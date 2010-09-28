@@ -7,6 +7,15 @@ sys             = require "sys"
 {exec, spawn}   = require "child_process"
 
 module.exports.bash =
+  history: """
+  # [Node Stack History]
+  node_stack_count=0
+
+  function stack_history ()
+  {
+      echo "[$(date --iso-8601=seconds)] $1"
+  }
+  """
   progress: """
   # [Node Stack Progress]
   node_stack_count=0
@@ -163,6 +172,17 @@ run = (coffee, service, qualified) ->
 
 module.exports.command = command
 
+class History
+  constructor: ->
+    @seen = 0
+
+  progress: (data) ->
+    entries = data.match(/^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[-+]\d{4}\]\s.*$/mg)
+    for entry, i in entries or []
+      if @seen < i
+        @seen = i
+        process.stdout.write(entry + "\n")
+
 class Indicator
   constructor: (@count) ->
     @seen = 0
@@ -196,15 +216,18 @@ module.exports.script = script = (splat...) ->
   program = spawn.apply null, splat
   stdout = ""
   stderr = ""
+  history = new History()
   program.stdout.on "data", (data) ->
     stdout += data
     if indicator
       indicator.progress(stdout)
+    history.progress(stdout)
   program.stderr.on "data", (data) ->
     stderr += data.toString()
   program.on "exit", (code) ->
     if indicator
       indicator.progress(stdout)
+    history.progress(stdout)
     callback(code, stdout, stderr)
   program.stdin.write(source)
   program.stdin.end()

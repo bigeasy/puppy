@@ -37,30 +37,59 @@ module.exports.Client = class Client
     update = ->
       admin = configuration.data.administrator
       remote.sudo.script "bash", """
-      #{stack.bash.progress}
+      #{stack.bash.history}
 
-      stack_progress "Adding Node Stack Launchpad PPA."
+      stack_history "Updating apt cache."
       apt-get update
-      apt-get install -y python-software-properties
-      add-apt-repository ppa:bigeasy/node-stack
 
-      stack_progress "Installing CoffeeScript."
-      apt-get update
-      apt-get install -y coffeescript
+      installed=$(dpkg --list | awk '{ print $2 }' | grep '^python-software-properties$')
+      if [ "x-$installed" != "x-python-software-properties" ]
+      then
+        stack_history "Installing python-software-properties to add Launchpad PPAs"
+        apt-get install -y python-software-properties
+      fi
 
-      stack_progress "Performing distribution upgrade."
+      if [ ! -e /etc/apt/sources.list.d/bigeasy-node-stack-lucid.list ]
+      then
+        stack_history "Adding Node Stack Launchpad PPA."
+        add-apt-repository ppa:bigeasy/node-stack
+        apt-get update
+      fi
+
+      installed=$(dpkg --list | awk '{ print $2 }' | grep '^coffeescript$')
+      if [ "x-$installed" != "x-coffeescript" ]
+      then
+        stack_history "Installing CoffeeScript."
+        apt-get install -y coffeescript
+      fi
+
+      stack_history "Performing distribution upgrade."
       aptitude -y dist-upgrade
 
-      echo "#{remote.host}" >> /etc/hostname
+      if [ $(cat /etc/hostname) != "#{remote.host}" ]
+      then
+        stack_history "Setting hostname to #{remote.host}."
+        echo "#{remote.host}" >> /etc/hostname
+      fi
 
-      /usr/sbin/groupadd --gid #{admin.gid} #{admin.group}
-      /usr/sbin/useradd --uid #{admin.uid} --gid #{admin.gid} --shell /bin/bash --groups sudo #{admin.name}
+      if /usr/sbin/groupadd --gid #{admin.gid} #{admin.group}
+      then
+        stack_history "Adding group #{admin.group} with gid #{admin.gid}."
+      fi
+
+      if /usr/sbin/useradd --uid #{admin.uid} --gid #{admin.gid} --shell /bin/bash --groups sudo #{admin.name}
+      then
+        stack_history "Adding user #{admin.name} with uid #{admin.uid}."
+      fi
+
+      stack_history "Adding public key to keyring of user #{admin.name}."
       mkdir -p /home/#{admin.name}/.ssh
       touch /home/#{admin.name}/.ssh/authorized_keys
       chmod 600 /home/#{admin.name}/.ssh/authorized_keys
       echo "#{admin.key}" > /home/#{admin.name}/.ssh/authorized_keys
       chown -R #{admin.name}:#{admin.group} /home/#{admin.name}
 
+      stack_history "Creating /etc/sudoers."
       cat <<HERE > /etc/sudoers
       # /etc/sudoers
       #
@@ -86,10 +115,8 @@ module.exports.Client = class Client
       # provided their password
       # (Note that later entries override this, so you might need to move
       # it further down)
-      \%sudo ALL=NOPASSWD:ALL
+      %sudo ALL=NOPASSWD:ALL
       HERE
-
-      stack_complete "Node Stack bootstrap complete, you can now log in as #{admin.name}."
       """, (error, stdout, stderr) ->
         if error
           console.log error

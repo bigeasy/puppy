@@ -2,3 +2,22 @@
 
 Manage a Node.js applicatation stack from the command line or through a web
 management console.
+
+## Adding a System to the Farm
+
+You can create a system from EC2 and that system will be added to your farm
+directly.
+
+Alternatively, if you've created a system at virtual hosing size like Webbynode,
+Linode or Slicehost, you can import a system using the `system:bootstrap`
+command.
+
+```
+[alan@localhost $] stack host:add annunciation.prettyrobots.com
+[alan@localhost $] stack host:list
+annunciation.prettyrobots.com
+[alan@localhost $] stack annunciation system:bootstrap --root
+rosie@annunciation.prettyrobots.com's password: 
+[alan@localhost $] stack annunciation system:history
+
+```
