@@ -5,7 +5,7 @@ path            = require("path")
 OptionParser    = require("coffee-script/optparse").OptionParser
 
 # Require Node Stack library.
-stack           = require("../lib/stack")
+stack           = require("../utility")
 
 BANNER = ""
 
@@ -37,15 +37,22 @@ module.exports.Client = class Client
     update = ->
       admin = configuration.data.administrator
       remote.sudo.script "bash", """
+      #{stack.bash.progress}
+
+      stack_progress "Adding Node Stack Launchpad PPA."
       apt-get update
       apt-get install -y python-software-properties
       add-apt-repository ppa:bigeasy/node-stack
+
+      stack_progress "Installing CoffeeScript."
       apt-get update
       apt-get install -y coffeescript
-      apt-get update
-      apt-get -y upgrade
+
+      stack_progress "Performing distribution upgrade."
       aptitude -y dist-upgrade
+
       echo "#{remote.host}" >> /etc/hostname
+
       /usr/sbin/groupadd --gid #{admin.gid} #{admin.group}
       /usr/sbin/useradd --uid #{admin.uid} --gid #{admin.gid} --shell /bin/bash --groups sudo #{admin.name}
       mkdir -p /home/#{admin.name}/.ssh
@@ -53,6 +60,7 @@ module.exports.Client = class Client
       chmod 600 /home/#{admin.name}/.ssh/authorized_keys
       echo "#{admin.key}" > /home/#{admin.name}/.ssh/authorized_keys
       chown -R #{admin.name}:#{admin.group} /home/#{admin.name}
+
       cat <<HERE > /etc/sudoers
       # /etc/sudoers
       #
@@ -78,13 +86,12 @@ module.exports.Client = class Client
       # provided their password
       # (Note that later entries override this, so you might need to move
       # it further down)
-      %sudo ALL=NOPASSWD:ALL
+      \%sudo ALL=NOPASSWD:ALL
       HERE
+
+      stack_complete "Node Stack bootstrap complete, you can now log in as #{admin.name}."
       """, (error, stdout, stderr) ->
-        if not error
-          console.log "Complete"
-          console.log stdout
-        else
+        if error
           console.log error
           console.log stdout
           console.log stderr

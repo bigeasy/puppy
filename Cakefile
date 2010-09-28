@@ -3,8 +3,8 @@ fs              = require("fs")
 path            = require("path")
 idl             = require("idl")
 
-compile = (sources) ->
-  coffee =          spawn "coffee", "-c -o lib".split(/\s/).concat(sources)
+compile = (sources, output) ->
+  coffee =          spawn "coffee", "-c -o #{output}".split(/\s/).concat(sources)
   coffee.stderr.on  "data", (buffer) -> puts buffer.toString()
   coffee.on         "exit", (status) -> process.exit(1) if status != 0
 
@@ -44,6 +44,8 @@ task "gitignore", "create a .gitignore for node-ec2 based on git branch", ->
 task "docco", "rebuild the CoffeeScript docco documentation.", ->
   exec "rm -rf documentation && docco src/*.coffee && cp -rf docs documentation && rm -r docs", (err) ->
     throw err if err
+  exec "docco src/services/*.coffee && cp -rf docs documentation/services && rm -r docs", (err) ->
+    throw err if err
 
 task "index", "rebuild the Node IDL landing page.", ->
   package = JSON.parse fs.readFileSync "package.json", "utf8"
@@ -52,10 +54,15 @@ task "index", "rebuild the Node IDL landing page.", ->
 
 task "compile", "compile the CoffeeScript into JavaScript", ->
   path.exists "./lib", (exists) ->
-    fs.mkdirSync("./lib", parseInt(755, 8)) if not exists
+    fs.mkdirSync("./lib", 0755) if not exists
     sources = fs.readdirSync("src")
     sources = "src/" + source for source in sources when source.match(/\.coffee$/)
-    compile sources
+    compile sources, "./lib"
+    path.exists "./lib/services", (exists) ->
+      fs.mkdirSync("./lib/services", 0755) if not exists
+      sources = fs.readdirSync("src/services")
+      sources = "src/services/" + source for source in sources when source.match(/\.coffee$/)
+      compile sources, "./lib/services"
 
 task "clean", "rebuild the CoffeeScript docco documentation.", ->
   currentBranch (branch) ->

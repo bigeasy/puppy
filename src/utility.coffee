@@ -6,6 +6,23 @@ fs              = require "fs"
 sys             = require "sys"
 {exec, spawn}   = require "child_process"
 
+module.exports.bash =
+  progress: """
+  # [Node Stack Progress]
+  node_stack_count=0
+
+  function stack_progress ()
+  {
+      node_stack_count=$(expr "${node_stack_count}" + 1)
+      echo "[Node Stack Progress ${node_stack_count}] $1"
+  }
+
+  function stack_complete ()
+  {
+      echo "[Node Stack Progress Complete] $1"
+  }
+  """
+
 USAGE =
 """
 Node Stack management utility.
@@ -109,7 +126,7 @@ command = ->
 
   return 1 if not qualified
   try
-    service   = require("../services/#{qualified[1]}")
+    service   = require("./services/#{qualified[1]}")
   catch _
     console.log _
     return 1
@@ -146,18 +163,48 @@ run = (coffee, service, qualified) ->
 
 module.exports.command = command
 
+class Indicator
+  constructor: (@count) ->
+    @seen = 0
+
+  indicator: (message) ->
+    seen = @seen.toString()
+    while seen.length < @count.toString().length
+      seen = "0" + seen
+    indicator = "[#{@seen} of #{@count} | #{message}"
+    while indicator.length < 77
+      indicator += " "
+    indicator += "]"
+    process.stdout.write("\r" + indicator)
+
+  progress: (data) ->
+    while match = /^\[Node Stack Progress #{@seen + 1}\] (.*)$/m.exec(data)
+      @seen ++
+      @indicator(match[1])
+    if not @complete and  match = /^\[Node Stack Progress Complete\] (.*)$/m.exec(data)
+      @indicator(match[1])
+      @complete = true
+      process.stdout.write("\n")
+
 module.exports.script = script = (splat...) ->
   callback = splat.pop()
   source = splat.pop()
+  indicator = null
+  if /^# \[Node Stack Progress\]$/m.test(source)
+    indicator = new Indicator(source.match(/^stack_progress /mg).length)
   splat = [ splat[0], splat.splice(1) ]
   program = spawn.apply null, splat
   stdout = ""
   stderr = ""
   program.stdout.on "data", (data) ->
     stdout += data
+    if indicator
+      indicator.progress(stdout)
   program.stderr.on "data", (data) ->
     stderr += data.toString()
   program.on "exit", (code) ->
+    if indicator
+      indicator.progress(stdout)
     callback(code, stdout, stderr)
   program.stdin.write(source)
   program.stdin.end()
