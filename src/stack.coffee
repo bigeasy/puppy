@@ -11,9 +11,49 @@ module.exports.bash =
   # [Node Stack History]
   node_stack_count=0
 
+  function stack_check_reboot ()
+  {
+      if [ -e /var/run/reboot-required ]
+      then
+          echo "[Node Stack Reboot] Reboot is requried. Rebooting."
+          /sbin/shutdown -r now
+          exit 0
+      fi
+  }
+
+  function stack_install ()
+  {
+      package=$1
+      if stack_missing $package
+      then
+          stack_history "Installing $package."
+          stack_try apt-get install -y $package
+      fi
+  }
+
+  function stack_missing ()
+  {
+      package=$1
+      installed=$(dpkg --list | awk '{ print $2 }' | grep '^'$package'$')
+      if [ "x-$installed" == "x-$package" ]
+      then
+        return 1
+      fi
+  }
+
   function stack_history ()
   {
       echo "[$(date --iso-8601=seconds)] $1"
+  }
+
+  function stack_try ()
+  {
+      eval $@
+      if [ $? -ne 0 ]
+      then
+          echo "[Node Stack Fatal] Unable to execute: $@"
+          exit 1
+      fi
   }
   """
   progress: """
@@ -38,6 +78,14 @@ Node Stack management utility.
 
 Usage: stack service:command [arguments]
 """
+makepath = (directory, mode, callback) ->
+  path.exists directory, (exists) ->
+    if not exists
+      makepath path.dirname(directory), mode, ->
+        fs.mkdirSync directory, mode
+        callback()
+    else
+      callback()
 
 #### Configuration
 # Reads and writes configuration files.
@@ -49,15 +97,17 @@ module.exports.Configuration = class Configuration
 
   # Create a default configuration if the `~/.node-stack` file does not exist.
   constructor: ->
-    @file = "#{process.env["HOME"]}/.node-stack"
+    @file = "#{process.env["HOME"]}/.node-stack/configuration"
     try
       @data = JSON.parse(fs.readFileSync(@file, "utf8"))
     catch _
       @data =
         hosts: {}
         administrator: { name: "node", uid: 707, group: "node", gid: 707 }
-  save: ->
-    fs.writeFileSync(@file, JSON.stringify(@data), "utf8")
+  save: (callback) ->
+    makepath path.dirname(@ifle), 755, ->
+      fs.writeFileSync(@file, JSON.stringify(@data), "utf8")
+      callback()
 
 #### class LocalShell
 # Implements command shell on the calling machine.
@@ -135,7 +185,7 @@ command = ->
 
   return 1 if not qualified
   try
-    service   = require("./services/#{qualified[1]}")
+    service   = require("./#{qualified[1]}")
   catch _
     console.log _
     return 1
@@ -174,14 +224,20 @@ module.exports.command = command
 
 class History
   constructor: ->
-    @seen = 0
+    @entry = -1
+    @error = -1
 
   progress: (data) ->
     entries = data.match(/^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[-+]\d{4}\]\s.*$/mg)
     for entry, i in entries or []
-      if @seen < i
-        @seen = i
+      if @entry < i
+        @entry = i
         process.stdout.write(entry + "\n")
+    errors = data.match(/^\[Node Stack Fatal]\s.*$/mg)
+    for error, i in errors or []
+      if @error < i
+        @error = i
+        process.stdout.write("#{error}\n")
 
 class Indicator
   constructor: (@count) ->

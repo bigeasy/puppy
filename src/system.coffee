@@ -5,13 +5,14 @@ path            = require("path")
 OptionParser    = require("coffee-script/optparse").OptionParser
 
 # Require Node Stack library.
-stack           = require("../utility")
+stack           = require("./stack")
 
 BANNER = ""
 
 module.exports.actions =
   bootstrap: {}
   hello: {}
+  deploy: {}
 
 module.exports.Client = class Client
   hello: (local, remote) ->
@@ -40,36 +41,36 @@ module.exports.Client = class Client
       #{stack.bash.history}
 
       stack_history "Updating apt cache."
-      apt-get update
+      stack_try apt-get update
 
       installed=$(dpkg --list | awk '{ print $2 }' | grep '^python-software-properties$')
       if [ "x-$installed" != "x-python-software-properties" ]
       then
         stack_history "Installing python-software-properties to add Launchpad PPAs"
-        apt-get install -y python-software-properties
+        stack_try apt-get install -y python-software-properties
       fi
 
       if [ ! -e /etc/apt/sources.list.d/bigeasy-node-stack-lucid.list ]
       then
         stack_history "Adding Node Stack Launchpad PPA."
-        add-apt-repository ppa:bigeasy/node-stack
-        apt-get update
+        stack_try add-apt-repository ppa:bigeasy/node-stack
+        stack_try apt-get update
       fi
 
       installed=$(dpkg --list | awk '{ print $2 }' | grep '^coffeescript$')
       if [ "x-$installed" != "x-coffeescript" ]
       then
         stack_history "Installing CoffeeScript."
-        apt-get install -y coffeescript
+        stack_try apt-get install -y coffeescript
       fi
 
       stack_history "Performing distribution upgrade."
-      aptitude -y dist-upgrade
+      stack_try aptitude -y dist-upgrade
 
       if [ $(cat /etc/hostname) != "#{remote.host}" ]
       then
         stack_history "Setting hostname to #{remote.host}."
-        echo "#{remote.host}" >> /etc/hostname
+        stack_try echo "#{remote.host}" >> /etc/hostname
       fi
 
       if /usr/sbin/groupadd --gid #{admin.gid} #{admin.group}
@@ -83,14 +84,14 @@ module.exports.Client = class Client
       fi
 
       stack_history "Adding public key to keyring of user #{admin.name}."
-      mkdir -p /home/#{admin.name}/.ssh
-      touch /home/#{admin.name}/.ssh/authorized_keys
-      chmod 600 /home/#{admin.name}/.ssh/authorized_keys
-      echo "#{admin.key}" > /home/#{admin.name}/.ssh/authorized_keys
-      chown -R #{admin.name}:#{admin.group} /home/#{admin.name}
+      stack_try mkdir -p /home/#{admin.name}/.ssh
+      stack_try touch /home/#{admin.name}/.ssh/authorized_keys
+      stack_try chmod 600 /home/#{admin.name}/.ssh/authorized_keys
+      stack_try echo "#{admin.key}" > /home/#{admin.name}/.ssh/authorized_keys
+      stack_try chown -R #{admin.name}:#{admin.group} /home/#{admin.name}
 
       stack_history "Creating /etc/sudoers."
-      cat <<HERE > /etc/sudoers
+      stack_try cat <<HERE > /etc/sudoers
       # /etc/sudoers
       #
       # This file MUST be edited with the 'visudo' command as root.
@@ -117,6 +118,12 @@ module.exports.Client = class Client
       # it further down)
       %sudo ALL=NOPASSWD:ALL
       HERE
+
+      if [ -e /var/run/reboot-required ]
+      then
+        stack_history "Reboot required. Rebooting."
+        stack_try /sbin/shutdown -r now
+      fi
       """, (error, stdout, stderr) ->
         if error
           console.log error
@@ -125,29 +132,38 @@ module.exports.Client = class Client
 
     update()
 
-    return
-
-    # Start by installing coffeescript and upgrading the distribution.
+  deploy: (local, remote) ->
     remote.sudo.script "bash", """
-    add-apt-repository ppa:bigeasy/node-stack
-    apt-get update
-    apt-get install coffeescript
-    apt-get upgrade
-    """, checkReboot
+    #{stack.bash.history}
 
-    checkReboot = (error) ->
-      throw error if error
-      # Time to check to see if reboot is necessary.
-      remote.sudo.exec "ls /var/run/reboot-required", (error) ->
-        if error
-          local.say """
-          The remote system is now rebooting after a package update. Wait for the
-          reboot to complete an then to complete the bootstrap run:
+    stack_history "Updating apt cache."
+    stack_try apt-get update
 
-              stack stack:bootstrap #{process.argv.join(" ")}
-          """
+    stack_check_reboot
+
+    stack_install git-core
+
+    if [ ! -d ~/git/stack ]
+    then
+      stack_history "Installing Node Stack."
+      stack_try mkdir -p ~/git
+      stack_try cd ~/git && git clone git://github.com/bigeasy/node-stack.git stack 2>&1 > /dev/null
+    fi
+
+    stack_install nginx
+    stack_install ufw
+    """, (error, stdout) ->
+      if error
+        console.log error
 
 module.exports.Server = class Server
   boostrap: ->
     options = new OptionParser(SWITCHES, BANNER)
     o       = options.parse(process.argv)
+
+  _deploy: (local) ->
+    local.sudo.script "bash", """
+    #{stack.bash.history}
+
+    stack_history "Reboot required. Rebooting system."
+    """

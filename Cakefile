@@ -58,11 +58,6 @@ task "compile", "compile the CoffeeScript into JavaScript", ->
     sources = fs.readdirSync("src")
     sources = "src/" + source for source in sources when source.match(/\.coffee$/)
     compile sources, "./lib"
-    path.exists "./lib/services", (exists) ->
-      fs.mkdirSync("./lib/services", 0755) if not exists
-      sources = fs.readdirSync("src/services")
-      sources = "src/services/" + source for source in sources when source.match(/\.coffee$/)
-      compile sources, "./lib/services"
 
 task "clean", "rebuild the CoffeeScript docco documentation.", ->
   currentBranch (branch) ->
