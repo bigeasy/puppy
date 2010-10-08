@@ -7,7 +7,7 @@ sys             = require "sys"
 {exec, spawn}   = require "child_process"
 
 module.exports.bash =
-  history: """
+  functions: """
   # [Node Stack History]
   node_stack_count=0
 
@@ -54,21 +54,6 @@ module.exports.bash =
           echo "[Node Stack Fatal] Unable to execute: $@"
           exit 1
       fi
-  }
-  """
-  progress: """
-  # [Node Stack Progress]
-  node_stack_count=0
-
-  function stack_progress ()
-  {
-      node_stack_count=$(expr "${node_stack_count}" + 1)
-      echo "[Node Stack Progress ${node_stack_count}] $1"
-  }
-
-  function stack_complete ()
-  {
-      echo "[Node Stack Progress Complete] $1"
   }
   """
 

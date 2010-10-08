@@ -38,7 +38,7 @@ module.exports.Client = class Client
     update = ->
       admin = configuration.data.administrator
       remote.sudo.script "bash", """
-      #{stack.bash.history}
+      #{stack.bash.functions}
 
       stack_history "Updating apt cache."
       stack_try apt-get update
@@ -134,7 +134,7 @@ module.exports.Client = class Client
 
   deploy: (local, remote) ->
     remote.sudo.script "bash", """
-    #{stack.bash.history}
+    #{stack.bash.functions}
 
     stack_history "Updating apt cache."
     stack_try apt-get update
@@ -151,8 +151,26 @@ module.exports.Client = class Client
     fi
 
     stack_install nginx
+
     stack_install ufw
-    """, (error, stdout) ->
+
+    if sudo ufw status | grep inactive > /dev/null
+    then
+        stack_history "Enabling Uncomplicated Firewall."
+        stack_try ufw allow ssh
+        stack_try ufw --force enable
+    fi
+
+    if stack_missing gitosis
+    then
+        stack_history "Preconfiguring gitosis."
+        stack_try find /var/cache/apt/archives -name \\\\*.deb -exec rm {} \\\\\\;
+        stack_try apt-get install -y -d gitosis
+        stack_try dpkg-preconfigure -fnoninteractive /var/cache/apt/archives/gitosis*.deb
+    fi
+    """, (error, stdout, stderr) ->
+      console.log stdout
+      console.log stderr
       if error
         console.log error
 
