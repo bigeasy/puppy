@@ -26,6 +26,7 @@ task "gitignore", "create a .gitignore for node-ec2 based on git branch", ->
                 **/.DS_Store
                 configuration.js
                 server.pid
+                lib
                 
                 '''
 
