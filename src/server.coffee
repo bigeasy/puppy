@@ -94,32 +94,56 @@ dirStat = (directory, files, index, callback) ->
   if index is files.length
     callback(files)
   else
-    fs.lstat directory + files[index], (error, stat) ->
-      full =  path.join(directory, "/", files[index])
+    file = path.join(directory, "/",  files[index])
+    fs.lstat file, (error, stat) ->
+      file += "/" if stat.isDirectory()
+      id = getIdentifier(file)
       files[index] =
         data:
           title: files[index]
           attr:
             type: fileType(stat)
-        attr: {}
+            id: id
+        attr:
+          id: "remoteFileId_#{id}"
       files[index].state = "closed" if stat.isDirectory()
-      full += "/"
-      console.log full
-      files[index].attr.id = "remoteFileId_#{getIdentifier(full)}"
       dirStat(directory, files, index + 1, callback)
+
+getType = (file) ->
+  switch (/^.*\.(.*)$/.exec(file) or [])[1]
+    when "css"
+      "text/css"
+    else
+      "application/octet-stream"
 
 routes = (app) ->
   app.get mount("/editor"), (request, response) ->
     sendTemplate response, "/editor.html.nun", {}
   app.get mount("/directory.json"), (request, response) ->
     query = url.parse(request.url, true).query
-    directory = identifiers.directory[query.directory]
+    directory = identifiers.directory[query.id]
     if directory
       fs.readdir directory, (error, files) ->
         dirStat directory, files, 0, (files) ->
           sendObject response, files
     else
       sendError response, 404
+  app.get mount("/file"), (request, response) ->
+    query = url.parse(request.url, true).query
+    file = identifiers.directory[query.id]
+    type = getType(file)
+    if type is "text/css"
+      fs.readFile file, (error, data) ->
+        throw error if error
+        response.writeHead 200,
+          "Content-Length": data.length
+          "Content-Type":type
+        response.end(data)
+    else
+      response.writeHead 200,
+        "Content-Length": 0
+        "Content-Type": "text/plain"
+      response.end("")
 
 sendTemplate = (response, template, model) ->
   model.url = domain + mountPoint

@@ -4,12 +4,13 @@
   <script src="javascripts/jquery.js"></script>
   <script src="javascripts/json2.js"></script>
   <script src="javascripts/jquery.jstree.js"></script>
+  <script src="javascripts/codemirror/js/codemirror.js"></script>
   <script src="javascripts/stack-editor.js"></script>
   <title>Node Stack Editor</title>
 </head>
 <body>
 <div class="container">
-  <div id="editor">
+  <div id="content">
     <div id="directory"></div>
     <div id="editor"><div></div></div>
   </div>

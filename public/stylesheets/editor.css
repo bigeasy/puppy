@@ -458,6 +458,14 @@ body { text-align: center; }
   text-align: left;
 }
 #installed { display: none; }
+#content {
+  float: left;
+  margin-right: 10px;
+  width: 950px;
+  margin-right: 0;
+  padding-right: 0;
+  text-align: left;
+}
 #directory {
   float: left;
   margin-right: 10px;
@@ -469,7 +477,4 @@ body { text-align: center; }
   width: 630px;
   margin-right: 0;
   padding-right: 0;
-  text-align: left;
-  font-family: "Lucida Grande";
-  letter-spacing: 0.1em;
 }
