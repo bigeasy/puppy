@@ -13,7 +13,7 @@ module.exports.Client = class Client
   add: ->
     configuration = new (stack.Configuration)()
     for host in process.argv
-      configuration.data.hosts[host] = {}
+      configuration.data.hosts[host] or= {}
     configuration.save()
 
 module.exports.Server = class Server

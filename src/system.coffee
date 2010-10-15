@@ -167,12 +167,14 @@ module.exports.Client = class Client
         stack_try find /var/cache/apt/archives -name \\\\*.deb -exec rm {} \\\\\\;
         stack_try apt-get install -y -d gitosis
         stack_try dpkg-preconfigure -fnoninteractive /var/cache/apt/archives/gitosis*.deb
+        stack_try echo "gitosis gitosis/username string git" | debconf-set-selections 
+        stack_try apt-get install gitosis
     fi
+
+    stack_install mysql-server
     """, (error, stdout, stderr) ->
-      console.log stdout
-      console.log stderr
       if error
-        console.log error
+        console.log "Had error."
 
 module.exports.Server = class Server
   boostrap: ->
