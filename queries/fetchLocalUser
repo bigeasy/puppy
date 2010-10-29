@@ -1,0 +1,9 @@
+INSERT INTO ApplicationLocalUser(
+    applicationId, machineId, localUserId, created
+)
+SELECT ?, ?, id, CURRENT_TIMESTAMP()
+  FROM LocalUser as lu
+ WHERE NOT EXISTS (SELECT *
+                     FROM ApplicationLocalUser
+                    WHERE machineId = lu.machineId
+                      AND localUserId = lu.id)

@@ -1,0 +1,8 @@
+SELECT a.id AS account__id,
+       a.email AS account__email,
+       a.sshKey AS account__sshKey
+  FROM Machine AS m
+  JOIN ApplicationLocalUser AS alu ON alu.machineId = m.id
+  JOIN Application AS app ON alu.applicationId = app.id
+  JOIN Account AS a ON app.accountId = a.id
+ WHERE m.hostname = ? AND alu.localUserId = ?

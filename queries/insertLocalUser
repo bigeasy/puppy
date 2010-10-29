@@ -1,0 +1,2 @@
+INSERT INTO LocalUser(machineId, id, created)
+VALUES (?, ?, CURRENT_TIMESTAMP())
