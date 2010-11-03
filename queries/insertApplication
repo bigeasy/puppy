@@ -1,2 +1,0 @@
-INSERT INTO Application(accountId, inUse, created)
-VALUES(?, 0, CURRENT_TIMESTAMP())

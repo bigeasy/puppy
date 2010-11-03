@@ -1,3 +1,0 @@
-#!/usr/bin/coffee
-
-require("../lib/appliance").command(process.argv)
