@@ -1,23 +1,14 @@
-shell = new (require("puppy/shell").Shell)()
-database = new (require("puppy/database").Database)()
-fs    = require "fs"
-exec = require("child_process").exec
+shell     = new (require("puppy/shell").Shell)()
+database  = new (require("puppy/database").Database)()
+fs        = require "fs"
+exec      = require("child_process").exec
 
 initializeUser = (localUserId) ->
   systemId = localUserId + 10000
-  if not /^u#{systemId}:/m.test(fs.readFileSync("/etc/group", "utf8"))
-    console.log "CREATING GROUP #{systemId}"
-    shell.script "/bin/bash", "-e", """
-    /usr/sbin/groupadd --gid #{systemId}  u#{systemId}
-    """, (error, stdout, stderr) =>
-      if error != 0
-        console.log error
-        throw new Error("Cannot create group.")
-      initializeUser(localUserId)
-  else if not /^u#{systemId}:/m.test(fs.readFileSync("/etc/passwd", "utf8"))
+  if not /^u#{systemId}:/m.test(fs.readFileSync("/etc/passwd", "utf8"))
     console.log "CREATING USER"
     shell.script "/bin/bash", "-e", """
-    /usr/sbin/useradd --gid #{systemId} --uid #{systemId} --home-dir /home/u#{systemId} u#{systemId}
+    /usr/sbin/useradd --gid 707 --uid #{systemId} --home-dir /home/u#{systemId} u#{systemId}
     """, (error, stdout, stderr) =>
       if error != 0
         console.log error
@@ -30,10 +21,10 @@ initializeUser = (localUserId) ->
     umask 077
     /bin/mkdir -p /home/u#{systemId}
     /bin/mkdir -p /home/u#{systemId}/.ssh
-    /bin/mkdir -p /home/u#{systemId}/application
+    /bin/mkdir -p /home/u#{systemId}/program
     /bin/mkdir -p /home/u#{systemId}/storage
     /bin/touch /home/u#{systemId}/.ssh/authorized_keys
-    /bin/chown -R u#{systemId}:u#{systemId} /home/u#{systemId}
+    /bin/chown -R u#{systemId}:puppy /home/u#{systemId}
     /sbin/restorecon -R -v /home/u#{systemId}
     """, (error, stdout, stderr) ->
       if error != 0
@@ -47,7 +38,7 @@ initializeUser = (localUserId) ->
         database.select "getLocalUserAccount", [ hostname, localUserId ], "account", (results) ->
           account = results.shift()
           console.log account
-          fs.writeFileSync("/home/u#{systemId}/.ssh/authorized_keys", account.sshKey + "\n", "utf8")
+          fs.writeFileSync("/home/u#{systemId}/.ssh/authorized_keys", "#{account.sshKey}\n", "utf8")
           fs.writeFileSync("/home/u#{systemId}/configuration.json", JSON.stringify({ "hostname", hostname }), "utf8")
 
 module.exports.command = (argv) ->
