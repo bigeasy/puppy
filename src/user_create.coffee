@@ -3,7 +3,8 @@ database  = new (require("puppy/database").Database)()
 fs        = require "fs"
 exec      = require("child_process").exec
 
-initializeUser = (localUserId) ->
+module.exports.command = (argv) ->
+  localUserId = parseInt(argv.shift(), 10)
   systemId = localUserId + 10000
   if not /^u#{systemId}:/m.test(fs.readFileSync("/etc/passwd", "utf8"))
     console.log "CREATING USER"
@@ -15,7 +16,6 @@ initializeUser = (localUserId) ->
         throw new Error("Cannot create user.")
       initializeUser(localUserId)
   else
-    home = "/home/u#{systemId}"
     shell.script "/bin/bash", "-e", """
     /bin/rm -rf /home/u#{systemId}
     umask 077
@@ -40,7 +40,3 @@ initializeUser = (localUserId) ->
           console.log account
           fs.writeFileSync("/home/u#{systemId}/.ssh/authorized_keys", "#{account.sshKey}\n", "utf8")
           fs.writeFileSync("/home/u#{systemId}/configuration.json", JSON.stringify({ "hostname", hostname }), "utf8")
-
-module.exports.command = (argv) ->
-  localUserId = parseInt(argv.shift(), 10)
-  initializeUser(localUserId)
