@@ -1,22 +1,31 @@
-class Application
-  fetchApplication: (accountId, callback) ->
-    database = new Database()
-    database.select "insertApplication", [ accountId ], (results) =>
-      database.select "getApplication", [ results.insertId ], "application", (results) =>
+shell     = new (require("puppy/shell").Shell)()
+database  = new (require("puppy/database").Database)()
+protected = require("./protected")
+fs        = require "fs"
+exec      = require("child_process").exec
+
+module.exports.command = (bin, argv) ->
+  fetch = (file, callback) ->
+    command = protected.command(file)
+    database.getLocalUserAccount command.uid - 10000, (account) =>
+      fetchApplication account.id, callback
+
+  fetchApplication = (accountId, callback) ->
+    database.select "insertApplication", [ accountId ], (results) ->
+      database.select "getApplication", [ results.insertId ], "application", (results) ->
         application = results[0]
-        database.select "getMachines", [], "machine", (results) =>
+        database.select "getMachines", [], "machine", (results) ->
           machine = results[0]
-          database.select "fetchLocalUser", [ application.id, machine.id ], (results) =>
+          database.select "fetchLocalUser", [ application.id, machine.id ], (results) ->
             console.log results
             if results.affectedRows is 0
               console.log "Must create a new local user."
-              @createLocalUser application, machine, () =>
+              createLocalUser application, machine, () ->
             else
               callback(application)
 
-  createLocalUser: (application, machine, callback) ->
-    database = new Database()
-    database.select "nextLocalUser", [ machine.id ], (results) =>
+  createLocalUser = (application, machine, callback) ->
+    database.select "nextLocalUser", [ machine.id ], (results) ->
       nextLocalUserId = results[0].nextLocalUserId
       client = database.createClient()
       client.connect =>
@@ -25,21 +34,11 @@ class Application
           client.end()
           if error
             if error.number is 1062
-              @createLocalUser application, machine, callback
+              createLocalUser application, machine, callback
             else
               throw error
           else
-            systemId = nextLocalUserId + 10000
-            @script "/bin/bash", "-e", """
-            /usr/sbin/groupadd --gid #{systemId}  u#{systemId}
-            /usr/sbin/useradd --gid #{systemId} --uid #{systemId} --home-dir /home/u#{systemId} u#{systemId}
-            """, (error, stdout, stderr) =>
-              if error != 0
-                console.log error
-                throw new Error("Cannot create user.")
-              callback(application)
+            console.log "MUST CREATE USER"
 
-application = new Application()
-module.exports.command =
-  fetch: (argv) ->
-    application.fetchApplication argv.shift(), ->
+  fetch argv[0], ->
+    console.log "DONE"
