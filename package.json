@@ -1,0 +1,6 @@
+{   "name":             "protected"
+,   "version":          "0.0.1"
+,   "author":           "Alan Gutierrez"
+,   "directories":      { "lib" : "./lib" }
+,   "bin":      { "protected" : "./bin/protected.js" }
+}
