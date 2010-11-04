@@ -1,14 +1,12 @@
 fs            = require "fs"
 Client        = require("mysql").Client
+exec          = require("child_process").exec
 
 module.exports.Database = class Database
-  constructor: (retries...) ->
+  constructor: () ->
     @queries = {}
     for file in fs.readdirSync __dirname + "/../queries"
       @queries[file] = fs.readFileSync __dirname + "/../queries/" + file , "utf8"
-    @retries = {}
-    for number in retries
-      @retries[number] = true
 
   createClient: ->
     client            = new Client()
@@ -27,11 +25,13 @@ module.exports.Database = class Database
       client.query @queries[query], parameters, (error, results, fields) =>
         client.end()
         if error
-          if @retries[error.number]
-            @select query, parameters, get, callback
+          if @error
+            @error(error, this)
+            @error = null
           else
             throw error
         else
+          @error = null
           if get
             expanded = []
             for result in results
@@ -49,3 +49,37 @@ module.exports.Database = class Database
         branch = branch[parts[i]] = branch[parts[i]] or {}
       branch[parts[parts.length - 1]] = record[key]
     tree[get]
+
+  getLocalUserAccount: (localUserId, callback) ->
+    exec "/bin/hostname", (error, stdout) =>
+      throw error if error
+      hostname = stdout.substring(0, stdout.length - 1)
+      console.log [ hostname, localUserId ]
+      @select "getLocalUserAccount", [ hostname, localUserId ], "account", (results) ->
+        console.log results
+        callback(results.shift())
+
+  fetchLocalUser: (applicationId, callback) ->
+    @select "getMachines", [], "machine", (results) =>
+      machine = results[0]
+      @error = (error) =>
+        throw error if error.number isnt 1062
+        @fetchLocalUser applicationId, callback
+      @select "fetchLocalUser", [ applicationId, machine.id ], (results) =>
+        if results.affectedRows is 0
+          console.log "Must create a new local user."
+          @createLocalUser applicationId, machine.id, callback
+        else
+          @select "getLocalUserByAssignment", [ results.insertId ], "localUser", (results) ->
+            callback(results.shift())
+
+  createLocalUser: (applicationId, machineId, callback) ->
+    @select "nextLocalUser", [ machineId ], (results) =>
+      console.log results
+      nextLocalUserId = results[0].nextLocalUserId
+      @error = (error) =>
+        throw error if error.number isnt 1062
+        @createLocalUser applicationId, machineId, callback
+      @select "insertLocalUser", [ machineId, nextLocalUserId ], (results) =>
+        console.log results
+        @fetchLocalUser applicationId, callback

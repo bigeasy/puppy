@@ -1,0 +1,9 @@
+INSERT INTO ActivationLocalUser(
+    machineId, localUserId, code, created
+)
+SELECT machineId, id, ?, CURRENT_TIMESTAMP()
+  FROM LocalUser as lu
+ WHERE NOT EXISTS (SELECT *
+                     FROM ActivationLocalUser
+                    WHERE machineId = lu.machineId
+                      AND localUserId = lu.id)
