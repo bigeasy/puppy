@@ -37,6 +37,8 @@ module.exports.command = (argv) ->
         hostname = stdout.substring(0, stdout.length - 1)
         database.select "getLocalUserAccount", [ hostname, localUserId ], "account", (results) ->
           account = results.shift()
-          console.log account
-          fs.writeFileSync("/home/u#{systemId}/.ssh/authorized_keys", "#{account.sshKey}\n", "utf8")
+          sshKeys = "#{account.sshKey}\n"
           fs.writeFileSync("/home/u#{systemId}/configuration.json", JSON.stringify({ "hostname", hostname }), "utf8")
+          database.select "getActivationByLocalUser", [ hostname, localUserId ], "activation", (results) ->
+            sshKeys += "#{results[0].sshKey}\n" if results.length
+            fs.writeFileSync("/home/u#{systemId}/.ssh/authorized_keys", sshKeys, "utf8")
