@@ -1,5 +1,5 @@
-shell     = new (require("puppy/shell").Shell)()
-database  = new (require("puppy/database").Database)()
+shell     = new (require("common/shell").Shell)()
+database  = new (require("common/database").Database)()
 fs        = require "fs"
 exec      = require("child_process").exec
 

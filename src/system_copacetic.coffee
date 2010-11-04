@@ -1,5 +1,5 @@
 fs = require "fs"
-syslog = new (require("puppy/syslog").Syslog)({ tag: "system_copacetic", pid: true })
+syslog = new (require("common/syslog").Syslog)({ tag: "system_copacetic", pid: true })
 
 module.exports.command = (argv) ->
   localUserId = parseInt(argv.shift(), 10)
