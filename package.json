@@ -1,5 +1,6 @@
 {   "name":             "puppy"
 ,   "version":          "0.0.1"
 ,   "author":           "Alan Gutierrez"
-,   "directories":      { "lib" : "./lib" }
+,   "directories":      { "lib" : "./lib", "etc" : "./etc" }
+,   "bin":              { "puppy" : "./bin/puppy.js" }
 }
