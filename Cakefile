@@ -31,7 +31,7 @@ task "gitignore", "create a .gitignore based on git branch", ->
       gitignore += '''
                    lib
                    '''
-    else if /^master|vhosts$/.test branch
+    else if "vhosts" is branch
       gitignore += '''
                    documentation
                    index.html
@@ -61,6 +61,6 @@ task "compile", "compile the CoffeeScript into JavaScript", ->
 
 task "clean", "rebuild the CoffeeScript docco documentation.", ->
   currentBranch (branch) ->
-    if branch is "master"
+    if branch is "vhosts"
       exec "rm -rf documentation lib _site site/idl.css index.html", (err) ->
         throw err if err
