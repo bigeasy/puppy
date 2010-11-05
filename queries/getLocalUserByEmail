@@ -9,4 +9,6 @@ SELECT lu.machineId AS localUser__machineId,
   FROM LocalUser AS lu
   JOIN Machine AS m ON lu.machineId = m.id
   JOIN ApplicationLocalUser AS alu ON alu.machineId = lu.machineId AND alu.localUserId = lu.id
- WHERE alu.id = ?
+  JOIN Application AS app ON alu.applicationId = app.id
+  JOIN Account AS a ON app.accountId = a.id
+ WHERE a.email = ? AND app.isHome = 1

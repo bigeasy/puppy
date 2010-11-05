@@ -22,7 +22,7 @@ CREATE TABLE Account (
 CREATE TABLE Application (
     id              INTEGER NOT NULL AUTO_INCREMENT,
     accountId       INTEGER NOT NULL,
-    inUse           INTEGER NOT NULL,
+    isHome          INTEGER NOT NULL,
     modified        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created         TIMESTAMP DEFAULT 0,
     PRIMARY KEY (id)
@@ -46,7 +46,6 @@ CREATE TABLE ActivationLocalUser (
     machineId       INTEGER NOT NULL,
     localUserId     INTEGER NOT NULL,
     code            VARCHAR(32) NOT NULL,
-    transactionId   INTEGER NOT NULL,
     modified        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created         TIMESTAMP DEFAULT 0,
     PRIMARY KEY (machineId, localUserId)

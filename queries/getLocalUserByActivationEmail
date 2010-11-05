@@ -8,5 +8,6 @@ SELECT lu.machineId AS localUser__machineId,
        m.created AS localUser__machine__created
   FROM LocalUser AS lu
   JOIN Machine AS m ON lu.machineId = m.id
-  JOIN ApplicationLocalUser AS alu ON alu.machineId = lu.machineId AND alu.localUserId = lu.id
- WHERE alu.id = ?
+  JOIN ActivationLocalUser AS alu ON alu.machineId = lu.machineId AND alu.localUserId = lu.id
+  JOIN Activation AS act ON alu.code = act.code
+ WHERE act.email = ? AND act.activated = 0

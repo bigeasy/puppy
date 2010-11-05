@@ -54,9 +54,7 @@ module.exports.Database = class Database
     exec "/bin/hostname", (error, stdout) =>
       throw error if error
       hostname = stdout.substring(0, stdout.length - 1)
-      console.log [ hostname, localUserId ]
       @select "getLocalUserAccount", [ hostname, localUserId ], "account", (results) ->
-        console.log results
         callback(results.shift())
 
   fetchLocalUser: (applicationId, callback) ->
@@ -67,7 +65,6 @@ module.exports.Database = class Database
         @fetchLocalUser applicationId, callback
       @select "fetchLocalUser", [ applicationId, machine.id ], (results) =>
         if results.affectedRows is 0
-          console.log "Must create a new local user."
           @createLocalUser applicationId, machine.id, callback
         else
           @select "getLocalUserByAssignment", [ results.insertId ], "localUser", (results) ->
@@ -75,11 +72,9 @@ module.exports.Database = class Database
 
   createLocalUser: (applicationId, machineId, callback) ->
     @select "nextLocalUser", [ machineId ], (results) =>
-      console.log results
       nextLocalUserId = results[0].nextLocalUserId
       @error = (error) =>
         throw error if error.number isnt 1062
         @createLocalUser applicationId, machineId, callback
       @select "insertLocalUser", [ machineId, nextLocalUserId ], (results) =>
-        console.log results
         @fetchLocalUser applicationId, callback

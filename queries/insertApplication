@@ -1,2 +1,2 @@
-INSERT INTO Application(accountId, inUse, created)
-VALUES(?, 0, CURRENT_TIMESTAMP())
+INSERT INTO Application(accountId, isHome, created)
+VALUES(?, ?, CURRENT_TIMESTAMP())
