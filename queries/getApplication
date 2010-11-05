@@ -1,5 +1,5 @@
 SELECT a.id as application__id,
-       a.inUse as application__inUse,
+       a.isHome as application__isHome,
        a.created as application__created,
        a.modified as application__modified
   FROM Application AS a
