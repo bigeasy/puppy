@@ -3,11 +3,10 @@ database  = new (require("common/database").Database)()
 fs        = require "fs"
 exec      = require("child_process").exec
 
-module.exports.command = (argv) ->
+module.exports.command = (bin, argv) ->
   localUserId = parseInt(argv.shift(), 10)
   systemId = localUserId + 10000
   if not /^u#{systemId}:/m.test(fs.readFileSync("/etc/passwd", "utf8"))
-    console.log "CREATING USER"
     shell.script "/bin/bash", "-e", """
     /usr/sbin/useradd --gid 707 --uid #{systemId} --home-dir /home/u#{systemId} u#{systemId}
     """, (error, stdout, stderr) =>
@@ -40,5 +39,6 @@ module.exports.command = (argv) ->
           sshKeys = "#{account.sshKey}\n"
           fs.writeFileSync("/home/u#{systemId}/configuration.json", JSON.stringify({ "hostname", hostname }), "utf8")
           database.select "getActivationByLocalUser", [ hostname, localUserId ], "activation", (results) ->
-            sshKeys += "#{results[0].sshKey}\n" if results.length
+            if results.length
+              sshKeys += "command=\"/usr/bin/sudo /home/puppy/bin/protected account:activate\" #{results[0].sshKey}\n"
             fs.writeFileSync("/home/u#{systemId}/.ssh/authorized_keys", sshKeys, "utf8")
