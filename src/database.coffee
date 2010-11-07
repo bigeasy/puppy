@@ -22,8 +22,9 @@ module.exports.Database = class Database
       get = null
     client = @createClient()
     client.connect =>
+      client.on "end", -> client.destroy()
       client.query @queries[query], parameters, (error, results, fields) =>
-        client.end()
+        client.end -> client.destroy()
         if error
           if @error
             @error(error, this)
@@ -56,6 +57,24 @@ module.exports.Database = class Database
       hostname = stdout.substring(0, stdout.length - 1)
       @select "getLocalUserAccount", [ hostname, localUserId ], "account", (results) ->
         callback(results.shift())
+
+  fetchLocalPort: (applicationId, machineId, service, callback) ->
+    @select "fetchLocalPort", [ applicationId, machineId, service ], (results) =>
+      console.log results
+      if results.affectedRows is 0
+        @createLocalPort applicationId, machineId, service, callback
+      else
+        @select "getLocalPortByAssignment", [ results.insertId ], "localPort", (results) ->
+          callback(results.shift())
+
+  createLocalPort: (applicationId, machineId, service, callback) ->
+    @select "nextLocalPort", [ machineId ], (results) =>
+      nextLocalPort = results[0].nextLocalPort
+      @error = (error) =>
+        throw error if error.number isnt 1062
+        @createLocalPort applicationId, machineId, callback
+      @select "insertLocalPort", [ machineId, nextLocalPort ], (results) =>
+        @fetchLocalPort applicationId, machineId, service, callback
 
   fetchLocalUser: (applicationId, callback) ->
     @select "getMachines", [], "machine", (results) =>

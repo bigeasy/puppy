@@ -58,6 +58,7 @@ CREATE TABLE ApplicationLocalPort (
     machineId       INTEGER NOT NULL,
     port            INTEGER NOT NULL,
     applicationId   INTEGER NOT NULL,
+    service         INTEGER NOT NULL,
     modified        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created         TIMESTAMP DEFAULT 0,
     PRIMARY KEY (id)
@@ -70,6 +71,7 @@ CREATE INDEX ApplicationLocalPort_ApplicationId ON ApplicationLocalPort(applicat
 CREATE TABLE Machine (
     id              INTEGER NOT NULL AUTO_INCREMENT,
     hostname        VARCHAR(255) NOT NULL,
+    ip              VARCHAR(32) NOT NULL,
     modified        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created         TIMESTAMP DEFAULT 0,
     PRIMARY KEY (id)
@@ -89,5 +91,16 @@ CREATE TABLE LocalPort (
     modified        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created         TIMESTAMP DEFAULT 0,
     PRIMARY KEY (machineId, port)
+)
+\g
+CREATE TABLE Hostname (
+    id              INTEGER NOT NULL AUTO_INCREMENT,
+    machineId       INTEGER NOT NULL,
+    port            INTEGER NOT NULL,
+    hostname        VARCHAR(255) NOT NULL,
+    modified        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created         TIMESTAMP DEFAULT 0,
+    PRIMARY KEY (id),
+    FOREIGN KEY (machineId, port) REFERENCES LocalPort (machineId, port)
 )
 \g

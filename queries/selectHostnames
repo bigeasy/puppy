@@ -1,0 +1,16 @@
+SELECT h.id AS hostname__id,
+       h.machineId AS hostname__machineId,
+       h.port AS hostname__port,
+       h.hostname AS hostname__hostname,
+       h.modified AS hostname__modified,
+       h.created AS hostname__created,
+       m.id AS hostname__machine__id,
+       m.hostname AS hostname__machine__hostname,
+       m.ip AS hostname__machine__ip,
+       m.modified AS hostname__machine__modified,
+       m.created AS hostname__machine__created
+  FROM Hostname AS h
+  JOIN Machine AS m ON h.machineId = m.id
+ WHERE h.id > ?
+ ORDER
+    BY h.id

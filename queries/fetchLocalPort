@@ -1,0 +1,9 @@
+INSERT INTO ApplicationLocalPort (
+    applicationId, machineId, service, port, created
+)
+SELECT ?, ?, ?, port, CURRENT_TIMESTAMP()
+  FROM LocalPort as lu
+ WHERE NOT EXISTS (SELECT *
+                     FROM ApplicationLocalPort
+                    WHERE machineId = lu.machineId
+                      AND port = lu.port)
