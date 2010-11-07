@@ -14,7 +14,7 @@ module.exports.command = (argv) ->
   sshKey = sshKey.substring(0, sshKey.length - 1)
   command = [ "/home/puppy/bin/public", "account:register", email, sshKey ]
 
-  ssh = spawn "ssh", [ "-i", public, "-l", "public", "portoroz.prettyrobots.com", "/home/public/bin/public" ]
+  ssh = spawn "ssh", [ "-T", "-i", public, "-l", "public", "portoroz.prettyrobots.com" ]
   ssh.stdin.end(JSON.stringify(command))
   ssh.stdout.on "data", (chunk) -> process.stdout.write chunk.toString()
   ssh.stderr.on "data", (chunk) -> process.stdout.write chunk.toString()

@@ -6,19 +6,17 @@ Configuration = require("./puppy").Configuration
 module.exports.command = (argv) ->
   configuration = new Configuration()
 
-  delete configuration.local["home"]
-  delete configuration.global["home"]
-
   configuration.home (home) ->
     console.log home
-    [ code ] = argv
 
-    ssh = spawn "ssh", [ "-T", home, "/usr/bin/sudo", "/home/puppy/bin/protected", "account:activated" ]
-    ssh.stdin.end(code)
+    command = argv.slice(0)
+
+    command.unshift("app:fetch")
+    command.unshift("/home/puppy/bin/puppy")
+
+    ssh = spawn "ssh", [ "-T", home, "/usr/bin/sudo", "/home/puppy/bin/protected", "app:fetch" ]
     ssh.stdout.on "data", (chunk) -> process.stdout.write chunk.toString()
     ssh.stderr.on "data", (chunk) -> process.stdout.write chunk.toString()
     ssh.on "exit", (code) ->
-      if code is 0
-        process.stdout.write "Activation successful. Welcome to Puppy.\n"
-      else
-        process.stdout.write "Unable to activate.\n"
+      if code != 0
+        process.stdout.write "Unable to create application.\n"
