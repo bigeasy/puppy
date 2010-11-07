@@ -1,0 +1,6 @@
+{   "name":             "vhosts"
+,   "version":          "0.0.1"
+,   "author":           "Alan Gutierrez"
+,   "directories":      { "lib" : "./lib" }
+,   "bin":      { "vhosts" : "./bin/vhosts.js" }
+}
