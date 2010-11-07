@@ -8,7 +8,11 @@ module.exports.command = (bin, argv) ->
   uid = parseInt(process.env["SUDO_UID"], 10) - 10000
   database.getLocalUserAccount uid, (account) =>
     database.select "insertApplication", [ account.id, 0 ], (results) ->
-      database.fetchLocalUser results.insertId, (localUser) ->
-        console.log localUser
+      applicationId = results.insertId
+      database.fetchLocalUser applicationId, (localUser) ->
         exec "/usr/bin/ssh -i /home/puppy/.ssh/id_puppy_private puppy@#{localUser.machine.hostname} /usr/bin/sudo #{bin}/private user:create 1", (error) ->
           throw error if error
+          database.fetchLocalPort applicationId, localUser.machineId, 1, (localPort) ->
+            console.log localPort
+            database.select "insertHostname", [ localPort.machineId, localPort.port, "t#{localPort.application.id}.puppy.prettyrobots.com" ], (results) ->
+              console.log results
