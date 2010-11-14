@@ -7,7 +7,7 @@ module.exports.command = (argv) ->
   vhosts = {}
   max = 0
   queryHosts = ->
-    database.select "selectHostnames", [ max ], "hostname", (results) ->
+    database.select "selectHostnames", [ max, 1 ], "hostname", (results) ->
       count = 0
       for hostname in results
         vhosts[hostname.hostname] = "#{hostname.machine.ip}:#{hostname.port}"
