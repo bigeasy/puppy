@@ -11,6 +11,7 @@ SELECT h.id AS hostname__id,
        m.created AS hostname__machine__created
   FROM Hostname AS h
   JOIN Machine AS m ON h.machineId = m.id
- WHERE h.id > ?
+  JOIN ApplicationLocalPort AS alp ON alp.machineId = h.machineId AND alp.port = h.port
+ WHERE h.id > ? AND alp.service = ?
  ORDER
     BY h.id
