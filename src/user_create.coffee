@@ -34,7 +34,9 @@ module.exports.command = (bin, argv) ->
           console.log error
           throw new Error("Cannot get hostname.")
         hostname = stdout.substring(0, stdout.length - 1)
+        console.log hostname
         database.select "getLocalUserAccount", [ hostname, localUserId ], "account", (results) ->
+          console.log results
           account = results.shift()
           sshKeys = "#{account.sshKey}\n"
           fs.writeFileSync("/home/u#{systemId}/configuration.json", JSON.stringify({ "hostname", hostname }), "utf8")
