@@ -14,4 +14,4 @@ userdom_restricted_user_template(puppy)
 # Local policy
 #
 
-#gen_user(puppy_u,, puppy_r, s0, s0)
+gen_user(puppy_u,, puppy_r, s0, s0)
