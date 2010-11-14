@@ -31,7 +31,7 @@ task "gitignore", "create a .gitignore for node-ec2 based on git branch", ->
       gitignore += '''
                    lib
                    '''
-    else if branch is "private"
+    else if branch is "worker"
       gitignore += '''
                    documentation
                    index.html
@@ -61,6 +61,6 @@ task "compile", "compile the CoffeeScript into JavaScript", ->
 
 task "clean", "rebuild the CoffeeScript docco documentation.", ->
   currentBranch (branch) ->
-    if branch is "private"
+    if branch is "worker"
       exec "rm -rf documentation lib _site site/idl.css index.html", (err) ->
         throw err if err
