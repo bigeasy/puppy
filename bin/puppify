@@ -1,0 +1,6 @@
+#!/bin/bash -e
+
+if [ ! -e /var/spool/puppy ]
+then
+    /bin/mkdir -p /var/spool/puppy
+fi
