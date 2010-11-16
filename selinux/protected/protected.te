@@ -1,0 +1,17 @@
+policy_module(protected, 1.1.1)
+
+########################################
+#
+# Declarations
+#
+
+role protected_r;
+
+userdom_restricted_user_template(protected)
+
+########################################
+#
+# Local policy
+#
+
+gen_user(protected_u,, protected_r, s0, s0)
