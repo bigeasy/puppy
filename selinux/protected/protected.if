@@ -2,7 +2,7 @@
 
 ########################################
 ## <summary>
-##	Change to the puppy role.
+##	Change to the protected role.
 ## </summary>
 ## <param name="role">
 ##	<summary>
@@ -11,21 +11,21 @@
 ## </param>
 ## <rolecap/>
 #
-interface(`puppy_role_change',`
+interface(`protected_role_change',`
 	gen_require(`
-		role puppy_r;
+		role protected_r;
 	')
 
-	allow $1 puppy_r;
+	allow $1 protected_r;
 ')
 
 ########################################
 ## <summary>
-##	Change from the puppy role.
+##	Change from the protected role.
 ## </summary>
 ## <desc>
 ##	<p>
-##	Change from the puppy role to
+##	Change from the protected role to
 ##	the specified role.
 ##	</p>
 ##	<p>
@@ -41,10 +41,10 @@ interface(`puppy_role_change',`
 ## </param>
 ## <rolecap/>
 #
-interface(`puppy_role_change_to',`
+interface(`protected_role_change_to',`
 	gen_require(`
-		role puppy_r;
+		role protected_r;
 	')
 
-	allow puppy_r $1;
+	allow protected_r $1;
 ')

@@ -24,6 +24,8 @@ task "gitignore", "create a .gitignore for node-ec2 based on git branch", ->
                 .DS_Store
                 _site
                 **/.DS_Store
+                **/*.pp
+                **/tmp/*
                 
                 '''
 
@@ -31,7 +33,7 @@ task "gitignore", "create a .gitignore for node-ec2 based on git branch", ->
       gitignore += '''
                    lib
                    '''
-    else if branch is "master"
+    else if branch is "fedora"
       gitignore += '''
                    documentation
                    index.html
@@ -61,6 +63,6 @@ task "compile", "compile the CoffeeScript into JavaScript", ->
 
 task "clean", "rebuild the CoffeeScript docco documentation.", ->
   currentBranch (branch) ->
-    if branch is "master"
+    if branch is "fedora"
       exec "rm -rf documentation lib _site site/idl.css index.html", (err) ->
         throw err if err

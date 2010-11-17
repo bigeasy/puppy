@@ -1,0 +1,43 @@
+#!/bin/sh
+# My system IP/set ip address of server
+SERVER_IP=`ifconfig | grep 'inet addr:' | grep -v '127.0.0.1' | sed 's/.*inet addr:\([0-9.]\+\).*/\1/g'`
+
+echo $SERVER_IP
+
+# Flushing all rules
+iptables -F
+iptables -X
+# Setting default filter policy
+iptables -P INPUT DROP
+iptables -P OUTPUT ACCEPT
+iptables -P FORWARD DROP
+# Allow unlimited traffic on loopback
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A OUTPUT -o lo -j ACCEPT
+
+# Allow incoming ssh only
+
+iptables -A INPUT -p tcp -s 0/0 -d $SERVER_IP --sport 513:65535 --dport 22 -m state --state NEW,ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -p tcp -s $SERVER_IP -d 0/0 --sport 22 --dport 513:65535 -m state --state ESTABLISHED -j ACCEPT
+iptables -A INPUT -i eth0 -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+service iptables save
+
+yum -y update
+yum -y groupinstall core
+yum -y install kernel-PAE.i686
+
+touch /.autorelabel
+
+vmlinuz=`ls /boot/vmlinuz-*`
+initramfs=`ls /boot/initramfs-*`
+kernel=`ls /boot/vmlinuz-* | sed 's/\/boot\/vmlinuz-//'`
+
+cat <<HERE > /boot/grub/menu.lst
+timeout 0
+
+title           Fedora 13, kernel $kernel
+root            (hd0)
+kernel          $vmlinuz root=/dev/xvda ro quiet
+initrd          $initramfs
+HERE
