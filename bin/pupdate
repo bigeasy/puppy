@@ -1,0 +1,62 @@
+#!/bin/bash
+
+export HOME=/home/puppy
+
+umask 177
+
+touch /home/puppy/.ssh/config
+cat <<CONFIG > /home/puppy/.ssh/config
+Host bled.prettyrobots.com
+  Hostname=bled.prettyrobots.com
+  IdentityFile=~/.ssh/id_puppy
+CONFIG
+
+umask 022
+
+cat <<NPMRC > /home/puppy/.npmrc
+root = /home/puppy/.node_libraries
+binroot = /home/puppy/bin
+manroot = /home/puppy/share/man
+NPMRC
+
+if [ ! -e /home/puppy/git/puppy ]
+then
+    /bin/mkdir -p /home/puppy/git/puppy
+fi
+
+function maybe_clone()
+{
+    branch=$1
+    if [ ! -e /home/puppy/git/puppy/$branch ]
+    then
+        cd /home/puppy/git/puppy
+        /usr/bin/git clone git@bled.prettyrobots.com:puppy.git $branch
+        cd /home/puppy/git/puppy/$branch
+        /usr/bin/git checkout -t remotes/origin/$branch
+    fi
+}
+
+function update_project()
+{
+    branch=$1
+    cd /home/puppy/git/puppy/$branch
+    /usr/bin/git pull
+    /usr/bin/cake clean
+    /usr/bin/cake compile
+    /usr/bin/npm install .
+}
+
+/usr/bin/npm install mail
+
+maybe_clone common
+maybe_clone private
+maybe_clone protected
+maybe_clone public
+maybe_clone fedora
+maybe_clone enqueue
+
+update_project common
+update_project private
+update_project protected
+update_project fedora
+update_project enqueue
