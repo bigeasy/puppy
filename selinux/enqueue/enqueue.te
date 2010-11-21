@@ -1,0 +1,22 @@
+policy_module(enqueue,1.0.0)
+
+########################################
+#
+# Declarations
+#
+role enqueue_r;
+type enqueue_agent_t;
+type enqueue_exec_t;
+
+userdom_restricted_user_template(enqueue)
+
+role enqueue_r types enqueue_agent_t;
+
+application_domain(enqueue_agent_t, enqueue_exec_t)
+
+domtrans_pattern(enqueue_t, enqueue_exec_t, enqueue_agent_t)
+
+gen_user(enqueue_u,, enqueue_r, s0, s0)
+
+# Enqueue agent policy.
+allow enqueue_agent_t self:process execmem;

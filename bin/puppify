@@ -1,6 +1,52 @@
-#!/bin/bash -e
+#!/bin/bash
 
-if [ ! -e /var/spool/puppy ]
-then
-    /bin/mkdir -p /var/spool/puppy
-fi
+function make_dir()
+{
+    directory=$1
+    ownership=$2
+    perms=$3
+    if [ ! -e $directory ]
+    then
+        /bin/mkdir -p $directory
+    fi
+    /bin/chown $ownership $directory
+    /bin/chmod $perms $directory
+    /sbin/restorecon -R $directory
+}
+
+function make_group()
+{
+    group=$1
+    gid=$2
+    cut -d: -f1 /etc/group | grep '^'$group'$' > /dev/null
+    ret=$?
+    if [ $ret != 0 ]
+    then
+        echo "Creating group $group."
+        /usr/sbin/groupadd --gid $gid $group
+    else
+        echo "Group $group exists."
+    fi
+}
+
+function make_user()
+{
+    user=$1
+    uid=$2
+    gid=$3
+    cut -d: -f1 /etc/passwd | grep '^'$user'$' > /dev/null
+    ret=$?
+    if [ $ret != 0 ]
+    then
+        echo "Creating user $user."
+        /usr/sbin/useradd --uid $uid --gid $gid $user
+    else
+        echo "User $user exists."
+    fi
+}
+
+make_group worker 704
+make_user enqueue 703 704 
+make_user worker 704 704
+
+make_dir /var/spool/puppy worker:worker 770

@@ -1,0 +1,9 @@
+policy_module(worker,1.0.0)
+
+type worker_t;
+type worker_exec_t;
+init_daemon_domain(worker_t, worker_exec_t)
+
+type worker_var_dir_t;
+
+type worker_var_t;

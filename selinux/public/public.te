@@ -4,15 +4,16 @@ policy_module(public, 1.1.1)
 #
 # Declarations
 #
-
 type public_puppy_t;
 role public_r;
+role public_r types public_puppy_t;
 
+
+# Limited roles are based on the guest role.
 userdom_restricted_user_template(public)
 
+# Rename to minimal_sudo_role_template, puppy specific.
 puppy_sudo_role_template(public, public_r, public_t)
-
-role public_r types public_puppy_t;
 
 ########################################
 #

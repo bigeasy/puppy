@@ -1,0 +1,4 @@
+interface(`worker_spool_offer',`
+')
+interface(`worker_spool_take',`
+')

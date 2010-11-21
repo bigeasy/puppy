@@ -1,0 +1,40 @@
+#!/bin/bash
+
+
+function build_user_profile()
+{
+    profile=$1
+    echo "Building user profile $profile."
+    pushd selinux/$profile > /dev/null
+    output=$(/usr/bin/make -f /usr/share/selinux/devel/Makefile)
+    if [ $? -eq 0 ]
+    then
+        echo $output | /bin/grep "make: Nothing to be done for \`all'\." > /dev/null
+        if [ $? -ne 0 ]
+        then
+            echo "User profile for $profile is out of date, reloading."
+            /usr/bin/sudo /usr/sbin/semodule -i $profile.pp 
+        fi
+    else
+        echo $output
+        exit 1
+    fi
+    popd > /dev/null
+}
+
+users=$(sudo /usr/sbin/semanage login -l | awk '/^[a-z]/ { print $1 }')
+
+function assign_profile()
+{
+    user=$1
+    echo users | grep user
+    if [ $? -ne 0 ]
+    then
+        echo "Assigning profile "$user"_u to user $user"
+    fi
+}
+
+build_user_profile worker
+build_user_profile enqueue
+
+sudo semanage login -a -s enqueue_u  enqueue
