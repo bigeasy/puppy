@@ -1,0 +1,2 @@
+[ "user:create", 1 ]
+[ "user:invite", 'fa4bf37135f94fed58f109e1a9e4f169' ]
