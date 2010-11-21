@@ -1,5 +1,9 @@
 policy_module(enqueue,1.0.0)
 
+require {
+    type worker_spool_t;
+}
+
 ########################################
 #
 # Declarations
@@ -14,9 +18,21 @@ role enqueue_r types enqueue_agent_t;
 
 application_domain(enqueue_agent_t, enqueue_exec_t)
 
-domtrans_pattern(enqueue_t, enqueue_exec_t, enqueue_agent_t)
-
-gen_user(enqueue_u,, enqueue_r, s0, s0)
-
 # Enqueue agent policy.
 allow enqueue_agent_t self:process execmem;
+allow enqueue_t enqueue_exec_t:lnk_file read_lnk_file_perms;
+allow enqueue_agent_t enqueue_exec_t:lnk_file read_lnk_file_perms;
+allow enqueue_agent_t worker_spool_t:dir rw_dir_perms;
+allow enqueue_agent_t worker_spool_t:file manage_file_perms;
+
+domtrans_pattern(enqueue_t, enqueue_exec_t, enqueue_agent_t)
+
+# Always needed by a Node.js program.
+dev_read_urand(enqueue_agent_t)
+sysnet_read_config(enqueue_agent_t)
+allow enqueue_agent_t etc_t:file read_file_perms;
+
+files_search_spool(enqueue_agent_t)
+allow enqueue_agent_t var_spool_t:dir search;
+
+gen_user(enqueue_u,, enqueue_r, s0, s0)
