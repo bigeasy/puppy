@@ -11,7 +11,7 @@ function make_dir()
     fi
     /bin/chown $ownership $directory
     /bin/chmod $perms $directory
-    /sbin/restorecon -R $directory
+#    /sbin/restorecon -R $directory
 }
 
 function make_group()
@@ -50,3 +50,29 @@ make_user enqueue 703 704
 make_user worker 704 704
 
 make_dir /var/spool/puppy worker:worker 770
+
+for file in $(/bin/find etc -type d -perm 755 | sort)
+do
+    dest=/$file
+    if [ ! -e $dest ]
+    then
+        echo "Creating directory $dest."
+        /bin/mkdir $dest
+    fi
+    /bin/chmod 755 $dest
+    /bin/chown root:root $dest
+    /sbin/restorecon $dest
+done
+
+for file in $(/bin/find etc -type f -perm 644)
+do
+    dest=/$file
+    if [ ! -e $dest ]
+    then
+        echo "Installing $dest."
+        cp $file $dest
+    fi
+    /bin/chmod 644 $dest
+    /bin/chown root:root $dest
+    /sbin/restorecon $dest
+done
