@@ -51,7 +51,7 @@ make_user worker 704 704
 
 make_dir /var/spool/puppy worker:worker 770
 
-for file in $(/bin/find etc -type d -perm 755 | sort)
+for file in $(/bin/find opt etc -type d -perm 755 | sort)
 do
     dest=/$file
     if [ ! -e $dest ]
@@ -69,10 +69,23 @@ do
     dest=/$file
     if [ ! -e $dest ]
     then
-        echo "Installing $dest."
+        echo "Installing file $dest."
         cp $file $dest
     fi
     /bin/chmod 644 $dest
+    /bin/chown root:root $dest
+    /sbin/restorecon $dest
+done
+
+for file in $(/bin/find opt etc -type f -perm 755 | sort)
+do
+    dest=/$file
+    if [ ! -e $dest ]
+    then
+        echo "Installing program $dest."
+        cp $file $dest
+    fi
+    /bin/chmod 755 $dest
     /bin/chown root:root $dest
     /sbin/restorecon $dest
 done

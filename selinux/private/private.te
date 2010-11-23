@@ -1,0 +1,5 @@
+policy_module(private,1.0.0)
+
+type private_exec_t;
+
+application_executable_file(private_exec_t)

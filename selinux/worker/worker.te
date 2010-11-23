@@ -1,9 +1,103 @@
 policy_module(worker,1.0.0)
 
+require {
+    type etc_t;
+    role system_r;
+    type private_exec_t;
+}
+
+############################################################################
+### Policy for `worker` daemon.
+############################################################################
+
 type worker_t;
 type worker_exec_t;
+
+## Daemonize.
 init_daemon_domain(worker_t, worker_exec_t)
 
-type worker_var_dir_t;
+## Worker spool directory.
+type worker_spool_t;
+files_type(worker_spool_t)
 
-type worker_var_t;
+allow worker_t self:process execmem;
+allow worker_t worker_exec_t:lnk_file read_lnk_file_perms;
+
+allow worker_t worker_spool_t:dir rw_dir_perms;
+allow worker_t worker_spool_t:file manage_file_perms;
+
+allow worker_t etc_t:file read_file_perms;
+
+files_search_spool(worker_t)
+logging_write_generic_logs(worker_t)
+
+domtrans_pattern(worker_t, private_user_invite_exec_t, private_user_invite_t)
+
+allow worker_t self:fifo_file rw_fifo_file_perms;
+
+# Node.js always wants these.
+dev_read_urand(worker_t)
+sysnet_read_config(worker_t)
+
+# Don't feel good about this. I'd rather the transition programs where not
+# shell, since I don't want worker to be able to launch an interactive shell.
+#
+# However, many daemons are allowed to execute the shell_exec_t. Grep the
+# references policy and you'll see Squid, PostreSQL, Apache, and Samba.
+corecmd_exec_shell(worker_t)
+
+# Logging via syslog.
+logging_send_syslog_msg(worker_t)
+
+# Log messages when sending invitations.
+logging_send_syslog_msg(private_user_invite_t)
+#allow enqueue_t enqueue_exec_t:lnk_file read_lnk_file_perms;
+#allow enqueue_agent_t enqueue_exec_t:lnk_file read_lnk_file_perms;
+
+############################################################################
+### Policy for `private user:invite`.
+############################################################################
+
+## Types
+type private_user_invite_t;
+type private_user_invite_exec_t;
+
+role system_r types private_user_invite_t;
+
+## Application.
+application_domain(private_user_invite_t, private_user_invite_exec_t)
+
+can_exec(private_user_invite_t, private_exec_t)
+allow private_user_invite_t private_exec_t:lnk_file read_lnk_file_perms;
+
+## Node.js boilerplate.
+# -- Node.js DNS reads urandom for an encryption key it doesn't use. --
+dev_read_urand(private_user_invite_t)
+# -- The JIT generates executable code in writable memory. --
+allow private_user_invite_t self:process execmem;
+# -- TODO. --
+allow private_user_invite_t etc_t:file read_file_perms;
+# -- Both `bash` and `node` read system page size from `/proc/meminfo`. 
+kernel_read_system_state(private_user_invite_t)
+
+## Execute node.
+# -- Need to execute `/usr/bin/node` which is labeled with `bin_t`. --
+corecmd_exec_bin(private_user_invite_t)
+
+
+## Read/Write Pipes.
+allow private_user_invite_t self:fifo_file rw_fifo_file_perms;
+
+## Query MySQL.
+mysql_tcp_connect(private_user_invite_t)
+mysql_stream_connect(private_user_invite_t)
+mysql_rw_db_sockets(private_user_invite_t)
+
+## Logging
+logging_send_syslog_msg(private_user_invite_t)
+
+## Send email.
+corenet_tcp_connect_smtp_port(private_user_invite_t)
+sysnet_dns_name_resolve(private_user_invite_t)
+miscfiles_read_localization(private_user_invite_t)
+hostname_exec(private_user_invite_t)
