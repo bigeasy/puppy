@@ -1,3 +1,3 @@
-path = require("path");
-
-require("../lib/enqueue").command(path.dirname(process.argv[1]), process.argv.slice(2));
+var path = require("path");
+require.paths.unshift(path.dirname(process.argv[1]) + "/../lib/node");
+require("../lib/enqueue").command();
