@@ -29,14 +29,23 @@ poll = ->
       if commands.length
         command = commands.shift()
         [ program, args, input ] = command
-        child = spawn "/opt/share/puppy/private/bin/#{program.replace(/:/, "_")}", args
+        env =
+          NODE_PATH: "/opt/lib/node"
+        child = spawn "/opt/share/puppy/private/bin/#{program.replace(/:/, "_")}", args, { env }
         child.stdin.write(input) if input
         child.stdin.end()
-        child.stdout.on "data", (chunk) -> process.stdout.write chunk.toString()
-        child.stderr.on "data", (chunk) -> process.stdout.write chunk.toString()
+        stdout = ""
+        stderr = ""
+        child.stdout.on "data", (chunk) -> stdout += chunk.toString()
+        child.stderr.on "data", (chunk) -> stderr += chunk.toString()
         child.on "exit", (code) ->
           program += " #{args.join(", ")}" if args.length
-          syslog.send "info", "Worker ran [#{program}] with exit code #{code}.", { command }
+          if code
+            syslog.send "err", stdout if /^ERROR:/.test(stdout)
+            commands.length = 0
+          stderr = stderr.substring(0, 1024)
+          stdout = stdout.substring(0, 256)
+          syslog.send "info", "Worker ran [#{program}] with exit code #{code}.", { command, stderr, stdout }
           task()
       else
         fs.unlinkSync job.name
