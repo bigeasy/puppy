@@ -139,7 +139,12 @@ kernel_read_system_state(private_user_create_t)
 ## Pipes.
 ## -- Allow sudo to pipe input and output. --
 allow private_user_create_sudo_t worker_t:fifo_file rw_fifo_file_perms;
+allow private_user_create_t self:fifo_file rw_fifo_file_perms;
 
 # Resources.
 # -- Read `/etc/passwd` file to see if user has already been created.
 allow private_user_create_t etc_t:file read_file_perms;
+
+## User add.
+## -- Transition to the exising user management policy. --
+usermanage_domtrans_useradd(private_user_create_t)
