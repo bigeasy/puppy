@@ -2,3 +2,5 @@
 /var/spool/puppy          gen_context(system_u:object_r:worker_spool_t, s0)
 /var/spool/puppy/.*       -- gen_context(system_u:object_r:worker_spool_t, s0)
 /opt/share/puppy/private/bin/user_invite gen_context(system_u:object_r:private_user_invite_exec_t, s0)
+/opt/share/puppy/private/bin/user_create gen_context(system_u:object_r:private_user_create_exec_t, s0)
+/opt/share/puppy/private/sbin/user_create gen_context(system_u:object_r:private_user_create_exec_t, s0)

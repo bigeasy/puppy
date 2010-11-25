@@ -1,0 +1,23 @@
+#!/bin/bash
+
+. /opt/share/puppy/private/bin/functions
+
+if [ $# -ne 1 ]; then
+    abend "Incorrect count of arguments ($#) to user_create."
+fi
+
+user=$1
+digit='^[0-9]+$'
+if [[ ! ($user =~ $digit) ]]; then
+    abend "Incorrect parameter. Single UID parameter expected."
+fi
+
+if [ $user -lt 1 -o $user -gt 100000000 ]; then
+    abend "Puppy user id value $user is out of range."
+fi
+
+uid=$(($user + 10000))
+existing=$(cut -d: -f1 /etc/passwd | grep '^u'$uid'$')
+if [ $existing"x" == "x" ]; then
+    /usr/sbin/useradd --gid 707 --uid $uid --home-dir "/home/u$uid" "u$uid" || abend "Unable to create user #{uid}."
+fi

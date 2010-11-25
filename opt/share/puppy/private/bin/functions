@@ -1,0 +1,6 @@
+function abend()
+{
+    message=$1
+    echo -n "ERROR: $message"
+    exit 1
+}

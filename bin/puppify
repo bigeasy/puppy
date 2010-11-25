@@ -51,41 +51,51 @@ make_user worker 704 704
 
 make_dir /var/spool/puppy worker:worker 770
 
-for file in $(/bin/find opt etc -type d -perm 755 | sort)
-do
-    dest=/$file
-    if [ ! -e $dest ]
-    then
-        echo "Creating directory $dest."
-        /bin/mkdir $dest
-    fi
-    /bin/chmod 755 $dest
-    /bin/chown root:root $dest
-    /sbin/restorecon $dest
-done
 
-for file in $(/bin/find etc -type f -perm 644)
-do
-    dest=/$file
-    if [ ! -e $dest ]
-    then
-        echo "Installing file $dest."
-        cp $file $dest
-    fi
-    /bin/chmod 644 $dest
-    /bin/chown root:root $dest
-    /sbin/restorecon $dest
-done
+function make_directories()
+{
+    path=$1
+    prefix=$2
+    perm=$3
+    ownership=$4
+    for file in $(/bin/find $path -type d -perm $perm | sort)
+    do
+        dest=$prefix$file
+        if [ ! -e $dest ]
+        then
+            echo "Creating directory $dest."
+            /bin/mkdir $dest
+        fi
+        /bin/chmod $perm $dest
+        /bin/chown $ownership $dest
+        /sbin/restorecon $dest
+    done
+}
 
-for file in $(/bin/find opt etc -type f -perm 755 | sort)
-do
-    dest=/$file
-    if [ ! -e $dest ]
-    then
-        echo "Installing program $dest."
-        cp $file $dest
-    fi
-    /bin/chmod 755 $dest
-    /bin/chown root:root $dest
-    /sbin/restorecon $dest
-done
+make_directories etc / 755 root:root
+make_directories opt / 755 root:root
+
+function copy_files()
+{
+    path=$1
+    prefix=$2
+    perm=$3
+    ownership=$4
+    for file in $(/bin/find $path -type f -perm $perm | sort)
+    do
+        dest=$prefix$file
+        if [ ! -e $dest ]
+        then
+            echo "Installing program $dest."
+            cp $file $dest
+        fi
+        /bin/chmod $perm $dest
+        /bin/chown $ownership $dest
+        /sbin/restorecon $dest
+    done
+}
+
+copy_files opt/share/puppy/private/bin / 700 worker:worker
+copy_files opt/share/puppy/private/bin / 640 worker:root
+copy_files opt/share/puppy/private/sbin / 700 root:root
+copy_files etc / 644 root:root

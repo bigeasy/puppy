@@ -2,6 +2,7 @@ policy_module(worker,1.0.0)
 
 require {
     type etc_t;
+    type bin_t;
     role system_r;
     type private_exec_t;
 }
@@ -20,7 +21,16 @@ init_daemon_domain(worker_t, worker_exec_t)
 type worker_spool_t;
 files_type(worker_spool_t)
 
+## Node.js executable boilerplate.
+# -- The JIT generates executable code in writable memory. --
 allow worker_t self:process execmem;
+# -- Ares DNS reads urandom for an encryption key it doesn't use. --
+dev_read_urand(worker_t)
+# -- Ares DNS reads `/etc/resolve.conf`. 
+sysnet_read_config(worker_t)
+# -- Read system page size from `/proc/meminfo`. 
+kernel_read_system_state(worker_t)
+
 allow worker_t worker_exec_t:lnk_file read_lnk_file_perms;
 
 allow worker_t worker_spool_t:dir rw_dir_perms;
@@ -31,13 +41,8 @@ allow worker_t etc_t:file read_file_perms;
 files_search_spool(worker_t)
 logging_write_generic_logs(worker_t)
 
-domtrans_pattern(worker_t, private_user_invite_exec_t, private_user_invite_t)
 
 allow worker_t self:fifo_file rw_fifo_file_perms;
-
-# Node.js always wants these.
-dev_read_urand(worker_t)
-sysnet_read_config(worker_t)
 
 # Don't feel good about this. I'd rather the transition programs where not
 # shell, since I don't want worker to be able to launch an interactive shell.
@@ -58,7 +63,7 @@ logging_send_syslog_msg(private_user_invite_t)
 ### Policy for `private user:invite`.
 ############################################################################
 
-## Types
+## Types and roles.
 type private_user_invite_t;
 type private_user_invite_exec_t;
 
@@ -66,6 +71,7 @@ role system_r types private_user_invite_t;
 
 ## Application.
 application_domain(private_user_invite_t, private_user_invite_exec_t)
+domtrans_pattern(worker_t, private_user_invite_exec_t, private_user_invite_t)
 
 can_exec(private_user_invite_t, private_exec_t)
 allow private_user_invite_t private_exec_t:lnk_file read_lnk_file_perms;
@@ -75,7 +81,7 @@ allow private_user_invite_t private_exec_t:lnk_file read_lnk_file_perms;
 dev_read_urand(private_user_invite_t)
 # -- The JIT generates executable code in writable memory. --
 allow private_user_invite_t self:process execmem;
-# -- TODO. --
+# -- TODO. (Might be bash doing this.) --
 allow private_user_invite_t etc_t:file read_file_perms;
 # -- Both `bash` and `node` read system page size from `/proc/meminfo`. 
 kernel_read_system_state(private_user_invite_t)
@@ -101,3 +107,39 @@ corenet_tcp_connect_smtp_port(private_user_invite_t)
 sysnet_dns_name_resolve(private_user_invite_t)
 miscfiles_read_localization(private_user_invite_t)
 hostname_exec(private_user_invite_t)
+
+############################################################################
+### Policy for `private user:create`.
+############################################################################
+
+## Types and roles.
+type private_user_create_t;
+type private_user_create_exec_t;
+
+role system_r types private_user_create_t;
+
+## Application and transitions.
+## -- Specify the executable type.
+application_domain(private_user_create_t, private_user_create_exec_t)
+## -- Transition into the executable domain.
+domtrans_pattern(worker_t, private_user_create_exec_t, private_user_create_t)
+## -- Allow the domain to sudo.
+sudo_role_template(private_user_create, system_r, private_user_create_t)
+## -- Transition back into executable domain after sudo.
+domtrans_pattern(private_user_create_sudo_t, private_user_create_exec_t, private_user_create_t)
+
+## -- Application is a shell program. --
+corecmd_exec_shell(private_user_create_t)
+## -- The shell program calls utilities. --
+corecmd_exec_bin(private_user_create_t)
+
+## -- `bash` read system page size from `/proc/meminfo`.
+kernel_read_system_state(private_user_create_t)
+
+## Pipes.
+## -- Allow sudo to pipe input and output. --
+allow private_user_create_sudo_t worker_t:fifo_file rw_fifo_file_perms;
+
+# Resources.
+# -- Read `/etc/passwd` file to see if user has already been created.
+allow private_user_create_t etc_t:file read_file_perms;
