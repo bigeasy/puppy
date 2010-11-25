@@ -3,7 +3,7 @@ database  = new (require("common/database").Database)()
 syslog    = new (require("common/syslog").Syslog)({ tag: "private[user_invite]", pid: true })
 shell     = new (require("common/shell").Shell)()
 
-module.exports.command = (bin, argv) ->
+module.exports.command = (argv) ->
   sendActivation = (activation) ->
     mail = require("mail").Mail(
       host: "smtp.gmail.com"
@@ -36,16 +36,6 @@ module.exports.command = (bin, argv) ->
     
     We'll put a stop to it.
     """
-    new Buffer(32 * 1024 * 1024)
-    new Buffer(32 * 1024 * 1024)
-    new Buffer(32 * 1024 * 1024)
-    new Buffer(32 * 1024 * 1024)
-    new Buffer(32 * 1024 * 1024)
-    new Buffer(32 * 1024 * 1024)
-    new Buffer(32 * 1024 * 1024)
-    new Buffer(32 * 1024 * 1024)
-    new Buffer(32 * 1024 * 1024)
-    new Buffer(32 * 1024 * 1024)
     message.send (error) ->
       if error
         syslog.send "local2", "err", error.message
