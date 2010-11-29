@@ -121,50 +121,20 @@ hostname_exec(private_user_invite_t)
 ### Policy for `private user:create`.
 ############################################################################
 
-## Types and roles.
-type private_user_create_t;
-type private_user_create_exec_t;
+# User creation is performed as root.
+puppy_worker_sudo_job(private_user_create)
 
-role system_r types private_user_create_t;
-
-## Application and transitions.
-## -- Specify the executable type.
-application_domain(private_user_create_t, private_user_create_exec_t)
-## -- Transition into the executable domain.
-domtrans_pattern(worker_t, private_user_create_exec_t, private_user_create_t)
-## -- Allow the domain to sudo.
-sudo_role_template(private_user_create, system_r, private_user_create_t)
-## -- Transition back into executable domain after sudo.
-domtrans_pattern(private_user_create_sudo_t, private_user_create_exec_t, private_user_create_t)
-
-## -- Application is a shell program. --
-corecmd_exec_shell(private_user_create_t)
-## -- The shell program calls utilities. --
-corecmd_exec_bin(private_user_create_t)
-
-## -- Read the private library of functions.
-allow private_user_harden_t private_functions_t:file read_file_perms;
-
-## -- `bash` reads system page size from `/proc/meminfo`.
-kernel_read_system_state(private_user_create_t)
-
-## Pipes.
-## -- Allow sudo to pipe input and output. --
-allow private_user_create_sudo_t worker_t:fifo_file rw_fifo_file_perms;
-allow private_user_create_t self:fifo_file rw_fifo_file_perms;
-
-# Resources.
-# -- Read `/etc/passwd` file to see if user has already been created.
+# Read /etc/passwd to determine if the user already exists.
 allow private_user_create_t etc_t:file read_file_perms;
 
-## User add.
-## -- Transition to the exising user management policy. --
+# Transition to the exising user management policy.
 usermanage_domtrans_useradd(private_user_create_t)
 
 ############################################################################
 ### Policy for `private user:policy`.
 ############################################################################
 
+# User policy assignment is performed as root.
 puppy_worker_sudo_job(private_user_policy)
 
 # Execute semanage to assign the protected policy to the user.

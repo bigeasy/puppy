@@ -73,7 +73,7 @@ template(`puppy_worker_sudo_job',`
     dontaudit $1_spawn_sudo_t worker_t:fifo_file rw_fifo_file_perms;
 
     # The working script will report to the spawn script via stdio.
-    allow private_user_policy_t private_user_policy_spawn_t:fifo_file rw_fifo_file_perms;
+    allow $1_t $1_spawn_t:fifo_file rw_fifo_file_perms;
 
     # The transition program is always a Node.js program.
     puppy_node_exec($1_spawn_t)
