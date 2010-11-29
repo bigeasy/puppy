@@ -35,6 +35,7 @@ function assign_profile()
 }
 
 build_user_profile private
+build_user_profile protected
 build_user_profile worker
 build_user_profile enqueue
 

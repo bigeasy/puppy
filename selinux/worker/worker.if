@@ -1,4 +1,86 @@
-interface(`worker_spool_offer',`
+########################################
+### <summary>
+###  Assign permissions for a Node.js executable.
+### </summary>
+### <param name="domain">
+###  <summary>
+###  The application domain that will run node.
+###  </summary>
+### </param>
+##
+#
+template(`puppy_node_exec',`
+    # Node.js is a bin_t.
+    corecmd_exec_bin($1)
+    # The JIT generates executable code in writable memory.
+    allow $1 self:process execmem;
+    # The Aries DNS library read nsswitch.conf for DNS lookups, regardless of
+    # whether node performs DNS lookups.
+    sysnet_read_config($1)
+    # Read the system page size from /proc/meminfo.
+    kernel_read_system_state($1)
+    # The Aries DNS library reads urandom for an encryption key it does not use.
+    dev_read_urand($1)
+    # Read and write stdin, stdout, and stderr.
+    allow $1 self:fifo_file read;
+    # The Aries DNS library reads /etc/nsswitch.conf.
+    files_read_etc_files($1)
 ')
-interface(`worker_spool_take',`
+
+template(`puppy_shell_exec',`
+    # Read system page size from /proc/meminfo. 
+    kernel_read_system_state($1)
+    # Shell programs use utility programs.
+    corecmd_exec_bin($1)
+    # Read common shell functions.
+    allow $1 private_functions_t:file read_file_perms;
+')
+
+########################################
+### <summary>
+###  Create a set of derived types for Puppy worker jobs that operate as root.
+### </summary>
+### <param name="prefix">
+###  <summary>
+###  The prefix to be used for deriving type names.
+###  </summary>
+### </param>
+##
+#
+template(`puppy_worker_sudo_job',`
+    # Domain types for spawn and job.
+    type $1_spawn_t;
+    type $1_t;
+
+    # Role assignments for spawn and job.
+    role system_r types $1_spawn_t;
+    role system_r types $1_t;
+
+    # Role assignments for spawn and job.
+    type $1_exec_t;
+
+    # Application domains for spawn and job.
+    application_domain($1_t, $1_exec_t)
+    application_domain($1_spawn_t, $1_exec_t)
+
+    # Transition from worker to the spawn domain, from the transition program to
+    # the sudo domain, from sudo domain to the job domain.
+    domtrans_pattern(worker_t, $1_exec_t, $1_spawn_t)
+    sudo_role_template($1_spawn, system_r, $1_spawn_t)
+    domtrans_pattern($1_spawn_sudo_t, $1_exec_t, $1_t)
+
+    # sudo will attempt to read and write to stdin and stdout.
+    dontaudit $1_spawn_sudo_t worker_t:fifo_file rw_fifo_file_perms;
+
+    # The working script will report to the spawn script via stdio.
+    allow private_user_policy_t private_user_policy_spawn_t:fifo_file rw_fifo_file_perms;
+
+    # The transition program is always a Node.js program.
+    puppy_node_exec($1_spawn_t)
+
+    # The working program is always a shell program.
+    puppy_shell_exec($1_t)
+
+    # Read and write to stdin, stout and stderr.
+    allow $1_t self:fifo_file rw_fifo_file_perms;
 ')

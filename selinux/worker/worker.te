@@ -14,6 +14,13 @@ require {
 type worker_t;
 type worker_exec_t;
 
+type worker_tmp_t;
+files_type(worker_tmp_t)
+
+## -- Functions common to all private `bash` scripts. --
+type private_functions_t;
+files_type(private_functions_t)
+
 ## Daemonize.
 init_daemon_domain(worker_t, worker_exec_t)
 
@@ -49,7 +56,8 @@ allow worker_t self:fifo_file rw_fifo_file_perms;
 #
 # However, many daemons are allowed to execute the shell_exec_t. Grep the
 # references policy and you'll see Squid, PostreSQL, Apache, and Samba.
-corecmd_exec_shell(worker_t)
+#corecmd_exec_shell(worker_t)
+corecmd_exec_bin(worker_t)
 
 # Logging via syslog.
 logging_send_syslog_msg(worker_t)
@@ -81,7 +89,8 @@ allow private_user_invite_t private_exec_t:lnk_file read_lnk_file_perms;
 dev_read_urand(private_user_invite_t)
 # -- The JIT generates executable code in writable memory. --
 allow private_user_invite_t self:process execmem;
-# -- TODO. (Might be bash doing this.) --
+# -- Both `bash` and `node` read nsswitch.conf, and `bash` reads `/etc/passwd`
+#       apparently to configure DNS lookups (via glibc). --
 allow private_user_invite_t etc_t:file read_file_perms;
 # -- Both `bash` and `node` read system page size from `/proc/meminfo`. 
 kernel_read_system_state(private_user_invite_t)
@@ -133,7 +142,10 @@ corecmd_exec_shell(private_user_create_t)
 ## -- The shell program calls utilities. --
 corecmd_exec_bin(private_user_create_t)
 
-## -- `bash` read system page size from `/proc/meminfo`.
+## -- Read the private library of functions.
+allow private_user_harden_t private_functions_t:file read_file_perms;
+
+## -- `bash` reads system page size from `/proc/meminfo`.
 kernel_read_system_state(private_user_create_t)
 
 ## Pipes.
@@ -148,3 +160,101 @@ allow private_user_create_t etc_t:file read_file_perms;
 ## User add.
 ## -- Transition to the exising user management policy. --
 usermanage_domtrans_useradd(private_user_create_t)
+
+############################################################################
+### Policy for `private user:policy`.
+############################################################################
+
+puppy_worker_sudo_job(private_user_policy)
+
+# Execute semanage to assign the protected policy to the user.
+seutil_run_semanage(private_user_policy_t, worker_r)
+allow semanage_t private_user_policy_spawn_t:fifo_file rw_fifo_file_perms;
+
+############################################################################
+### Policy for `private user:harden`.
+############################################################################
+
+## Types and roles.
+type private_user_harden_spawn_t;
+type private_user_harden_exec_t;
+type private_user_harden_t;
+
+role system_r types private_user_harden_spawn_t;
+role system_r types private_user_harden_t;
+
+## -- Type of files used to define per-application policies. --
+type private_policy_var_t;
+files_type(private_policy_var_t)
+
+## Application and transitions.
+# -- Specify the spawn executable type. --
+application_domain(private_user_harden_spawn_t, private_user_harden_exec_t)
+# -- Specify the executable type. --
+application_domain(private_user_harden_t, private_user_harden_exec_t)
+# -- Transition into the executable domain. --
+domtrans_pattern(worker_t, private_user_harden_exec_t, private_user_harden_spawn_t)
+# -- Allow the domain to sudo. --
+sudo_role_template(private_user_harden_spawn, system_r, private_user_harden_spawn_t)
+# -- Transition back into executable domain after sudo. --
+domtrans_pattern(private_user_harden_spawn_sudo_t, private_user_harden_exec_t, private_user_harden_t)
+# -- Both `bash` reads `nsswitch.conf`and `/etc/passwd` apparently to configure
+#       DNS lookups (via glibc). --
+allow private_user_harden_t etc_t:file read_file_perms;
+
+## -- Application is a shell program. --
+corecmd_exec_shell(private_user_harden_t)
+## -- The shell program calls utilities. --
+corecmd_exec_bin(private_user_harden_t)
+## -- Read the private library of functions. --
+allow private_user_harden_t private_functions_t:file read_file_perms;
+
+## -- Create temporary files to redirect stdout. --
+#write_worker_temporary_files(private_user_harden)
+
+## -- `bash` read system page size from `/proc/meminfo`. --
+kernel_read_system_state(private_user_harden_t)
+
+## Pipes.
+## -- Allow sudo to pipe input and output. --
+#allow private_user_harden_sudo_t worker_t:fifo_file rw_fifo_file_perms;
+allow private_user_harden_t self:fifo_file rw_fifo_file_perms;
+allow load_policy_t private_user_harden_t:fifo_file rw_fifo_file_perms;
+
+## Files.
+## -- Create new var directories. --
+allow private_user_harden_t private_policy_var_t:file manage_file_perms;
+allow private_user_harden_t self:process execmem;
+
+seutil_run_semanage(private_user_harden_t, worker_r)
+allow semanage_t worker_t:fifo_file rw_fifo_file_perms;
+allow setfiles_t private_user_harden_t:fifo_file rw_fifo_file_perms;
+
+dontaudit private_user_harden_spawn_sudo_t worker_t:fifo_file rw_fifo_file_perms;
+
+allow private_user_harden_spawn_t self:process execmem;
+
+#============= private_user_harden_spawn_t ==============
+allow private_user_harden_spawn_t self:fifo_file read_fifo_file_perms;
+allow private_user_harden_t private_user_harden_spawn_t:fifo_file read_fifo_file_perms;
+
+#============= private_user_harden_t ==============
+allow private_user_harden_t private_user_harden_spawn_t:fifo_file write_fifo_file_perms;
+allow semanage_t private_user_harden_spawn_t:fifo_file rw_fifo_file_perms;
+
+allow load_policy_t private_user_harden_spawn_t:fifo_file rw_fifo_file_perms;
+
+# -- Node.js DNS reads urandom for an encryption key it doesn't use. --
+dev_dontaudit_read_urand(private_user_harden_spawn_t)
+# -- Both `bash` and `node` read nsswitch.conf, and `bash` reads `/etc/passwd`
+#       apparently to configure DNS lookups (via glibc). --
+allow private_user_harden_spawn_t etc_t:file read_file_perms;
+# -- Both `bash` and `node` read system page size from `/proc/meminfo`. 
+kernel_read_system_state(private_user_harden_spawn_t)
+
+allow setfiles_t private_user_harden_spawn_t:fifo_file rw_fifo_file_perms;
+
+sysnet_read_config(private_user_harden_spawn_t)
+
+allow private_user_harden_t private_policy_var_t:dir manage_dir_perms;
+allow private_user_harden_t private_policy_var_t:file manage_file_perms;

@@ -50,6 +50,7 @@ make_user enqueue 703 704
 make_user worker 704 704
 
 make_dir /var/spool/puppy worker:worker 770
+make_dir /var/run/puppy/tmp worker:root 770
 
 
 function make_directories()
