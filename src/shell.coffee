@@ -1,6 +1,24 @@
 {spawn, exec} = require "child_process"
+sys = require "sys"
 
 class Shell
+  sudo: (splat...) ->
+    parameters = []
+    for parameter in splat
+      if parameter.join
+        for param in parameter
+          parameters.push param
+      else
+        parameters.push parameter
+    sudo = spawn "/usr/bin/sudo", parameters
+    sys.pump process.openStdin(), sudo.stdin
+    stderr = ""
+    stdout = ""
+    sudo.stderr.on "data", (data) -> stderr += data.toString()
+    sudo.stdout.on "data", (data) -> stdout += data.toString()
+    sudo.on "exit", (code) ->
+      process.stdout.write JSON.stringify { stdout, stderr }
+      process.exit code
   script: (splat...) ->
     callback = splat.pop()
     source = splat.pop()
@@ -39,3 +57,6 @@ class Shell
         callback(null, body)
 
 module.exports.Shell = Shell
+module.exports.sudo = (splat...)->
+  shell = new Shell()
+  shell.sudo.apply shell, splat
