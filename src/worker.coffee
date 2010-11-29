@@ -62,16 +62,24 @@ poll = ->
         child.stdout.on "data", (chunk) -> stdout += chunk.toString()
         child.stderr.on "data", (chunk) -> stderr += chunk.toString()
         child.on "exit", (code) ->
+          # Record the stderr messages, which we do not expect from the launch
+          # program.
+          if stderr
+            syslog.send "err", "Worker recieved unexpected error messages from [#{program}] with exit code #{code}.", { command, stderr }
+          outcome = null
+          try
+            outcome = JSON.parse(stdout)
+          catch e
+            syslog.send "err", "Worker recieved malformed stdout from [#{program}] with exit code #{code}.", { command, stdout }
           # Record the error if one was reported.
           if code
-            syslog.send "err", stdout if /^ERROR:/.test(stdout)
+            syslog.send "err", outcome.stdout if /^ERROR:/.test(outcome.stdout)
             commands.length = 0
 
+          outcome.command = command
           # Create a descriptive message for the logs.
           program += " #{args.join(", ")}" if args.length
-          stderr = stderr.substring(0, 1024)
-          stdout = stdout.substring(0, 256)
-          syslog.send "info", "Worker ran [#{program}] with exit code #{code}.", { command, stderr, stdout }
+          syslog.send "info", "Worker ran [#{program}] with exit code #{code}.", outcome
 
           # Execute the next task, if any.
           task()
