@@ -38,6 +38,45 @@ template(`puppy_shell_exec',`
 
 ########################################
 ### <summary>
+###  Create a set of derived types for Puppy worker jobs that operate as the
+###  worker daemon user.
+### </summary>
+### <param name="prefix">
+###  <summary>
+###  The prefix to be used for deriving type names.
+###  </summary>
+### </param>
+##
+#
+template(`puppy_worker_wudo_private',`
+    # Job domain type.
+    type $1_job_t;
+
+    # Role assignment for job domains.
+    role system_r types $1_job_t;
+
+    # The executable type.
+    type $1_exec_t;
+
+    # Create the application domains.
+    application_domain($1_job_t, $1_exec_t)
+
+    # Transition from worker to the job domain.
+    domtrans_pattern(worker_t, $1_exec_t, $1_job_t)
+
+    # The job program is a Node.js program.
+    puppy_node_exec($1_job_t)
+    
+    ## Read/Write Pipes.
+    allow $1_job_t self:fifo_file rw_fifo_file_perms;
+
+    # Execute the private program.
+    can_exec($1_job_t, private_exec_t)
+    allow $1_job_t private_exec_t:lnk_file read_lnk_file_perms;
+')
+
+########################################
+### <summary>
 ###  Create a set of derived types for Puppy worker jobs that operate as root.
 ### </summary>
 ### <param name="prefix">
@@ -56,7 +95,7 @@ template(`puppy_worker_sudo_job',`
     role system_r types $1_spawn_t;
     role system_r types $1_t;
 
-    # Role assignments for spawn and job.
+    # The executable type.
     type $1_exec_t;
 
     # Application domains for spawn and job.

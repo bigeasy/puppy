@@ -62,8 +62,6 @@ corecmd_exec_bin(worker_t)
 # Logging via syslog.
 logging_send_syslog_msg(worker_t)
 
-# Log messages when sending invitations.
-logging_send_syslog_msg(private_user_invite_t)
 #allow enqueue_t enqueue_exec_t:lnk_file read_lnk_file_perms;
 #allow enqueue_agent_t enqueue_exec_t:lnk_file read_lnk_file_perms;
 
@@ -71,51 +69,22 @@ logging_send_syslog_msg(private_user_invite_t)
 ### Policy for `private user:invite`.
 ############################################################################
 
-## Types and roles.
-type private_user_invite_t;
-type private_user_invite_exec_t;
+# Invite sending is performed as the worker user.
+puppy_worker_wudo_private(private_user_invite)
 
-role system_r types private_user_invite_t;
+# Query MySQL.
+mysql_tcp_connect(private_user_invite_job_t)
+mysql_stream_connect(private_user_invite_job_t)
+mysql_rw_db_sockets(private_user_invite_job_t)
 
-## Application.
-application_domain(private_user_invite_t, private_user_invite_exec_t)
-domtrans_pattern(worker_t, private_user_invite_exec_t, private_user_invite_t)
+# Write to the syslog.
+logging_send_syslog_msg(private_user_invite_job_t)
 
-can_exec(private_user_invite_t, private_exec_t)
-allow private_user_invite_t private_exec_t:lnk_file read_lnk_file_perms;
-
-## Node.js boilerplate.
-# -- Node.js DNS reads urandom for an encryption key it doesn't use. --
-dev_read_urand(private_user_invite_t)
-# -- The JIT generates executable code in writable memory. --
-allow private_user_invite_t self:process execmem;
-# -- Both `bash` and `node` read nsswitch.conf, and `bash` reads `/etc/passwd`
-#       apparently to configure DNS lookups (via glibc). --
-allow private_user_invite_t etc_t:file read_file_perms;
-# -- Both `bash` and `node` read system page size from `/proc/meminfo`. 
-kernel_read_system_state(private_user_invite_t)
-
-## Execute node.
-# -- Need to execute `/usr/bin/node` which is labeled with `bin_t`. --
-corecmd_exec_bin(private_user_invite_t)
-
-
-## Read/Write Pipes.
-allow private_user_invite_t self:fifo_file rw_fifo_file_perms;
-
-## Query MySQL.
-mysql_tcp_connect(private_user_invite_t)
-mysql_stream_connect(private_user_invite_t)
-mysql_rw_db_sockets(private_user_invite_t)
-
-## Logging
-logging_send_syslog_msg(private_user_invite_t)
-
-## Send email.
-corenet_tcp_connect_smtp_port(private_user_invite_t)
-sysnet_dns_name_resolve(private_user_invite_t)
-miscfiles_read_localization(private_user_invite_t)
-hostname_exec(private_user_invite_t)
+# Send email.
+corenet_tcp_connect_smtp_port(private_user_invite_job_t)
+sysnet_dns_name_resolve(private_user_invite_job_t)
+miscfiles_read_localization(private_user_invite_job_t)
+hostname_exec(private_user_invite_job_t)
 
 ############################################################################
 ### Policy for `private user:create`.
