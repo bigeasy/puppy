@@ -2,6 +2,25 @@
 sys = require "sys"
 
 class Shell
+  # Worker user do.
+  wudo: (splat...) ->
+    parameters = []
+    for parameter in splat
+      if parameter.join
+        for param in parameter
+          parameters.push param
+      else
+        parameters.push parameter
+    command = parameters.shift()
+    sudo = spawn command, parameters
+    sys.pump process.openStdin(), sudo.stdin
+    stderr = ""
+    stdout = ""
+    sudo.stderr.on "data", (data) -> stderr += data.toString()
+    sudo.stdout.on "data", (data) -> stdout += data.toString()
+    sudo.on "exit", (code) ->
+      process.stdout.write JSON.stringify { stdout, stderr }
+      process.exit code
   sudo: (splat...) ->
     parameters = []
     for parameter in splat
@@ -60,3 +79,6 @@ module.exports.Shell = Shell
 module.exports.sudo = (splat...)->
   shell = new Shell()
   shell.sudo.apply shell, splat
+module.exports.wudo = (splat...)->
+  shell = new Shell()
+  shell.wudo.apply shell, splat
