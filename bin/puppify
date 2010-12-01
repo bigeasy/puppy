@@ -45,14 +45,28 @@ function make_user()
     fi
 }
 
+# Create the stunnel daemon user.
+make_group stunnel 706
+make_user stunnel 706 706
+
+# Create general puppified operations user.
+make_group puppy 707
+make_user puppy 707 707
+
+# Create the vhosts daemon user.
+make_group vhosts 708
+make_user vhosts 708 708
+
+# Create the worker daemon and enqueue task users.
 make_group worker 704
 make_user enqueue 703 704 
 make_user worker 704 704
 
+# Create the worker spool directory.
 make_dir /var/spool/puppy worker:worker 770
-make_dir /var/run/puppy/tmp worker:root 770
 
-
+# Creates a directory tree by copying a directory tree, selecting the
+# directories with a particular permissions setting.
 function make_directories()
 {
     path=$1
@@ -73,6 +87,17 @@ function make_directories()
     done
 }
 
+# git does not perserve file permissions, in case you're wondering.
+#  http://kerneltrap.org/mailarchive/git/2008/12/5/4327894
+/bin/find etc opt -type d -exec /bin/chmod 755 {} \;
+/bin/chmod 644 etc/init/*
+/bin/chmod 440 etc/sudoers.d/*
+/bin/chmod 644 etc/selinux/targeted/contexts/users/*
+/bin/chmod 640 opt/share/puppy/private/bin/functions
+/bin/chmod 700 opt/share/puppy/private/bin/*_*
+/bin/chmod 700 opt/share/puppy/private/sbin/*_*
+
+# Copy the etc and opt directory structures.
 make_directories etc / 755 root:root
 make_directories opt / 755 root:root
 
@@ -96,7 +121,11 @@ function copy_files()
     done
 }
 
+# Copy the opt mount point.
 copy_files opt/share/puppy/private/bin / 700 worker:worker
 copy_files opt/share/puppy/private/bin / 640 worker:root
 copy_files opt/share/puppy/private/sbin / 700 root:root
+
+# Copy the etc configuration files.
 copy_files etc / 644 root:root
+copy_files etc / 440 root:root

@@ -1,0 +1,2 @@
+%puppy  ALL = NOPASSWD: /home/puppy/bin/protected
+puppy ALL = NOPASSWD: /home/puppy/bin/private

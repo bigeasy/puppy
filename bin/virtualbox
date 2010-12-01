@@ -1,0 +1,42 @@
+#!/bin/bash
+
+if [ ! -e /mnt/chroot ]
+then
+    /bin/mkdir /mnt/chroot
+fi
+
+/bin/mount | cut -d' ' -f1 | grep /dev/sdb1 > /dev/null
+if [ $? -ne 0 ]
+then
+    /bin/mount /dev/sdb1 /mnt/chroot
+fi
+
+/bin/mount --bind /dev /mnt/chroot/dev
+/bin/mount --bind /dev/pts /mnt/chroot/dev/pts
+/bin/mount --bind /dev/shm /mnt/chroot/dev/shm
+/bin/mount --bind /proc /mnt/chroot/proc
+/bin/mount --bind /sys /mnt/chroot/sys
+
+cat <<EOL > /tmp/yumec2.conf
+[main]
+cachedir=/var/cache/yum
+debuglevel=2
+logfile=/var/log/yum.log
+exclude=*-debuginfo
+gpgcheck=0
+obsoletes=1
+reposdir=/dev/null
+
+[base]
+name=Fedora 13 – i386 – Base
+mirrorlist=http://mirrors.fedoraproject.org/mirrorlist?repo=fedora-13&arch=i386
+enabled=1
+
+[updates-released]
+name=Fedora 13 – i386 – Released Updates
+mirrorlist=http://mirrors.fedoraproject.org/mirrorlist?repo=updates-released-f13&arch=i386
+enabled=1
+EOL
+
+dirname=$(dirname $0)
+cat "$dirname/rpms.txt" | xargs sudo yum -c /tmp/yumec2.conf --installroot=/mnt/chroot -y install 
