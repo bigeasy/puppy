@@ -25,14 +25,6 @@ fi
 /bin/mount --bind /proc /mnt/chroot/proc
 /bin/mount --bind /sys /mnt/chroot/sys
 
-cat <<EOL > /mnt/chroot/etc/fstab
-/dev/sda1               /                       ext4    defaults        1 1
-tmpfs                   /dev/shm                tmpfs   defaults        0 0
-devpts                  /dev/pts                devpts  gid=5,mode=620  0 0
-sysfs                   /sys                    sysfs   defaults        0 0
-proc                    /proc                   proc    defaults        0 0
-EOL
-
 cat <<EOL > /tmp/yumec2.conf
 [main]
 cachedir=/var/cache/yum
@@ -103,6 +95,14 @@ ird=`ls /mnt/chroot/boot/ini*i686.img|awk -F/ '{print $NF}'`
 
 sed -ie "s/vmlinuz/$kern/" /mnt/chroot/boot/grub/grub.conf
 sed -ie "s/initramfs/$ird/" /mnt/chroot/boot/grub/grub.conf
+
+cat <<EOL > /mnt/chroot/etc/fstab
+/dev/sda1               /                       ext4    defaults        1 1
+tmpfs                   /dev/shm                tmpfs   defaults        0 0
+devpts                  /dev/pts                devpts  gid=5,mode=620  0 0
+sysfs                   /sys                    sysfs   defaults        0 0
+proc                    /proc                   proc    defaults        0 0
+EOL
 
 sync
 
