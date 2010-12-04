@@ -22,7 +22,6 @@ module.exports.Database = class Database
       callback = get
       get = null
     client = @createClient()
-    client.debug = true
     client.on "error", -> process.stdout.write "ERROR: MySQL Missing."
     client.connect (error) =>
       if error
