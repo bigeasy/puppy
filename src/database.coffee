@@ -1,6 +1,7 @@
 fs            = require "fs"
 Client        = require("mysql").Client
 exec          = require("child_process").exec
+Danger        = require("common/danger").Danger
 
 module.exports.Database = class Database
   constructor: () ->
@@ -21,7 +22,13 @@ module.exports.Database = class Database
       callback = get
       get = null
     client = @createClient()
-    client.connect =>
+    client.debug = true
+    client.on "error", -> process.stdout.write "ERROR: MySQL Missing."
+    client.connect (error) =>
+      if error
+        danger = new Danger("ERROR: MySQL is not available.", { e: error.message })
+        process.stdout.write danger.toString()
+        process.exit 1
       client.on "end", -> client.destroy()
       client.query @queries[query], parameters, (error, results, fields) =>
         client.end -> client.destroy()
