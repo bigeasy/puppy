@@ -40,14 +40,14 @@ module.exports.command = (argv) ->
       if error
         syslog.send "local2", "err", error.message
         process.exit 1
-      syslog.send "local2", "info", "Invitation sent to #{activation.email}."
+      syslog.send "info", "Invitation sent to #{activation.email}."
   shell.stdin 33, (error, code) ->
     if error
-      syslog.send "local2", "err", error.message
+      syslog.send "err", "ERROR: #{error.message}"
       process.exit 1
     code = code.substring(0, 32)
     database.select "getActivationByCode", [ code ], "activation", (results) ->
       if results.length is 0
-        syslog.send "local2", "err", "ERROR: Cannot find activation code #{code}."
+        syslog.send "err", "ERROR: Cannot find activation code #{code}."
       else
         sendActivation(results.shift())
