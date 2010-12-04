@@ -10,10 +10,11 @@ module.exports.Danger = class Danger
     if left
       count = 1
       for i in [left..0]
-        if line[i] is "}"
-          count++
-        else if line[i] is "{"
-          count--
+        if i is 0 or line[i - 1] isnt "\\"
+          if line[i] is "}"
+            count++
+          else if line[i] is "{"
+            count--
         if count is 0
           break
       if count
