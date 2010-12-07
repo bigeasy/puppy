@@ -58,5 +58,6 @@ maybe_clone enqueue
 update_project common
 update_project private
 update_project protected
+update_project public
 update_project fedora
 update_project enqueue

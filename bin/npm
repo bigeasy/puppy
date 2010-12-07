@@ -1,0 +1,15 @@
+#!/bin/bash
+
+function npm_install()
+{
+    branch=$1
+    cd $HOME/git/ecma/puppy/$branch
+    /usr/bin/sudo /usr/bin/npm install .
+}
+
+npm_install common
+npm_install private
+npm_install protected
+npm_install public
+npm_install system
+npm_install enqueue

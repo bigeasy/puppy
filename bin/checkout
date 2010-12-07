@@ -1,0 +1,39 @@
+#!/bin/bash
+
+function maybe_clone()
+{
+    branch=$1
+    if [ ! -e $HOME/git/ecma/puppy/$branch ]
+    then
+        cd $HOME/git/ecma/puppy
+        /usr/bin/git clone git@bled.prettyrobots.com:puppy.git $branch
+        cd $HOME/git/ecma/puppy/$branch
+        /usr/bin/git checkout -t remotes/origin/$branch
+    fi
+}
+
+function update_project()
+{
+    branch=$1
+    cd $HOME/git/ecma/puppy/$branch
+    /usr/bin/git pull
+    /usr/bin/cake clean
+    /usr/bin/cake compile
+    /usr/bin/npm install .
+}
+
+/bin/mkdir -p $HOME/git/ecma/puppy
+
+maybe_clone common
+maybe_clone private
+maybe_clone protected
+maybe_clone public
+maybe_clone system
+maybe_clone enqueue
+
+update_project common
+update_project private
+update_project protected
+update_project public
+update_project system
+update_project enqueue
