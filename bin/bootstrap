@@ -1,0 +1,70 @@
+#!/bin/bash
+
+HOME=/home/alan
+
+function make_group()
+{
+    group=$1
+    gid=$2
+    cut -d: -f1 /etc/group | grep '^'$group'$' > /dev/null
+    ret=$?
+    if [ $ret != 0 ]
+    then
+        echo "Creating group $group."
+        /usr/bin/sudo /usr/sbin/groupadd --gid $gid $group
+    else
+        echo "Group $group exists."
+    fi
+}
+
+function make_user()
+{
+    user=$1
+    uid=$2
+    gid=$3
+    cut -d: -f1 /etc/passwd | grep '^'$user'$' > /dev/null
+    ret=$?
+    if [ $ret != 0 ]
+    then
+        echo "Creating user $user."
+        /usr/bin/sudo /usr/sbin/useradd --uid $uid --gid $gid $user --groups wheel
+    else
+        echo "User $user exists."
+    fi
+}
+
+# Create the alan user.
+make_group alan 701
+make_user alan 701 701
+
+# Configure git.
+HOME=/home/alan /usr/bin/sudo -u alan /usr/bin/git config --global user.name "Alan Gutierrez"
+HOME=/home/alan /usr/bin/sudo -u alan /usr/bin/git config --global user.email alan@prettyrobots.com
+HOME=/home/alan /usr/bin/sudo -u alan /usr/bin/git config --global color.ui true
+
+if [ ! -e /home/alan/etc ]
+then
+    HOME=/home/alan /usr/bin/sudo -E -u alan /usr/bin/git clone git@bled.prettyrobots.com:etc.git /home/alan/etc
+fi
+
+for file in .vim/ .bash_profile .vimrc
+do
+    if [ ! -e /home/alan/$file ]
+    then
+        copy=/home/alan/$file
+        /usr/bin/sudo -E -u alan /usr/bin/rsync -avz -e /usr/bin/ssh alan@portoroz.prettyrobots.com:$copy $copy
+    fi
+done
+
+if [ ! -e /home/alan/.ssh/authorized_keys ]
+then
+    /usr/bin/sudo -u alan /bin/mkdir -m 755 -p /home/alan/.ssh
+    /bin/cp -p /root/.ssh/authorized_keys /home/alan/.ssh/
+    /bin/chown alan:alan /home/alan/.ssh/authorized_keys
+fi
+
+if [ ! -e /home/alan/git/ecma/puppy/system ]
+then
+    /usr/bin/sudo -u alan /bin/mkdir -p /home/alan/git/ecma/puppy
+    /usr/bin/sudo -E -u alan /usr/bin/git clone git@bled.prettyrobots.com:etc.git /home/alan/etc
+fi
