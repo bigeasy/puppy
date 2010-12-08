@@ -1,7 +1,5 @@
 #!/bin/bash
 
-HOME=/home/alan
-
 function make_group()
 {
     group=$1
@@ -33,38 +31,19 @@ function make_user()
     fi
 }
 
-# Create the alan user.
-make_group alan 701
-make_user alan 701 701
+# Create the development user.
+make_group $user 701
+make_user $user 701 701
 
-# Configure git.
-HOME=/home/alan /usr/bin/sudo -u alan /usr/bin/git config --global user.name "Alan Gutierrez"
-HOME=/home/alan /usr/bin/sudo -u alan /usr/bin/git config --global user.email alan@prettyrobots.com
-HOME=/home/alan /usr/bin/sudo -u alan /usr/bin/git config --global color.ui true
-
-if [ ! -e /home/alan/etc ]
+if [ ! -e /home/$user/.ssh/authorized_keys ]
 then
-    HOME=/home/alan /usr/bin/sudo -E -u alan /usr/bin/git clone git@bled.prettyrobots.com:etc.git /home/alan/etc
+    /usr/bin/sudo -u $user /bin/mkdir -m 755 -p /home/$user/.ssh
+    /bin/cp -p /root/.ssh/authorized_keys /home/$user/.ssh/
+    /bin/chown $user:$user /home/$user/.ssh/authorized_keys
 fi
 
-for file in .vim/ .bash_profile .vimrc
-do
-    if [ ! -e /home/alan/$file ]
-    then
-        copy=/home/alan/$file
-        /usr/bin/sudo -E -u alan /usr/bin/rsync -avz -e /usr/bin/ssh alan@portoroz.prettyrobots.com:$copy $copy
-    fi
-done
-
-if [ ! -e /home/alan/.ssh/authorized_keys ]
+if [ ! -e /home/$user/git/ecma/puppy/system ]
 then
-    /usr/bin/sudo -u alan /bin/mkdir -m 755 -p /home/alan/.ssh
-    /bin/cp -p /root/.ssh/authorized_keys /home/alan/.ssh/
-    /bin/chown alan:alan /home/alan/.ssh/authorized_keys
-fi
-
-if [ ! -e /home/alan/git/ecma/puppy/system ]
-then
-    /usr/bin/sudo -u alan /bin/mkdir -p /home/alan/git/ecma/puppy
-    /usr/bin/sudo -E -u alan /usr/bin/git clone git@bled.prettyrobots.com:etc.git /home/alan/etc
+    /usr/bin/sudo -u $user /bin/mkdir -p /home/$user/git/ecma/puppy
+    /usr/bin/sudo -E -u $user /usr/bin/git clone git@bled.prettyrobots.com:etc.git /home/$user/etc
 fi
