@@ -1,0 +1,14 @@
+#!/bin/bash
+
+host=$1
+
+shift
+
+for file in $@
+do
+    if [ ! -e $HOME/$file ]
+    then
+        copy=$HOME/$file
+        /usr/bin/rsync -avz -e /usr/bin/ssh $host:$copy $copy
+    fi
+done
