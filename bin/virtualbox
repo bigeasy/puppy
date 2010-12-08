@@ -2,6 +2,27 @@
 
 # https://github.com/dazed1/pvgrub2ebs/raw/master/createfedora13bootebs.sh
 
+# Start by creating a partition and then running `sudo mkfs.ext4 /dev/sdb1`.
+
+user=$1
+
+if [ $user"x" == "x" -o ! -e /home/$user ]
+then
+    user=$SUDO_USER
+fi
+
+if [ $user"x" == "x" -o ! -e /home/$user ]
+then
+    echo "Please provide a user used to copy the authorized keys" 1>&2
+    exit 1
+fi
+
+if [ $(whoami) != "root" ]
+then
+    echo "Must run as root."
+    exit 1
+fi
+
 if [ ! -e /mnt/chroot ]
 then
     /bin/mkdir /mnt/chroot
@@ -107,11 +128,10 @@ EOL
 sync
 
 /bin/mkdir -p /mnt/chroot/root/.ssh
-/bin/cp /home/alan/.ssh/authorized_keys /mnt/chroot/root/.ssh/authorized_keys
+/bin/cp /home/$user/.ssh/authorized_keys /mnt/chroot/root/.ssh/authorized_keys
 /bin/chmod 600 /mnt/chroot/root/.ssh/authorized_keys
 
 touch /mnt/chroot/.autorelabel 
-
 
 cat <<EOL > /mnt/chroot/boot/grub/device.map
 (fd0)	/dev/fd0
@@ -124,6 +144,8 @@ cat <<EOL > /mnt/chroot/boot/grub/device.map
 (fd0)	/dev/fd0
 (hd0)	/dev/sda
 EOL
+
+/bin/cp -p $dirname/bootstrap /mnt/chroot/root/bootstrap
 
 /bin/umount /mnt/chroot/dev/shm
 /bin/umount /mnt/chroot/dev/pts
