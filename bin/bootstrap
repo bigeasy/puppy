@@ -1,5 +1,7 @@
 #!/bin/bash
 
+user=$1
+
 function make_group()
 {
     group=$1
@@ -45,5 +47,12 @@ fi
 if [ ! -e /home/$user/git/ecma/puppy/system ]
 then
     /usr/bin/sudo -u $user /bin/mkdir -p /home/$user/git/ecma/puppy
-    /usr/bin/sudo -E -u $user /usr/bin/git clone git@bled.prettyrobots.com:etc.git /home/$user/etc
+    /usr/bin/ssh -o ForwardAgent=yes -o NoHostAuthenticationForLocalhost=yes -l $user localhost /usr/bin/git clone -b system git@bled.prettyrobots.com:puppy.git /home/$user/git/ecma/puppy/system
 fi
+
+cat<<EOL > /root/wheel
+%wheel	ALL=(ALL)	NOPASSWD: ALL
+EOL
+
+/bin/chmod 440 /root/wheel
+/bin/mv /root/wheel /etc/sudoers.d/
