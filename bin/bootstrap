@@ -2,6 +2,12 @@
 
 user=$1
 
+if [ -z $user ]
+then
+    echo "User name for primary user required." 1>&2
+    exit 1
+fi
+
 function make_group()
 {
     group=$1
