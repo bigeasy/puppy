@@ -4,45 +4,16 @@ policy_module(public, 1.1.1)
 #
 # Declarations
 #
-type public_puppy_t;
 role public_r;
-role public_r types public_puppy_t;
+type public_agent_t;
+type public_exec_t;
 
+role public_r types public_t;
 
-# Limited roles are based on the guest role.
+# This will create basic roll and the public_t. 
 userdom_restricted_user_template(public)
 
-# Rename to minimal_sudo_role_template, puppy specific.
-puppy_sudo_role_template(public, public_r, public_t)
-
-########################################
-#
-# Local policy
-#
-domtrans_pattern(public_puppy_sudo_t, public_puppy_exec_t, public_puppy_t)
-application_domain(public_puppy_t, public_puppy_exec_t)
-
-mysql_tcp_connect(public_puppy_t)
-allow public_puppy_t self:tcp_socket create_stream_socket_perms;
-
-# The public client inherits stdin, stdout, and stderr handles.
-allow public_puppy_t public_t:fifo_file rw_fifo_file_perms;
-allow public_puppy_t self:process execmem;
-allow public_puppy_t public_puppy_exec_t:lnk_file read;
-allow public_puppy_t public_t:fifo_file ioctl;
-corecmd_read_bin_symlinks(public_puppy_t)
-files_read_etc_files(public_puppy_t)
-
-# Why isn't this included in `mysql_tcp_connect`?
-#allow public_puppy_t self:tcp_socket create;
-miscfiles_read_localization(public_puppy_t)
-
-# Allow httpd to work with mysql
-mysql_stream_connect(public_puppy_t)
-mysql_rw_db_sockets(public_puppy_t)
-
-# Even a minimal Node.js program needs this.
-dev_read_urand(public_puppy_t)
-sysnet_read_config(public_puppy_t)
+# Domain transition to the public angent domain.
+domtrans_pattern(public_t, public_exec_t, public_agent_t)
 
 gen_user(public_u,, public_r, s0, s0)
