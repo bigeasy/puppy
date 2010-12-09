@@ -1,0 +1,12 @@
+#!/bin/bash
+
+. /opt/share/puppy/private/bin/functions
+
+[ $# -ne 1 ] && abend "Incorrect count of arguments ($#)."
+
+user=$1
+assert_valid_user $user
+
+uid=$(($user + 10000))
+
+/sbin/restorecon -R "/home/u$uid"
