@@ -1,0 +1,30 @@
+#!/bin/bash
+
+user=$(whoami)
+if [ $user != "root" ]
+then
+    echo "Must run as root." 2>&1
+    exit 1
+fi
+
+echo "show databases" | /usr/bin/mysql -u root | /usr/bin/sed 1d | /usr/bin/grep '^'puppy'$'
+if [ $? -ne 0 ]
+then
+    echo "Database puppy already exists." 2>&1
+    exit 1
+fi
+
+/usr/bin/mysqladmin create puppy
+
+password=$(ps ax | md5sum | cut -c 1-32)
+umask 330
+
+/bin/mkdir -p /opt/etc/mysql
+
+# FIXME: These permissions are not quite right.
+echo -n "" > /opt/etc/mysql/puppy_passwd
+/usr/bin/chown puppy:puppy /opt/etc/mysql/puppy_passwd
+/usr/bin/chmod 440 /opt/etc/mysql/puppy_passwd
+echo $password >> /opt/etc/mysql/puppy_passwd
+
+echo "GRANT ALL PRIVILAGES ON puppy.* TO 'puppy'@'localhost' IDENTIFIED BY '"$password"'" | /usr/bin/mysql -u root 
