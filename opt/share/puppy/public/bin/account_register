@@ -1,0 +1,3 @@
+#!/usr/bin/node
+
+require("common/shell").wudo("/opt/bin/public", process.argv.slice(2));
