@@ -12,9 +12,11 @@ stdin.on("data", function (chunk) {
 stdin.on("end", function () {
   command = JSON.parse(body);
 
-  if (command[0] != "/opt/bin/public") {
+  if (command[0].indexOf("/opt/share/puppy/public/bin") != 0) {
     process.exit(1);
   }
+  
+  process.stdout.write(command[0] + "\n");
 
   command.unshift("puppy");
   command.unshift("-u");
