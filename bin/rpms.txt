@@ -232,7 +232,6 @@ shadow-utils
 shorewall
 slang
 sqlite
-stunnel
 sudo
 sysvinit-tools
 tar

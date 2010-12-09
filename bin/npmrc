@@ -1,0 +1,3 @@
+root = /opt/lib/node
+binroot = /opt/bin
+manroot = /opt/share/man

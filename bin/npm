@@ -1,15 +1,17 @@
 #!/bin/bash
 
+dirname=$(dirname $0)
+
 function npm_install()
 {
     branch=$1
     cd $HOME/git/ecma/puppy/$branch
-    /usr/bin/sudo /usr/bin/npm install .
+    /usr/bin/cake compile
+    /usr/bin/sudo /usr/bin/npm --globalconfig $HOME/git/ecma/puppy/system/bin/npmrc install .
 }
 
 npm_install common
 npm_install private
 npm_install protected
 npm_install public
-npm_install system
 npm_install enqueue
