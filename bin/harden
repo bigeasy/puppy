@@ -40,3 +40,4 @@ build_user_profile worker
 build_user_profile enqueue
 
 sudo semanage login -a -s enqueue_u  enqueue
+sudo semanage login -a -s public_u public

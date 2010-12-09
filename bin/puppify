@@ -46,6 +46,10 @@ function make_user()
 }
 
 # Create the stunnel daemon user.
+make_group public 709
+make_user public 709 709
+
+# Create the stunnel daemon user.
 make_group stunnel 706
 make_user stunnel 706 706
 
@@ -125,6 +129,16 @@ function copy_files()
 copy_files opt/share/puppy/private/bin / 700 worker:worker
 copy_files opt/share/puppy/private/bin / 640 worker:root
 copy_files opt/share/puppy/private/sbin / 700 root:root
+
+# Copy the public transition programs.
+copy_files opt/share/puppy/public/bin / 700 public:public
+
+# Create the authorized_keys file that will launch /opt/bin/public.
+/usr/bin/sudo -u public /bin/mkdir -p /home/public/.ssh
+/bin/touch /home/public/.ssh/authorized_keys
+/bin/chown public:public /home/public/.ssh/authorized_keys
+/bin/chmod 600 /home/public/.ssh/authorized_keys
+/bin/cat home/public/ssh/authorized_keys >> /home/public/.ssh/authorized_keys
 
 # Copy the etc configuration files.
 copy_files etc / 644 root:root
