@@ -65,21 +65,13 @@ EOL
 /bin/chmod 440 /root/wheel
 /bin/mv /root/wheel /etc/sudoers.d/
 
-# Recreate grub.conf with selinux on.
-cat <<EOL > /boot/grub/grub.conf
-
-default=0
-timeout=10
-title Fedora 13
-        root (hd0,0)
-        kernel /boot/vmlinuz ro root=/dev/sda1 rd_NO_PLYMOUTH
-        initrd /boot/initramfs
-EOL
-
 /bin/chmod 600 /boot/grub/grub.conf
 
 /usr/bin/yum install -y selinux-policy-targeted
 
 touch /.autorelabel 
+
+# Recreate grub.conf with selinux on.
+/bin/sed -ie "s/ selinux=0//" /boot/grub/grub.conf
 
 /usr/sbin/semodule -B
