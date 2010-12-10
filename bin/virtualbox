@@ -105,7 +105,7 @@ default=0
 timeout=10
 title Fedora 13
         root (hd0,0)
-        kernel /boot/vmlinuz ro root=/dev/sda1 rd_NO_PLYMOUTH
+        kernel /boot/vmlinuz ro root=/dev/sda1 rd_NO_PLYMOUTH selinux=0
         initrd /boot/initramfs
 EOL
 
@@ -131,8 +131,6 @@ sync
 /bin/cp /home/$user/.ssh/authorized_keys /mnt/chroot/root/.ssh/authorized_keys
 /bin/chmod 600 /mnt/chroot/root/.ssh/authorized_keys
 
-touch /mnt/chroot/.autorelabel 
-
 cat <<EOL > /mnt/chroot/boot/grub/device.map
 (fd0)	/dev/fd0
 (hd0)	/dev/sdb
@@ -146,6 +144,9 @@ cat <<EOL > /mnt/chroot/boot/grub/device.map
 EOL
 
 /bin/cp -p $dirname/bootstrap /mnt/chroot/root/bootstrap
+
+# Not sure who creates this, or why.
+/bin/rm -rf /mnt/chroot/home/alan
 
 /bin/umount /mnt/chroot/dev/shm
 /bin/umount /mnt/chroot/dev/pts

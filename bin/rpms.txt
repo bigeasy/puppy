@@ -20,7 +20,6 @@ bzip2
 bzip2-libs
 c-ares
 ca-certificates
-checkpolicy
 chkconfig
 compat-readline5
 coreutils
@@ -116,12 +115,6 @@ libgpg-error
 libidn
 libnih
 libpcap
-libselinux
-libselinux-python
-libselinux-utils
-libsemanage
-libsemanage-python
-libsepol
 libss
 libssh2
 libstdc++
@@ -197,8 +190,6 @@ pkgconfig
 plymouth
 plymouth-core-libs
 plymouth-scripts
-policycoreutils
-policycoreutils-python
 polkit
 popt
 postfix
@@ -220,8 +211,6 @@ rsync
 rsyslog
 ruby-libs
 sed
-selinux-policy
-selinux-policy-targeted
 setools-console
 setools-libs
 setools-libs-python
