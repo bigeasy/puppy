@@ -67,7 +67,7 @@ EOL
 
 /bin/chmod 600 /boot/grub/grub.conf
 
-/usr/bin/yum install -y selinux-policy-targeted
+/usr/bin/yum install -y selinux-policy-targeted policycoreutils-python
 
 touch /.autorelabel 
 
