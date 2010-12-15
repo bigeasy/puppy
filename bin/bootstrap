@@ -69,9 +69,14 @@ EOL
 
 /usr/bin/yum install -y selinux-policy-targeted policycoreutils-python
 
+# Relabel the drive at the next boot.
 touch /.autorelabel 
 
 # Recreate grub.conf with selinux on.
 /bin/sed -ie "s/ selinux=0//" /boot/grub/grub.conf
 
+# Rebuild the policy.
 /usr/sbin/semodule -B
+
+# Generate the file `/var/lib/sepolgen/interface_info` for use with `audit2allow`.
+/usr/bin/sepolgen-ifgen
