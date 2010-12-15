@@ -14,6 +14,7 @@ puppydom_restricted_user_template(public)
 
 role public_r types public_agent_t;
 
+allow public_t public_exec_t:lnk_file read_lnk_file_perms;
 
 # Domain transition to the public angent domain.
 domtrans_pattern(public_t, public_exec_t, public_agent_t)

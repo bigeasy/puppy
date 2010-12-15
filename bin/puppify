@@ -140,6 +140,15 @@ copy_files opt/share/puppy/public/bin / 700 public:public
 /bin/chmod 600 /home/public/.ssh/authorized_keys
 /bin/cat home/public/ssh/authorized_keys >> /home/public/.ssh/authorized_keys
 
+if [ ! -e /etc/ssh/sshd_config.org ]
+then
+    /bin/cp /etc/ssh/sshd_config /etc/ssh/sshd_config.org
+    /bin/rm /etc/ssh/sshd_config
+fi
+
 # Copy the etc configuration files.
 copy_files etc / 644 root:root
 copy_files etc / 440 root:root
+copy_files etc / 600 root:root
+
+/bin/sed -ie "s/gt 199/gt 710/" /etc/bashrc

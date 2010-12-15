@@ -1,0 +1,18 @@
+# No SFTP or other services.
+
+# Use instead of AUTH.
+SyslogFacility AUTHPRIV
+
+# No password login.
+PasswordAuthentication no
+
+# Accept locale-related environment variables
+AcceptEnv LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES
+AcceptEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT
+AcceptEnv LC_IDENTIFICATION LC_ALL LANGUAGE
+
+# Force public to run only the public script.
+Match User public
+    ForceCommand /bin/true
+    AllowTcpForwarding no
+    AllowAgentForwarding no

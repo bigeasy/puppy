@@ -1,190 +1,4 @@
-## <summary>least privledge terminal user role</summary>
-
-########################################
-## <summary>
-##	Change to the public role.
-## </summary>
-## <param name="role">
-##	<summary>
-##	Role allowed access.
-##	</summary>
-## </param>
-## <rolecap/>
-#
-interface(`public_role_change',`
-	gen_require(`
-		role public_r;
-	')
-
-	allow $1 public_r;
-')
-
-########################################
-## <summary>
-##	Change from the public role.
-## </summary>
-## <desc>
-##	<p>
-##	Change from the public role to
-##	the specified role.
-##	</p>
-##	<p>
-##	This is an interface to support third party modules
-##	and its use is not allowed in upstream reference
-##	policy.
-##	</p>
-## </desc>
-## <param name="role">
-##	<summary>
-##	Role allowed access.
-##	</summary>
-## </param>
-## <rolecap/>
-#
-interface(`public_role_change_to',`
-	gen_require(`
-		role public_r;
-	')
-
-	allow public_r $1;
-')
-
-template(`puppy_sudo_role_template',`
-
-	gen_require(`
-		type sudo_exec_t;
-		attribute sudodomain;
-	')
-
-	##############################
-	#
-	# Declarations
-	#
-
-	type $1_puppy_sudo_t, sudodomain; 
-	application_domain($1_puppy_sudo_t, sudo_exec_t)
- 	domain_interactive_fd($1_puppy_sudo_t)
- 	domain_role_change_exemption($1_puppy_sudo_t)
- 	ubac_constrained($1_puppy_sudo_t)
-	role $2 types $1_puppy_sudo_t;
-
-    type $1_puppy_exec_t;
-    corecmd_executable_file($1_puppy_exec_t)
-
-	##############################
-	#
-	# Local Policy
-	#
-
-	# Use capabilities.
-	allow $1_puppy_sudo_t self:capability { fowner setuid setgid dac_override sys_nice sys_resource };
-	#allow $1_puppy_sudo_t self:capability { fowner setuid setgid dac_override };
-	allow $1_puppy_sudo_t self:process ~{ ptrace setcurrent setexec setfscreate setrlimit execmem execstack execheap };
-	allow $1_puppy_sudo_t self:process { setexec setrlimit };
-	allow $1_puppy_sudo_t self:fd use;
- 	allow $1_puppy_sudo_t self:fifo_file rw_fifo_file_perms;
- 	allow $1_puppy_sudo_t self:shm create_shm_perms;
- 	allow $1_puppy_sudo_t self:sem create_sem_perms;
- 	allow $1_puppy_sudo_t self:msgq create_msgq_perms;
- 	allow $1_puppy_sudo_t self:msg { send receive };
- 	allow $1_puppy_sudo_t self:unix_dgram_socket create_socket_perms;
- 	allow $1_puppy_sudo_t self:unix_stream_socket create_stream_socket_perms;
- 	allow $1_puppy_sudo_t self:unix_dgram_socket sendto;
- 	allow $1_puppy_sudo_t self:unix_stream_socket connectto;
- 	allow $1_puppy_sudo_t self:key manage_key_perms;
-
-	allow $1_puppy_sudo_t $3:key search;
-
-	# Enter this derived domain from the user domain
-	domtrans_pattern($3, sudo_exec_t, $1_puppy_sudo_t)
-
-	# By default, revert to the calling domain when a shell is executed.
- 	corecmd_shell_domtrans($1_puppy_sudo_t, $3)
- 	corecmd_bin_domtrans($1_puppy_sudo_t, $3)
-	allow $3 $1_puppy_sudo_t:fd use;
-	allow $3 $1_puppy_sudo_t:fifo_file rw_fifo_file_perms;
-	allow $3 $1_puppy_sudo_t:process signal_perms;
-
-	kernel_read_kernel_sysctls($1_puppy_sudo_t)
-	kernel_read_system_state($1_puppy_sudo_t)
-	kernel_link_key($1_puppy_sudo_t)
-
-	corecmd_read_bin_symlinks($1_puppy_sudo_t)
-	corecmd_exec_all_executables($1_puppy_sudo_t)
-
-	#dev_getattr_fs($1_puppy_sudo_t)
-	dev_read_urand($1_puppy_sudo_t)
-	dev_rw_generic_usb_dev($1_puppy_sudo_t)
-	dev_read_sysfs($1_puppy_sudo_t)
-
-	domain_use_interactive_fds($1_puppy_sudo_t)
-	domain_sigchld_interactive_fds($1_puppy_sudo_t)
-	domain_getattr_all_entry_files($1_puppy_sudo_t)
-
-	files_read_etc_files($1_puppy_sudo_t)
-	files_read_var_files($1_puppy_sudo_t)
-	files_read_usr_symlinks($1_puppy_sudo_t)
-	files_getattr_usr_files($1_puppy_sudo_t)
-	# for some PAM modules and for cwd
-	files_dontaudit_search_home($1_puppy_sudo_t)
-	files_list_tmp($1_puppy_sudo_t)
-
-	fs_search_auto_mountpoints($1_puppy_sudo_t)
-	fs_getattr_xattr_fs($1_puppy_sudo_t)
-
-	selinux_validate_context($1_puppy_sudo_t)
-	selinux_compute_relabel_context($1_puppy_sudo_t)
-
-	term_getattr_pty_fs($1_puppy_sudo_t)
-	term_relabel_all_ttys($1_puppy_sudo_t)
-	term_relabel_all_ptys($1_puppy_sudo_t)
-
-	auth_run_chk_passwd($1_puppy_sudo_t, $2)
-	# sudo stores a token in the pam_pid directory
-	auth_manage_pam_pid($1_puppy_sudo_t)
-	auth_use_nsswitch($1_puppy_sudo_t)
-
-	init_rw_utmp($1_puppy_sudo_t)
-
-	logging_send_audit_msgs($1_puppy_sudo_t)
-	logging_send_syslog_msg($1_puppy_sudo_t)
-
-	miscfiles_read_localization($1_puppy_sudo_t)
-
-	seutil_search_default_contexts($1_puppy_sudo_t)
-	seutil_libselinux_linked($1_puppy_sudo_t)
-
-	userdom_spec_domtrans_all_users($1_puppy_sudo_t)
-	userdom_manage_user_home_content_files($1_puppy_sudo_t)
-	userdom_manage_user_home_content_symlinks($1_puppy_sudo_t)
-	userdom_manage_user_tmp_files($1_puppy_sudo_t)
-	userdom_manage_user_tmp_symlinks($1_puppy_sudo_t)
-	userdom_use_user_terminals($1_puppy_sudo_t)
-	# for some PAM modules and for cwd
-	userdom_dontaudit_search_user_home_content($1_puppy_sudo_t)
-
-	ifdef(`hide_broken_symptoms', `
-		dontaudit $1_puppy_sudo_t $3:socket_class_set { read write };
-	')
-
-	tunable_policy(`use_nfs_home_dirs',`
-		fs_manage_nfs_files($1_puppy_sudo_t)
-	')
-
-	tunable_policy(`use_samba_home_dirs',`
-		fs_manage_cifs_files($1_puppy_sudo_t)
-	')
-
-	optional_policy(`
-		dbus_system_bus_client($1_puppy_sudo_t)
-	')
-
-	optional_policy(`
-		fprintd_dbus_chat($1_puppy_sudo_t)
-	')
-
-')
-
+# Interfaces for public agent.
 template(`puppydom_restricted_user_template',`
 	gen_require(`
 		attribute unpriv_userdomain;
@@ -193,19 +7,177 @@ template(`puppydom_restricted_user_template',`
 	puppydom_login_user_template($1)
 
 	typeattribute $1_t unpriv_userdomain;
-	domain_interactive_fd($1_t)
+#	domain_interactive_fd($1_t)
+')
+
+#######################################
+## <summary>
+##	Allow a home directory for which the
+##	role has read-only access.
+## </summary>
+## <desc>
+##	<p>
+##	Allow a home directory for which the
+##	role has read-only access.
+##	</p>
+##	<p>
+##	This does not allow execute access.
+##	</p>
+## </desc>
+## <param name="role">
+##	<summary>
+##	The user role
+##	</summary>
+## </param>
+## <param name="userdomain">
+##	<summary>
+##	The user domain
+##	</summary>
+## </param>
+## <rolebase/>
+#
+#interface(`puppydom_ro_home_role',`
+#	gen_require(`
+#		type user_home_t, user_home_dir_t;
+#	')
+
+	##############################
+	#
+	# Domain access to home dir
+	#
+
+#	type_member $2 user_home_dir_t:dir user_home_dir_t;
+
+	# read-only home directory
+#	allow $2 user_home_dir_t:dir list_dir_perms;
+#	allow $2 user_home_t:dir list_dir_perms;
+#	allow $2 user_home_t:file entrypoint;
+#	read_files_pattern($2, { user_home_t user_home_dir_t }, user_home_t)
+#	read_lnk_files_pattern($2, { user_home_t user_home_dir_t }, user_home_t)
+#	read_fifo_files_pattern($2, { user_home_t user_home_dir_t }, user_home_t)
+#	read_sock_files_pattern($2, { user_home_t user_home_dir_t }, user_home_t)
+#	files_list_home($2)
+#')
+
+#######################################
+## <summary>
+##	The template containing the most basic rules common to all users.
+## </summary>
+## <desc>
+##	<p>
+##	The template containing the most basic rules common to all users.
+##	</p>
+##	<p>
+##	This template creates a user domain, types, and
+##	rules for the user's tty and pty.
+##	</p>
+## </desc>
+## <param name="userdomain_prefix">
+##	<summary>
+##	The prefix of the user domain (e.g., user
+##	is the prefix for user_t).
+##	</summary>
+## </param>
+## <rolebase/>
+#
+template(`puppydom_base_user_template',`
+
+	gen_require(`
+		attribute userdomain;
+		class context contains;
+	')
+
+#	attribute $1_file_type;
+
+	type $1_t, userdomain;
+	domain_type($1_t)
+	corecmd_shell_entry_type($1_t)
+	corecmd_bin_entry_type($1_t)
+	domain_user_exemption_target($1_t)
+	ubac_constrained($1_t)
+	role $1_r types $1_t;
+	allow system_r $1_r;
+
+#	term_user_pty($1_t, user_devpts_t)
+
+#	term_user_tty($1_t, user_tty_device_t)
+
+	allow $1_t self:process { signal_perms getsched setsched share getpgid setpgid setcap getsession getattr };
+	allow $1_t self:fd use;
+	allow $1_t self:fifo_file rw_fifo_file_perms;
+	#allow $1_t self:unix_dgram_socket { create_socket_perms sendto };
+	#allow $1_t self:unix_stream_socket { create_stream_socket_perms connectto };
+	#allow $1_t self:shm create_shm_perms;
+	#allow $1_t self:sem create_sem_perms;
+	#allow $1_t self:msgq create_msgq_perms;
+	#allow $1_t self:msg { send receive };
+	#allow $1_t self:context contains;
+#	dontaudit $1_t self:socket create;
+
+#	allow $1_t user_devpts_t:chr_file { setattr rw_chr_file_perms };
+#	term_create_pty($1_t, user_devpts_t)
+	# avoid annoying messages on terminal hangup on role change
+#	dontaudit $1_t user_devpts_t:chr_file ioctl;
+
+#	allow $1_t user_tty_device_t:chr_file { setattr rw_chr_file_perms };
+	# avoid annoying messages on terminal hangup on role change
+#	dontaudit $1_t user_tty_device_t:chr_file ioctl;
+
+#	kernel_read_kernel_sysctls($1_t)
+#	kernel_dontaudit_list_unlabeled($1_t)
+#	kernel_dontaudit_getattr_unlabeled_files($1_t)
+#	kernel_dontaudit_getattr_unlabeled_symlinks($1_t)
+#	kernel_dontaudit_getattr_unlabeled_pipes($1_t)
+#	kernel_dontaudit_getattr_unlabeled_sockets($1_t)
+#	kernel_dontaudit_getattr_unlabeled_blk_files($1_t)
+#	kernel_dontaudit_getattr_unlabeled_chr_files($1_t)
+
+#	dev_dontaudit_getattr_all_blk_files($1_t)
+#	dev_dontaudit_getattr_all_chr_files($1_t)
+
+	# When the user domain runs ps, there will be a number of access
+	# denials when ps tries to search /proc. Do not audit these denials.
+#	domain_dontaudit_read_all_domains_state($1_t)
+#	domain_dontaudit_getattr_all_domains($1_t)
+#	domain_dontaudit_getsession_all_domains($1_t)
+
+	files_read_etc_files($1_t)
+#	files_read_etc_runtime_files($1_t)
+#	files_read_usr_files($1_t)
+	# Read directories and files with the readable_t type.
+	# This type is a general type for "world"-readable files.
+#	files_list_world_readable($1_t)
+#	files_read_world_readable_files($1_t)
+#	files_read_world_readable_symlinks($1_t)
+#	files_read_world_readable_pipes($1_t)
+#	files_read_world_readable_sockets($1_t)
+	# old broswer_domain():
+#	files_dontaudit_list_non_security($1_t)
+#	files_dontaudit_getattr_non_security_files($1_t)
+#	files_dontaudit_getattr_non_security_symlinks($1_t)
+#	files_dontaudit_getattr_non_security_pipes($1_t)
+#	files_dontaudit_getattr_non_security_sockets($1_t)
+
+#	libs_exec_ld_so($1_t)
+
+#	miscfiles_read_localization($1_t)
+
+#	sysnet_read_config($1_t)
 ')
 
 template(`puppydom_login_user_template', `
 	gen_require(`
+		type user_home_t, user_home_dir_t;
 		class context contains;
 	')
 
-	userdom_base_user_template($1)
+	puppydom_base_user_template($1)
 
-	userdom_ro_home_role($1_r, $1_t)
+    corecmd_exec_shell($1_t)
+#	puppydom_ro_home_role($1_r, $1_t)
+    userdom_read_user_home_content_files($1_t)
+#	read_files_pattern($1_t, { user_home_t user_home_dir_t }, user_home_t)
 
-	#userdom_manage_tmp_role($1_r, $1_t)
 	#userdom_manage_tmpfs_role($1_r, $1_t)
 
 	#userdom_exec_user_tmp_files($1_t)
@@ -222,44 +194,46 @@ template(`puppydom_login_user_template', `
 	#dontaudit $1_t self:capability { sys_nice fsetid };
 
 	allow $1_t self:process ~{ setcurrent setexec setrlimit execmem execstack execheap };
-	dontaudit $1_t self:process setrlimit;
-	dontaudit $1_t self:netlink_route_socket { create ioctl read getattr write setattr append bind connect getopt setopt shutdown nlmsg_read nlmsg_write };
+	#dontaudit $1_t self:process setrlimit;
+	#dontaudit $1_t self:netlink_route_socket { create ioctl read getattr write setattr append bind connect getopt setopt shutdown nlmsg_read nlmsg_write };
 
 	allow $1_t self:context contains;
 
 	kernel_dontaudit_read_system_state($1_t)
 
-	dev_read_sysfs($1_t)
+	#dev_read_sysfs($1_t)
 	dev_read_urand($1_t)
 
-	domain_use_interactive_fds($1_t)
+	#domain_use_interactive_fds($1_t)
 	# Command completion can fire hundreds of denials
-	domain_dontaudit_exec_all_entry_files($1_t)
+	#domain_dontaudit_exec_all_entry_files($1_t)
 
-	files_dontaudit_list_default($1_t)
-	files_dontaudit_read_default_files($1_t)
+	#files_dontaudit_list_default($1_t)
+	#files_dontaudit_read_default_files($1_t)
 	# Stat lost+found.
-	files_getattr_lost_found_dirs($1_t)
+	#files_getattr_lost_found_dirs($1_t)
 
-	fs_get_all_fs_quotas($1_t)
-	fs_getattr_all_fs($1_t)
-	fs_getattr_all_dirs($1_t)
-	fs_search_auto_mountpoints($1_t)
-	fs_list_inotifyfs($1_t)
-	fs_rw_anon_inodefs_files($1_t)
+	#fs_get_all_fs_quotas($1_t)
+	#fs_getattr_all_fs($1_t)
+	#fs_getattr_all_dirs($1_t)
+	#fs_search_auto_mountpoints($1_t)
+	#fs_list_inotifyfs($1_t)
+	#fs_rw_anon_inodefs_files($1_t)
 
-	auth_dontaudit_write_login_records($1_t)
+	#auth_dontaudit_write_login_records($1_t)
 
-	application_exec_all($1_t)
+# 	application_exec_all($1_t)
+
+
 
 	# The library functions always try to open read-write first,
 	# then fall back to read-only if it fails. 
-	init_dontaudit_rw_utmp($1_t)
+	#init_dontaudit_rw_utmp($1_t)
 	# Stop warnings about access to /dev/console
-	init_dontaudit_use_fds($1_t)
-	init_dontaudit_use_script_fds($1_t)
+	#init_dontaudit_use_fds($1_t)
+	#init_dontaudit_use_script_fds($1_t)
 
-	libs_exec_lib_files($1_t)
+	#libs_exec_lib_files($1_t)
 
-	logging_dontaudit_getattr_all_logs($1_t)
+	#logging_dontaudit_getattr_all_logs($1_t)
 ')
