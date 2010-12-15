@@ -17,6 +17,7 @@ stdin.on("end", function () {
   }
   
   process.stdout.write(command[0] + "\n");
+  process.exit(1);
 
   command.unshift("puppy");
   command.unshift("-u");
