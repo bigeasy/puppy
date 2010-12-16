@@ -68,7 +68,9 @@ enabled=1
 EOL
 
 dirname=$(dirname $0)
-cat "$dirname/rpms.txt" | xargs sudo yum -c /tmp/yumec2.conf --installroot=/mnt/chroot -y install 
+/bin/cat "$dirname/rpms.txt" | /usr/bin/xargs /usr/bin/sudo /usr/bin/yum \
+    -c /tmp/yumec2.conf --installroot=/mnt/chroot -y install 
+/usr/bin/sudo /usr/bin/yum -c /tmp/yumec2.conf --installroot=/mnt/chroot clean all
 
 /usr/sbin/chroot /mnt/chroot chkconfig --level 2345 network on
 /usr/sbin/chroot /mnt/chroot chkconfig --level 2345 sshd on
