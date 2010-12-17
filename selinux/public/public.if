@@ -1,3 +1,9 @@
+# Use:
+#  grep -v '#'  selinux/public/public.if  | grep -v '^$'
+#
+# To see what is actually going on here. Clean it up later after enqueue and
+# protected are as hardened as public.
+
 # Interfaces for public agent.
 template(`puppydom_restricted_user_template',`
 	gen_require(`
