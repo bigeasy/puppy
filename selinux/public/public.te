@@ -9,7 +9,7 @@ type public_agent_t;
 type public_exec_t;
 
 # This will create basic roll and the public_t. 
-puppydom_restricted_user_template(public)
+puppy_restricted_user_template(public)
 #userdom_ro_home_role(public_r, public_t)
 
 role public_r types public_agent_t;
