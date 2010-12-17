@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ $(whoami) != "root" ]; then
+    echo "Must run as root." 1>&2
+    exit 1
+fi
+
 function make_dir()
 {
     directory=$1
@@ -7,10 +12,10 @@ function make_dir()
     perms=$3
     if [ ! -e $directory ]
     then
-        /usr/bin/sudo /bin/mkdir -p $directory
+        /bin/mkdir -p $directory
     fi
-    /usr/bin/sudo /bin/chown $ownership $directory
-    /usr/bin/sudo /bin/chmod $perms $directory
+    /bin/chown $ownership $directory
+    /bin/chmod $perms $directory
 #    /sbin/restorecon -R $directory
 }
 
@@ -23,7 +28,7 @@ function make_group()
     if [ $ret != 0 ]
     then
         echo "Creating group $group."
-        /usr/bin/sudo /usr/sbin/groupadd --gid $gid $group
+        /usr/sbin/groupadd --gid $gid $group
     else
         echo "Group $group exists."
     fi
@@ -39,7 +44,7 @@ function make_user()
     if [ $ret != 0 ]
     then
         echo "Creating user $user."
-        /usr/bin/sudo /usr/sbin/useradd --uid $uid --gid $gid $user
+        /usr/sbin/useradd --uid $uid --gid $gid $user
     else
         echo "User $user exists."
     fi
@@ -83,23 +88,24 @@ function make_directories()
         if [ ! -e $dest ]
         then
             echo "Creating directory $dest."
-            /usr/bin/sudo /bin/mkdir $dest
+            /bin/mkdir $dest
         fi
-        /usr/bin/sudo /bin/chmod $perm $dest
-        /usr/bin/sudo /bin/chown $ownership $dest
-        /usr/bin/sudo /sbin/restorecon $dest
+        /bin/chmod $perm $dest
+        /bin/chown $ownership $dest
+        /sbin/restorecon $dest
     done
 }
 
 # git does not perserve file permissions, in case you're wondering.
 #  http://kerneltrap.org/mailarchive/git/2008/12/5/4327894
-/usr/bin/sudo /bin/find etc opt -type d -exec /bin/chmod 755 {} \;
-/usr/bin/sudo /bin/chmod 644 etc/init/*
-/usr/bin/sudo /bin/chmod 440 etc/sudoers.d/*
-/usr/bin/sudo /bin/chmod 644 etc/selinux/targeted/contexts/users/*
-/usr/bin/sudo /bin/chmod 640 opt/share/puppy/private/bin/functions
-/usr/bin/sudo /bin/chmod 700 opt/share/puppy/private/bin/*_*
-/usr/bin/sudo /bin/chmod 700 opt/share/puppy/private/sbin/*_*
+/bin/find etc opt -type d -exec /bin/chmod 755 {} \;
+/bin/chmod 644 etc/init/*
+/bin/chmod 440 etc/sudoers.d/*
+/bin/chmod 644 etc/selinux/targeted/contexts/users/*
+/bin/chmod 640 opt/share/puppy/private/bin/functions
+/bin/chmod 700 opt/share/puppy/private/bin/*_*
+/bin/chmod 700 opt/share/puppy/private/sbin/*_*
+/bin/chmod 600 etc/ssh/sshd_config
 
 # Copy the etc and opt directory structures.
 make_directories etc / 755 root:root
@@ -117,11 +123,11 @@ function copy_files()
         if [ ! -e $dest ]
         then
             echo "Installing program $dest."
-            /usr/bin/sudo /bin/cp $file $dest
+            /bin/cp $file $dest
         fi
-        /usr/bin/sudo /bin/chmod $perm $dest
-        /usr/bin/sudo /bin/chown $ownership $dest
-        /usr/bin/sudo /sbin/restorecon $dest
+        /bin/chmod $perm $dest
+        /bin/chown $ownership $dest
+        /sbin/restorecon $dest
     done
 }
 
