@@ -146,18 +146,13 @@ copy_files opt/share/puppy/public/bin / 700 public:public
 /bin/chmod 600 /home/public/.ssh/authorized_keys
 /bin/cat home/public/ssh/authorized_keys >> /home/public/.ssh/authorized_keys
 
-if [ ! -e /etc/ssh/sshd_config.org ]
-then
-    /bin/cp /etc/ssh/sshd_config /etc/ssh/sshd_config.org
-    /bin/rm /etc/ssh/sshd_config
-fi
-
 # Copy the etc configuration files.
 copy_files etc / 644 root:root
 copy_files etc / 440 root:root
 copy_files etc / 600 root:root
 
-# Change a condition in the `/etc/bashrc` to prevent the execution of
-# `/usr/bin/id` for the public user, because execution of programs other than
-# the login shell and the public agent program by the public user is prohibited.
-/bin/sed -ie "s/gt 199/gt 299/" /etc/bashrc
+# We do not want the agent accounts to run `/etc/bashrc` at startup, so delete
+# the `~/.bashrc` files for those accounts.
+for agent in public enqueue; do
+    echo "# Do nothing." > /home/$agent/.bashrc
+done
