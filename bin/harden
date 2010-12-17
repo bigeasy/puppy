@@ -43,7 +43,7 @@ build_user_profile enqueue
 mapped=$(/usr/bin/sudo /usr/sbin/semanage login -l | /bin/sed 1,3d | /bin/awk '{ print $1 }')
 for user in public enqueue
 do
-    echo $mapped | grep '^'$user'$' > /dev/hello
+    echo $mapped | grep '^'$user'$' > /dev/null
     if [ $? -ne 0 ]
     then
         sudo semanage login -a -s $user'_u' $user
