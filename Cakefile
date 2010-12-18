@@ -24,8 +24,8 @@ task "gitignore", "create a .gitignore for node-ec2 based on git branch", ->
                 .DS_Store
                 _site
                 **/.DS_Store
-                */*/*.pp
-                */*/tmp/*
+                */*.pp
+                */tmp/*
                 
                 '''
 

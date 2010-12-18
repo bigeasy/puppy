@@ -1,26 +1,17 @@
 #!/bin/bash
 
-
-function build_user_profile()
-{
-    profile=$1
-    echo "Building policy for agent $profile."
-    pushd selinux/$profile > /dev/null
-    output=$(/usr/bin/make -f /usr/share/selinux/devel/Makefile)
-    if [ $? -eq 0 ]
-    then
-        echo $output | /bin/grep "make: Nothing to be done for \`all'\." > /dev/null
-        if [ $? -ne 0 ]
-        then
-            echo "The policy for agent $profile is out of date, reloading."
-            /usr/bin/sudo /usr/sbin/semodule -i $profile.pp 
-        fi
-    else
-        echo $output
-        exit 1
-    fi
-    popd > /dev/null
-}
+echo "Building policy."
+pushd selinux > /dev/null
+output=$(/usr/bin/make -f /usr/share/selinux/devel/Makefile)
+if [ $? -eq 0 ]
+then
+    echo "Reloading policy."
+    /usr/bin/sudo /usr/sbin/semodule -i *.pp 
+else
+    echo $output
+    exit 1
+fi
+popd > /dev/null
 
 users=$(sudo /usr/sbin/semanage login -l | awk '/^[a-z]/ { print $1 }')
 
@@ -33,12 +24,6 @@ function assign_profile()
         echo "Assigning profile "$user"_u to user $user"
     fi
 }
-
-build_user_profile public
-build_user_profile private
-build_user_profile protected
-build_user_profile worker
-build_user_profile enqueue
 
 mapped=$(/usr/bin/sudo /usr/sbin/semanage login -l | /bin/sed 1,3d | /bin/awk '{ print $1 }')
 for user in public enqueue
