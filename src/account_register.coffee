@@ -1,10 +1,10 @@
 crypto    = require "crypto"
 shell     = new (require("common/shell").Shell)()
 database  = new (require("common/database").Database)()
-public    = require "./public"
+#public    = require "./public"
 exec      = require("child_process").exec
 
-module.exports.command = (bin, argv) ->
+module.exports.command = (argv) ->
   register = (email, sshKey) ->
     hash = crypto.createHash "md5"
     hash.update(email +  sshKey + (new Date().toString()) + process.pid)
@@ -22,7 +22,7 @@ module.exports.command = (bin, argv) ->
     database.select "insertActivation", [ code, email, sshKey ], (results) ->
       database.select "getActivationByEmail", [ email ], "activation", (results) ->
         activation = results.shift()
-        public.sendActivation(activation)
+        #public.sendActivation(activation)
         fetchActivationLocalUser activation.code
 
   fetchActivationLocalUser = (code) ->
