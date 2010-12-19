@@ -1,0 +1,9 @@
+#!/bin/bash
+
+function npm_install()
+{
+    /usr/bin/sudo /usr/bin/npm --globalconfig $HOME/git/ecma/puppy/system/bin/npmrc install $1
+}
+
+npm_install mysql
+npm_install mail
