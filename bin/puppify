@@ -144,7 +144,7 @@ copy_files opt/share/puppy/public/bin / 700 public:public
 /bin/touch /home/public/.ssh/authorized_keys
 /bin/chown public:public /home/public/.ssh/authorized_keys
 /bin/chmod 600 /home/public/.ssh/authorized_keys
-/bin/cat home/public/ssh/authorized_keys >> /home/public/.ssh/authorized_keys
+/bin/cat home/public/ssh/authorized_keys > /home/public/.ssh/authorized_keys
 
 # Copy the etc configuration files.
 copy_files etc / 644 root:root
