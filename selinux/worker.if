@@ -48,7 +48,7 @@ template(`puppy_shell_exec',`
 ### </param>
 ##
 #
-template(`puppy_worker_wudo_private',`
+template(`puppy_worker_medo_private',`
     # Job domain type.
     type $1_job_t;
 

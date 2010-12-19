@@ -70,7 +70,7 @@ logging_send_syslog_msg(worker_t)
 ############################################################################
 
 # Invite sending is performed as the worker user.
-puppy_worker_wudo_private(private_user_invite)
+puppy_worker_medo_private(private_user_invite)
 
 # Query MySQL.
 mysql_tcp_connect(private_user_invite_job_t)
