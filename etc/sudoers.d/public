@@ -1,1 +1,2 @@
+Defaults:public   !requiretty
 public  ALL = (puppy) NOPASSWD: /opt/bin/public
