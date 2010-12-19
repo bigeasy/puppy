@@ -12,16 +12,20 @@ stdin.on("data", function (chunk) {
 stdin.on("end", function () {
   command = JSON.parse(body);
 
-  if (command[0].indexOf("/opt/share/puppy/public/bin") != 0) {
+  if (command[0] != "/opt/bin/public") {
+    process.stdout.write("#{command[0]}\n");
     process.exit(1);
   }
   
-  process.stdout.write(command[0] + "\n");
-  process.exit(1);
+  process.stdout.write("Successful.\n");
 
   command.unshift("puppy");
   command.unshift("-u");
+
+  console.log(command);
+
   public = spawn("sudo", command);
   public.stdout.on("data", function (chunk) { process.stdout.write(chunk.toString()) });
+  public.stderr.on("data", function (chunk) { process.stdout.write(chunk.toString()) });
   public.on("exit", function (code) { process.stdout.write(code); process.exit(code) })
 });
