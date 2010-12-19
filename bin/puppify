@@ -71,6 +71,9 @@ make_group worker 204
 make_user enqueue 203 204 
 make_user worker 204 204
 
+make_group janitor 201
+make_user janitor 201 201
+
 # Create the worker spool directory.
 make_dir /var/spool/puppy worker:worker 770
 
