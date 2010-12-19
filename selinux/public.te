@@ -6,7 +6,6 @@ policy_module(public, 1.1.2)
 #
 role public_r;
 type public_agent_t;
-type puppy_t;
 type escalator_exec_t;
 type public_exec_t;
 

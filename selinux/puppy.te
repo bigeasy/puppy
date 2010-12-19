@@ -1,0 +1,5 @@
+policy_module(puppy, 1.0.0)
+
+type puppy_t;
+
+puppy_node_exec(puppy_t)

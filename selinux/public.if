@@ -8,6 +8,8 @@ template(`puppy_sudo_puppy',`
     sudo_role_template($1, $1_r, $1_agent_t)
     domtrans_pattern($1_sudo_t, $1_exec_t, puppy_t)
     allow $1_sudo_t $1_exec_t:lnk_file read;
+    allow puppy_t $1_agent_t:fifo_file rw_fifo_file_perms;
+    allow puppy_t $1_exec_t:lnk_file read;
 ')
 template(`puppy_restricted_user_template',`
 	gen_require(`
