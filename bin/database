@@ -7,24 +7,29 @@ then
     exit 1
 fi
 
-echo "show databases" | /usr/bin/mysql -u root | /usr/bin/sed 1d | /usr/bin/grep '^'puppy'$'
-if [ $? -ne 0 ]
+echo "show databases" | /usr/bin/sudo -H -u janitor /usr/bin/mysql -u root | /bin/sed 1d | /bin/grep '^'puppy'$'
+if [ $? -eq 0 ]
 then
     echo "Database puppy already exists." 2>&1
     exit 1
 fi
 
-/usr/bin/mysqladmin create puppy
+echo "CREATE DATABASE puppy" | \
+    /usr/bin/sudo -H -u janitor /usr/bin/mysql -u root
 
 password=$(ps ax | md5sum | cut -c 1-32)
-umask 330
+umask 022
 
 /bin/mkdir -p /opt/etc/mysql
 
-# FIXME: These permissions are not quite right.
-echo -n "" > /opt/etc/mysql/puppy_passwd
-/usr/bin/chown puppy:puppy /opt/etc/mysql/puppy_passwd
-/usr/bin/chmod 440 /opt/etc/mysql/puppy_passwd
-echo $password >> /opt/etc/mysql/puppy_passwd
+/bin/mkdir -p /etc/puppy/database
+/bin/rm -f /etc/puppy/database/password
+/bin/touch /etc/puppy/database/password
+/bin/chown root:database /etc/puppy/database/password
+/bin/chmod 640 /etc/puppy/database/password
+echo $password >> /etc/puppy/database/password
 
-echo "GRANT ALL PRIVILAGES ON puppy.* TO 'puppy'@'localhost' IDENTIFIED BY '"$password"'" | /usr/bin/mysql -u root 
+echo "GRANT ALL PRIVILEGES ON puppy.* TO 'puppy'@'localhost' IDENTIFIED BY '"$password"'" | \
+    /usr/bin/sudo -H -u janitor /usr/bin/mysql -u root
+
+/sbin/restorecon -R /etc/puppy
