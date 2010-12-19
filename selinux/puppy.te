@@ -14,3 +14,4 @@ mysql_rw_db_sockets(puppy_t)
 
 # The database configuration file type.
 files_type(puppy_database_conf_t)
+read_files_pattern(puppy_t, puppy_database_conf_t, puppy_database_conf_t)
