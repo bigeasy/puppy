@@ -2,4 +2,11 @@ policy_module(puppy, 1.0.0)
 
 type puppy_t;
 
+# Run Node.js.
 puppy_node_exec(puppy_t)
+
+# Query MySQL.
+sysnet_dns_name_resolve(puppy_t)
+mysql_tcp_connect(puppy_t)
+mysql_stream_connect(puppy_t)
+mysql_rw_db_sockets(puppy_t)
