@@ -1,3 +1,14 @@
+# Transition from public to puppy using sudo.
+template(`puppy_sudo_puppy',`
+	gen_require(`
+        type sudo_exec_t, puppy_t;
+    ')
+    role $1_r types puppy_t;
+    application_domain(puppy_t, $1_exec_t)
+    sudo_role_template($1, $1_r, $1_agent_t)
+    domtrans_pattern($1_sudo_t, $1_exec_t, puppy_t)
+    allow $1_sudo_t $1_exec_t:lnk_file read;
+')
 template(`puppy_restricted_user_template',`
 	gen_require(`
 		attribute unpriv_userdomain;

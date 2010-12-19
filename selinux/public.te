@@ -6,6 +6,8 @@ policy_module(public, 1.1.2)
 #
 role public_r;
 type public_agent_t;
+type puppy_t;
+type escalator_exec_t;
 type public_exec_t;
 
 # This will create basic roll and the public_t. 
@@ -14,16 +16,25 @@ puppy_restricted_user_template(public)
 
 role public_r types public_agent_t;
 
-allow public_t public_exec_t:lnk_file read_lnk_file_perms;
+allow public_t escalator_exec_t:lnk_file read_lnk_file_perms;
 
 # Domain transition to the public angent domain.
-domtrans_pattern(public_t, public_exec_t, public_agent_t)
+domtrans_pattern(public_t, escalator_exec_t, public_agent_t)
 
-application_domain(public_agent_t, public_exec_t)
+application_domain(public_agent_t, escalator_exec_t)
 
-# Execute the puppy gateway program.
+# Temporary.
+files_type(public_exec_t)
+
+# Execute the puppy escalator program.
 puppy_node_exec(public_agent_t)
-allow public_agent_t public_exec_t:lnk_file read;
+allow public_agent_t escalator_exec_t:lnk_file read;
+
+# Write piped output.
+allow public_agent_t self:fifo_file rw_file_perms;
+
+# Transition from public to puppy using sudo.
+puppy_sudo_puppy(public)
 
 # Generate the puppy user.
 gen_user(public_u,, public_r, s0, s0)
