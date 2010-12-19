@@ -3,7 +3,7 @@ sys = require "sys"
 
 class Shell
   # Worker user do.
-  wudo: (splat...) ->
+  medo: (splat...) ->
     parameters = []
     for parameter in splat
       if parameter.join
@@ -79,6 +79,6 @@ module.exports.Shell = Shell
 module.exports.sudo = (splat...)->
   shell = new Shell()
   shell.sudo.apply shell, splat
-module.exports.wudo = (splat...)->
+module.exports.medo = (splat...)->
   shell = new Shell()
-  shell.wudo.apply shell, splat
+  shell.medo.apply shell, splat
