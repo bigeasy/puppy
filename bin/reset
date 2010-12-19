@@ -1,0 +1,23 @@
+#!/bin/bash
+
+user=$(whoami)
+if [ $user != "root" ]
+then
+    echo "Must run as root." 2>&1
+    exit 1
+fi
+
+function mysql_command()
+{
+    echo $1 | /usr/bin/sudo -H -u janitor /usr/bin/mysql -u root
+}
+
+function mysql_script()
+{
+    /usr/bin/sudo -H -u janitor /usr/bin/mysql -u root puppy < $1
+}
+
+mysql_command "drop database puppy"
+mysql_command "create database puppy"
+mysql_script ddl/0001_create_user.sql 
+mysql_script ddl/0002_insert_account.sql 
