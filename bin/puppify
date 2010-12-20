@@ -165,5 +165,5 @@ done
 
 /usr/sbin/usermod --group database vhosts
 /usr/sbin/usermod --group database worker
-/usr/sbin/usermod --group database puppy
-/usr/sbin/usermod --group enqueue puppy
+/usr/sbin/usermod --group database,enqueue puppy
+/usr/sbin/usermod --group worker enqueue
