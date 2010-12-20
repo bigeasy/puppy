@@ -68,8 +68,9 @@ make_user vhosts 208 208
 
 # Create the worker daemon and enqueue task users.
 make_group worker 204
-make_user enqueue 203 204 
 make_user worker 204 204
+make_group enqueue 203
+make_user enqueue 203 203 
 
 make_group janitor 201
 make_user janitor 201 201
@@ -164,4 +165,5 @@ done
 
 /usr/sbin/usermod --group database vhosts
 /usr/sbin/usermod --group database worker
-/usr/sbin/usermod --group database puppy
+/usr/sbin/usermod --group database,enqueue puppy
+/usr/sbin/usermod --group worker enqueue
