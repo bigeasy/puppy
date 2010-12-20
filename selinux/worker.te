@@ -5,6 +5,7 @@ require {
     type bin_t;
     role system_r;
     type private_exec_t;
+    type puppy_password_t;
 }
 
 ############################################################################
@@ -76,6 +77,9 @@ puppy_worker_medo_private(private_user_invite)
 mysql_tcp_connect(private_user_invite_job_t)
 mysql_stream_connect(private_user_invite_job_t)
 mysql_rw_db_sockets(private_user_invite_job_t)
+
+# Read the MySQL password.
+read_files_pattern(private_user_invite_job_t, puppy_password_t, puppy_password_t)
 
 # Write to the syslog.
 logging_send_syslog_msg(private_user_invite_job_t)

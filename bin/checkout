@@ -27,6 +27,7 @@ maybe_clone protected
 maybe_clone public
 maybe_clone system
 maybe_clone enqueue
+maybe_clone worker
 maybe_clone appliances
 
 update_project common
@@ -35,4 +36,5 @@ update_project protected
 update_project public
 update_project system
 update_project enqueue
+update_project worker
 update_project appliances
