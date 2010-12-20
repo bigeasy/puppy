@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ $(whoami) != "root" ]
+then
+    echo "Must run as root." 2>&1
+    exit 1
+fi
+
+/bin/mkdir -p /etc/puppy/enqueue
+/bin/chown enqueue:enqueue /etc/puppy/enqueue
+/bin/chmod 750 /etc/puppy/enqueue
+
+/sbin/restorecon -R /etc
+
+/usr/bin/sudo -u enqueue /usr/bin/ssh-keygen -t rsa -f /etc/puppy/enqueue/identity -N ''
