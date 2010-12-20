@@ -8,11 +8,14 @@ module.exports.Database = class Database
     @queries = {}
     for file in fs.readdirSync __dirname + "/../queries"
       @queries[file] = fs.readFileSync __dirname + "/../queries/" + file , "utf8"
+    console.log process.env
+    @password = fs.readFileSync "/etc/puppy/database/password", "utf8"
+    @password = @password.substring 0, @password.length - 1
 
   createClient: ->
     client            = new Client()
     client.user       = "puppy"
-    client.password   = "puppy"
+    client.password   = @password
     client.database   = "puppy"
 
     client
