@@ -12,4 +12,7 @@ fi
 
 /sbin/restorecon -R /etc
 
-/usr/bin/sudo -u enqueue /usr/bin/ssh-keygen -t rsa -f /etc/puppy/enqueue/identity -N ''
+/usr/bin/sudo -u enqueue /usr/bin/ssh-keygen -C enqueue -t rsa -f /etc/puppy/enqueue/identity -N ''
+
+/sbin/restorecon -R /etc
+

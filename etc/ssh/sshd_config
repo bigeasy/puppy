@@ -3,6 +3,9 @@
 # Use instead of AUTH.
 SyslogFacility AUTHPRIV
 
+# No root login.
+PermitRootLogin no
+
 # No password login.
 PasswordAuthentication no
 
@@ -14,5 +17,11 @@ AcceptEnv LC_IDENTIFICATION LC_ALL LANGUAGE
 # Force public to run only the public script.
 Match User public
     ForceCommand /opt/bin/escalator
+    AllowTcpForwarding no
+    AllowAgentForwarding no
+
+# Force enqueue to run only the enqueue script.
+Match User enqueue
+    ForceCommand /opt/bin/enqueue
     AllowTcpForwarding no
     AllowAgentForwarding no

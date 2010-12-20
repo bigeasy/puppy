@@ -146,15 +146,28 @@ copy_files opt/share/puppy/private/sbin / 700 root:root
 copy_files opt/share/puppy/public/bin / 700 public:public
 
 # Create the authorized_keys file that will launch /opt/bin/public.
-/usr/bin/sudo -u public /bin/mkdir -p /home/public/.ssh
-/bin/touch /home/public/.ssh/authorized_keys
-/bin/chown public:public /home/public/.ssh/authorized_keys
-/bin/chmod 600 /home/public/.ssh/authorized_keys
-/bin/cat home/public/ssh/authorized_keys > /home/public/.ssh/authorized_keys
+function copy_public_key()
+{
+    user=$1
+    key=$2
+    /usr/bin/sudo -u $user /bin/mkdir -p /home/$user/.ssh
+    /bin/touch /home/$user/.ssh/authorized_keys
+    /bin/chown $user:$user /home/$user/.ssh/authorized_keys
+    /bin/chmod 600 /home/$user/.ssh/authorized_keys
+    /bin/cat $key > /home/$user/.ssh/authorized_keys
+}
+
+copy_public_key public home/public/ssh/authorized_keys
+copy_public_key enqueue /etc/puppy/enqueue/identity.pub
 
 # Copy the etc configuration files.
 copy_files etc / 644 root:root
 copy_files etc / 440 root:root
+
+if [ ! -e /etc/ssh/sshd_config.org ]; then
+    /bin/mv /etc/ssh/sshd_config /etc/ssh/sshd_config.org
+fi
+
 copy_files etc / 600 root:root
 
 # We do not want the agent accounts to run `/etc/bashrc` at startup, so delete
