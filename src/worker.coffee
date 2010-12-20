@@ -73,7 +73,7 @@ poll = ->
             syslog.send "err", "Worker recieved malformed stdout from [#{program}] with exit code #{code}.", { command, stdout }
           # Record the error if one was reported.
           if code
-            syslog.send "err", outcome.stdout if /^ERROR:/.test(outcome.stdout)
+            syslog.send "err", outcome.stdout if outcome and /^ERROR:/.test(outcome.stdout)
             commands.length = 0
 
           outcome.command = command
@@ -90,4 +90,5 @@ poll = ->
   else
     nextPoll()
 
+syslog.send "info", "Initializing."
 module.exports.poll = poll
