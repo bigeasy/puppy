@@ -166,6 +166,7 @@ copy_files etc / 440 root:root
 
 if [ ! -e /etc/ssh/sshd_config.org ]; then
     /bin/mv /etc/ssh/sshd_config /etc/ssh/sshd_config.org
+    echo "You must restart sshd."
 fi
 
 copy_files etc / 600 root:root
