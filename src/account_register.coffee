@@ -16,7 +16,7 @@ module.exports.command = (argv) ->
   [ email, sshKey ] = argv
   sshKey = fs.readFileSync(sshKey, "utf8")
   sshKey = sshKey.substring(0, sshKey.length - 1)
-  command = [ "/opt/share/puppy/public/bin/account_register", email, sshKey ]
+  command = [ "/opt/bin/public", "account:register", email, sshKey ]
 
   ssh = spawn "ssh", [ "-T", "-i", public, "-l", "public", configuration.server ]
   ssh.stdin.end(JSON.stringify(command))
