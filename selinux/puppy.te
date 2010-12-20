@@ -15,3 +15,6 @@ mysql_rw_db_sockets(puppy_t)
 # The database configuration file type.
 files_type(puppy_password_t)
 read_files_pattern(puppy_t, puppy_password_t, puppy_password_t)
+
+# Someone, maybe MySQL, maybe DNS, wants to read localization.
+miscfiles_read_localization(puppy_t)
