@@ -39,6 +39,9 @@ function make_user()
     fi
 }
 
+# Update yum, because we may freeze the image and reuse it much later.
+/usr/bin/yum update
+
 # Create the development user.
 make_group $user 701
 make_user $user 701 701
