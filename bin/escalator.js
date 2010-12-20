@@ -17,12 +17,8 @@ stdin.on("end", function () {
     process.exit(1);
   }
   
-  process.stdout.write("Successful.\n");
-
   command.unshift("puppy");
   command.unshift("-u");
-
-  console.log(command);
 
   public = spawn("sudo", command);
   public.stdout.on("data", function (chunk) { process.stdout.write(chunk.toString()) });
