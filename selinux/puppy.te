@@ -1,7 +1,7 @@
 policy_module(puppy, 1.0.0)
 
 type puppy_t;
-type puppy_database_conf_t;
+type puppy_password_t;
 
 # Run Node.js.
 puppy_node_exec(puppy_t)
@@ -13,5 +13,5 @@ mysql_stream_connect(puppy_t)
 mysql_rw_db_sockets(puppy_t)
 
 # The database configuration file type.
-files_type(puppy_database_conf_t)
-read_files_pattern(puppy_t, puppy_database_conf_t, puppy_database_conf_t)
+files_type(puppy_password_t)
+read_files_pattern(puppy_t, puppy_password_t, puppy_password_t)

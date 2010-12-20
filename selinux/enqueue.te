@@ -12,6 +12,9 @@ role enqueue_r;
 type enqueue_agent_t;
 type enqueue_exec_t;
 
+type enqueue_key_t;
+type enqueue_secret_t;
+
 userdom_restricted_user_template(enqueue)
 
 role enqueue_r types enqueue_agent_t;
@@ -35,5 +38,9 @@ allow enqueue_agent_t etc_t:file read_file_perms;
 logging_send_syslog_msg(enqueue_agent_t)
 files_search_spool(enqueue_agent_t)
 allow enqueue_agent_t var_spool_t:dir search;
+
+# The ssh key types.
+files_type(enqueue_key_t)
+files_type(enqueue_secret_t)
 
 gen_user(enqueue_u,, enqueue_r, s0, s0)
