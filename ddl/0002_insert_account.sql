@@ -5,5 +5,5 @@ INSERT INTO Application (accountId, isHome, created)
 VALUES (1, 1, CURRENT_TIMESTAMP())
 \g
 INSERT INTO Machine (hostname, ip, created)
-VALUES ('portoroz.prettyrobots.com', '127.0.0.1', CURRENT_TIMESTAMP())
+VALUES ('dvor.prettyrobots.com', '127.0.0.1', CURRENT_TIMESTAMP())
 \g
