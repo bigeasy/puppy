@@ -14,5 +14,7 @@ fi
 
 /usr/bin/sudo -u enqueue /usr/bin/ssh-keygen -C enqueue -t rsa -f /etc/puppy/enqueue/identity -N ''
 
+/bin/chmod 440 /etc/puppy/enqueue/identity
+
 /sbin/restorecon -R /etc
 
