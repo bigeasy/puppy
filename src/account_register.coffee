@@ -36,7 +36,6 @@ module.exports.command = (argv) ->
         else
           database.select "getLocalUserByActivationCode", [ code ], "localUser", (results) =>
             localUser = results.shift()
-#            exec "/usr/bin/ssh -i /home/puppy/.ssh/id_puppy_private puppy@#{localUser.machine.hostname} /usr/bin/sudo #{bin}/private user:create 1", (error) ->
-#              throw error if error
+            shell.enqueue localUser.machine.hostname, [ "user:invite", [], code ]
 
   register argv[0], argv[1]
