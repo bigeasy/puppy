@@ -1,7 +1,25 @@
 policy_module(puppy, 1.0.0)
 
+require {
+    type enqueue_key_t;
+    type enqueue_secret_t;
+    type ssh_exec_t;
+    type cert_t;
+}
+
 type puppy_t;
 type puppy_password_t;
+
+allow puppy_t cert_t:dir list_dir_perms;
+read_files_pattern(puppy_t, cert_t, cert_t)
+read_lnk_files_pattern(puppy_t, cert_t, cert_t)
+miscfiles_read_certs(puppy_t)
+
+
+
+#miscfiles_manage_generic_cert_files(puppy_t)
+
+miscfiles_read_localization(puppy_t)
 
 # Run Node.js.
 puppy_node_exec(puppy_t)
@@ -16,5 +34,17 @@ mysql_rw_db_sockets(puppy_t)
 files_type(puppy_password_t)
 read_files_pattern(puppy_t, puppy_password_t, puppy_password_t)
 
+# Read the enqueue private key.
+read_files_pattern(puppy_t, enqueue_key_t, enqueue_key_t)
+read_files_pattern(puppy_t, enqueue_secret_t, enqueue_secret_t)
+
 # Someone, maybe MySQL, maybe DNS, wants to read localization.
-miscfiles_read_localization(puppy_t)
+
+# Brute force.
+allow puppy_t self:fifo_file rw_fifo_file_perms;
+ssh_exec(puppy_t)
+corenet_tcp_connect_ssh_port(puppy_t)
+
+# Seems that this used to read `.known_hosts`, so it might no longer be
+# necessary when DNSSEC distributed key fingerprints are implemented.
+userdom_read_user_home_content_files(puppy_t)
