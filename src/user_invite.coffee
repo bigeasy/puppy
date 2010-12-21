@@ -5,9 +5,12 @@ shell     = new (require("common/shell").Shell)()
 
 module.exports.command = (argv) ->
   sendActivation = (activation) ->
+    # Note that, if we don't provide the domain name, then the mail module will
+    # execute `/bin/hostname`, which it is not allowed to do, and send will fail.
     mail = require("mail").Mail(
       host: "smtp.gmail.com"
       port: 587
+      domain: "prettyrobots.com"
       username: "messages@prettyrobots.com"
       password: "c3b8e5fd1b31cb88f489500897e7380d"
     )
@@ -38,8 +41,8 @@ module.exports.command = (argv) ->
     """
     message.send (error) ->
       if error
-        syslog.send "local2", "err", error.message
-        process.exit 1
+        syslog.send "err", error.message
+        throw error
       syslog.send "info", "Invitation sent to #{activation.email}."
   shell.stdin 33, (error, code) ->
     if error
