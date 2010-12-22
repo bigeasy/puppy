@@ -1,3 +1,5 @@
+# Includes policy for the puppy user, plus general policies that apply to the
+# entire puppy environment, such as the SSH key types, node exec templates, etc.
 policy_module(puppy, 1.0.0)
 
 require {
@@ -13,13 +15,6 @@ type puppy_password_t;
 allow puppy_t cert_t:dir list_dir_perms;
 read_files_pattern(puppy_t, cert_t, cert_t)
 read_lnk_files_pattern(puppy_t, cert_t, cert_t)
-miscfiles_read_certs(puppy_t)
-
-
-
-#miscfiles_manage_generic_cert_files(puppy_t)
-
-miscfiles_read_localization(puppy_t)
 
 # Run Node.js.
 puppy_node_exec(puppy_t)
@@ -39,11 +34,17 @@ read_files_pattern(puppy_t, enqueue_key_t, enqueue_key_t)
 read_files_pattern(puppy_t, enqueue_secret_t, enqueue_secret_t)
 
 # Someone, maybe MySQL, maybe DNS, wants to read localization.
+miscfiles_read_localization(puppy_t)
 
-# Brute force.
+# Puppy can read and write stdio.
 allow puppy_t self:fifo_file rw_fifo_file_perms;
+
+# Execute SSH.
 ssh_exec(puppy_t)
 corenet_tcp_connect_ssh_port(puppy_t)
+
+# SSH needs to read certificates.
+miscfiles_read_certs(puppy_t)
 
 # Seems that this used to read `.known_hosts`, so it might no longer be
 # necessary when DNSSEC distributed key fingerprints are implemented.
