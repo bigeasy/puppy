@@ -10,5 +10,5 @@ assert_valid_user $user
 uid=$(($user + 10000))
 existing=$(cut -d: -f1 /etc/passwd | grep '^u'$uid'$')
 if [ $existing"x" == "x" ]; then
-    /usr/sbin/useradd --gid 707 --uid $uid --home-dir "/home/u$uid" "u$uid" || abend "Unable to create user #{uid}."
+    /usr/sbin/useradd --gid 207 --uid $uid --home-dir "/home/u$uid" "u$uid" || abend "Unable to create user u$uid."
 fi
