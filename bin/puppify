@@ -150,15 +150,18 @@ function copy_public_key()
 {
     user=$1
     key=$2
+    command=$3
     /usr/bin/sudo -u $user /bin/mkdir -p /home/$user/.ssh
     /bin/touch /home/$user/.ssh/authorized_keys
     /bin/chown $user:$user /home/$user/.ssh/authorized_keys
     /bin/chmod 600 /home/$user/.ssh/authorized_keys
-    /bin/cat $key > /home/$user/.ssh/authorized_keys
+    echo -n 'command="'$command'",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ' \
+        > /home/$user/.ssh/authorized_keys
+    /bin/cat $key >> /home/$user/.ssh/authorized_keys
 }
 
-copy_public_key public home/public/ssh/authorized_keys
-copy_public_key enqueue /etc/puppy/enqueue/identity.pub
+copy_public_key public home/public/ssh/authorized_keys /opt/bin/escalator
+copy_public_key enqueue /etc/puppy/enqueue/identity.pub /opt/bin/enqueue
 
 # Copy the etc configuration files.
 copy_files etc / 644 root:root

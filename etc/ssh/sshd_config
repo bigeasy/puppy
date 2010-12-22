@@ -13,15 +13,3 @@ PasswordAuthentication no
 AcceptEnv LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES
 AcceptEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT
 AcceptEnv LC_IDENTIFICATION LC_ALL LANGUAGE
-
-# Force public to run only the public script.
-Match User public
-    ForceCommand /opt/bin/escalator
-    AllowTcpForwarding no
-    AllowAgentForwarding no
-
-# Force enqueue to run only the enqueue script.
-Match User enqueue
-    ForceCommand /opt/bin/enqueue
-    AllowTcpForwarding no
-    AllowAgentForwarding no

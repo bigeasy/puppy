@@ -7,6 +7,7 @@ require {
     type enqueue_secret_t;
     type ssh_exec_t;
     type cert_t;
+    type ssh_home_t;
 }
 
 type puppy_t;
@@ -49,3 +50,4 @@ miscfiles_read_certs(puppy_t)
 # Seems that this used to read `.known_hosts`, so it might no longer be
 # necessary when DNSSEC distributed key fingerprints are implemented.
 userdom_read_user_home_content_files(puppy_t)
+read_files_pattern(puppy_t, ssh_home_t, ssh_home_t)
