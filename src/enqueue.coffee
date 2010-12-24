@@ -1,9 +1,10 @@
 # Require Node.js core modules.
 fs = require "fs"
+spawn = require("child_process").spawn
 
 # Require Puppy command execution and logging.
-shell = new (require("common/shell").Shell)()
 syslog = new (require("common/syslog").Syslog)({ tag: "enqueue", pid: true })
+shell = new (require("common/shell").Shell)(syslog)
 
 # Need to set a limit to the size of the incoming buffer. It should never be
 # more than a kilobyte, so at 4K and we need to report an attack.
@@ -19,35 +20,24 @@ syslog = new (require("common/syslog").Syslog)({ tag: "enqueue", pid: true })
 # to sifting through a morass of log files.
 #
 # The error level should trigger an audit by the system administrator.
-module.exports.command = ->
+module.exports.command = (argv) ->
+  hostname = argv.shift()
   file = "/var/spool/puppy/#{process.pid}-#{new Date().getTime()}"
   stdin = process.openStdin()
   stdin.setEncoding "utf8"
   commands = []
   stdin.on "data", (chunk) -> commands.push chunk
   stdin.on "end", ->
-    commands = commands.join ""
-    for line in commands.split /\n/
-      continue if /^\s*$/.test(line)
-      abend = (msg, e) ->
-        dump =
-          line: line
-          stdin: commands.substring(0, 256)
-        dump.e = e.message if e
-        syslog.send "err", "ERROR: #{msg}", dump
-        process.exit 1
-      try
-        command = JSON.parse line
-      catch e
-        abend "Invalid JSON line.", e
-      if not command.join
-        abend "Command is not an array."
-      if command.length > 3
-        abend "Command array is too long."
-      if command.length == 0
-        abend "Command array is empty."
-      if command.length != 1 and not command[1].join
-        abend "Command arguments must be contained in array."
-      syslog.send "info", "Queued command #{command[0]}.", { command }
-    fs.writeFileSync "#{file}.tmp", commands, "utf8"
-    fs.renameSync "#{file}.tmp", file
+    # TODO This is looking common. Can I put it in shell?
+    # We're explicit about the private key, even though it's in the default location.
+    ssh = spawn "/usr/bin/ssh", [ "-i", "/home/enqueue/.ssh/identity", "enqueue@#{hostname}", "/opt/bin/enqueue" ]
+    stdout = ""
+    stderr = ""
+    ssh.stdout.on "data", (data) -> stdout += data.toString()
+    ssh.stderr.on "data", (data) -> stderr += data.toString()
+    ssh.stdin.write(commands.join(""))
+    ssh.stdin.end()
+    ssh.on "exit", (code) ->
+      if code
+        syslog.send "err", "ssh exited with code #{code}.", { code, stdout, stderr }
+        process.exit code
