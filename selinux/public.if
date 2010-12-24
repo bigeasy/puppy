@@ -1,15 +1,36 @@
 # Transition from public to puppy using sudo.
 template(`puppy_sudo_puppy',`
 	gen_require(`
-        type sudo_exec_t, puppy_t;
+        type sudo_exec_t, puppy_t, database_t, database_exec_t;
     ')
+    # The agent role will be able to assume the puppy_t and database_t domain types.
+    # TODO Can I put these on one line?
     role $1_r types puppy_t;
+    role $1_r types database_t;
+
+    # The agent program is an application in the puppy_t domain. 
     application_domain(puppy_t, $1_exec_t)
+
+    # TODO I can probably make my own sudo template that is stricter, by
+    # forbidding execute_notrans, forcing the specification of a transition.
+
+    # The agent domain type can sudo.
     sudo_role_template($1, $1_r, $1_agent_t)
+
+    allow $1_sudo_t puppy_t:key search;
+    domtrans_pattern(puppy_t, sudo_exec_t, $1_sudo_t)
+
+    # When the agent domain comes out of sudo it is in the puppy_t domain.
     domtrans_pattern($1_sudo_t, $1_exec_t, puppy_t)
+    domtrans_pattern($1_sudo_t, database_exec_t, database_t)
+
+    # Allow both sudo and puppy domains to read the NPM link of the agent
+    # program.
     allow $1_sudo_t $1_exec_t:lnk_file read;
-    allow puppy_t $1_agent_t:fifo_file rw_fifo_file_perms;
     allow puppy_t $1_exec_t:lnk_file read;
+
+    # Read and write to the agent program via stdio.
+    allow puppy_t $1_agent_t:fifo_file rw_fifo_file_perms;
 ')
 template(`puppy_restricted_user_template',`
 	gen_require(`

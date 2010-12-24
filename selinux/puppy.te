@@ -8,6 +8,7 @@ require {
     type ssh_exec_t;
     type cert_t;
     type ssh_home_t;
+    type database_t, database_exec_t;
 }
 
 type puppy_t;
@@ -51,3 +52,5 @@ miscfiles_read_certs(puppy_t)
 # necessary when DNSSEC distributed key fingerprints are implemented.
 userdom_read_user_home_content_files(puppy_t)
 read_files_pattern(puppy_t, ssh_home_t, ssh_home_t)
+
+allow database_t puppy_t:fifo_file rw_fifo_file_perms;
