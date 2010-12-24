@@ -2,5 +2,5 @@
 ,   "version":          "0.0.1"
 ,   "author":           "Alan Gutierrez"
 ,   "directories":      { "lib" : "./lib" }
-,   "bin":      { "enqueue" : "./bin/enqueue.js" }
+,   "bin":      { "enqueue_proxy": "./bin/enqueue_proxy.js", "enqueue" : "./bin/enqueue.js" }
 }
