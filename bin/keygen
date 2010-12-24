@@ -7,7 +7,7 @@ then
 fi
 
 if [ -e /home/enqueue/.ssh/identity ]; then
-    echo "Identity private key already exists." 2&>1
+    echo "Identity private key already exists." 2>&1
     exit 1
 fi
 
