@@ -22,12 +22,14 @@ class Shell
     sudo.on "exit", (code) ->
       process.stdout.write JSON.stringify { stdout, stderr }
       process.exit code
-  as: (user, command, splat...) ->
-    callback = splat.pop()
-    parameters = [ "-u", user, command ]
-    for parameter in splat
-      parameters.push parameter
+  as: (user, command, parameters, input, callback) ->
+    prefix = [ "-u", user, command ]
+    while prefix.length
+      parameters.unshift(prefix.pop())
     sudo = spawn "/usr/bin/sudo", parameters
+    if input?
+      sudo.stdin.write(input)
+      sudo.stdin.end()
     stdout = ""
     stderr = ""
     sudo.stdout.on "data", (data) -> stdout += data.toString()
