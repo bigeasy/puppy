@@ -1,15 +1,19 @@
 fs            = require "fs"
 Client        = require("mysql").Client
 exec          = require("child_process").exec
+spawn         = require("child_process").spawn
 Danger        = require("common/danger").Danger
 
-module.exports.Database = class Database
-  constructor: () ->
+module.exports.createDatabase = (syslog, callback) ->
+  shell = new (require("common/shell").Shell)(syslog)
+  shell.as "database", "/opt/bin/database", (stdout) ->
+    callback(new Database(stdout.substring 0, 32))
+
+class Database
+  constructor: (@password) ->
     @queries = {}
     for file in fs.readdirSync __dirname + "/../queries"
       @queries[file] = fs.readFileSync __dirname + "/../queries/" + file , "utf8"
-    @password = fs.readFileSync "/etc/puppy/database/password", "utf8"
-    @password = @password.substring 0, @password.length - 1
 
   createClient: ->
     client            = new Client()

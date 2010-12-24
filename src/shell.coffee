@@ -2,6 +2,7 @@
 sys = require "sys"
 
 class Shell
+  constructor: (@syslog) ->
   # Worker user do.
   medo: (splat...) ->
     parameters = []
@@ -21,6 +22,21 @@ class Shell
     sudo.on "exit", (code) ->
       process.stdout.write JSON.stringify { stdout, stderr }
       process.exit code
+  as: (user, command, splat...) ->
+    callback = splat.pop()
+    parameters = [ "-u", user, command ]
+    for parameter in splat
+      parameters.push parameter
+    sudo = spawn "/usr/bin/sudo", parameters
+    stdout = ""
+    stderr = ""
+    sudo.stdout.on "data", (data) -> stdout += data.toString()
+    sudo.stderr.on "data", (data) -> stderr += data.toString()
+    sudo.on "exit", (code) ->
+      if code
+        @syslog.send "err", "Command #{command} exited with code #{code}.", { code, stdout, stderr }
+        process.exit code
+      callback(stdout)
   sudo: (splat...) ->
     parameters = []
     for parameter in splat
