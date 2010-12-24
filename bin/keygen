@@ -6,15 +6,16 @@ then
     exit 1
 fi
 
-/bin/mkdir -p /etc/puppy/enqueue
-/bin/chown enqueue:enqueue /etc/puppy/enqueue
-/bin/chmod 750 /etc/puppy/enqueue
+if [ -e /home/enqueue/.ssh/identity ]; then
+    echo "Identity private key already exists." 2&>1
+    exit 1
+fi
 
-/sbin/restorecon -R /etc
+if [ -e /home/enqueue/.ssh/identity.pub ]; then
+    echo "Identity public key already exists." 2&>1
+    exit 1
+fi
 
-/usr/bin/sudo -u enqueue /usr/bin/ssh-keygen -C enqueue -t rsa -f /etc/puppy/enqueue/identity -N ''
+/usr/bin/sudo -u enqueue /usr/bin/ssh-keygen -C enqueue -t rsa -f /home/enqueue/.ssh/identity -N ''
 
-/bin/chmod 440 /etc/puppy/enqueue/identity
-
-/sbin/restorecon -R /etc
-
+/sbin/restorecon -R /home/enqueue
