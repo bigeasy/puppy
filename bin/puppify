@@ -38,45 +38,37 @@ function make_user()
 {
     user=$1
     uid=$2
-    gid=$3
+    make_group $user $uid
     cut -d: -f1 /etc/passwd | grep '^'$user'$' > /dev/null
     ret=$?
     if [ $ret != 0 ]
     then
         echo "Creating user $user."
-        /usr/sbin/useradd --uid $uid --gid $gid $user
+        /usr/sbin/useradd --uid $uid --gid $uid $user
     else
         echo "User $user exists."
     fi
 }
 
 # Create the stunnel daemon user.
-make_group public 209
-make_user public 209 209
+make_user public 209
 
 # Create the stunnel daemon user.
-make_group stunnel 206
-make_user stunnel 206 206
+make_user stunnel 206
 
 # Create general puppified operations user.
-make_group puppy 207
-make_user puppy 207 207
+make_user puppy 207
 
 # Create the vhosts daemon user.
-make_group vhosts 208
-make_user vhosts 208 208
+make_user vhosts 208
 
 # Create the worker daemon and enqueue task users.
-make_group worker 204
-make_user worker 204 204
-make_group enqueue 203
-make_user enqueue 203 203 
+make_user worker 204
+make_user enqueue 203
 
-make_group janitor 201
-make_user janitor 201 201
+make_user janitor 201
 
-make_group database 205
-make_user database 205 205 
+make_user database 205
 
 # Create the worker spool directory.
 make_dir /var/spool/puppy worker:worker 770
