@@ -156,16 +156,7 @@ function copy_public_key()
 # TODO Check the public key into source, but the keys do not live in source,
 # they live on a server and propagate.
 copy_public_key public home/public/ssh/authorized_keys /opt/bin/public_transition
-
-/bin/sed \
-    -i 's/^ssh-rsa/command="\/opt\/bin\/enqueue_transition",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ssh-rsa/' \
-    /home/enqueue/.ssh/identity.pub
-
-/bin/rm -f /home/enqueue/.ssh/identity
-/bin/touch /home/enqueue/.ssh/identity
-/bin/chmod 400 /home/enqueue/.ssh/identity
-/bin/chown enqueue:enqueue /home/enqueue/.ssh/identity
-/bin/cat /etc/puppy/enqueue/identity >> /home/enqueue/.ssh/identity
+copy_public_key enqueue /home/enqueue/.ssh/identity.pub /opt/bin/enqueue_proxy
 
 # Copy the etc configuration files.
 copy_files etc / 644 root:root
