@@ -18,18 +18,14 @@ echo "CREATE DATABASE puppy" | \
     /usr/bin/sudo -H -u janitor /usr/bin/mysql -u root
 
 password=$(ps ax | md5sum | cut -c 1-32)
-umask 022
 
-/bin/mkdir -p /opt/etc/mysql
-
-/bin/mkdir -p /etc/puppy/database
-/bin/rm -f /etc/puppy/database/password
-/bin/touch /etc/puppy/database/password
-/bin/chown root:database /etc/puppy/database/password
-/bin/chmod 640 /etc/puppy/database/password
-echo $password >> /etc/puppy/database/password
+/bin/rm -f /home/database/password
+/bin/touch /home/database/password
+/bin/chown database:database /home/database/password
+/bin/chmod 400 /home/database/password
+echo $password >> /home/database/password
 
 echo "GRANT ALL PRIVILEGES ON puppy.* TO 'puppy'@'localhost' IDENTIFIED BY '"$password"'" | \
     /usr/bin/sudo -H -u janitor /usr/bin/mysql -u root
 
-/sbin/restorecon -R /etc/puppy
+/sbin/restorecon -R /home/database

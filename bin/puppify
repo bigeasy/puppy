@@ -76,6 +76,7 @@ make_group janitor 201
 make_user janitor 201 201
 
 make_group database 205
+make_user database 205 205 
 
 # Create the worker spool directory.
 make_dir /var/spool/puppy worker:worker 770
