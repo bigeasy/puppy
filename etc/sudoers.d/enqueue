@@ -1,0 +1,2 @@
+Defaults:enqueue   !requiretty
+enqueue ALL = (worker) NOPASSWD: /opt/bin/job
