@@ -1,41 +1,54 @@
 policy_module(enqueue,1.0.0)
 
 require {
-    type worker_spool_t;
+    type worker_spool_t, worker_job_exec_t, worker_job_t;
 }
 
 ########################################
 #
 # Declarations
 #
-role enqueue_r;
-type enqueue_agent_t;
-type enqueue_exec_t;
+role enqueue_r;             # The enqueue role.
+type enqueue_agent_t;       # Sends requests to remote machines via ssh.
+type enqueue_proxy_t;       # Accepts ssh requests to enqueue.
+type enqueue_exec_t;        # The enqueue program types.
 
 type enqueue_key_t;
 type enqueue_secret_t;
 
-userdom_restricted_user_template(enqueue)
+# This will create basic roll and the enqueue_t. 
+puppy_restricted_user_template(enqueue)
+role enqueue_r types enqueue_proxy_t;
+role enqueue_r types worker_job_t;
 
-role enqueue_r types enqueue_agent_t;
-
-application_domain(enqueue_agent_t, enqueue_exec_t)
+domtrans_pattern(enqueue_t, enqueue_exec_t, enqueue_proxy_t)
+application_domain(enqueue_proxy_t, enqueue_exec_t)
+allow enqueue_t enqueue_exec_t:lnk_file read;
+allow enqueue_proxy_t enqueue_exec_t:lnk_file read;
 
 # Enqueue agent policy.
-allow enqueue_agent_t self:process execmem;
-allow enqueue_t enqueue_exec_t:lnk_file read_lnk_file_perms;
-allow enqueue_agent_t enqueue_exec_t:lnk_file read_lnk_file_perms;
+puppy_node_exec(enqueue_proxy_t)
+
+allow enqueue_proxy_t self:fifo_file rw_fifo_file_perms;
+
+logging_send_syslog_msg(enqueue_proxy_t)
+
+# The proxy domain type can sudo to add the job.
+sudo_role_template(enqueue, enqueue_r, enqueue_proxy_t)
+domtrans_pattern(enqueue_sudo_t, worker_job_exec_t, worker_job_t)
+allow worker_job_t enqueue_proxy_t:fifo_file rw_fifo_file_perms;
+
+# Log succssful message enqueue.
+logging_send_syslog_msg(worker_job_t)
+
+#### OLDER ####
+# Fixing this stuff down here....
 allow enqueue_agent_t worker_spool_t:dir rw_dir_perms;
 allow enqueue_agent_t worker_spool_t:file manage_file_perms;
 
-domtrans_pattern(enqueue_t, enqueue_exec_t, enqueue_agent_t)
-
-# Always needed by a Node.js program.
-dev_read_urand(enqueue_agent_t)
-sysnet_read_config(enqueue_agent_t)
-allow enqueue_agent_t etc_t:file read_file_perms;
-
+# Allow logging.
 logging_send_syslog_msg(enqueue_agent_t)
+
 files_search_spool(enqueue_agent_t)
 allow enqueue_agent_t var_spool_t:dir search;
 

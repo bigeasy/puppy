@@ -1,6 +1,3 @@
 # enqueue labeling policy
 # file: enqueue.fc
 /opt/bin/enqueue.*                      gen_context(system_u:object_r:enqueue_exec_t, s0)
-/etc/puppy/enqueue                      gen_context(system_u:object_r:enqueue_key_t, s0)
-/etc/puppy/enqueue/identity.pub         gen_context(system_u:object_r:enqueue_key_t, s0)
-/etc/puppy/enqueue/identity             gen_context(system_u:object_r:enqueue_secret_t, s0)
