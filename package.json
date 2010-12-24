@@ -2,5 +2,5 @@
 ,   "version":          "0.0.1"
 ,   "author":           "Alan Gutierrez"
 ,   "directories":      { "lib" : "./lib" }
-,   "bin":      { "escalator" : "./bin/escalator.js", "public": "./bin/public.js" }
+,   "bin":      { "public_transition" : "./bin/public_transition.js", "public": "./bin/public.js" }
 }
