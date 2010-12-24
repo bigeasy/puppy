@@ -160,7 +160,7 @@ function copy_public_key()
     /bin/cat $key >> /home/$user/.ssh/authorized_keys
 }
 
-copy_public_key public home/public/ssh/authorized_keys /opt/bin/escalator
+copy_public_key public home/public/ssh/authorized_keys /opt/bin/public_transition
 copy_public_key enqueue /etc/puppy/enqueue/identity.pub /opt/bin/enqueue
 
 # Copy the etc configuration files.
@@ -188,3 +188,6 @@ done
 # Create puppy logging directory.
 /bin/mkdir -p /var/log/puppy/worker
 /bin/chown worker:worker /var/log/puppy/worker
+
+/bin/chown public:public /opt/bin/public_transition*
+/bin/chmod 550 /opt/bin/public_transition*

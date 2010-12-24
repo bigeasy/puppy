@@ -1,33 +1,29 @@
 policy_module(public, 1.1.2)
 
 ########################################
-#
 # Declarations
-#
-role public_r;
-type public_agent_t;
-type escalator_exec_t;
-type public_exec_t;
+
+role public_r;          # The public role.
+type public_exec_t;     # Use for both the sudoer and the actual command.
+type public_agent_t;    # The public agent domain performes the actual work as the puppy user.
 
 # This will create basic roll and the public_t. 
 puppy_restricted_user_template(public)
-#userdom_ro_home_role(public_r, public_t)
 
 role public_r types public_agent_t;
 
-allow public_t escalator_exec_t:lnk_file read_lnk_file_perms;
 
 # Domain transition to the public angent domain.
-domtrans_pattern(public_t, escalator_exec_t, public_agent_t)
+domtrans_pattern(public_t, public_exec_t, public_agent_t)
+application_domain(public_agent_t, public_exec_t)
+allow public_t public_exec_t:lnk_file read;
 
-application_domain(public_agent_t, escalator_exec_t)
-
-# Temporary.
+# Temporary. TODO
 files_type(public_exec_t)
 
-# Execute the puppy escalator program.
+# Execute the puppy sudoer program.
 puppy_node_exec(public_agent_t)
-allow public_agent_t escalator_exec_t:lnk_file read;
+allow public_agent_t public_exec_t:lnk_file read;
 
 # Write piped output.
 allow public_agent_t self:fifo_file rw_file_perms;
