@@ -173,11 +173,6 @@ for agent in public enqueue; do
     echo "# Do nothing." > /home/$agent/.bashrc
 done
 
-/usr/sbin/usermod --group database vhosts
-/usr/sbin/usermod --group database worker
-/usr/sbin/usermod --group database,enqueue puppy
-/usr/sbin/usermod --group worker enqueue
-
 # Create puppy logging directory.
 /bin/mkdir -p /var/log/puppy/worker
 /bin/chown worker:worker /var/log/puppy/worker
