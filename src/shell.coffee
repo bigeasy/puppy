@@ -34,7 +34,7 @@ class Shell
     stderr = ""
     sudo.stdout.on "data", (data) -> stdout += data.toString()
     sudo.stderr.on "data", (data) -> stderr += data.toString()
-    sudo.on "exit", (code) ->
+    sudo.on "exit", (code) =>
       if code
         @syslog.send "err", "Command #{command} exited with code #{code}.", { code, stdout, stderr }
         process.exit code
