@@ -12,7 +12,6 @@ puppy_restricted_user_template(public)
 
 role public_r types public_agent_t;
 
-
 # Domain transition to the public angent domain.
 domtrans_pattern(public_t, public_exec_t, public_agent_t)
 application_domain(public_agent_t, public_exec_t)
