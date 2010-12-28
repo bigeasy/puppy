@@ -1,7 +1,0 @@
-## <summary>selinux policy module for haproxy</summary>
-template(`puppy_enqueue',`
-    gen_require(`
-        type enqueue_key_t;
-    ')
-    read_files_pattern($1, enqueue_key_t, enqueue_key_t)
-')
