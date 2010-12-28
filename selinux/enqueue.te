@@ -3,66 +3,63 @@ policy_module(enqueue,1.0.0)
 
 require {
     type worker_spool_t, worker_job_exec_t, worker_job_t;
-    class netlink_route_socket bind;
-    class udp_socket connect;
 }
 
 ########################################
-#
 # Declarations
-#
 role enqueue_r;             # The enqueue role.
 type enqueue_agent_t;       # Sends requests to remote machines via ssh.
 type enqueue_proxy_t;       # Accepts ssh requests to enqueue.
 type enqueue_exec_t;        # The enqueue program types.
 
+############################################################################
+### Policy for `enqueue` user and the `enqueue_proxy` program.
+############################################################################
+
 # This will create basic roll and the enqueue_t. 
 puppy_restricted_user_template(enqueue)
+
+# Both worker_job_t and enqueue_proxy_t assume enqueue_r.
 role enqueue_r types enqueue_proxy_t;
 role enqueue_r types worker_job_t;
 
+# The `enqueue` user can execute the `enqueue` program.
 domtrans_pattern(enqueue_t, enqueue_exec_t, enqueue_proxy_t)
-application_domain(enqueue_proxy_t, enqueue_exec_t)
 allow enqueue_t enqueue_exec_t:lnk_file read;
-allow enqueue_proxy_t enqueue_exec_t:lnk_file read;
 
-# Enqueue agent policy.
+# The `enqueue` proxy is a Node.js program.
 puppy_node_exec(enqueue_proxy_t)
-
-allow enqueue_agent_t self:fifo_file rw_fifo_file_perms;
+application_domain(enqueue_proxy_t, enqueue_exec_t)
+allow enqueue_proxy_t enqueue_exec_t:lnk_file read;
 allow enqueue_proxy_t self:fifo_file rw_fifo_file_perms;
 
-logging_send_syslog_msg(enqueue_agent_t)
+# Allow syslog messages.
+logging_send_syslog_msg(enqueue_proxy_t)
 
 # The proxy domain type can sudo to add the job.
 sudo_role_template(enqueue, enqueue_r, enqueue_proxy_t)
 domtrans_pattern(enqueue_sudo_t, worker_job_exec_t, worker_job_t)
 allow worker_job_t enqueue_proxy_t:fifo_file rw_fifo_file_perms;
 
-logging_send_syslog_msg(enqueue_proxy_t)
+############################################################################
+### Policy for `enqueue` program.
+############################################################################
 
-# Fixing this stuff down here....
+# The `enqueue` program is a Node.js program.
 puppy_node_exec(enqueue_agent_t)
-logging_send_syslog_msg(enqueue_agent_t)
 application_domain(enqueue_agent_t, enqueue_exec_t)
 allow enqueue_agent_t enqueue_exec_t:lnk_file read;
+allow enqueue_agent_t self:fifo_file rw_fifo_file_perms;
 
-# Temporary:
-allow enqueue_agent_t self:netlink_route_socket create;
-allow enqueue_agent_t self:udp_socket create;
-allow enqueue_agent_t self:netlink_route_socket bind;
-allow enqueue_agent_t self:netlink_route_socket getattr;
-allow enqueue_agent_t self:tcp_socket create_stream_socket_perms;
-allow enqueue_agent_t self:netlink_route_socket r_netlink_socket_perms;
-
-corenet_tcp_sendrecv_generic_if(enqueue_agent_t)
-corenet_tcp_sendrecv_generic_node(enqueue_agent_t)
-corenet_tcp_sendrecv_all_ports(enqueue_agent_t)
-corenet_tcp_connect_ssh_port(enqueue_agent_t)
-corenet_sendrecv_ssh_client_packets(enqueue_agent_t)
+# Allow syslog messages.
+logging_send_syslog_msg(enqueue_agent_t)
 
 # Execute SSH.
 ssh_exec(enqueue_agent_t)
+
+# Allow SSH TCP.
+allow enqueue_agent_t self:tcp_socket create_stream_socket_perms;
+allow enqueue_agent_t self:netlink_route_socket r_netlink_socket_perms;
 corenet_tcp_connect_ssh_port(enqueue_agent_t)
 
 # SSH needs to read certificates.
