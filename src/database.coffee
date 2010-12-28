@@ -6,7 +6,7 @@ Danger        = require("common/danger").Danger
 
 module.exports.createDatabase = (syslog, callback) ->
   shell = new (require("common/shell").Shell)(syslog)
-  shell.as "database", "/opt/bin/database", (stdout) ->
+  shell.as "database", "/opt/bin/database", [], null, (stdout) ->
     callback(new Database(stdout.substring 0, 32))
 
 class Database
@@ -30,10 +30,7 @@ class Database
     client = @createClient()
     client.on "error", -> process.stdout.write "ERROR: MySQL Missing."
     client.connect (error) =>
-      if error
-        danger = new Danger("ERROR: MySQL is not available.", { e: error.message })
-        process.stdout.write danger.toString()
-        process.exit 1
+      throw error if error
       client.on "end", -> client.destroy()
       client.query @queries[query], parameters, (error, results, fields) =>
         client.end -> client.destroy()
