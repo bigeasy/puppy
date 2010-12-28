@@ -31,13 +31,13 @@ module.exports.command = (argv) ->
           fetchActivationLocalUser activation.code
 
     fetchActivationLocalUser = (code) ->
-      database.fetchLocalUser 1, (localUser) =>
-        database.error = (error) =>
+      database.fetchLocalUser 1, (localUser) ->
+        database.error = (error) ->
           throw error if error.number isnt 1062
-          @fetchActivationLocalUser code
-        database.select "fetchActivationLocalUser", [ code ], (results) =>
+          fetchActivationLocalUser code
+        database.select "fetchActivationLocalUser", [ code ], (results) ->
           if results.affectedRows is 0
-            @fetchActivationLocalUser(code)
+            fetchActivationLocalUser(code)
           else
             database.select "getLocalUserByActivationCode", [ code ], "localUser", (results) =>
               localUser = results.shift()
