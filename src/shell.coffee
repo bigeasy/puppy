@@ -69,14 +69,11 @@ class Shell
     program.stdin.write(source)
     program.stdin.end()
   enqueue: (hostname, splat...) ->
-    callback = if typeof splat[splat.length - 1] is "function" then splat.pop() else ->
-    ssh = spawn "/usr/bin/ssh", [ "-i", "/etc/puppy/enqueue/identity", "enqueue@#{hostname}", "/opt/bin/enqueue" ]
-    ssh.stderr.on "data", (data) -> process.stdout.write data.toString()
-    ssh.stdout.on "data", (data) -> process.stdout.write data.toString()
-    ssh.on "exit", (code) -> callback(code)
+    commands = []
     for command in splat
-      ssh.stdin.write(JSON.stringify(command) + "\n")
-    ssh.stdin.end()
+      commands.push JSON.stringify(command)
+    callback = if typeof splat[splat.length - 1] is "function" then splat.pop() else ->
+    @as "enqueue", "/opt/bin/enqueue", [ hostname ], commands.join("\n"), (stdout) ->
   stdin: (length, callback) ->
     body = ""
     stdin = process.openStdin()
