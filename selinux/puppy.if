@@ -1,1 +1,64 @@
 ## <summary></summary>
+template(`puppy_sudo_puppy',`
+    gen_require(`
+        type sudo_exec_t, puppy_t, database_t, database_exec_t, enqueue_agent_t, enqueue_exec_t;
+    ')
+    # The agent role will be able to assume the puppy_t and database_t domain types.
+    # TODO Can I put these on one line?
+    role $1_r types puppy_t;
+    role $1_r types database_t;
+    role $1_r types enqueue_agent_t;
+
+    # The agent program is an application in the puppy_t domain. 
+    application_domain(puppy_t, $1_exec_t)
+
+    # TODO I can probably make my own sudo template that is stricter, by
+    # forbidding execute_notrans, forcing the specification of a transition.
+
+    # The agent domain type can sudo.
+    sudo_role_template($1, $1_r, $1_agent_t)
+
+    allow $1_sudo_t puppy_t:key search;
+    domtrans_pattern(puppy_t, sudo_exec_t, $1_sudo_t)
+
+    # When the agent domain comes out of sudo it is in the puppy_t domain.
+    domtrans_pattern($1_sudo_t, $1_exec_t, puppy_t)
+    domtrans_pattern($1_sudo_t, database_exec_t, database_t)
+    domtrans_pattern($1_sudo_t, enqueue_exec_t, enqueue_agent_t)
+
+    # Allow both sudo and puppy domains to read the NPM link of the agent
+    # program.
+    allow $1_sudo_t $1_exec_t:lnk_file read;
+    allow puppy_t $1_exec_t:lnk_file read;
+
+    # Read and write to the agent program via stdio.
+    allow puppy_t $1_agent_t:fifo_file rw_fifo_file_perms;
+')
+template(`puppy_restricted_user_template',`
+	gen_require(`
+		attribute unpriv_userdomain;
+		attribute userdomain;
+		class context contains;
+		type user_home_t, user_home_dir_t;
+		class context contains;
+	')
+	type $1_t, userdomain;
+	domain_type($1_t)
+	corecmd_shell_entry_type($1_t)
+ 	corecmd_bin_entry_type($1_t)
+	domain_user_exemption_target($1_t)
+	ubac_constrained($1_t)
+	role $1_r types $1_t;
+	allow system_r $1_r;
+	allow $1_t self:process { signal_perms getsched setsched share getpgid setpgid setcap getsession getattr };
+	allow $1_t self:fd use;
+	allow $1_t self:fifo_file rw_fifo_file_perms;
+	files_read_etc_files($1_t)
+    corecmd_exec_shell($1_t)
+    userdom_read_user_home_content_files($1_t)
+	allow $1_t self:process ~{ setcurrent setexec setrlimit execmem execstack execheap };
+	allow $1_t self:context contains;
+	kernel_dontaudit_read_system_state($1_t)
+	dev_read_urand($1_t)
+	typeattribute $1_t unpriv_userdomain;
+')
