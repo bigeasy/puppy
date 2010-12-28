@@ -155,7 +155,7 @@ function copy_public_key()
 
 # TODO Check the public key into source, but the keys do not live in source,
 # they live on a server and propagate.
-copy_public_key public home/public/ssh/authorized_keys /opt/bin/public_transition
+copy_public_key public home/public/ssh/authorized_keys /opt/bin/public_proxy
 copy_public_key enqueue /home/enqueue/.ssh/identity.pub /opt/bin/enqueue_proxy
 
 # Copy the etc configuration files.
@@ -179,8 +179,11 @@ done
 /bin/mkdir -p /var/log/puppy/worker
 /bin/chown worker:worker /var/log/puppy/worker
 
-/bin/chown public:public /opt/bin/public_transition*
-/bin/chmod 550 /opt/bin/public_transition*
+/bin/chown public:public /opt/bin/public_proxy*
+/bin/chmod 550 /opt/bin/public_proxy*
 
 /bin/chown database:database /opt/bin/database*
 /bin/chmod 550 /opt/bin/database*
+
+/bin/chown enqueue:enqueue /opt/bin/enqueue*
+/bin/chmod 550 /opt/bin/enqueue*
