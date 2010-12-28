@@ -1,25 +1,26 @@
+# Policy module for haproxy.
 policy_module(haproxy,1.0.0)
 
 ########################################
-#
 # Declarations
-#
 
-type haproxy_t;
-type haproxy_exec_t;
-type haproxy_port_t;
+type haproxy_t;             # The haproxy domain.
+type haproxy_exec_t;        # The haproxy executable.
+type haproxy_port_t;        # The haproxy port type.
+
+# Define haproxy as a daemon.
 init_daemon_domain(haproxy_t, haproxy_exec_t)
 
+# Define haproxy pid file type.
 type haproxy_var_run_t;
 files_pid_file(haproxy_var_run_t)
 
+# Define haproxy configuration file type.
 type haproxy_conf_t;
 files_config_file(haproxy_conf_t)
 
 ########################################
-#
 # Local policy
-#
 
 # Configuration files - read
 allow haproxy_t haproxy_conf_t : dir list_dir_perms;
@@ -32,13 +33,14 @@ files_pid_filetrans(haproxy_t, haproxy_var_run_t, { file sock_file })
 allow haproxy_t haproxy_var_run_t:file manage_file_perms;
 allow haproxy_t haproxy_var_run_t:sock_file { create rename link setattr unlink };
 
+# Allow syslog messages.
+logging_send_syslog_msg(haproxy_t)
+
+# Read and write to all mannor of network connections.
 allow haproxy_t self : tcp_socket create_stream_socket_perms;
 allow haproxy_t self: udp_socket create_socket_perms;
 allow haproxy_t self: capability { setgid setuid sys_chroot sys_resource kill };
 allow haproxy_t self: process { setrlimit signal };
-
-
-logging_send_syslog_msg(haproxy_t)
 
 corenet_tcp_bind_all_ports(haproxy_t)
 corenet_tcp_connect_all_ports(haproxy_t)
@@ -50,12 +52,12 @@ corenet_tcp_recvfrom_unlabeled(haproxy_t)
 libs_use_ld_so(haproxy_t)
 libs_use_shared_libs(haproxy_t)
 
-# Read /etc/localtime:
+# Read `/etc/localtime`.
 miscfiles_read_localization(haproxy_t)
-# Read /etc/passwd and more.
+# Read `/etc/passwd` and more.
 files_read_etc_files(haproxy_t)
 
-# Read /etc/hosts and /etc/resolv.conf
+# Read `/etc/hosts` and `/etc/resolv.conf`.
 sysnet_read_config(haproxy_t)
 
 # RHEL5 specific:
@@ -67,4 +69,3 @@ require {
 }
 
 allow haproxy_t unlabeled_t:packet { send recv };
-
