@@ -4,21 +4,19 @@ policy_module(public, 1.1.2)
 # Declarations
 
 role public_r;          # The public role.
-type public_exec_t;     # Use for both the sudoer and the actual command.
+type public_exec_t;     # Use for both the proxy and the agent program.
 type public_agent_t;    # The public agent domain performes the actual work as the puppy user.
 
-# This will create basic roll and the public_t. 
+# Create a puppy restricted user, this will create basic roll and the public_t. 
 puppy_restricted_user_template(public)
 
+# The public_agent_t is allowed to assume public_r.
 role public_r types public_agent_t;
 
 # Domain transition to the public angent domain.
 domtrans_pattern(public_t, public_exec_t, public_agent_t)
 application_domain(public_agent_t, public_exec_t)
 allow public_t public_exec_t:lnk_file read;
-
-# Temporary. TODO
-files_type(public_exec_t)
 
 # Execute the puppy sudoer program.
 puppy_node_exec(public_agent_t)
