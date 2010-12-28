@@ -1,6 +1,6 @@
 var spawn = require("child_process").spawn;
 var body = "";
-var syslog = new (require("common/syslog").Syslog)({ tag: "public_transition", pid: true })
+var syslog = new (require("common/syslog").Syslog)({ tag: "public_proxy", pid: true })
 
 var stdin = process.openStdin();
 stdin.on("data", function (chunk) {
@@ -28,7 +28,7 @@ stdin.on("end", function () {
   public.on("exit", function (code) {
     if (code || stderr.length) {
       syslog.send( "err",
-        "Recieved unexpected error messages with exit code #{code}.",
+        "Recieved unexpected error messages with exit code " + code + ".",
         { stderr: stderr.join(""), code: code });
     }
     process.exit(code);

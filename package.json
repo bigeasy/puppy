@@ -2,5 +2,7 @@
 ,   "version":          "0.0.1"
 ,   "author":           "Alan Gutierrez"
 ,   "directories":      { "lib" : "./lib" }
-,   "bin":      { "public_transition" : "./bin/public_transition.js", "public": "./bin/public.js" }
+,   "bin":              { "public_proxy" :  "./bin/public_proxy.js"
+                        , "public":         "./bin/public.js"
+                        }
 }
