@@ -1,3 +1,4 @@
+# SELinux policy module for database password reader program.
 policy_module(database, 1.0.0)
 
 ########################################
@@ -7,18 +8,15 @@ type database_t;            # The database password domain.
 type database_exec_t;       # The database password program.
 type database_conf_t;       # The database password file type.
 
-# Run Node.js.
+# Allow the execution of the Node.js database reader program.
 puppy_node_exec(database_t)
-
 application_domain(database_t, database_exec_t)
 allow database_t database_exec_t:lnk_file read;
 
-# The database configuration file type.
+# All read of the database configuration file type.
 files_type(database_conf_t)
 read_files_pattern(database_t, database_conf_t, database_conf_t)
-
-# Read and write stdio.
-allow database_t self:fifo_file rw_fifo_file_perms;
-
-#files_list_home(database_t)
 userdom_list_user_home_dirs(database_t)
+
+# Allow read and write stdio.
+allow database_t self:fifo_file rw_fifo_file_perms;
