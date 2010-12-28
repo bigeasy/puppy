@@ -4,7 +4,6 @@ policy_module(puppy, 1.0.0)
 
 require {
     type ssh_exec_t;
-    type cert_t;
     type ssh_home_t;
     type database_t, database_exec_t;
     type enqueue_agent_t;
@@ -14,10 +13,6 @@ require {
 
 type puppy_t;
 type puppy_password_t;
-
-allow puppy_t cert_t:dir list_dir_perms;
-read_files_pattern(puppy_t, cert_t, cert_t)
-read_lnk_files_pattern(puppy_t, cert_t, cert_t)
 
 # Run Node.js.
 puppy_node_exec(puppy_t)
