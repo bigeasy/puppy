@@ -1,3 +1,4 @@
+# Policy module for for the worker daemon and utilities.
 policy_module(worker,1.0.0)
 
 require {
@@ -11,19 +12,19 @@ require {
 ############################################################################
 ### Policy for `job` program.
 ############################################################################
-
 type worker_job_t;      # The domain of the job program.
 type worker_job_exec_t; # The worker job executable type.
+
+# Read and write the puppy spool directory.
 files_search_spool(worker_job_t)
-
-application_domain(worker_job_t, worker_job_exec_t)
-
-puppy_node_exec(worker_job_t)
-allow worker_job_t worker_job_exec_t:lnk_file read;
-allow worker_job_t self:fifo_file rw_file_perms;
-
 allow worker_job_t worker_spool_t:dir rw_dir_perms;
 allow worker_job_t worker_spool_t:file manage_file_perms;
+
+# The `job` program is a
+puppy_node_exec(worker_job_t)
+application_domain(worker_job_t, worker_job_exec_t)
+allow worker_job_t worker_job_exec_t:lnk_file read;
+allow worker_job_t self:fifo_file rw_file_perms;
 
 # Log succssful message enqueue.
 logging_send_syslog_msg(worker_job_t)
@@ -31,11 +32,10 @@ logging_send_syslog_msg(worker_job_t)
 ############################################################################
 ### Policy for `worker` daemon.
 ############################################################################
-
 type worker_t;          # The worker type.
 type worker_exec_t;     # The worker executable type.
 
-
+# Not in use, probably used with policy file generation.
 type worker_tmp_t;
 files_type(worker_tmp_t)
 
@@ -70,7 +70,6 @@ allow worker_t etc_t:file read_file_perms;
 files_search_spool(worker_t)
 logging_write_generic_logs(worker_t)
 
-
 allow worker_t self:fifo_file rw_fifo_file_perms;
 
 # Don't feel good about this. I'd rather the transition programs where not
@@ -83,9 +82,6 @@ corecmd_exec_bin(worker_t)
 
 # Logging via syslog.
 logging_send_syslog_msg(worker_t)
-
-#allow enqueue_t enqueue_exec_t:lnk_file read_lnk_file_perms;
-#allow enqueue_agent_t enqueue_exec_t:lnk_file read_lnk_file_perms;
 
 ############################################################################
 ### Policy for `private user:invite`.
