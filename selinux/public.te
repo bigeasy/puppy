@@ -28,7 +28,7 @@ allow public_agent_t self:fifo_file rw_file_perms;
 # Transition from public to puppy using sudo.
 puppy_sudo_puppy(public)
 
-logging_write_generic_logs(public_agent_t)
+#logging_write_generic_logs(public_agent_t)
 logging_send_syslog_msg(public_agent_t)
 
 # Generate the puppy user.
