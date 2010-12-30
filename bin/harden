@@ -1,5 +1,8 @@
 #!/bin/bash
 
+cd $(dirname $0)
+cd ..
+
 echo "Building policy."
 pushd selinux > /dev/null
 output=$(/usr/bin/make -f /usr/share/selinux/devel/Makefile)
