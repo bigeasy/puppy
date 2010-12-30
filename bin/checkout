@@ -29,6 +29,7 @@ maybe_clone system
 maybe_clone enqueue
 maybe_clone worker
 maybe_clone appliances
+maybe_clone vhosts
 
 update_project common
 update_project private
@@ -38,3 +39,4 @@ update_project system
 update_project enqueue
 update_project worker
 update_project appliances
+update_project vhosts
