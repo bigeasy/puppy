@@ -1,3 +1,3 @@
-module.exports.command = (bin, argv) ->
+module.exports.command = (argv) ->
   [ noun, verb ] = argv.shift().split(/:/)
-  require("../lib/#{noun}_#{verb}").command(bin, argv)
+  require("../lib/#{noun}_#{verb}").command(argv)
