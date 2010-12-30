@@ -3,9 +3,13 @@ policy_module(worker,1.0.0)
 
 require {
     type etc_t;
+    type policy_src_t, policy_config_t;
+    type ssh_home_t;
+    type user_home_t;
     type bin_t;
     role system_r;
     type private_exec_t;
+    type setfiles_exec_t;
     type puppy_password_t;
 }
 
@@ -119,6 +123,63 @@ allow private_user_create_t etc_t:file read_file_perms;
 
 # Transition to the exising user management policy.
 usermanage_domtrans_useradd(private_user_create_t)
+
+############################################################################
+### Policy for `user:restorecon`.
+############################################################################
+#
+# Note that the `user:restorecon` command may not be able to relabel from
+# anything to anything. It exists to apply the correct labels during 
+
+# Run security context restoration as root.
+puppy_worker_sudo_job(private_user_restorecon)
+
+#init_system_domain(private_user_restorecon_t, private_user_restorecon_exec_t)
+
+# This resolves the error message from audit2allow that reads:
+# 
+#  This avc is a constraint violation.  You will need to add an attribute to
+#  either the source or target type to make it work.
+#
+# Constraints are defined in
+#  /home/alan/src/refpolicy/policy/constraints
+#
+# They are more rough stuff to do to a domain, limiting the transitions based
+# on domination, expressing constraints based on types and attributes.
+#
+# This will apply the typeattribute can_change_object_identity, which allows
+# the private_user_restorecon_exec_t to relabel.
+domain_obj_id_change_exemption(private_user_restorecon_t)
+
+# Run restorecon.
+seutil_exec_setfiles(private_user_restorecon_t)
+seutil_read_config(private_user_restorecon_t)
+seutil_read_file_contexts(private_user_restorecon_t)
+
+# DAC override describes the ability of root read and write files that root does
+# not itself own. (TODO: Not sure what fowner is about, but it is in the same vein.)
+allow private_user_restorecon_t self:capability { dac_override dac_read_search fowner };
+
+# TODO: Not sure why this is necessary.
+allow private_user_restorecon_t { default_context_t }:file read_file_perms;
+
+# Allow relabeling from any type.
+allow private_user_restorecon_t { file_type }:dir list_dir_perms;
+relabelfrom_dirs_pattern(private_user_restorecon_t, { file_type }, { file_type })
+relabelfrom_files_pattern(private_user_restorecon_t, { file_type }, { file_type })
+relabelfrom_lnk_files_pattern(private_user_restorecon_t, { file_type }, { file_type })
+relabelfrom_fifo_files_pattern(private_user_restorecon_t, { file_type }, { file_type })
+relabelfrom_sock_files_pattern(private_user_restorecon_t, { file_type }, { file_type })
+
+# Allow relabling to home, SSH types.
+allow private_user_restorecon_t { user_home_t user_home_dir_t ssh_home_t }:dir relabelto;
+allow private_user_restorecon_t { user_home_t ssh_home_t }:file relabelto;
+
+# Check to see if SELinux is enforcing.
+selinux_get_enforce_mode(private_user_restorecon_t)
+
+# Read the home directory files and folders.
+userdom_read_user_home_content_files(private_user_restorecon_t)
 
 ############################################################################
 ### Policy for `private user:policy`.

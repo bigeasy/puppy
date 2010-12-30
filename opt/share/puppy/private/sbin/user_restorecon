@@ -9,4 +9,8 @@ assert_valid_user $user
 
 uid=$(($user + 10000))
 
+if [ ! -d /home/u$uid ]; then
+    abend "Home directory /home/u$uid does not exist."
+fi
+
 /sbin/restorecon -R "/home/u$uid"

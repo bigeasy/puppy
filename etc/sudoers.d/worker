@@ -1,2 +1,3 @@
 Defaults:worker   !requiretty
-worker ALL = (root) NOPASSWD: /opt/share/puppy/private/sbin/user_create,/opt/share/puppy/private/sbin/user_policy
+worker ALL = (root) NOPASSWD: /opt/share/puppy/private/sbin/user_create,/opt/share/puppy/private/sbin/user_policy,
+    /opt/share/puppy/private/sbin/user_restorecon
