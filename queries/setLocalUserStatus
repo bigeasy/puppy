@@ -1,3 +1,3 @@
 UPDATE LocalUser
    SET status = ?
- WHERE id = ? AND machineId = (SELECT id FROM Machine WHERE hostname = ?)
+ WHERE machineId = (SELECT id FROM Machine WHERE hostname = ?) AND id = ?
