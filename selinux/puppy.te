@@ -12,7 +12,6 @@ require {
 }
 
 type puppy_t;
-type puppy_password_t;
 
 # Run Node.js.
 puppy_node_exec(puppy_t)
@@ -22,10 +21,6 @@ sysnet_dns_name_resolve(puppy_t)
 mysql_tcp_connect(puppy_t)
 mysql_stream_connect(puppy_t)
 mysql_rw_db_sockets(puppy_t)
-
-# The database configuration file type.
-files_type(puppy_password_t)
-read_files_pattern(puppy_t, puppy_password_t, puppy_password_t)
 
 # Someone, maybe MySQL, maybe DNS, wants to read localization.
 miscfiles_read_localization(puppy_t)

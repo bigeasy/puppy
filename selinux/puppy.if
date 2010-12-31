@@ -1,13 +1,11 @@
 ## <summary></summary>
 template(`puppy_sudo_puppy',`
     gen_require(`
-        type sudo_exec_t, puppy_t, database_t, database_exec_t, enqueue_agent_t, enqueue_exec_t;
+        type puppy_t, database_t, enqueue_agent_t, enqueue_exec_t, database_exec_t;
     ')
     # The agent role will be able to assume the puppy_t and database_t domain types.
     # TODO Can I put these on one line?
-    role $1_r types puppy_t;
-    role $1_r types database_t;
-    role $1_r types enqueue_agent_t;
+    puppy_role($1)
 
     # The agent program is an application in the puppy_t domain. 
     application_domain(puppy_t, $1_exec_t)
@@ -33,6 +31,16 @@ template(`puppy_sudo_puppy',`
 
     # Read and write to the agent program via stdio.
     allow puppy_t $1_agent_t:fifo_file rw_fifo_file_perms;
+')
+template(`puppy_role',`
+    gen_require(`
+        type puppy_t, database_t, enqueue_agent_t;
+    ')
+    # The agent role will be able to assume the puppy_t and database_t domain types.
+    # TODO Can I put these on one line?
+    role $1_r types puppy_t;
+    role $1_r types database_t;
+    role $1_r types enqueue_agent_t;
 ')
 template(`puppy_restricted_user_template',`
 	gen_require(`

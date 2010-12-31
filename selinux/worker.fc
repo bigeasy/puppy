@@ -11,6 +11,8 @@
 /opt/share/puppy/private/sbin/user_policy   gen_context(system_u:object_r:private_user_policy_exec_t, s0)
 /opt/share/puppy/private/bin/user_restorecon    gen_context(system_u:object_r:private_user_restorecon_exec_t, s0)
 /opt/share/puppy/private/sbin/user_restorecon   gen_context(system_u:object_r:private_user_restorecon_exec_t, s0)
+/opt/share/puppy/private/bin/user_provision    gen_context(system_u:object_r:private_user_provision_exec_t, s0)
+/opt/share/puppy/private/sbin/user_provision   gen_context(system_u:object_r:private_user_provision_exec_t, s0)
 /opt/share/puppy/private/bin/functions      gen_context(system_u:object_r:private_functions_t, s0)
 /var/cache/puppy/policy                     gen_context(system_u:object_r:private_policy_var_t, s0)
 /var/cache/puppy/policy/.*                  gen_context(system_u:object_r:private_policy_var_t, s0)

@@ -1,5 +1,12 @@
 policy_module(private,1.0.0)
 
+require {
+    type puppy_t;
+}
+
 type private_exec_t;
 
-application_executable_file(private_exec_t)
+application_domain(puppy_t, private_exec_t)
+allow puppy_t private_exec_t:lnk_file read;
+
+#puppyish(private)
