@@ -7,7 +7,7 @@ module.exports.command = (argv) ->
   hostname = argv.shift()
   id = parseInt argv.shift(), 10
   db.createDatabase syslog, (database) ->
-    database.select "getLocalUser", [ id, hostname ], "localUser", (results) ->
+    database.select "getLocalUser", [ hostname, id ], "localUser", (results) ->
       if results.length is 0
         process.exit 1
       localUser = results.shift()
