@@ -9,4 +9,4 @@ SELECT lu.machineId AS localUser__machineId,
        m.created AS localUser__machine__created
   FROM LocalUser AS lu
   JOIN Machine AS m ON lu.machineId = m.id
- WHERE lu.id = ? AND m.hostname = ?
+ WHERE m.hostname = ? AND lu.id = ?
