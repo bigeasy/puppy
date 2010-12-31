@@ -1,0 +1,12 @@
+#!/bin/bash
+
+for user in $(/bin/ls /home); do
+    mode=$(/usr/bin/stat --format=%a /home/$user)
+    if [ "$mode" != "700" ]; then
+        echo "Home directory /home/$user has invalid file permissions $mode."
+    fi
+#    pattern='^u'
+#    if [[ $user =~ $pattern ]]; then
+#        # User specific steps would go here.        
+#    fi
+done
