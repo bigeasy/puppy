@@ -187,3 +187,5 @@ done
 
 /bin/chown enqueue:enqueue /opt/bin/enqueue*
 /bin/chmod 550 /opt/bin/enqueue*
+
+/sbin/restorecon -R /opt /etc /home
