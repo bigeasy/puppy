@@ -5,13 +5,11 @@ exec      = require("child_process").exec
 db        = require("common/database")
 
 module.exports.command = (argv) ->
+  hostname = argv.shift()
   id = parseInt argv.shift(), 10
   db.createDatabase syslog, (database) ->
-    exec "/bin/hostname", (error, stdout) ->
-      throw error if error
-      hostname = stdout.substring(0, stdout.length - 1)
-      database.select "getLocalUser", [ id, hostname ], "localUser", (results) ->
-        if results.length is 0
-          process.exit 1
-        localUser = results.shift()
-        process.stdout.write("#{localUser.status}\n")
+    database.select "getLocalUser", [ id, hostname ], "localUser", (results) ->
+      if results.length is 0
+        process.exit 1
+      localUser = results.shift()
+      process.stdout.write("#{localUser.status}\n")
