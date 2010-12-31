@@ -23,4 +23,4 @@ umask 077
 /bin/mkdir /home/u$uid
 /bin/chown u$uid:puppy /home/u$uid
 
-/usr/bin/sudo -H -u puppy /opt/bin/private user:status $(/bin/hostname) $user
+/usr/bin/sudo -H -u puppy /opt/bin/private user:provisioned $(/bin/hostname) $user

@@ -153,4 +153,5 @@ template(`job_sudo_private',`
 
     # Allow puppy_t to read and write stdio of caller.
     allow puppy_t $1_t:fifo_file rw_fifo_file_perms;
+    allow puppy_t $1_proxy_t:fifo_file rw_fifo_file_perms;
 ')
