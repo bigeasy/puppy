@@ -1,6 +1,5 @@
 syslog    = new (require("common/syslog").Syslog)({ tag: "user_status", pid: true })
 shell     = new (require("common/shell").Shell)(syslog)
-exec      = require("child_process").exec
 
 db        = require("common/database")
 
