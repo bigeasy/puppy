@@ -229,15 +229,43 @@ job_sudo_private(private_user_chown)
 
 # Read user home directory files.
 userdom_ro_home_role(system_r, private_user_chown_t)
+ssh_read_user_home_files(private_user_chown_t)
 
 # Allow root override of DAC and write of modes.
 allow private_user_chown_t self:capability { chown dac_override };
 allow private_user_chown_t user_home_t:dir setattr;
 allow private_user_chown_t user_home_t:file setattr;
 allow private_user_chown_t user_home_dir_t:dir setattr;
+allow private_user_chown_t ssh_home_t:dir setattr;
+allow private_user_chown_t ssh_home_t:file setattr;
 
 # Chown needs to read `/etc/passwd`.
 files_read_etc_files(private_user_chown_t)
+
+############################################################################
+### Policy for `user:authorize`.
+############################################################################
+
+# User creation is performed as root.
+puppy_worker_sudo_job(private_user_authorize)
+
+# Execute hostname. 
+hostname_exec(private_user_authorize_t)
+
+# Run the private utility.
+job_sudo_private(private_user_authorize)
+
+# Allow root DAC override.
+allow private_user_authorize_t self:capability dac_override;
+
+# List the home directory.
+files_search_home(private_user_authorize_t)
+
+# Manage home directory, where the ssh files may be mislabeled.
+userdom_manage_home_role(system_r, private_user_authorize_t)
+
+# List the home directories.
+#userdom_manage_user_home_dirs(private_user_authorize_t)
 
 ############################################################################
 ### Policy for `private user:policy`.
