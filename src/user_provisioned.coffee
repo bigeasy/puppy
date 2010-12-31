@@ -7,10 +7,12 @@ module.exports.command = (argv) ->
   hostname = argv.shift()
   id = parseInt argv.shift(), 10
   db.createDatabase syslog, (database) ->
-    database.select "getLocalUser", [ id, hostname ], "localUser", (results) ->
+    database.select "getLocalUser", [ hostname, id ], "localUser", (results) ->
       if results.length is 0
+        syslog.send "err", "ERROR: Cannot find user u#{id + 10000} on #{hostname}"
         process.exit 1
       localUser = results.shift()
       if localUser.status isnt 0
+        syslog.send "err", "ERROR: User u#{id + 10000} on #{hostname} is provisioned already."
         process.exit 1
-      database.select "setLocalUserStatus", [ 1, id, hostname ], (results) ->
+      database.select "setLocalUserStatus", [ 1, hostname, id ], (results) ->
