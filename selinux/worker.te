@@ -195,6 +195,8 @@ puppy_worker_sudo_job(private_user_provision)
 
 job_sudo_private(private_user_provision)
 
+allow puppy_t private_user_provision_t:fifo_file rw_fifo_file_perms;
+
 allow private_user_provision_t { home_root_t user_home_dir_t }:dir list_dir_perms;
 allow private_user_provision_t user_home_dir_t:dir read_file_perms;
 
