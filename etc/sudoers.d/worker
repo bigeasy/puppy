@@ -1,4 +1,5 @@
 worker ALL = (root) NOPASSWD: /opt/share/puppy/private/sbin/user_create, \
     /opt/share/puppy/private/sbin/user_policy, \
     /opt/share/puppy/private/sbin/user_restorecon, \
-    /opt/share/puppy/private/sbin/user_provision
+    /opt/share/puppy/private/sbin/user_provision, \
+    /opt/share/puppy/private/sbin/user_chown

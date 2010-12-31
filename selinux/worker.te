@@ -215,6 +215,31 @@ files_read_etc_files(private_user_provision_t)
 hostname_exec(private_user_provision_t)
 
 ############################################################################
+### Policy for `user:chown`.
+############################################################################
+
+# User creation is performed as root.
+puppy_worker_sudo_job(private_user_chown)
+
+# Execute hostname. 
+hostname_exec(private_user_chown_t)
+
+# Run the private utility.
+job_sudo_private(private_user_chown)
+
+# Read user home directory files.
+userdom_ro_home_role(system_r, private_user_chown_t)
+
+# Allow root override of DAC and write of modes.
+allow private_user_chown_t self:capability { chown dac_override };
+allow private_user_chown_t user_home_t:dir setattr;
+allow private_user_chown_t user_home_t:file setattr;
+allow private_user_chown_t user_home_dir_t:dir setattr;
+
+# Chown needs to read `/etc/passwd`.
+files_read_etc_files(private_user_chown_t)
+
+############################################################################
 ### Policy for `private user:policy`.
 ############################################################################
 
