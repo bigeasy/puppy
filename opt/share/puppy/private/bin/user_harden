@@ -1,3 +1,0 @@
-#!/usr/bin/node
-
-require("common/shell").sudo("/opt/share/puppy/private/sbin/user_harden", process.argv.slice(2));
