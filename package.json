@@ -2,5 +2,8 @@
 ,   "version":          "0.0.1"
 ,   "author":           "Alan Gutierrez"
 ,   "directories":      { "lib" : "./lib" }
-,   "bin":      { "private" : "./bin/private.js" }
+,   "bin":             
+    { "user_keys":      "./bin/user_keys.js"
+    , "user_status":    "./bin/user_status.js"
+    }
 }
