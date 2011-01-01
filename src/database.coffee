@@ -6,7 +6,7 @@ Danger        = require("common/danger").Danger
 
 module.exports.createDatabase = (syslog, callback) ->
   shell = new (require("common/shell").Shell)(syslog)
-  shell.as "database", "/opt/bin/database", [], null, (stdout) ->
+  shell.doas "database", "/opt/bin/database", [], null, (stdout) ->
     callback(new Database(stdout.substring 0, 32))
 
 class Database

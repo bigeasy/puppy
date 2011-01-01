@@ -22,7 +22,7 @@ class Shell
     sudo.on "exit", (code) ->
       process.stdout.write JSON.stringify { stdout, stderr }
       process.exit code
-  as: (user, command, parameters, input, callback) ->
+  doas: (user, command, parameters, input, callback) ->
     prefix = [ "-u", user, command ]
     while prefix.length
       parameters.unshift(prefix.pop())
@@ -93,6 +93,6 @@ module.exports.Shell = Shell
 module.exports.sudo = (splat...)->
   shell = new Shell()
   shell.sudo.apply shell, splat
-module.exports.medo = (splat...)->
+module.exports.doas = (splat...)->
   shell = new Shell()
-  shell.medo.apply shell, splat
+  shell.doas.apply shell, splat
