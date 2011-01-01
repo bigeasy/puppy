@@ -67,6 +67,8 @@ if [ $user == "system" ]; then
 elif [ ! -z $(echo $user | grep '^public|protected|private$') ]; then
     user=puppy
     mode=550
+elif [ $user == "job" ]; then
+    user=worker
 else
     mode=550
 fi
