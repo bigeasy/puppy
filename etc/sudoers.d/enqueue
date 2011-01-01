@@ -1,2 +1,1 @@
-Defaults:enqueue   !requiretty
-enqueue ALL = (worker) NOPASSWD: /opt/bin/job
+enqueue ALL = (worker) NOPASSWD: /puppy/bin/job
