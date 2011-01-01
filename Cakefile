@@ -29,14 +29,14 @@ task "gitignore", "create a .gitignore for node-ec2 based on git branch", ->
 
     if branch is "gh-pages"
       gitignore += '''
-                   lib
+                   bin
                    '''
     else if branch is "job"
       gitignore += '''
                    documentation
                    index.html
                    site/idl.css
-                   lib
+                   bin
                    '''
     fs.writeFile(".gitignore", gitignore)
 
@@ -62,5 +62,5 @@ task "compile", "compile the CoffeeScript into JavaScript", ->
 task "clean", "rebuild the CoffeeScript docco documentation.", ->
   currentBranch (branch) ->
     if branch is "job"
-      exec "rm -rf documentation lib _site site/idl.css index.html", (err) ->
+      exec "rm -rf documentation bin _site site/idl.css index.html", (err) ->
         throw err if err
