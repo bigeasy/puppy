@@ -188,4 +188,7 @@ done
 /bin/chown enqueue:enqueue /opt/bin/enqueue*
 /bin/chmod 550 /opt/bin/enqueue*
 
+/bin/chown puppy:puppy /opt/bin/private*
+/bin/chmod 550 /opt/bin/private*
+
 /sbin/restorecon -R /opt /etc /home
