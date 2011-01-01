@@ -1,0 +1,20 @@
+#!/bin/bash
+
+. /opt/share/puppy/private/bin/functions
+
+[ $# -ne 1 ] && abend "Incorrect count of arguments ($#)."
+
+user=$1
+assert_valid_user $user
+
+uid=$(($user + 10000))
+
+if [ ! -d /home/u$uid ]; then
+    abend "Home directory /home/u$uid does not exist."
+fi
+
+if [ $(/usr/bin/sudo -H -u puppy /opt/bin/private user:status $(/bin/hostname) $user) -ne 1 ]; then
+    abend "User $uid has not been provisioned."
+fi
+
+/bin/chown -R u$uid:puppy /home/u$uid

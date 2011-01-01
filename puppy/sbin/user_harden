@@ -1,0 +1,22 @@
+#!/bin/bash
+
+. /opt/share/puppy/private/bin/functions
+
+[ $# -ne 1 ] && abend "Incorrect count of arguments ($#)."
+
+echo "$$ Redirect this STDOUT to STDERR" 1>&2  
+
+user=$1
+assert_valid_user $user
+
+uid=$(($user + 10000))
+
+/usr/sbin/semanage login -a -s protected_u "u$uid"
+
+if [ ! -e "/var/cache/puppy/policy/user_$uid/user_$uid.pp" ]
+then
+    whoami 1>&2
+    /bin/mkdir -p "/var/cache/puppy/policy/user_$uid" || abend "Cannot create user policy directory."
+    echo "Need to create policy." 1>&2
+fi
+#/bin/chown -R "u$uid:puppy" "/home/u$uid" || abend "Cannot chown home directory."

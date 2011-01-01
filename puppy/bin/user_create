@@ -1,0 +1,3 @@
+#!/usr/bin/node
+
+require("common/shell").sudo("/opt/share/puppy/private/sbin/user_create", process.argv.slice(2));
