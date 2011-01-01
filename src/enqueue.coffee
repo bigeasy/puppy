@@ -31,7 +31,7 @@ stdin.on "data", (chunk) -> commands.push chunk
 stdin.on "end", ->
   # TODO This is looking common. Can I put it in shell?
   # We're explicit about the private key, even though it's in the default location.
-  ssh = spawn "/usr/bin/ssh", [ "-i", "/home/enqueue/.ssh/identity", "enqueue@#{hostname}", "/opt/bin/enqueue" ]
+  ssh = spawn "/usr/bin/ssh", [ "-i", "/home/enqueue/.ssh/identity", "enqueue@#{hostname}", "/puppy/bin/enqueue_proxy" ]
   stdout = ""
   stderr = ""
   ssh.stdout.on "data", (data) -> stdout += data.toString()

@@ -11,4 +11,4 @@ stdin = process.openStdin()
 stdin.setEncoding "utf8"
 stdin.on "data", (chunk)-> commands.push chunk
 stdin.on "end", ->
-  shell.doas "worker", "/opt/bin/job", [], commands.join(""), ->
+  shell.doas "worker", "/puppy/bin/job", [], commands.join(""), ->
