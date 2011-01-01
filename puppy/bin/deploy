@@ -60,17 +60,17 @@ function copy_files()
     fi
 }
 
-echo $user | grep '^public|protected|private$'
 if [ $user == "system" ]; then
     user=root
     mode=755
 elif [ ! -z $(echo $user | grep '^public|protected|private$') ]; then
     user=puppy
-    mode=550
+    mode=500
 elif [ $user == "job" ]; then
     user=worker
+    mode=500
 else
-    mode=550
+    mode=500
 fi
 
 copy_files puppy/bin /puppy/bin $user:$user $mode
