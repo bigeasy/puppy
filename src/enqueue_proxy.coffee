@@ -9,4 +9,4 @@ module.exports.command = ->
   stdin.setEncoding "utf8"
   stdin.on "data", (chunk)-> commands.push chunk
   stdin.on "end", ->
-    shell.as "worker", "/opt/bin/job", [], commands.join(""), ->
+    shell.doas "worker", "/opt/bin/job", [], commands.join(""), ->
