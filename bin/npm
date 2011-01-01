@@ -17,4 +17,4 @@ npm_install public
 npm_install enqueue
 npm_install worker
 
-/usr/bin/sudo /sbin/restorecon -R /opt
+/usr/bin/sudo /sbin/restorecon -R /puppy

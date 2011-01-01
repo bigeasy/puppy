@@ -97,18 +97,18 @@ function make_directories()
 
 # git does not perserve file permissions, in case you're wondering.
 #  http://kerneltrap.org/mailarchive/git/2008/12/5/4327894
-/bin/find etc opt -type d -exec /bin/chmod 755 {} \;
+/bin/find etc puppy -type d -exec /bin/chmod 755 {} \;
 /bin/chmod 644 etc/init/*
 /bin/chmod 440 etc/sudoers.d/*
 /bin/chmod 644 etc/selinux/targeted/contexts/users/*
-/bin/chmod 640 opt/share/puppy/private/bin/functions
-/bin/chmod 700 opt/share/puppy/private/bin/*_*
-/bin/chmod 700 opt/share/puppy/private/sbin/*_*
+/bin/chmod 640 puppy/share/puppy/private/bin/functions
+/bin/chmod 700 puppy/share/puppy/private/bin/*_*
+/bin/chmod 700 puppy/share/puppy/private/sbin/*_*
 /bin/chmod 600 etc/ssh/sshd_config
 
-# Copy the etc and opt directory structures.
+# Copy the etc and puppy directory structures.
 make_directories etc / 755 root:root
-make_directories opt / 755 root:root
+make_directories puppy / 755 root:root
 
 function copy_files()
 {
@@ -130,15 +130,15 @@ function copy_files()
     done
 }
 
-# Copy the opt mount point.
-copy_files opt/share/puppy/private/bin / 700 worker:worker
-copy_files opt/share/puppy/private/bin / 640 worker:root
-copy_files opt/share/puppy/private/sbin / 700 root:root
+# Copy the puppy mount point.
+copy_files puppy/share/puppy/private/bin / 700 worker:worker
+copy_files puppy/share/puppy/private/bin / 640 worker:root
+copy_files puppy/share/puppy/private/sbin / 700 root:root
 
 # Copy the public transition programs.
-copy_files opt/share/puppy/public/bin / 700 public:public
+copy_files puppy/share/puppy/public/bin / 700 public:public
 
-# Create the authorized_keys file that will launch /opt/bin/public.
+# Create the authorized_keys file that will launch /puppy/bin/public.
 function copy_public_key()
 {
     user=$1
@@ -155,8 +155,8 @@ function copy_public_key()
 
 # TODO Check the public key into source, but the keys do not live in source,
 # they live on a server and propagate.
-copy_public_key public home/public/ssh/authorized_keys /opt/bin/public_proxy
-copy_public_key enqueue /home/enqueue/.ssh/identity.pub /opt/bin/enqueue_proxy
+copy_public_key public home/public/ssh/authorized_keys /puppy/bin/public_proxy
+copy_public_key enqueue /home/enqueue/.ssh/identity.pub /puppy/bin/enqueue_proxy
 
 # Copy the etc configuration files.
 copy_files etc / 644 root:root
@@ -179,16 +179,16 @@ done
 /bin/mkdir -p /var/log/puppy/worker
 /bin/chown worker:worker /var/log/puppy/worker
 
-/bin/chown public:public /opt/bin/public_proxy*
-/bin/chmod 550 /opt/bin/public_proxy*
+/bin/chown public:public /puppy/bin/public_proxy*
+/bin/chmod 550 /puppy/bin/public_proxy*
 
-/bin/chown database:database /opt/bin/database*
-/bin/chmod 550 /opt/bin/database*
+/bin/chown database:database /puppy/bin/database*
+/bin/chmod 550 /puppy/bin/database*
 
-/bin/chown enqueue:enqueue /opt/bin/enqueue*
-/bin/chmod 550 /opt/bin/enqueue*
+/bin/chown enqueue:enqueue /puppy/bin/enqueue*
+/bin/chmod 550 /puppy/bin/enqueue*
 
-/bin/chown puppy:puppy /opt/bin/private*
-/bin/chmod 550 /opt/bin/private*
+/bin/chown puppy:puppy /puppy/bin/private*
+/bin/chmod 550 /puppy/bin/private*
 
-/sbin/restorecon -R /opt /etc /home
+/sbin/restorecon -R /puppy /etc /home
