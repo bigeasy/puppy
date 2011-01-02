@@ -88,6 +88,24 @@ template(`puppy_read_puppy_bin',`
     list_dirs_pattern($1, puppy_mount_t, puppy_mount_t)
     read_files_pattern($1, puppy_bin_t, puppy_bin_t)
 ')
+########################################
+## <summary>
+##	Read Puppy system binary files.
+## </summary>
+## <param name="role">
+##	<summary>
+##	Role allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+template(`puppy_read_puppy_sbin',`
+    gen_require(`
+        type puppy_mount_t, puppy_sbin_t;
+    ')
+    list_dirs_pattern($1, puppy_mount_t, puppy_mount_t)
+    read_files_pattern($1, puppy_sbin_t, puppy_sbin_t)
+')
 template(`puppy_exec_puppy_bin',`
     gen_require(`
         type puppy_mount_t, puppy_bin_t, puppy_lib_t;

@@ -125,6 +125,15 @@ template(`puppy_worker_sudo_job',`
 
     # Allow stdin, stdout and stderr to propagate.
     allow $1_proxy_sudo_t worker_t:fifo_file rw_fifo_file_perms;
+
+    # The proxy needs to read Puppy executables.
+    puppy_read_puppy_bin($1_proxy_t)
+
+    # The proxy needs to read Puppy executables.
+    puppy_read_puppy_sbin($1_proxy_sudo_t)
+
+    # The agent needs to execute Puppy system executables.
+    puppy_exec_puppy_sbin($1_t)
 ')
 ########################################
 ### <summary>
