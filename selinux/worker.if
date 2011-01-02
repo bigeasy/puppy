@@ -86,7 +86,7 @@ template(`puppy_worker_medo_private',`
 ### </param>
 ##
 #
-template(`puppy_worker_sudo_job',`
+template(`puppy_job_sudo_root',`
     # Domain types for proxy and job.
     type $1_proxy_t;
     type $1_t;
