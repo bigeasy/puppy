@@ -2,7 +2,7 @@
 /puppy/bin/job.*                                gen_context(system_u:object_r:worker_job_exec_t, s0)
 /var/spool/puppy                                gen_context(system_u:object_r:worker_spool_t, s0)
 /var/spool/puppy/.*                          -- gen_context(system_u:object_r:worker_spool_t, s0)
-/puppy/bin/user_invite                          gen_context(system_u:object_r:private_user_invite_exec_t, s0)
+/puppy/bin/user_invite.*                        gen_context(system_u:object_r:private_user_invite_exec_t, s0)
 /puppy/bin/user_create.*                        gen_context(system_u:object_r:private_user_create_exec_t, s0)
 /puppy/sbin/user_create                         gen_context(system_u:object_r:private_user_create_exec_t, s0)
 /puppy/bin/user_harden.*                        gen_context(system_u:object_r:private_user_harden_exec_t, s0)

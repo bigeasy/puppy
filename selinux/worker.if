@@ -48,7 +48,7 @@ template(`puppy_shell_exec',`
 ### </param>
 ##
 #
-template(`puppy_worker_medo_private',`
+template(`puppy_worker_job',`
     # Job domain type.
     type $1_job_t;
 
@@ -66,6 +66,9 @@ template(`puppy_worker_medo_private',`
 
     # The job program is a Node.js program.
     puppy_node_exec($1_job_t)
+    puppy_exec_puppy_bin($1_job_t)
+    allow worker_t $1_exec_t:lnk_file read;
+    allow $1_job_t $1_exec_t:lnk_file read;
     
     ## Read/Write Pipes.
     allow $1_job_t self:fifo_file rw_fifo_file_perms;

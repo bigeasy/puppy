@@ -1,2 +1,3 @@
 /puppy/bin/user_keys.*          gen_context(system_u:object_r:private_exec_t, s0)
 /puppy/bin/user_status.*        gen_context(system_u:object_r:private_exec_t, s0)
+/puppy/bin/user_activation.*    gen_context(system_u:object_r:private_exec_t, s0)

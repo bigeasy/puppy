@@ -97,7 +97,13 @@ logging_send_syslog_msg(worker_t)
 ############################################################################
 
 # Invite sending is performed as the worker user.
-puppy_worker_medo_private(private_user_invite)
+puppy_worker_job(private_user_invite)
+
+puppy_sudo(private_user_invite_job)
+role system_r types private_user_invite_job_sudo_t;
+domtrans_pattern(private_user_invite_job_sudo_t, private_exec_t, delegate_t)
+allow private_user_invite_job_sudo_t worker_t:fifo_file rw_fifo_file_perms;
+allow delegate_t private_user_invite_job_t:fifo_file rw_fifo_file_perms;
 
 # Query MySQL.
 mysql_tcp_connect(private_user_invite_job_t)
