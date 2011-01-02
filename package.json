@@ -5,5 +5,6 @@
 ,   "bin":             
     { "user_keys":      "./bin/user_keys.js"
     , "user_status":    "./bin/user_status.js"
+    , "user_activation":    "./bin/user_activation.js"
     }
 }
