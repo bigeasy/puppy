@@ -53,6 +53,7 @@ puppy_read_puppy_bin(enqueue_sudo_t)
 
 # The `enqueue` program is a Node.js program.
 puppy_node_exec(enqueue_agent_t)
+puppy_exec_puppy_bin(enqueue_agent_t)
 application_domain(enqueue_agent_t, enqueue_exec_t)
 allow enqueue_agent_t enqueue_exec_t:lnk_file read;
 allow enqueue_agent_t self:fifo_file rw_fifo_file_perms;

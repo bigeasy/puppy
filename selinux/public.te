@@ -17,6 +17,8 @@ type public_exec_t;     # Use for both the proxy and the agent program.
 type public_agent_t;    # Invokes the public program as the puppy user.
 puppy_sudo(public)
 
+allow delegate_t public_agent_t:fifo_file rw_fifo_file_perms;
+
 # Create a restricted user, this will create basic roll and the public_t. 
 puppy_restricted_user_template(public)
 
