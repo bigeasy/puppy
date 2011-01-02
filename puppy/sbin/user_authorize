@@ -13,8 +13,7 @@ if [ ! -d /home/u$uid ]; then
     abend "Home directory /home/u$uid does not exist."
 fi
 
-/usr/bin/sudo -u puppy /puppy/bin/user_status $(/bin/hostname) $user 
-if [ $(/usr/bin/sudo -u puppy /puppy/bin/user_status $(/bin/hostname) $user) -ne 1 ]; then
+if [ $(/usr/bin/sudo -u delegate /puppy/bin/user_status $(/bin/hostname) $user) -ne 1 ]; then
     abend "User $uid has not been provisioned."
 fi
 
@@ -26,4 +25,10 @@ umask 077
 /bin/touch /home/u$uid/.ssh/authorized_keys
 /bin/chmod 600 /home/u$uid/.ssh/authorized_keys
 
-/usr/bin/sudo -u puppy /puppy/bin/user_keys $(/bin/hostname) $user > /home/u$uid/.ssh/authorized_keys
+# If we redirect directly to authorized_keys, we'll have to modfiy the SELinux
+# policy to allow the delegate domain to write home directories.
+keys=$(/usr/bin/sudo -u delegate /puppy/bin/user_keys $(/bin/hostname) $user)
+
+# Quoting keys is necessary to keep echo from swallowing the new lines.
+# http://stackoverflow.com/questions/3445628/bash-line-concatenation-during-variable-interpolation
+echo "$keys" > /home/u$uid/.ssh/authorized_keys
