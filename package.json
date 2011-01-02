@@ -7,6 +7,7 @@
     , "user_authorize":     "./bin/user_authorize.js"
     , "user_chown":         "./bin/user_chown.js"
     , "user_create":        "./bin/user_create.js"
+    , "user_invite":        "./bin/user_invite.js"
     , "user_provision":     "./bin/user_provision.js"
     , "user_restorecon":    "./bin/user_restorecon.js"
     }
