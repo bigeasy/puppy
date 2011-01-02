@@ -7,7 +7,7 @@ function abend()
     exit 1
 }
 
-[ $# -eq 1 -a -d $1 ] || abend "Must provide a working directory."
+[ $# -eq 1 ] && [ -d $1 ] || abend "Must provide a working directory."
 
 project=$(readlink -f $1)
 user=$(basename $project)
