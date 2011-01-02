@@ -70,3 +70,40 @@ template(`puppy_restricted_user_template',`
 	dev_read_urand($1_t)
 	typeattribute $1_t unpriv_userdomain;
 ')
+########################################
+## <summary>
+##	Read Puppy binary files.
+## </summary>
+## <param name="role">
+##	<summary>
+##	Role allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+template(`puppy_read_puppy_bin',`
+    gen_require(`
+        type puppy_mount_t, puppy_bin_t;
+    ')
+    list_dirs_pattern($1, puppy_mount_t, puppy_mount_t)
+    read_files_pattern($1, puppy_bin_t, puppy_bin_t)
+')
+template(`puppy_exec_puppy_bin',`
+    gen_require(`
+        type puppy_mount_t, puppy_bin_t, puppy_lib_t;
+    ')
+    list_dirs_pattern($1, puppy_mount_t, puppy_mount_t)
+    read_files_pattern($1, puppy_bin_t, puppy_bin_t)
+    read_files_pattern($1, puppy_lib_t, puppy_lib_t)
+    read_lnk_files_pattern($1, puppy_lib_t, puppy_lib_t)
+')
+template(`puppy_exec_puppy_sbin',`
+    gen_require(`
+        type puppy_mount_t, puppy_bin_t, puppy_lib_t, puppy_sbin_t;
+    ')
+    list_dirs_pattern($1, puppy_mount_t, puppy_mount_t)
+    read_files_pattern($1, puppy_bin_t, puppy_bin_t)
+    read_files_pattern($1, puppy_sbin_t, puppy_sbin_t)
+    read_files_pattern($1, puppy_lib_t, puppy_lib_t)
+    read_lnk_files_pattern($1, puppy_lib_t, puppy_lib_t)
+')

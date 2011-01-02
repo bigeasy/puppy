@@ -23,6 +23,10 @@ puppy_restricted_user_template(enqueue)
 role enqueue_r types enqueue_proxy_t;
 role enqueue_r types worker_job_t;
 
+# Read the Puppy binary files.
+puppy_read_puppy_bin(enqueue_t)
+puppy_exec_puppy_bin(enqueue_proxy_t)
+
 # The `enqueue` user can execute the `enqueue` program.
 domtrans_pattern(enqueue_t, enqueue_exec_t, enqueue_proxy_t)
 allow enqueue_t enqueue_exec_t:lnk_file read;
@@ -40,6 +44,7 @@ logging_send_syslog_msg(enqueue_proxy_t)
 sudo_role_template(enqueue, enqueue_r, enqueue_proxy_t)
 domtrans_pattern(enqueue_sudo_t, worker_job_exec_t, worker_job_t)
 allow worker_job_t enqueue_proxy_t:fifo_file rw_fifo_file_perms;
+puppy_read_puppy_bin(enqueue_sudo_t)
 
 ############################################################################
 ### Policy for `enqueue` program.
