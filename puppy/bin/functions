@@ -1,0 +1,48 @@
+#!/bin/bash
+
+function abend()
+{
+    message=$1
+    echo -n "ERROR: $message"
+    exit 1
+}
+
+function assert_valid_user()
+{
+    user=$1
+    digit='^[0-9]+$'
+    if [[ ! ($user =~ $digit) ]]; then
+        abend "Incorrect parameter. Single UID parameter expected."
+    fi
+
+    if [ $user -lt 1 -o $user -gt 100000000 ]; then
+        abend "Puppy user id value $user is out of range."
+    fi
+}
+
+function assert_valid_home_dir()
+{
+    user=$1
+    uid=$(($user + 10000))
+    if [ ! -d /home/u$uid ]; then
+        abend "Home directory /home/u$uid does not exist."
+    fi
+
+    if [ $(/usr/bin/sudo -H -u delegate /puppy/bin/user_status $(/bin/hostname) $user) -ne 1 ]; then
+        abend "User $uid has not been provisioned."
+    fi
+}
+
+# Write output to a temporary file, then write the temperary file to stdout.
+# This prevents the child process from inheriting the stdin, stdout, and stderr
+# of the parent.
+function redirect()
+{
+    command=$1
+    shift
+    $($command $@ 0>&- >/var/run/puppy/tmp/$$.out 2>/var/run/puppy/tmp/$$.err)
+    /bin/cat /var/run/puppy/tmp/$$.out
+    /bin/cat /var/run/puppy/tmp/$$.err 1>&2
+    /bin/rm /var/run/puppy/tmp/$$.out
+    /bin/rm /var/run/puppy/tmp/$$.err
+}
