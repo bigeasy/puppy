@@ -126,14 +126,20 @@ template(`puppy_worker_sudo_job',`
     # Allow stdin, stdout and stderr to propagate.
     allow $1_proxy_sudo_t worker_t:fifo_file rw_fifo_file_perms;
 
-    # The proxy needs to read Puppy executables.
-    puppy_read_puppy_bin($1_proxy_t)
+    # The proxy needs to execute Puppy executables.
+    puppy_exec_puppy_bin($1_proxy_t)
 
     # The proxy needs to read Puppy executables.
     puppy_read_puppy_sbin($1_proxy_sudo_t)
 
     # The agent needs to execute Puppy system executables.
     puppy_exec_puppy_sbin($1_t)
+
+    # Allow worker to read the NPM link to the executable.
+    allow worker_t $1_exec_t:lnk_file read;
+
+    # Alllow the proxy to read the NPM link to the executable.
+    allow $1_proxy_t $1_exec_t:lnk_file read;
 ')
 ########################################
 ### <summary>
@@ -148,19 +154,22 @@ template(`puppy_worker_sudo_job',`
 #
 template(`job_sudo_private',`
     gen_require(`
-        type private_exec_t, puppy_t;
+        type private_exec_t, delegate_t;
     ')
 
     # Create a generated sudo_t type.
     sudo_role_template($1, system_r, $1_t)
 
-    # Transition to puppy_t from the generated sudo_t.
-    domtrans_pattern($1_sudo_t, private_exec_t, puppy_t)
+    # Transition to delegate_t from the generated sudo_t.
+    domtrans_pattern($1_sudo_t, private_exec_t, delegate_t)
 
     # Allow the sudo_t to read and write the proxy_t.
     allow $1_sudo_t $1_proxy_t:fifo_file rw_fifo_file_perms;
 
-    # Allow puppy_t to read and write stdio of caller.
-    allow puppy_t $1_t:fifo_file rw_fifo_file_perms;
-    allow puppy_t $1_proxy_t:fifo_file rw_fifo_file_perms;
+    # Generally sudo means running private as the delegate user.
+    puppy_read_puppy_bin($1_sudo_t)
+
+    # Allow delegate_t to read and write stdio of caller.
+    allow delegate_t $1_t:fifo_file rw_fifo_file_perms;
+    allow delegate_t $1_proxy_t:fifo_file rw_fifo_file_perms;
 ')

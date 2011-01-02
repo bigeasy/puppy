@@ -1,3 +1,1 @@
 %puppy  ALL = NOPASSWD: /home/puppy/bin/protected
-puppy ALL = (database) NOPASSWD: /opt/bin/database
-puppy ALL = (enqueue) NOPASSWD: /opt/bin/enqueue

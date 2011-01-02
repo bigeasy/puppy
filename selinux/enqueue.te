@@ -3,6 +3,7 @@ policy_module(enqueue,1.0.0)
 
 require {
     type worker_spool_t, worker_job_exec_t, worker_job_t;
+    type ssh_home_t;
 }
 
 ########################################
@@ -69,6 +70,12 @@ corenet_tcp_connect_ssh_port(enqueue_agent_t)
 
 # SSH needs to read certificates.
 miscfiles_read_certs(enqueue_agent_t)
+
+# Seems that this used to read `.known_hosts`, so it might no longer be
+# necessary when DNSSEC distributed key fingerprints are implemented.
+userdom_read_user_home_content_files(enqueue_agent_t)
+read_files_pattern(enqueue_agent_t, ssh_home_t, ssh_home_t)
+logging_send_syslog_msg(enqueue_agent_t)
 
 # Enqueue user.
 gen_user(enqueue_u,, enqueue_r, s0, s0)

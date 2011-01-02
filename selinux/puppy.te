@@ -5,16 +5,12 @@ policy_module(puppy, 1.0.0)
 require {
     type ssh_exec_t;
     type ssh_home_t;
-    type database_t, database_exec_t;
-    type enqueue_agent_t;
     class netlink_route_socket bind;
     class udp_socket connect;
 }
 
-type puppy_t;               # The type of the puppy agent.
-
 # Declare mount point file types.
-type puppy_mount_t;         # The file type for the /puppy mount point.
+type puppy_t;               # The file type for the /puppy mount point.
 type puppy_bin_t;           # The file type for the /puppy/bin mount point.
 type puppy_sbin_t;          # The file type for the /puppy/sbin mount point.
 type puppy_lib_t;           # The file type for the /puppy/lib mount point.
@@ -23,36 +19,10 @@ type puppy_lib_t;           # The file type for the /puppy/lib mount point.
 type puppy_func_t;          # The type of bash function scripts.
 
 # Define mount point types.
-files_mountpoint(puppy_mount_t)
+files_mountpoint(puppy_t)
 files_mountpoint(puppy_bin_t)
 files_mountpoint(puppy_sbin_t)
 files_mountpoint(puppy_lib_t)
 
 # Define file types.
 files_type(puppy_func_t)
-
-# Run Node.js.
-puppy_node_exec(puppy_t)
-
-# Query MySQL.
-sysnet_dns_name_resolve(puppy_t)
-mysql_tcp_connect(puppy_t)
-mysql_stream_connect(puppy_t)
-mysql_rw_db_sockets(puppy_t)
-
-# Someone, maybe MySQL, maybe DNS, wants to read localization.
-miscfiles_read_localization(puppy_t)
-
-# Puppy can read and write stdio.
-allow puppy_t self:fifo_file rw_fifo_file_perms;
-
-# Seems that this used to read `.known_hosts`, so it might no longer be
-# necessary when DNSSEC distributed key fingerprints are implemented.
-userdom_read_user_home_content_files(enqueue_agent_t)
-read_files_pattern(enqueue_agent_t, ssh_home_t, ssh_home_t)
-logging_send_syslog_msg(enqueue_agent_t)
-
-allow database_t puppy_t:fifo_file rw_fifo_file_perms;
-allow enqueue_agent_t puppy_t:fifo_file rw_fifo_file_perms;
-
-logging_send_syslog_msg(puppy_t)

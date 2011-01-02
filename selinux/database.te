@@ -10,6 +10,7 @@ type database_conf_t;       # The database password file type.
 
 # Allow the execution of the Node.js database reader program.
 puppy_node_exec(database_t)
+puppy_exec_puppy_bin(database_t)
 application_domain(database_t, database_exec_t)
 allow database_t database_exec_t:lnk_file read;
 

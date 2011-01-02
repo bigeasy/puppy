@@ -2,11 +2,12 @@ policy_module(private,1.0.0)
 
 require {
     type puppy_t;
+    type delegate_t;
 }
 
 type private_exec_t;
 
-application_domain(puppy_t, private_exec_t)
-allow puppy_t private_exec_t:lnk_file read;
+application_domain(delegate_t, private_exec_t)
+allow delegate_t private_exec_t:lnk_file read;
 
 #puppyish(private)

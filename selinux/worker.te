@@ -9,7 +9,6 @@ require {
     type bin_t;
     role system_r;
     type private_exec_t;
-    type public_sudo_t;
     type database_t;
     type puppy_t;
     type setfiles_exec_t;
@@ -17,8 +16,8 @@ require {
 
 # When we sudo to other roles.
 role system_r types database_t;
-role system_r types public_sudo_t;
-role system_r types puppy_t;
+role system_r types delegate_t;
+puppy_delegate_roles(system_r)
 
 ############################################################################
 ### Policy for `job` program.
@@ -266,6 +265,8 @@ userdom_manage_home_role(system_r, private_user_authorize_t)
 
 # List the home directories.
 #userdom_manage_user_home_dirs(private_user_authorize_t)
+
+domtrans_pattern(private_user_authorize_t, private_exec_t, delegate_t)
 
 ############################################################################
 ### Policy for `private user:policy`.

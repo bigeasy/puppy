@@ -2,7 +2,8 @@
 
 function npm_install()
 {
-    /usr/bin/sudo /usr/bin/npm --globalconfig $HOME/git/ecma/puppy/system/bin/npmrc install $1
+    npm_config_root=/puppy/lib/node npm_config_binroot=/puppy/bin npm_config_manroot=/puppy/share/man \
+        /usr/bin/sudo -E /usr/bin/npm install $1
 }
 
 npm_install mysql

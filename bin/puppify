@@ -66,6 +66,7 @@ make_user vhosts 208
 make_user worker 204
 make_user enqueue 203
 
+make_user delegate 210
 make_user janitor 201
 
 make_user database 205
