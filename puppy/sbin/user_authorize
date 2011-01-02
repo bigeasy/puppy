@@ -6,16 +6,7 @@
 
 user=$1
 assert_valid_user $user
-
-uid=$(($user + 10000))
-
-if [ ! -d /home/u$uid ]; then
-    abend "Home directory /home/u$uid does not exist."
-fi
-
-if [ $(/usr/bin/sudo -u delegate /puppy/bin/user_status $(/bin/hostname) $user) -ne 1 ]; then
-    abend "User $uid has not been provisioned."
-fi
+assert_valid_home_dir $user
 
 umask 022
 /bin/mkdir -p /home/u$uid/.ssh
