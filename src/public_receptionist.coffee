@@ -1,3 +1,5 @@
+require.paths.unshift("/puppy/lib/node")
+
 spawn = require("child_process").spawn
 body = ""
 syslog = new (require("common/syslog").Syslog)({ tag: "public_proxy", pid: true })
@@ -10,16 +12,21 @@ stdin.on "data", (chunk) ->
 
 stdin.on "end", ->
   command = JSON.parse(body)
+  process.stdout.write "Hello, World!\n"
+  process.stdout.write body
 
   if ! /^\/puppy\/bin\/(account_register|account_home)$/.test(command[0])
-    process.stdout.write("#{command[0]}\n")
+    syslog.send "err", "Invalid command #{command[0]}.", {}
     process.exit(1)
 
-  command.unshift "puppy"
+  command.unshift "delegate"
   command.unshift "-u"
 
+  process.stdout.write "Hello, World!\n"
+
+  syslog.send "info", "Executing public request.", { command }
   stderr = []
-  public = spawn "sudo", command
+  public = spawn "/usr/bin/sudo", command
   public.stdout.on "data", (chunk) -> process.stdout.write(chunk.toString())
   public.stderr.on "data", (chunk) -> stderr.push(chunk.toString())
   public.on "exit", (code) ->
