@@ -73,7 +73,7 @@ class Shell
     for command in splat
       commands.push JSON.stringify(command)
     callback = if typeof splat[splat.length - 1] is "function" then splat.pop() else ->
-    @as "enqueue", "/opt/bin/enqueue", [ hostname ], commands.join("\n"), (stdout) ->
+    @doas "enqueue", "/puppy/bin/enqueue", [ hostname ], commands.join("\n"), (stdout) ->
   stdin: (length, callback) ->
     body = ""
     stdin = process.openStdin()
