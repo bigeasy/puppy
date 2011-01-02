@@ -114,6 +114,7 @@ template(`puppy_exec_puppy_bin',`
     ')
     list_dirs_pattern($1, puppy_t, puppy_t)
     read_files_pattern($1, puppy_bin_t, puppy_bin_t)
+    read_lnk_files_pattern($1, puppy_bin_t, puppy_bin_t)
     list_dirs_pattern($1, puppy_bin_t, puppy_bin_t)
     read_files_pattern($1, puppy_lib_t, puppy_lib_t)
     read_lnk_files_pattern($1, puppy_lib_t, puppy_lib_t)

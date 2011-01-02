@@ -1,3 +1,5 @@
 # file contexts handled by userdomain and genhomedircon
 
-/opt/bin/public.*           gen_context(system_u:object_r:public_exec_t, s0)
+/puppy/bin/public_receptionist.*        gen_context(system_u:object_r:public_exec_t, s0)
+/puppy/bin/account_register.*           gen_context(system_u:object_r:public_exec_t, s0)
+/puppy/bin/account_home.*               gen_context(system_u:object_r:public_exec_t, s0)

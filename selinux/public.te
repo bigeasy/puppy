@@ -1,18 +1,27 @@
 # Policy module for the public interface.
 policy_module(public, 1.1.2)
 
+require {
+    type delegate_t;
+}
+
 ########################################
 # Declarations
 
-role public_r;          # The public role.
+role public_r;                          # The public role.
+role public_r types public_agent_t;
+role public_r types public_sudo_t;
+puppy_delegate_roles(public_r)
+
 type public_exec_t;     # Use for both the proxy and the agent program.
 type public_agent_t;    # Invokes the public program as the puppy user.
+puppy_sudo(public)
 
 # Create a restricted user, this will create basic roll and the public_t. 
 puppy_restricted_user_template(public)
 
-# The public_agent_t is allowed to assume public_r.
-role public_r types public_agent_t;
+# The public_t is allowed to assume public_r.
+role public_r types public_t;
 
 # Domain transition to the public angent domain.
 domtrans_pattern(public_t, public_exec_t, public_agent_t)
@@ -21,13 +30,22 @@ allow public_t public_exec_t:lnk_file read;
 
 # The public proxy program is a Node.js program.
 puppy_node_exec(public_agent_t)
+allow public_agent_t self:fifo_file rw_fifo_file_perms;
+puppy_exec_puppy_bin(public_agent_t)
+puppy_read_puppy_bin(public_t)
+
 allow public_agent_t public_exec_t:lnk_file read;
+allow public_t public_exec_t:lnk_file read;
 
 # Write piped output.
-allow public_agent_t self:fifo_file rw_file_perms;
+allow public_t self:fifo_file rw_file_perms;
 
 # Transition from public to puppy using sudo.
-#puppy_sudo_puppy(public)
+
+domtrans_pattern(public_agent_t, sudo_exec_t, public_sudo_t)
+domtrans_pattern(public_sudo_t, public_exec_t, delegate_t)
+application_domain(delegate_t, public_exec_t)
+allow delegate_t public_exec_t:lnk_file read;
 
 # Write to the system log.
 logging_send_syslog_msg(public_agent_t)

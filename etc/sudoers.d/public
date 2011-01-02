@@ -1,2 +1,1 @@
-Defaults:public   !requiretty
-public  ALL = (puppy) NOPASSWD: /opt/bin/public
+public ALL = (delegate) NOPASSWD: /puppy/bin/account_register
