@@ -12,8 +12,6 @@ stdin.on "data", (chunk) ->
 
 stdin.on "end", ->
   command = JSON.parse(body)
-  process.stdout.write "Hello, World!\n"
-  process.stdout.write body
 
   if ! /^\/puppy\/bin\/(account_register|account_home)$/.test(command[0])
     syslog.send "err", "Invalid command #{command[0]}.", {}
@@ -21,8 +19,6 @@ stdin.on "end", ->
 
   command.unshift "delegate"
   command.unshift "-u"
-
-  process.stdout.write "Hello, World!\n"
 
   syslog.send "info", "Executing public request.", { command }
   stderr = []

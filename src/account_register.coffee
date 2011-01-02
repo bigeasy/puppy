@@ -45,7 +45,7 @@ db.createDatabase syslog, (database) ->
           database.select "getLocalUserByActivationCode", [ code ], "localUser", (results) =>
             localUser = results.shift()
             shell.enqueue localUser.machine.hostname,
-              [ "user:create", [ localUser.id ] ] #
-              # [ "user:invite", [], code ] 
+              [ "user:create", [ localUser.id ] ],
+              [ "user:invite", [], code ] 
 
   register argv[0], argv[1]
