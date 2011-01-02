@@ -2,5 +2,12 @@
 ,   "version":          "0.0.1"
 ,   "author":           "Alan Gutierrez"
 ,   "directories":      { "lib" : "./lib" }
-,   "bin":              { "job": "./bin/job.js" }
+,   "bin":             
+    { "job":                "./bin/job.js"
+    , "user_authorize":     "./bin/user_authorize.js"
+    , "user_chown":         "./bin/user_chown.js"
+    , "user_create":        "./bin/user_create.js"
+    , "user_provision":     "./bin/user_provision.js"
+    , "user_restorecon":    "./bin/user_restorecon.js"
+    }
 }
