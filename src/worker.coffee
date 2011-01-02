@@ -47,8 +47,8 @@ poll = ->
         command = commands.shift()
         [ program, args, input ] = command
         env =
-          NODE_PATH: "/opt/lib/node"
-        child = spawn "/opt/share/puppy/private/bin/#{program.replace(/:/, "_")}", args, { env }
+          NODE_PATH: "/puppy/lib/node"
+        child = spawn "/puppy/bin/#{program.replace(/:/, "_")}", args, { env }
         child.stdin.write(input) if input
         child.stdin.end()
 
