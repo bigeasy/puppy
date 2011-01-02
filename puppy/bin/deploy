@@ -81,7 +81,7 @@ fi
 copy_files puppy/bin /puppy/bin $user:$user $mode
 copy_files puppy/sbin /puppy/sbin root:root 500
 
-if [ -d src ]; then
+if [ -d src -a ! -d lib ]; then
     for coffee in $(ls src/*.coffee); do
         program=$(echo $coffee | /bin/sed 's/src\/\(.*\).coffee$/\1/')
         if [ -e /puppy/bin/$program ]; then
