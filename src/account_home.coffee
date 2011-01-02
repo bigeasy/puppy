@@ -1,3 +1,5 @@
+require.paths.unshift("/puppy/lib/node")
+
 database  = new (require("common/database").Database)()
 
 sendEmailOrElse = (results, orElse) ->
@@ -7,10 +9,10 @@ sendEmailOrElse = (results, orElse) ->
   else
     orElse()
 
-module.exports.command = (bin, argv) ->
-  [ email ] =  argv
-  database.select "getLocalUserByEmail", [ email ], "localUser", (results) ->
-    sendEmailOrElse results, ->
-      database.select "getLocalUserByActivationEmail", [ email ], "localUser", (results) ->
-        sendEmailOrElse results, ->
-          process.exit 1
+argv = process.argv.slice(2)
+[ email ] =  argv
+database.select "getLocalUserByEmail", [ email ], "localUser", (results) ->
+  sendEmailOrElse results, ->
+    database.select "getLocalUserByActivationEmail", [ email ], "localUser", (results) ->
+      sendEmailOrElse results, ->
+        process.exit 1

@@ -1,37 +1,30 @@
-mail = require "mail"
+spawn = require("child_process").spawn
+body = ""
+syslog = new (require("common/syslog").Syslog)({ tag: "public_proxy", pid: true })
 
-module.exports =
-  sendActivation: (activation) ->
-    mail = require("mail").Mail(
-      host: "smtp.gmail.com"
-      port: 587
-      username: "messages@prettyrobots.com"
-      password: "c3b8e5fd1b31cb88f489500897e7380d"
-    )
-    message = mail.message(
-      from: "alan@prettyrobots.com"
-      to: [ activation.email ]
-      subject: "Activate Your Account at Puppy"
-    )
-    message.body """
-    Didn't expect this message? Very, very sorry. See below.
-    
-    Welcome to Puppy, intelligent hosting for your Node.js web
-    applications, with puppy-like workflow.
-    
-    Activate Puppy with the following command.
-    
-    $ puppy account:activate #{activation.code}
-    
-    Didn't expect this message?
-    
-    Someone might be annoying you with our signup form. Using your
-    email instead of their own. Please let us know that you did
-    not expect this message by clicking this link.
-    
-    https://www.runpup.com/bogus/#{activation.code}
-    
-    We'll put a stop to it.
-    """
-    message.send (error) ->
-      throw error if error
+stdin = process.openStdin()
+stdin.on "data", (chunk) ->
+  body += chunk.toString()
+  if body.length > 1024 * 16
+    process.exit(1)
+
+stdin.on "end", ->
+  command = JSON.parse(body)
+
+  if ! /^\/puppy\/bin\/(account_register|account_home)$/.test(command[0])
+    process.stdout.write("#{command[0]}\n")
+    process.exit(1)
+
+  command.unshift "puppy"
+  command.unshift "-u"
+
+  stderr = []
+  public = spawn "sudo", command
+  public.stdout.on "data", (chunk) -> process.stdout.write(chunk.toString())
+  public.stderr.on "data", (chunk) -> stderr.push(chunk.toString())
+  public.on "exit", (code) ->
+    if code || stderr.length
+      syslog.send "err",
+        "Recieved unexpected error messages with exit code " + code + ".",
+        { stderr: stderr.join(""), code: code }
+    process.exit(code)
