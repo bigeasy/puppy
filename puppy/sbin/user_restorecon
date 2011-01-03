@@ -6,7 +6,6 @@
 
 user=$1
 assert_valid_user $user
-assert_valid_home_dir $user
 
 uid=$(($user + 10000))
 
