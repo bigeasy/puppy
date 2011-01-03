@@ -46,6 +46,12 @@ db.createDatabase syslog, (database) ->
             localUser = results.shift()
             shell.enqueue localUser.machine.hostname,
               [ "user:create", [ localUser.id ] ],
-              [ "user:invite", [], code ] 
+              [ "user:restorecon", [ localUser.id ] ],
+              [ "user:provision", [ localUser.id ] ],
+              [ "user:restorecon", [ localUser.id ] ],
+              [ "user:authorize", [ localUser.id ] ],
+              [ "user:restorecon", [ localUser.id ] ],
+              [ "user:chown", [ localUser.id ] ],
+              [ "user:invite", [], code ]
 
   register argv[0], argv[1]
