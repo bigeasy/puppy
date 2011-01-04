@@ -8,6 +8,8 @@
     , "user_chown":         "./bin/user_chown.js"
     , "user_create":        "./bin/user_create.js"
     , "user_invite":        "./bin/user_invite.js"
+    , "user_login":         "./bin/user_login.js"
+    , "user_policy":        "./bin/user_policy.js"
     , "user_provision":     "./bin/user_provision.js"
     , "user_restorecon":    "./bin/user_restorecon.js"
     }

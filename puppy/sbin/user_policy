@@ -1,7 +1,12 @@
 #!/bin/bash
 
-. /opt/share/puppy/private/bin/functions
+# Generates a policy module for a user account on a Puppy machine and loads the
+# module into the kernel.
 
+# Import common functions for job shell programs.
+. /puppy/bin/functions
+
+# Assert that the arguments are valid.
 [ $# -ne 1 ] && abend "Incorrect count of arguments ($#)."
 
 user=$1
@@ -9,4 +14,25 @@ assert_valid_user $user
 
 uid=$(($user + 10000))
 
-/usr/sbin/semanage login -a -s protected_u "u$uid"
+# Create a directory.
+/bin/mkdir -p /var/cache/puppy/policy/u$uid
+
+# Generate a policy file.
+cat <<EOL > /var/cache/puppy/policy/u$uid/protected_u$uid.te
+policy_module(protected_u$uid, 1.0.0)
+
+role protected_${uid}_r;
+
+userdom_restricted_user_template(protected_${uid}_t)
+
+gen_user(protected_${uid}_u,, protected_${uid}_r, s0, s0)
+EOL
+
+# Build the policy. If the build is successful, reload it.
+output=$(cd /var/cache/puppy/policy/u$uid && /usr/bin/make -f /usr/share/selinux/devel/Makefile)
+if [ $? -eq 0 ]; then
+    /usr/sbin/semodule -i /var/cache/puppy/policy/u$uid/protected_u$uid.pp
+else
+    echo $output 1>&2
+    exit 1
+fi
