@@ -55,11 +55,10 @@ function copy_files()
 {
     dir=$1
     if [ -e $dir ]; then
-        dest=$2
-        ownership=$3
-        mode=$4
-        for file in $(/bin/ls $dir); do
-            copy_file $dir/$file $dest $ownership $mode
+        ownership=$2
+        mode=$3
+        for file in $(/bin/find $dir -type f); do
+            copy_file $file $(dirname /$file)  $ownership $mode
         done
     fi
 }
@@ -78,8 +77,8 @@ else
     mode=500
 fi
 
-copy_files puppy/bin /puppy/bin $user:$user $mode
-copy_files puppy/sbin /puppy/sbin root:root 500
+copy_files puppy/bin $user:$user $mode
+copy_files puppy/sbin root:root 500
 
 if [ -d src -a ! -d lib ]; then
     for coffee in $(ls src/*.coffee); do
