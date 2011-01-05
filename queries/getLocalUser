@@ -1,6 +1,7 @@
 SELECT lu.machineId AS localUser__machineId,
        lu.id AS localUser__id,
        lu.status AS localUser__status,
+       lu.policy AS localUser__policy,
        lu.modified AS localUser__modified,
        lu.created AS localUser__created,
        m.id AS localUser__machine__id,
