@@ -15,9 +15,20 @@ function assign_profile()
 mapped=$(/usr/bin/sudo /usr/sbin/semanage login -l | /bin/sed 1,3d | /bin/awk '{ print $1 }')
 for user in public enqueue
 do
-    echo $mapped | grep '^'$user'$' > /dev/null
+    echo "$mapped" | grep '^'$user'$' > /dev/null
     if [ $? -ne 0 ]
     then
+        echo "Mapping user $user to ${user}_u."
         sudo semanage login -a -s $user'_u' $user
+    fi
+done
+
+for user in unregistered
+do
+    echo "$mapped" | grep '^%'$user'$' > /dev/null
+    if [ $? -ne 0 ]
+    then
+        echo "Mapping group $user to ${user}_u."
+        /usr/bin/sudo /usr/sbin/semanage login -a -s $user'_u' '%'$user
     fi
 done

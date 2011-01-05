@@ -14,3 +14,6 @@ puppy_sudo(unregistered)
 
 # Allow the unregistered role to enter delegate domains.
 puppy_delegate_roles(unregistered_r)
+
+# Generate the unregistered user.
+gen_user(unregistered_u,, unregistered_r, s0, s0)
