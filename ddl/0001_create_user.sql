@@ -82,6 +82,7 @@ CREATE TABLE LocalUser (
     machineId       INTEGER NOT NULL,
     id              INTEGER NOT NULL,
     status          INTEGER NOT NULL DEFAULT 0,
+    policy          INTEGER NOT NULL DEFAULT 0,
     modified        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created         TIMESTAMP DEFAULT 0,
     PRIMARY KEY (machineId, id)
