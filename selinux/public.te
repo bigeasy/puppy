@@ -42,7 +42,7 @@ allow public_t public_exec_t:lnk_file read;
 # Write piped output.
 allow public_t self:fifo_file rw_file_perms;
 
-# Transition from public to puppy using sudo.
+# Transition from public to delegate using sudo.
 
 domtrans_pattern(public_agent_t, sudo_exec_t, public_sudo_t)
 domtrans_pattern(public_sudo_t, public_exec_t, delegate_t)
