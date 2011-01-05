@@ -7,7 +7,7 @@
 /puppy/sbin/user_create                         gen_context(system_u:object_r:private_user_create_exec_t, s0)
 /puppy/bin/user_harden.*                        gen_context(system_u:object_r:private_user_harden_exec_t, s0)
 /puppy/sbin/user_harden                         gen_context(system_u:object_r:private_user_harden_exec_t, s0)
-/puppy/bin/user_policy.*                        gen_context(system_u:object_r:private_user_policy_exec_t, s0)
+/puppy/bin/user_policy@.*                       gen_context(system_u:object_r:private_user_policy_exec_t, s0)
 /puppy/sbin/user_policy                         gen_context(system_u:object_r:private_user_policy_exec_t, s0)
 /puppy/bin/user_restorecon.*                    gen_context(system_u:object_r:private_user_restorecon_exec_t, s0)
 /puppy/sbin/user_restorecon                     gen_context(system_u:object_r:private_user_restorecon_exec_t, s0)

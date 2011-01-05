@@ -314,6 +314,12 @@ seutil_read_config(private_user_policy_t)
 # Create cache files as puppy_cache_t.
 puppy_manage_cache_files(private_user_policy_t)
 
+# Read and write the database.
+job_sudo_private(private_user_policy)
+
+# Ready the hostname.
+hostname_exec(private_user_policy_t)
+
 ############################################################################
 ### Policy for `private user:harden`.
 ############################################################################
