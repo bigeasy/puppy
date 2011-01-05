@@ -1,0 +1,16 @@
+# Policy module for the unregistered interface.
+policy_module(unregistered, 1.0.0)
+
+# We will invoke the delegate to create the new user account.
+require {
+    type delegate_t;
+}
+
+# Create a serverly restricted user.
+puppy_restricted_user_template(unregistered)
+
+# Can sudo to the delegate user into order to register.
+puppy_sudo(unregistered)
+
+# Allow the unregistered role to enter delegate domains.
+puppy_delegate_roles(unregistered_r)
