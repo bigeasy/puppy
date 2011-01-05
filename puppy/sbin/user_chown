@@ -9,5 +9,6 @@ assert_valid_user $user
 assert_valid_home_dir $user
 
 uid=$(($user + 10000))
+gid=$(/bin/awk -F':' '$3 ~ /'$uid'/ { print $4 }'  /etc/passwd)
 
-/bin/chown -R u$uid:puppy /home/u$uid
+/bin/chown -R $uid:$gid /home/u$uid
