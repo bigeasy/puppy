@@ -16,7 +16,8 @@ assert_valid_user $user
 uid=$(($user + 10000))
 
 # Get the current policy version for the user.
-version=$(/usr/bin/sudo -u delegate /puppy/bin/user_policy_version $(/bin/hostname) $user)
+version=$(/usr/bin/sudo -u delegate /puppy/bin/user_policy_version $(/bin/hostname) $user 2>/dev/null)
+[ $? -ne 0 ] && abend "MySQL not available."
 
 # Get the targeted policy version.
 target_version=$(/usr/bin/sudo -u delegate /puppy/bin/policy_version $(/bin/hostname) $user)
@@ -51,7 +52,6 @@ EOL
 
 # Build the policy. If the build is successful, reload it.
 output=$(cd /var/cache/puppy/policy/u$uid && /usr/bin/make -f /usr/share/selinux/devel/Makefile)
-echo "$output"
 if [ $? -eq 0 ]; then
     /usr/sbin/semodule -i /var/cache/puppy/policy/u$uid/protected_u$uid.pp
 else
@@ -59,7 +59,7 @@ else
     exit 1
 fi
 
-/usr/bin/sudo -u delegate /puppy/bin/policy_version $(/bin/hostname) $user $target_version
+/usr/bin/sudo -u delegate /puppy/bin/user_policy_version $(/bin/hostname) $user $target_version
 
 # If we are updating then enqueue the next update.
 if [ $updating -eq 1 ]; then
