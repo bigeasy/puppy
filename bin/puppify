@@ -71,6 +71,9 @@ make_user janitor 201
 
 make_user database 205
 
+make_group unregistered 211
+make_group registered 212
+
 # Create the worker spool directory.
 make_dir /var/spool/puppy worker:worker 770
 
