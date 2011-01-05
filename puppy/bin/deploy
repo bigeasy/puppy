@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Emit an error message to stderr and return a non-zero exit code.
 function abend()
 {
     message=$1
@@ -7,13 +8,17 @@ function abend()
     exit 1
 }
 
+# Argument validation.
 [ $# -eq 1 ] && [ -d $1 ] || abend "Must provide a working directory."
 
+# Fetch the directory name to determine the owner of the installed files.
 project=$(readlink -f $1)
 basename=$(basename $project)
 
+# Change directory to the project directory.
 cd $project
 
+# If we have a Cakefile and a src directory, then run cake and npm.
 if [ -e Cakefile ]; then
     if [ -d src ]; then
         /usr/bin/cake compile
@@ -24,6 +29,10 @@ if [ -e Cakefile ]; then
     /usr/bin/sudo /sbin/restorecon -R /puppy
 fi
 
+# Copy a file to a target directory assigning an owner and mode. Creates the
+# directory if necessary. Sets the execute bit if the execute bit is set on the
+# source, so you can specify a mode without the execute bit set and copy both
+# executables and configuration files.
 function copy_file()
 {
     source=$1
@@ -51,6 +60,7 @@ function copy_file()
     /usr/bin/sudo /bin/chown $ownership $dest/$file
 }
 
+# Copy a collection of files found in a directory with a specific mode.
 function copy_files()
 {
     dir=$1
@@ -63,6 +73,7 @@ function copy_files()
     fi
 }
 
+# Chose an owner and mode based on the project directory name. Slightly kludgey.
 if [ $basename == "system" ]; then
     user=root
     mode=755
@@ -77,9 +88,11 @@ else
     mode=500
 fi
 
+# Install bash programs.
 copy_files puppy/bin $user:$user $mode
 copy_files puppy/sbin root:root 500
 
+# Set ownership of Node.js programs.
 if [ -d src -a ! -d lib ]; then
     for coffee in $(ls src/*.coffee); do
         program=$(echo $coffee | /bin/sed 's/src\/\(.*\).coffee$/\1/')
