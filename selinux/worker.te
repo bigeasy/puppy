@@ -243,6 +243,7 @@ allow private_user_chown_t user_home_t:file setattr;
 allow private_user_chown_t user_home_dir_t:dir setattr;
 allow private_user_chown_t ssh_home_t:dir setattr;
 allow private_user_chown_t ssh_home_t:file setattr;
+allow private_user_chown_t home_root_t:dir setattr;
 
 # Chown needs to read `/etc/passwd`.
 files_read_etc_files(private_user_chown_t)
