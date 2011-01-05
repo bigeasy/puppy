@@ -31,10 +31,10 @@ function copy_file()
     ownership=$3
     mode=$4
     file=$(basename $source)
-    /bin/mkdir -p $dest
+    /usr/bin/sudo /bin/mkdir -p $dest
     install=0
     if [ -e $dest/$file ]; then
-        if [ $(/usr/bin/stat --format=%Y $source) -gt $(/usr/bin/stat --format=%Y $dest/$file) ]; then
+        if [ $(/usr/bin/stat --format=%Y $source) -gt $(/usr/bin/sudo /usr/bin/stat --format=%Y $dest/$file) ]; then
             install=1
         fi 
     else
@@ -42,13 +42,13 @@ function copy_file()
     fi
     if [ $install -eq 1 ]; then
         echo "Installing program $dest/$file."
-        /bin/cp $source $dest/$file
+        /usr/bin/sudo /bin/cp $source $dest/$file
     fi
-    /bin/chmod $mode $dest/$file
+    /usr/bin/sudo /bin/chmod $mode $dest/$file
     if [ $(/usr/bin/stat --format=%A $source | /usr/bin/cut -c 4) == "-" ]; then
-        /bin/chmod gou-x $dest/$file
+        /usr/bin/sudo /bin/chmod gou-x $dest/$file
     fi
-    /bin/chown $ownership $dest/$file
+    /usr/bin/sudo /bin/chown $ownership $dest/$file
 }
 
 function copy_files()
@@ -90,10 +90,10 @@ if [ -d src -a ! -d lib ]; then
             else
                 ownership=$user:$user
             fi
-            /bin/chmod $mode /puppy/bin/$program*
-            /bin/chown $ownership /puppy/bin/$program*
-            /bin/chmod $mode /puppy/bin/$program
-            /bin/chown $ownership /puppy/bin/$program
+            /usr/bin/sudo /bin/chmod $mode /puppy/bin/$program@*
+            /usr/bin/sudo /bin/chown $ownership /puppy/bin/$program@*
+            /usr/bin/sudo /bin/chmod $mode /puppy/bin/$program
+            /usr/bin/sudo /bin/chown $ownership /puppy/bin/$program
         fi
     done
 fi
