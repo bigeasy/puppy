@@ -98,4 +98,4 @@ if [ -d src -a ! -d lib ]; then
     done
 fi
 
-/sbin/restorecon -R /puppy
+/usr/bin/sudo /sbin/restorecon -R /puppy
