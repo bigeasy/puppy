@@ -56,9 +56,6 @@ make_user public 209
 # Create the stunnel daemon user.
 make_user stunnel 206
 
-# Create general puppified operations user.
-make_user puppy 207
-
 # Create the vhosts daemon user.
 make_user vhosts 208
 
