@@ -1,0 +1,3 @@
+UPDATE LocalUser
+   SET policy = ?
+ WHERE machineId = (SELECT id FROM Machine WHERE hostname = ?) AND id = ?
