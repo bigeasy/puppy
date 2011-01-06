@@ -79,7 +79,7 @@ if [ $basename == "system" ]; then
     mode=755
 elif [ ! -z $(echo $basename | grep '^\(public\|protected\|private\)$') ]; then
     user=delegate
-    mode=500
+    mode=550
 elif [ $basename == "job" ]; then
     user=worker
     mode=500
@@ -94,12 +94,17 @@ copy_files puppy/sbin root:root 500
 
 # Set ownership of Node.js programs.
 if [ -d src -a ! -d lib ]; then
-    for coffee in $(ls src/*.coffee); do
+    for coffee in $(ls src/*.coffee | /bin/sort); do
         program=$(echo $coffee | /bin/sed 's/src\/\(.*\).coffee$/\1/')
         if [ -e /puppy/bin/$program ]; then
             receptionist="_receptionist$"
             if [[ $program =~ $receptionist ]]; then
-                ownership=$basename:$basename
+                if [ $basename == "public" ]; then
+                    ownership=public:public
+                else
+                    ownership=root:unregistered
+                    mode=550
+                fi
             else
                 ownership=$user:$user
             fi
