@@ -20,4 +20,4 @@ db.createDatabase syslog, (database) ->
       process.stdout.write("#{account.sshKey}\n")
       if results.length
         activation = results.shift()
-        process.stdout.write("#{activation.sshKey}\n")
+        process.stdout.write("command=\"/puppy/bin/unregistered_receptionist\",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty #{activation.sshKey}\n")
