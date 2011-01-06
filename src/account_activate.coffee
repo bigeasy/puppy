@@ -1,22 +1,22 @@
-exec      = require("child_process").exec
-shell     = new (require("common/shell").Shell)()
-database  = new (require("common/database").Database)()
+require.paths.unshift("/puppy/lib/node")
 
-module.exports.command = (bin, argv) ->
-  authorize = (code) ->
-    exec "/bin/hostname", (error, stdout) ->
-      if error
-        console.log error
-        throw new Error("Cannot get hostname.")
-      hostname = stdout.substring(0, stdout.length - 1)
-      database.select "getLocalUserByActivationCode", [ code ], "localUser", (results) ->
-        process.exit 1 unless results.length
-        localUser = results.shift()
-        console.log process.env
-        process.exit 1 unless localUser.machine.hostname is hostname
-        process.exit 1 unless localUser.id + 10000 is parseInt(process.env['SUDO_UID'], 10)
-        console.log "ACTIVATING"
-        activate(localUser, code)
+exec      = require("child_process").exec
+syslog = new (require("common/syslog").Syslog)({ tag: "account_activate", pid: true })
+shell     = new (require("common/shell").Shell)(syslog)
+db        = require("common/database")
+
+argv = process.argv.slice 2
+hostname = argv.shift()
+
+db.createDatabase syslog, (database) ->
+  authorize = (hostname, code) ->
+    database.select "getLocalUserByActivationCode", [ code ], "localUser", (results) ->
+      shell.verify(results.length is 1, "Cannot find activation for code #{code}.")
+      localUser = results.shift()
+      shell.verify(localUser.machine.hostname is hostname, "Incorrect hostname #{hostname}.")
+      shell.verify(localUser.id + 10000 is parseInt(process.env["SUDO_UID"], 10),
+        "SUDO_UID #{process.env["SUDO_UID"]} does not match #{localUser.id + 10000}.")
+      activate(localUser, code)
 
   activate = (localUser, code) ->
     console.log "ACTIVATING"
@@ -43,10 +43,8 @@ module.exports.command = (bin, argv) ->
           console.log results
           database.fetchLocalUser results.insertId, (localUser) ->
             console.log localUser
-            exec "/usr/bin/ssh -i /home/puppy/.ssh/id_puppy_private puppy@#{localUser.machine.hostname} /usr/bin/sudo #{bin}/private user:create 1", (error) ->
-              throw error if error
+            # That other stuff goes here.
 
-  stdin = process.openStdin()
-  code = ""
-  stdin.on "data", (chunk) -> code += chunk.toString()
-  stdin.on "end", -> authorize(code)
+  shell.stdin 33, (error, stdin) ->
+    throw error if error
+    authorize(hostname, stdin.substring(0, 32))
