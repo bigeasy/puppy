@@ -233,6 +233,36 @@ files_read_etc_files(private_user_provision_t)
 hostname_exec(private_user_provision_t)
 
 ############################################################################
+### Policy for `user:decommission`.
+############################################################################
+
+# User creation is performed as root.
+puppy_job_sudo_root(private_user_decommission)
+
+job_sudo_private(private_user_decommission)
+
+allow puppy_t private_user_decommission_t:fifo_file rw_fifo_file_perms;
+
+allow private_user_decommission_t { home_root_t user_home_dir_t }:dir list_dir_perms;
+allow private_user_decommission_t user_home_dir_t:dir read_file_perms;
+
+# Allow deletion of existing home directory.
+allow private_user_decommission_t user_home_dir_t:dir delete_dir_perms;
+
+# Allow chown of home directory and DAC override for root.
+allow private_user_decommission_t self:capability { dac_override };
+
+# Create cache files as puppy_cache_t.
+puppy_manage_cache_files(private_user_decommission_t)
+
+# Relocate the home directory.
+allow private_user_decommission_t user_home_dir_t:dir { write rename reparent };
+manage_dirs_pattern(private_user_decommission_t, home_root_t, home_root_t)
+
+# Execute hostname. 
+hostname_exec(private_user_decommission_t)
+
+############################################################################
 ### Policy for `user:chown`.
 ############################################################################
 

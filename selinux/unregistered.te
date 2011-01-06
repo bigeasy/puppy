@@ -6,14 +6,52 @@ require {
     type delegate_t;
 }
 
+role unregistered_r;                            # The unregistered role.
+role unregistered_r types unregistered_agent_t;
+role unregistered_r types unregistered_sudo_t;
+
+type unregistered_exec_t;     # Use for both the proxy and the agent program.
+type unregistered_agent_t;    # Invokes the unregistered program as the puppy user.
+
+type account_activate_exec_t;
+
+hostname_exec(unregistered_agent_t)
+
+allow delegate_t unregistered_agent_t:fifo_file rw_fifo_file_perms;
+
+# The unregistered proxy program is a Node.js program.
+puppy_node_exec(unregistered_agent_t)
+allow unregistered_agent_t self:fifo_file rw_fifo_file_perms;
+puppy_exec_puppy_bin(unregistered_agent_t)
+puppy_read_puppy_bin(unregistered_t)
+
+allow unregistered_agent_t unregistered_exec_t:lnk_file read;
+allow unregistered_t unregistered_exec_t:lnk_file read;
+
+# Write piped output.
+allow unregistered_t self:fifo_file rw_file_perms;
+
 # Create a serverly restricted user.
 puppy_restricted_user_template(unregistered)
 
 # Can sudo to the delegate user into order to register.
 puppy_sudo(unregistered)
 
+# Transition from delegate to delegate using sudo.
+domtrans_pattern(unregistered_t, unregistered_exec_t, unregistered_agent_t)
+domtrans_pattern(unregistered_agent_t, sudo_exec_t, unregistered_sudo_t)
+domtrans_pattern(unregistered_sudo_t, account_activate_exec_t, delegate_t)
+application_domain(delegate_t, account_activate_exec_t)
+application_domain(unregistered_agent_t, unregistered_exec_t)
+allow delegate_t unregistered_exec_t:lnk_file read;
+
 # Allow the unregistered role to enter delegate domains.
 puppy_delegate_roles(unregistered_r)
+
+logging_send_syslog_msg(unregistered_agent_t)
+
+allow delegate_t account_activate_exec_t:lnk_file read;
+read_files_pattern(delegate_t, account_activate_exec_t, account_activate_exec_t)
 
 # Generate the unregistered user.
 gen_user(unregistered_u,, unregistered_r, s0, s0)

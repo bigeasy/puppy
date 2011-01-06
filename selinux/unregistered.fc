@@ -1,0 +1,4 @@
+/puppy/bin/unregistered_receptionist        gen_context(system_u:object_r:unregistered_exec_t, s0)
+/puppy/bin/unregistered_receptionist@.*     gen_context(system_u:object_r:unregistered_exec_t, s0)
+/puppy/bin/account_activate                 gen_context(system_u:object_r:account_activate_exec_t, s0)
+/puppy/bin/account_activate@.*              gen_context(system_u:object_r:account_activate_exec_t, s0)
