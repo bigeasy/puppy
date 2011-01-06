@@ -8,6 +8,5 @@
     , "user_status":        "./bin/user_status.js"
     , "user_activation":    "./bin/user_activation.js"
     , "user_policy_version":"./bin/user_policy_version.js"
-    , "user_provisioned":   "./bin/user_provisioned.js"
     }
 }
