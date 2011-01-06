@@ -68,6 +68,23 @@ class Shell
     program.on "exit", (code) -> callback(code, stdout, stderr)
     program.stdin.write(source)
     program.stdin.end()
+  verify: (condition, message, context) ->
+    unless condition
+      context or= {}
+      @abend message, context
+  abend: (message, context) ->
+    @syslog.send "err", "ERROR: #{message}", context
+    process.exit 1
+  hostname: (callback) ->
+    hostname = spawn "/bin/hostname"
+    stdout = ""
+    stderr = ""
+    hostname.stderr.on "data", (data) -> stderr += data.toString()
+    hostname.stdout.on "data", (data) -> stdout += data.toString()
+    hostname.on "exit", (code) =>
+      if code != 0
+        @abend "Unable to execute hostname.", { code, stderr, stdout }
+      callback(stdout.substring(0, stdout.length - 1))
   enqueue: (hostname, splat...) ->
     commands = []
     for command in splat
@@ -81,8 +98,7 @@ class Shell
     stdin.on "data", (chunk) ->
       body += chunk
       if body.length > length
-        dump = JSON.stringify
-          stdin: body.substring(0, 512)
+        dump = JSON.stringify { stdin: body.substring(0, 512) }
         callback(new RangeError("ERROR: Standard input longer than #{length} characters. #{dump}"), null)
         stdin.close()
     stdin.on "end", ->
