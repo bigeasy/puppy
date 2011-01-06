@@ -2,8 +2,8 @@
 ,   "version":          "0.0.1"
 ,   "author":           "Alan Gutierrez"
 ,   "directories":      { "lib" : "./lib" }
-,   "bin":              { "public_receptionist":    "./bin/public_receptionist.js"
+,   "bin":              { "account_home":           "./bin/account_home.js"
                         , "account_register":       "./bin/account_register.js"
-                        , "account_home":           "./bin/account_home.js"
+                        , "public_receptionist":    "./bin/public_receptionist.js"
                         }
 }
