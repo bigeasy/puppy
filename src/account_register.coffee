@@ -51,6 +51,7 @@ db.createDatabase syslog, (database) ->
               [ "user:restorecon", [ localUser.id ] ],
               [ "user:authorize", [ localUser.id ] ],
               [ "user:restorecon", [ localUser.id ] ],
+              [ "user:group", [ localUser.id, "unregistered" ] ],
               [ "user:chown", [ localUser.id ] ],
               [ "user:invite", [], code ]
 
