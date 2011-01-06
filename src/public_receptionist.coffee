@@ -2,7 +2,7 @@ require.paths.unshift("/puppy/lib/node")
 
 spawn = require("child_process").spawn
 body = ""
-syslog = new (require("common/syslog").Syslog)({ tag: "public_proxy", pid: true })
+syslog = new (require("common/syslog").Syslog)({ tag: "public_receptionist", pid: true })
 
 stdin = process.openStdin()
 stdin.on "data", (chunk) ->
@@ -13,7 +13,7 @@ stdin.on "data", (chunk) ->
 stdin.on "end", ->
   command = JSON.parse(body)
 
-  if ! /^\/puppy\/bin\/(account_register|account_home)$/.test(command[0])
+  if ! /^\/puppy\/bin\/account_(register|home)$/.test(command[0])
     syslog.send "err", "Invalid command #{command[0]}.", {}
     process.exit(1)
 
