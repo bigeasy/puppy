@@ -47,6 +47,7 @@ db.createDatabase syslog, (database) ->
             shell.enqueue localUser.machine.hostname,
               [ "user:create", [ localUser.id ] ],
               [ "user:restorecon", [ localUser.id ] ],
+              [ "user:decommission", [ localUser.id ] ],
               [ "user:provision", [ localUser.id ] ],
               [ "user:restorecon", [ localUser.id ] ],
               [ "user:authorize", [ localUser.id ] ],
