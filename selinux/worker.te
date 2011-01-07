@@ -307,6 +307,12 @@ job_sudo_private(private_user_skel)
 # Read user home directory files.
 userdom_manage_home_role(system_r, private_user_skel_t)
 
+# Read the `/etc/skel` files.
+files_read_etc_files(private_user_skel_t)
+
+# Write to directories owned by the intended user.
+allow private_user_skel_t self:capability { dac_read_search dac_override };
+
 ############################################################################
 ### Policy for `user:authorize`.
 ############################################################################
