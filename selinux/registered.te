@@ -1,0 +1,8 @@
+# Policy module for the registered interface.
+policy_module(registered, 1.0.0)
+
+role registered_r;
+
+userdom_unpriv_user_template(registered)
+
+gen_user(registered_u,, registered_r, s0, s0)
