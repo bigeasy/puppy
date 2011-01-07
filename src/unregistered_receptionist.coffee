@@ -10,7 +10,7 @@ shell.hostname (hostname) ->
     throw error if error
     process.stdout.write body
 
-    if process.env["SSH_ORIGINAL_COMMAND"] != "/puppy/bin/account_activate"
+    if process.env["SSH_ORIGINAL_COMMAND"] != "/puppy/bin/account_activated"
       syslog.send "err", "Invalid command #{process.env["SSH_ORIGINAL_COMMAND"]}.", {}
       process.exit(1)
 

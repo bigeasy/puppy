@@ -53,6 +53,7 @@ db.createDatabase syslog, (database) ->
               [ "user:restorecon", [ localUser.id ] ],
               [ "user:group", [ localUser.id, "registered" ] ],
               [ "user:chown", [ localUser.id ] ]
+            process.stdout.write "Activation successful. Welcome to Puppy.\n"
 
   shell.stdin 33, (error, stdin) ->
     throw error if error
