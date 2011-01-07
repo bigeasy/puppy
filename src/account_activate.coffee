@@ -43,7 +43,16 @@ db.createDatabase syslog, (database) ->
           console.log results
           database.fetchLocalUser results.insertId, (localUser) ->
             console.log localUser
-            # That other stuff goes here.
+            shell.enqueue localUser.machine.hostname,
+              [ "user:create", [ localUser.id ] ],
+              [ "user:restorecon", [ localUser.id ] ],
+              [ "user:decommission", [ localUser.id ] ],
+              [ "user:provision", [ localUser.id ] ],
+              [ "user:restorecon", [ localUser.id ] ],
+              [ "user:authorize", [ localUser.id ] ],
+              [ "user:restorecon", [ localUser.id ] ],
+              [ "user:group", [ localUser.id, "registered" ] ],
+              [ "user:chown", [ localUser.id ] ]
 
   shell.stdin 33, (error, stdin) ->
     throw error if error
