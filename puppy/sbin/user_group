@@ -7,10 +7,9 @@
 user=$1
 group=$2
 assert_valid_user $user
-assert_valid_home_dir $user
 
 uid=$(($user + 10000))
 
 echo $group | /bin/grep '^\(un\)\?registered$' > /dev/null || abend "Only registered and unregistred groups allowed."
 
-/usr/sbin/usermod -g $group u$uid
+/usr/sbin/usermod -g $group u$uid 2>/dev/null || abend "Cannot modify user."
