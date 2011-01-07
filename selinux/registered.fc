@@ -1,0 +1,2 @@
+/puppy/bin/account_activated@.*                 gen_context(system_u:object_r:account_activated_exec_t, s0)
+/puppy/bin/account_activated                    gen_context(system_u:object_r:account_activated_exec_t, s0)
