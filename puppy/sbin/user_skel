@@ -1,0 +1,23 @@
+#!/bin/bash
+
+. /puppy/bin/functions
+
+[ $# -ne 1 ] && abend "Incorrect count of arguments ($#)."
+
+user=$1
+assert_valid_user $user
+assert_valid_home_dir $user
+
+uid=$(($user + 10000))
+
+function copy_files()
+{
+    source=$1
+    for file in $(/bin/find $source -type f -printf "%P\n"); do
+        dest=/home/u${uid}/$file
+        /bin/mkdir -p $(/usr/bin/dirname /home/u${uid}/$file)
+        /bin/cp $source/$file $dest
+    done
+}
+
+copy_files /etc/skel
