@@ -292,6 +292,22 @@ allow private_user_chown_t home_root_t:dir setattr;
 files_read_etc_files(private_user_chown_t)
 
 ############################################################################
+### Policy for `user:skel`.
+############################################################################
+
+# User creation is performed as root.
+puppy_job_sudo_root(private_user_skel)
+
+# Execute hostname. 
+hostname_exec(private_user_skel_t)
+
+# Run the private utility.
+job_sudo_private(private_user_skel)
+
+# Read user home directory files.
+userdom_manage_home_role(system_r, private_user_skel_t)
+
+############################################################################
 ### Policy for `user:authorize`.
 ############################################################################
 
