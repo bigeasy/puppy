@@ -9,18 +9,16 @@
 # Assert that the arguments are valid.
 [ $# -ne 1 ] && abend "Incorrect count of arguments ($#)."
 
-user=$1
+uid=$1
 
-assert_valid_user $user
-
-uid=$(($user + 10000))
+assert_valid_user $uid
 
 # Get the current policy version for the user.
-version=$(/usr/bin/sudo -u delegate /puppy/bin/user_policy_version $(/bin/hostname) $user 2>/dev/null)
+version=$(/usr/bin/sudo -u delegate /puppy/bin/user_policy_version $(/bin/hostname) $uid 2>/dev/null)
 [ $? -ne 0 ] && abend "MySQL not available."
 
 # Get the targeted policy version.
-target_version=$(/usr/bin/sudo -u delegate /puppy/bin/policy_version $(/bin/hostname) $user)
+target_version=$(/usr/bin/sudo -u delegate /puppy/bin/policy_version $(/bin/hostname) $uid)
 
 # Rebuild if it is brand new or less than the maximum version.
 rebuild=0
@@ -59,7 +57,7 @@ else
     exit 1
 fi
 
-/usr/bin/sudo -u delegate /puppy/bin/user_policy_version $(/bin/hostname) $user $target_version
+/usr/bin/sudo -u delegate /puppy/bin/user_policy_version $(/bin/hostname) $uid $target_version
 
 # If we are updating then enqueue the next update.
 if [ $updating -eq 1 ]; then

@@ -4,9 +4,7 @@
 
 [ $# -ne 1 ] && abend "Incorrect count of arguments ($#)."
 
-user=$1
-assert_valid_user $user
-
-uid=$(($user + 10000))
+uid=$1
+assert_valid_user $uid
 
 /sbin/restorecon -R "/home/u$uid"

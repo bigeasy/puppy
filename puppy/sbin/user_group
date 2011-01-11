@@ -4,11 +4,9 @@
 
 [ $# -ne 2 ] && abend "Incorrect count of arguments ($#)."
 
-user=$1
+uid=$1
 group=$2
-assert_valid_user $user
-
-uid=$(($user + 10000))
+assert_valid_user $uid
 
 echo $group | /bin/grep '^\(liminal\|protected\)$' > /dev/null || abend "Only liminal and protected groups allowed."
 

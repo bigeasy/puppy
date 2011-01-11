@@ -4,9 +4,9 @@
 
 [ $# -ne 1 ] && abend "Incorrect count of arguments ($#)."
 
-user=$1
-assert_valid_user $user
-assert_valid_home_dir $user
+uid=$1
+assert_valid_user $uid
+assert_valid_home_dir $uid
 
 umask 022
 /bin/mkdir -p /home/u$uid/.ssh
@@ -18,7 +18,7 @@ umask 077
 
 # If we redirect directly to authorized_keys, we'll have to modfiy the SELinux
 # policy to allow the delegate domain to write home directories.
-keys=$(/usr/bin/sudo -u delegate /puppy/bin/user_keys $(/bin/hostname) $user)
+keys=$(/usr/bin/sudo -u delegate /puppy/bin/user_keys $(/bin/hostname) $uid)
 
 # Quoting keys is necessary to keep echo from swallowing the new lines.
 # http://stackoverflow.com/questions/3445628/bash-line-concatenation-during-variable-interpolation

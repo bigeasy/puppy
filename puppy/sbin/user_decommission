@@ -4,12 +4,10 @@
 
 [ $# -ne 1 ] && abend "Incorrect count of arguments ($#)."
 
-user=$1
-assert_valid_user $user
+uid=$1
+assert_valid_user $uid
 
-uid=$(($user + 10000))
-
-status=$(/usr/bin/sudo -H -u delegate /puppy/bin/user_status $(/bin/hostname) $user)
+status=$(/usr/bin/sudo -H -u delegate /puppy/bin/user_status $(/bin/hostname) $uid)
 if [ $? -ne 0 ]; then
     abend "Unable to check status of user $uid."
 fi
@@ -20,5 +18,5 @@ if [ $status -ne 0 ]; then
     directory="/var/cache/puppy/decommissioned/u${uid}/$(/bin/date --rfc-3339=seconds | /bin/sed 's/ /T/')"
     /bin/mkdir -p $(dirname $directory)
     /bin/mv /home/u${uid} $directory || abend "Cannot move home directory /home/u${uid}."
-    /usr/bin/sudo -H -u delegate /puppy/bin/user_status $(/bin/hostname) $user 0
+    /usr/bin/sudo -H -u delegate /puppy/bin/user_status $(/bin/hostname) $uid 0
 fi
