@@ -192,6 +192,9 @@ relabelfrom_lnk_files_pattern(private_user_restorecon_t, { file_type }, { file_t
 relabelfrom_fifo_files_pattern(private_user_restorecon_t, { file_type }, { file_type })
 relabelfrom_sock_files_pattern(private_user_restorecon_t, { file_type }, { file_type })
 
+# For `unlabeled_t`.
+kernel_relabelfrom_unlabeled_files(private_user_restorecon_t)
+
 # Allow relabling to home, SSH types.
 allow private_user_restorecon_t { user_home_t user_home_dir_t ssh_home_t }:dir relabelto;
 allow private_user_restorecon_t { user_home_t ssh_home_t }:file relabelto;

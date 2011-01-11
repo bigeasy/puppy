@@ -23,7 +23,7 @@ do
     fi
 done
 
-for user in unregistered
+for user in protected liminal
 do
     echo "$mapped" | grep '^%'$user'$' > /dev/null
     if [ $? -ne 0 ]

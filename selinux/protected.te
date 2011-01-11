@@ -1,0 +1,25 @@
+# Policy module for the protected interface.
+policy_module(protected, 1.0.0)
+
+role protected_r;
+role protected_r types protected_sudo_t;
+
+userdom_unpriv_user_template(protected)
+
+puppy_sudo(protected)
+
+# The proxy needs to read Puppy executables.
+puppy_read_puppy_bin(protected_t)
+
+############################################################################
+### Policy for `account_protected`.
+############################################################################
+#
+protected_program(account_activated)
+
+role protected_r types account_activated_t;
+
+allow protected_t account_activated_exec_t:lnk_file { getattr read };
+allow account_activated_t user_devpts_t:chr_file rw_term_perms;
+
+gen_user(protected_u,, protected_r, s0, s0)

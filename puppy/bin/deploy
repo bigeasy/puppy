@@ -77,15 +77,15 @@ function copy_files()
 if [ $basename == "system" ]; then
     user=root
     mode=755
-elif [ ! -z $(echo $basename | grep '^\(public\|protected\|private\)$') ]; then
+elif [ $basename == "private" ]; then
     user=delegate
-    mode=550
+    mode=500
 elif [ $basename == "job" ]; then
     user=worker
     mode=500
 else
     user=$basename
-    mode=500
+    mode=550
 fi
 
 # Install bash programs.
@@ -97,17 +97,7 @@ if [ -d src -a ! -d lib ]; then
     for coffee in $(ls src/*.coffee | /bin/sort); do
         program=$(echo $coffee | /bin/sed 's/src\/\(.*\).coffee$/\1/')
         if [ -e /puppy/bin/$program ]; then
-            receptionist="_receptionist$"
-            if [[ $program =~ $receptionist ]]; then
-                if [ $basename == "public" ]; then
-                    ownership=public:public
-                else
-                    ownership=root:unregistered
-                    mode=550
-                fi
-            else
-                ownership=$user:$user
-            fi
+            ownership=$user:$user
             /usr/bin/sudo /bin/chmod $mode /puppy/bin/$program@*
             /usr/bin/sudo /bin/chown $ownership /puppy/bin/$program@*
             /usr/bin/sudo /bin/chmod $mode /puppy/bin/$program

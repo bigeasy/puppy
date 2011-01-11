@@ -9,15 +9,15 @@ require {
 # Declarations
 
 role public_r;                          # The public role.
-role public_r types public_agent_t;
+role public_r types public_receptionist_t;
 role public_r types public_sudo_t;
 puppy_delegate_roles(public_r)
 
-type public_exec_t;     # Use for both the proxy and the agent program.
-type public_agent_t;    # Invokes the public program as the puppy user.
+type public_exec_t;     # Use for both the proxy and the receptionist program.
+type public_receptionist_t;    # Invokes the public program as the puppy user.
 puppy_sudo(public)
 
-allow delegate_t public_agent_t:fifo_file rw_fifo_file_perms;
+allow delegate_t public_receptionist_t:fifo_file rw_fifo_file_perms;
 
 # Create a restricted user, this will create basic roll and the public_t. 
 puppy_restricted_user_template(public)
@@ -26,17 +26,17 @@ puppy_restricted_user_template(public)
 role public_r types public_t;
 
 # Domain transition to the public angent domain.
-domtrans_pattern(public_t, public_exec_t, public_agent_t)
-application_domain(public_agent_t, public_exec_t)
+domtrans_pattern(public_t, public_exec_t, public_receptionist_t)
+application_domain(public_receptionist_t, public_exec_t)
 allow public_t public_exec_t:lnk_file read;
 
 # The public proxy program is a Node.js program.
-puppy_node_exec(public_agent_t)
-allow public_agent_t self:fifo_file rw_fifo_file_perms;
-puppy_exec_puppy_bin(public_agent_t)
+puppy_node_exec(public_receptionist_t)
+allow public_receptionist_t self:fifo_file rw_fifo_file_perms;
+puppy_exec_puppy_bin(public_receptionist_t)
 puppy_read_puppy_bin(public_t)
 
-allow public_agent_t public_exec_t:lnk_file read;
+allow public_receptionist_t public_exec_t:lnk_file read;
 allow public_t public_exec_t:lnk_file read;
 
 # Write piped output.
@@ -44,13 +44,13 @@ allow public_t self:fifo_file rw_file_perms;
 
 # Transition from public to delegate using sudo.
 
-domtrans_pattern(public_agent_t, sudo_exec_t, public_sudo_t)
-domtrans_pattern(public_sudo_t, public_exec_t, delegate_t)
-application_domain(delegate_t, public_exec_t)
-allow delegate_t public_exec_t:lnk_file read;
+domtrans_pattern(public_receptionist_t, sudo_exec_t, public_sudo_t)
+
+puppy_public_private(account_home)
+puppy_public_private(account_register)
 
 # Write to the system log.
-logging_send_syslog_msg(public_agent_t)
+logging_send_syslog_msg(public_receptionist_t)
 
 # Generate the public user.
 gen_user(public_u,, public_r, s0, s0)

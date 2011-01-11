@@ -1,0 +1,57 @@
+# Policy module for the liminal interface.
+policy_module(liminal, 1.0.0)
+
+# We will invoke the delegate to create the new user account.
+require {
+    type delegate_t;
+}
+
+role liminal_r;                            # The liminal role.
+role liminal_r types liminal_receptionist_t;
+role liminal_r types liminal_sudo_t;
+
+type liminal_exec_t;     # Use for both the proxy and the receptionist program.
+type liminal_receptionist_t;    # Invokes the liminal program as the puppy user.
+
+type account_activate_exec_t;
+
+hostname_exec(liminal_receptionist_t)
+
+allow delegate_t liminal_receptionist_t:fifo_file rw_fifo_file_perms;
+
+# The liminal proxy program is a Node.js program.
+puppy_node_exec(liminal_receptionist_t)
+allow liminal_receptionist_t self:fifo_file rw_fifo_file_perms;
+puppy_exec_puppy_bin(liminal_receptionist_t)
+puppy_read_puppy_bin(liminal_t)
+
+allow liminal_receptionist_t liminal_exec_t:lnk_file read;
+allow liminal_t liminal_exec_t:lnk_file read;
+
+# Write piped output.
+allow liminal_t self:fifo_file rw_file_perms;
+
+# Create a serverly restricted user.
+puppy_restricted_user_template(liminal)
+
+# Can sudo to the delegate user into order to register.
+puppy_sudo(liminal)
+
+# Transition from delegate to delegate using sudo.
+domtrans_pattern(liminal_t, liminal_exec_t, liminal_receptionist_t)
+domtrans_pattern(liminal_receptionist_t, sudo_exec_t, liminal_sudo_t)
+domtrans_pattern(liminal_sudo_t, account_activate_exec_t, delegate_t)
+application_domain(delegate_t, account_activate_exec_t)
+application_domain(liminal_receptionist_t, liminal_exec_t)
+allow delegate_t liminal_exec_t:lnk_file read;
+
+# Allow the liminal role to enter delegate domains.
+puppy_delegate_roles(liminal_r)
+
+logging_send_syslog_msg(liminal_receptionist_t)
+
+allow delegate_t account_activate_exec_t:lnk_file read;
+read_files_pattern(delegate_t, account_activate_exec_t, account_activate_exec_t)
+
+# Generate the liminal user.
+gen_user(liminal_u,, liminal_r, s0, s0)

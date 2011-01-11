@@ -11,7 +11,7 @@
 ### </param>
 ##
 #
-template(`registered_sudo_program',`
+template(`protected_sudo_program',`
     # Domain types for proxy and job.
     type $1_proxy_t;
     type $1_t;
@@ -78,7 +78,7 @@ template(`registered_sudo_program',`
 ### </param>
 ##
 #
-template(`registered_program',`
+template(`protected_program',`
     # Domain types for proxy and job.
     type $1_t;
 
@@ -93,10 +93,10 @@ template(`registered_program',`
 
     # Transition from worker to the proxy domain, from the transition program to
     # the sudo domain, from sudo domain to the job domain.
-    domtrans_pattern(registered_t, $1_exec_t, $1_t)
+    domtrans_pattern(protected_t, $1_exec_t, $1_t)
 
     # sudo will attempt to read and write to stdin and stdout.
-    dontaudit $1_t registered_t:fifo_file rw_fifo_file_perms;
+    dontaudit $1_t protected_t:fifo_file rw_fifo_file_perms;
 
     # The working script will report to the proxy script via stdio.
 #    allow $1_t $1_proxy_t:fifo_file rw_fifo_file_perms;
@@ -111,7 +111,7 @@ template(`registered_program',`
     puppy_exec_puppy_bin($1_t)
 
     # Allow worker to read the NPM link to the executable.
-    allow registered_t $1_exec_t:lnk_file read;
+    allow protected_t $1_exec_t:lnk_file read;
 
     # Alllow the proxy to read the NPM link to the executable.
     allow $1_t $1_exec_t:lnk_file read;
