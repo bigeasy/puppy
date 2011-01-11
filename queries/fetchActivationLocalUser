@@ -5,7 +5,7 @@ SELECT machineId, id, ?, CURRENT_TIMESTAMP()
   FROM LocalUser as lu
  -- Select from the local users associated with the activation application
  -- local user.
- WHERE (lu.machineId, lu.id) IN (SELECT machineId, id
+ WHERE (lu.machineId, lu.id) IN (SELECT machineId, localUserId
                                    FROM ApplicationLocalUser
                                   WHERE applicationId = 1)
   -- Exclude those already associated.
