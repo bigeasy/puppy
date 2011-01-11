@@ -8,11 +8,11 @@ INSERT INTO Machine (hostname, ip, created)
 VALUES ('dvor.prettyrobots.com', '127.0.0.1', CURRENT_TIMESTAMP())
 \g
 INSERT INTO LocalUser(machineId, id, policy, created)
-VALUES (1, 0, 1, CURRENT_TIMESTAMP())
+VALUES (1, 10000, 1, CURRENT_TIMESTAMP())
 \g
 INSERT INTO ApplicationLocalUser(machineId, localUserId, applicationId, created)
-VALUES(1, 0, 1, CURRENT_TIMESTAMP())
+VALUES(1, 10000, 1, CURRENT_TIMESTAMP())
 \g
 INSERT INTO ActivationLocalUser(machineId, localUserId, code, created)
-VALUES(1, 0, '', CURRENT_TIMESTAMP())
+VALUES(1, 10000, '', CURRENT_TIMESTAMP())
 \g

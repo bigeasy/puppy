@@ -15,15 +15,14 @@ function assert_valid_user()
         abend "Incorrect parameter. Single UID parameter expected."
     fi
 
-    if [ $user -lt 1 -o $user -gt 100000000 ]; then
+    if [ $user -lt 10001 -o $user -gt 100000000 ]; then
         abend "Puppy user id value $user is out of range."
     fi
 }
 
 function assert_valid_home_dir()
 {
-    user=$1
-    uid=$(($user + 10000))
+    uid=$1
     if [ ! -d /home/u$uid ]; then
         abend "Home directory /home/u$uid does not exist."
     fi
