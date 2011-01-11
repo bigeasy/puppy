@@ -21,6 +21,6 @@ fi
 umask 077
 /bin/rm -rf /home/u$uid
 /bin/mkdir /home/u$uid
-/bin/chown u$uid:unregistered /home/u$uid
+/bin/chown u$uid:liminal /home/u$uid
 
 /usr/bin/sudo -H -u delegate /puppy/bin/user_status $(/bin/hostname) $user 1
