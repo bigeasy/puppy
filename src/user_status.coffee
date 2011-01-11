@@ -15,7 +15,7 @@ db.createDatabase syslog, (database) ->
   if argv.length is 0
     database.select "getLocalUser", [ hostname, id ], "localUser", (results) ->
       if results.length is 0
-        syslog.send "err", "ERROR: Cannot find user u#{id + 10000} on #{hostname}."
+        syslog.send "err", "ERROR: Cannot find user u#{id} on #{hostname}."
         process.exit 1
       localUser = results.shift()
       process.stdout.write("#{localUser.status}\n")
@@ -23,5 +23,5 @@ db.createDatabase syslog, (database) ->
     status = argv.shift()
     database.select "setLocalUserStatus", [ status, hostname, id ], (results) ->
       if results.affectedRows is 0
-        syslog.send "err", "ERROR: Cannot find user u#{id + 10000} on #{hostname}."
+        syslog.send "err", "ERROR: Cannot find user u#{id} on #{hostname}."
         process.exit 1

@@ -15,7 +15,7 @@ email     =  argv.shift()
 sendEmailOrElse = (results, orElse) ->
   if results.length
     localUser = results.shift()
-    process.stdout.write "u#{localUser.id + 10000}@#{localUser.machine.hostname}\n"
+    process.stdout.write "u#{localUser.id}@#{localUser.machine.hostname}\n"
   else
     orElse()
 

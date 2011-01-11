@@ -13,7 +13,7 @@ id        = parseInt argv.shift(), 10
 db.createDatabase syslog, (database) ->
   database.select "getAccountByLocalUser", [ hostname, id ], "account", (results) ->
     if results.length is 0
-      syslog.send "err", "ERROR: Cannot find account on #{hostname} for user u#{10000 + id}."
+      syslog.send "err", "ERROR: Cannot find account on #{hostname} for user u#{id}."
       process.exit 1
     account = results.shift()
     database.select "getActivationByLocalUser", [ hostname, id ], "activation", (results) ->

@@ -14,8 +14,8 @@ db.createDatabase syslog, (database) ->
       shell.verify(results.length is 1, "Cannot find activation for code #{code}.")
       localUser = results.shift()
       shell.verify(localUser.machine.hostname is hostname, "Incorrect hostname #{hostname}.")
-      shell.verify(localUser.id + 10000 is parseInt(process.env["SUDO_UID"], 10),
-        "SUDO_UID #{process.env["SUDO_UID"]} does not match #{localUser.id + 10000}.")
+      shell.verify(localUser.id is parseInt(process.env["SUDO_UID"], 10),
+        "SUDO_UID #{process.env["SUDO_UID"]} does not match #{localUser.id}.")
       activate(localUser, code)
 
   activate = (localUser, code) ->
