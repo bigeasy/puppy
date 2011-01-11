@@ -3,9 +3,6 @@
 ,   "author":           "Alan Gutierrez"
 ,   "directories":      { "lib" : "./lib" }
 ,   "bin":
-    { "protected" : "./bin/protected.js"
-    , "account_activate":           "./bin/account_activate.js"
-    , "account_activated":          "./bin/account_activated.js"
-    , "unregistered_receptionist":  "./bin/unregistered_receptionist.js"
+    { "account_activated":          "./bin/account_activated.js"
     }
 }
