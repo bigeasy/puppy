@@ -62,3 +62,13 @@ task "clean", "rebuild the CoffeeScript docco documentation.", ->
     if branch is "client"
       exec "rm -rf documentation lib _site site/idl.css index.html", (err) ->
         throw err if err
+
+task "server", "create a configuration for the server side.", ->
+  fs.writeFileSync "./lib/location.js", """
+  module.exports.server = true;
+  """
+
+task "client", "create a configuration for the client side.", ->
+  fs.writeFileSync "./lib/location.js", """
+  module.exports.server = false;
+  """
