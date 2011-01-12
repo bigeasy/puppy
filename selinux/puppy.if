@@ -1,5 +1,5 @@
 ## <summary></summary>
-template(`puppy_sudo_delegate',`
+template(`_puppy_sudo_delegate',`
     gen_require(`
         type delegate_t, database_t, enqueue_agent_t, enqueue_exec_t, database_exec_t;
     ')

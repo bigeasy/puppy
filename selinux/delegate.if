@@ -1,1 +1,81 @@
 ## <summary></summary>
+template(`puppy_sudo_delegate', `
+    gen_require(`
+        type $2_delegate_t;
+    ')
+    allow $2_delegate_t $2_exec_t:lnk_file read;
+    type $2_exec_t;
+    application_domain($2_delegate_t, $2_exec_t)
+    domtrans_pattern($1_sudo_t, $2_exec_t, $2_delegate_t)
+')
+
+########################################
+### <summary>
+###  Create a set of dervied types for a program that will sudo to the delegate
+###  user.
+### </summary>
+### <param name="role">
+###  <summary>
+###  The role that will invoke the program as the delegate user.
+###  </summary>
+### </param>
+### <param name="prefix">
+###  <summary>
+###  The prefix to be used for deriving type names.
+###  </summary>
+### </param>
+##
+#
+template(`puppy_delegate', `
+    # The delegate domain.
+    type $2_delegate_t;
+
+    # Allow the role to assume the generated domain types.
+    role $1 types $2_delegate_t;
+    role $1 types $2_delegate_sudo_t;
+
+    # Run Node.js.
+    puppy_node_exec($2_delegate_t)
+
+    # Execute the puppy binary files.
+    puppy_exec_puppy_bin($2_delegate_t)
+
+    # Allow read and write of stdio.
+    allow $2_delegate_t self:fifo_file rw_fifo_file_perms;
+
+    # Allow sending of syslog messages.
+    logging_send_syslog_msg($2_delegate_t)
+
+    # Allow the enqueue utility to write to distpatcher stdio.
+    allow enqueue_agent_t delegate_t:fifo_file rw_fifo_file_perms;
+
+    puppy_sudo($2_delegate)
+')
+
+template(`puppy_delegate_database',`
+    gen_require(`
+        type database_t, database_exec_t, $1_delegate_sudo_t;
+    ')
+    # Allow the database utility to write to distpatcher stdio.
+    allow database_t $1_delegate_t:fifo_file rw_fifo_file_perms;
+
+    # Query MySQL.
+    puppy_mysql($1_delegate_t)
+
+    domtrans_pattern($1_delegate_sudo_t, database_exec_t, database_t)
+')
+
+template(`puppy_delegate_enqueue',`
+    gen_require(`
+        type enqueue_agent_t, enqueue_exec_t;
+    ')
+    allow enqueue_agent_t $1_delegate_t:fifo_file rw_fifo_file_perms;
+    domtrans_pattern($1_delegate_sudo_t, enqueue_exec_t, enqueue_agent_t)
+')
+
+template(`puppy_delegate_console',`
+    gen_require(`
+        type $1_delegate_t;
+    ')
+    userdom_use_user_ptys($1_delegate_t)
+')
