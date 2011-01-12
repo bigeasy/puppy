@@ -14,7 +14,7 @@ module.exports.command = (argv) ->
     command.unshift("app:fetch")
     command.unshift("/home/puppy/bin/puppy")
 
-    ssh = spawn "ssh", [ "-T", home, "/usr/bin/sudo", "/home/puppy/bin/protected", "app:fetch" ]
+    ssh = spawn "ssh", [ "-T", home, "/usr/bin/sudo", "/puppy/bin/app_fetch" ]
     ssh.stdout.on "data", (chunk) -> process.stdout.write chunk.toString()
     ssh.stderr.on "data", (chunk) -> process.stdout.write chunk.toString()
     ssh.on "exit", (code) ->
