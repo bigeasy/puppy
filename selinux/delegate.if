@@ -1,4 +1,22 @@
 ## <summary></summary>
+
+########################################
+### <summary>
+###  Create a domain transition from the sudo domain type of one type domain to
+###  a generated delegate type domain.
+### </summary>
+### <param name="from">
+###  <summary>
+###  The domain type to transition from.
+###  </summary>
+### </param>
+### <param name="prefix">
+###  <summary>
+###  The prefix to be used for deriving type names.
+###  </summary>
+### </param>
+##
+#
 template(`puppy_sudo_delegate', `
     gen_require(`
         type $2_delegate_t;
@@ -52,6 +70,17 @@ template(`puppy_delegate', `
     puppy_sudo($2_delegate)
 ')
 
+########################################
+### <summary>
+###  Allow a delegate program to read the database password.
+### </summary>
+### <param name="prefix">
+###  <summary>
+###  The prefix to be used for deriving type names.
+###  </summary>
+### </param>
+##
+#
 template(`puppy_delegate_database',`
     gen_require(`
         type database_t, database_exec_t, $1_delegate_sudo_t;
@@ -65,6 +94,17 @@ template(`puppy_delegate_database',`
     domtrans_pattern($1_delegate_sudo_t, database_exec_t, database_t)
 ')
 
+########################################
+### <summary>
+###  Allow a delegate program to enqueue jobs.
+### </summary>
+### <param name="prefix">
+###  <summary>
+###  The prefix to be used for deriving type names.
+###  </summary>
+### </param>
+##
+#
 template(`puppy_delegate_enqueue',`
     gen_require(`
         type enqueue_agent_t, enqueue_exec_t;
@@ -73,6 +113,17 @@ template(`puppy_delegate_enqueue',`
     domtrans_pattern($1_delegate_sudo_t, enqueue_exec_t, enqueue_agent_t)
 ')
 
+########################################
+### <summary>
+###  Allow a delegate program to write to the console.
+### </summary>
+### <param name="prefix">
+###  <summary>
+###  The prefix to be used for deriving type names.
+###  </summary>
+### </param>
+##
+#
 template(`puppy_delegate_console',`
     gen_require(`
         type $1_delegate_t;
