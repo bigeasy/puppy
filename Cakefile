@@ -43,8 +43,6 @@ task "gitignore", "create a .gitignore for node-ec2 based on git branch", ->
 task "docco", "rebuild the CoffeeScript docco documentation.", ->
   exec "rm -rf documentation && docco src/*.coffee && cp -rf docs documentation && rm -r docs", (err) ->
     throw err if err
-  exec "docco src/services/*.coffee && cp -rf docs documentation/services && rm -r docs", (err) ->
-    throw err if err
 
 task "index", "rebuild the Node IDL landing page.", ->
   idl     = require("idl")

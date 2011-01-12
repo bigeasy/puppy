@@ -1,4 +1,5 @@
 fs = require "fs"
+sys = require "sys"
 spawn = require("child_process").spawn
 
 class Configuration
@@ -14,22 +15,44 @@ class Configuration
     catch e
       throw e if process.binding("net").ENOENT isnt e.errno
       @local = {}
+    @global.server or= "portoroz.prettyrobots.com"
+    @dirty = {}
+
+  # Write a map of properties to the global property map. This marks the global
+  # property map dirty so that it will be written in a call to `save`. A `null`
+  # value will cause the property to be deleted from the global property map.
+  setGlobal: (properties) ->
+    for k, v of properties
+      if v is null
+        delete @global[k]
+      else
+        @global[k] = v
+    @dirty.global = true
+
+  # Write the local and global property maps, if they are dirty.
+  save: ->
+    if @dirty.global
+      pretty = JSON.stringify(@global)
+      fs.writeFileSync("#{process.env["HOME"]}/.puppy", pretty, "utf8")
+
+  # Get the value associated with the key looking first in the local property
+  # map, then in the global property map. Returns undefined if the property is
+  # not found.
   get: (key) ->
     @local[key] or @global[key]
+
   home: (callback) ->
     if not home = @get("home")
       if not email = @get("email")
         throw new Error("Email not configured.")
-      command = [ "/home/puppy/bin/public", "account:home", email ]
-      public = __dirname + "/../etc/puppy_public"
-      ssh = spawn "ssh", [ "-T", "-i", public, "-l", "public", "portoroz.prettyrobots.com" ]
-      ssh.stdin.end(JSON.stringify(command))
+      public = "#{__dirname}/../etc/public.pub"
+      ssh = spawn "ssh", [ "-T", "-i", public, "-l", "public", @get("server") ]
+      ssh.stdin.end(JSON.stringify([ "/puppy/bin/account_home", email ]))
       home = ""
       ssh.stdout.on "data", (chunk) -> home += chunk.toString()
       ssh.stderr.on "data", (chunk) -> process.stdout.write chunk.toString()
       ssh.on "exit", (code) ->
         if code is 0
-          console.log "HOME is #{home}\n"
           callback(home.substring(0, home.length - 1))
         else
           throw new Error("Unable to determine home for #{email}")
