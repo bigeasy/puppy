@@ -1,6 +1,10 @@
 # SELinux policy module for database password reader program.
 policy_module(database, 1.0.0)
 
+require {
+    type user_devpts_t;
+}
+
 ########################################
 # Declarations
 
@@ -21,3 +25,5 @@ userdom_list_user_home_dirs(database_t)
 
 # Allow read and write stdio.
 allow database_t self:fifo_file rw_fifo_file_perms;
+
+dontaudit database_t user_devpts_t:chr_file { read write };

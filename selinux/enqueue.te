@@ -4,6 +4,7 @@ policy_module(enqueue,1.0.0)
 require {
     type worker_spool_t, worker_job_exec_t, worker_job_t;
     type ssh_home_t;
+    type user_devpts_t;
 }
 
 ########################################
@@ -77,6 +78,8 @@ miscfiles_read_certs(enqueue_agent_t)
 userdom_read_user_home_content_files(enqueue_agent_t)
 read_files_pattern(enqueue_agent_t, ssh_home_t, ssh_home_t)
 logging_send_syslog_msg(enqueue_agent_t)
+
+dontaudit enqueue_agent_t user_devpts_t:chr_file { read write };
 
 # Enqueue user.
 gen_user(enqueue_u,, enqueue_r, s0, s0)

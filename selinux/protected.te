@@ -33,11 +33,14 @@ puppy_delegate_database(app_fetch)
 puppy_delegate_enqueue(app_fetch)
 puppy_delegate_console(app_fetch)
 
-#userdom_use_user_ptys(database_t)
-#userdom_use_user_ptys(enqueue_agent_t)
-##============= database_t ==============
-dontaudit database_t user_devpts_t:chr_file { read write };
-##============= enqueue_agent_t ==============
-dontaudit enqueue_agent_t user_devpts_t:chr_file { read write };
+############################################################################
+### Policy for `port_fetch`.
+############################################################################
+
+puppy_sudo_delegate(protected, port_fetch)
+puppy_delegate(protected_r, port_fetch)
+puppy_delegate_database(port_fetch)
+puppy_delegate_enqueue(port_fetch)
+puppy_delegate_console(port_fetch)
 
 gen_user(protected_u,, protected_r, s0, s0)
