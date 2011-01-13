@@ -1,2 +1,3 @@
 %protected ALL = (delegate) NOPASSWD: \
-    /puppy/bin/app_fetch
+    /puppy/bin/app_fetch, \
+    /puppy/bin/port_fetch
