@@ -54,9 +54,10 @@ CREATE TABLE ActivationLocalUser (
 \g
 CREATE UNIQUE INDEX ActivationLocalUser_Code ON ActivationLocalUser(code)
 \g
-CREATE TABLE ApplicationLocalPort (
+CREATE TABLE LocalUserLocalPort (
     id              INTEGER NOT NULL AUTO_INCREMENT,
     machineId       INTEGER NOT NULL,
+    localUserId     INTEGER NOT NULL,
     port            INTEGER NOT NULL,
     applicationId   INTEGER NOT NULL,
     service         INTEGER NOT NULL,
@@ -65,9 +66,9 @@ CREATE TABLE ApplicationLocalPort (
     PRIMARY KEY (id)
 )
 \g
-CREATE UNIQUE INDEX ApplicationLocalPort_LocalPort ON ApplicationLocalPort(machineId, port)
+CREATE UNIQUE INDEX LocalUserLocalPort_LocalPort ON LocalUserLocalPort(machineId, port)
 \g
-CREATE INDEX ApplicationLocalPort_ApplicationId ON ApplicationLocalPort(applicationId)
+CREATE INDEX LocalUserLocalPort_LocalUser ON LocalUserLocalPort(machineId, localUserId)
 \g
 CREATE TABLE Machine (
     id              INTEGER NOT NULL AUTO_INCREMENT,
