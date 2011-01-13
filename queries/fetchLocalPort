@@ -1,9 +1,13 @@
-INSERT INTO ApplicationLocalPort (
-    applicationId, machineId, service, port, created
+-- Insert a local port assocation into the local user local port table selecting
+-- from the local ports that are not already in the table.
+INSERT INTO LocalUserLocalPort (
+    machineId, localUserId, service, port, created
 )
 SELECT ?, ?, ?, port, CURRENT_TIMESTAMP()
   FROM LocalPort as lu
  WHERE NOT EXISTS (SELECT *
-                     FROM ApplicationLocalPort
+                     FROM LocalUserLocalPort
                     WHERE machineId = lu.machineId
                       AND port = lu.port)
+-- We only need one.
+ LIMIT 1

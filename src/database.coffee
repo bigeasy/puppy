@@ -67,11 +67,10 @@ class Database
       @select "getLocalUserAccount", [ hostname, localUserId ], "account", (results) ->
         callback(results.shift())
 
-  fetchLocalPort: (applicationId, machineId, service, callback) ->
-    @select "fetchLocalPort", [ applicationId, machineId, service ], (results) =>
-      console.log results
+  fetchLocalPort: (machineId, localUserId, service, callback) ->
+    @select "fetchLocalPort", [ machineId, localUserId, service ], (results) =>
       if results.affectedRows is 0
-        @createLocalPort applicationId, machineId, service, callback
+        @createLocalPort machineId, localUserId, service, callback
       else
         @select "getLocalPortByAssignment", [ results.insertId ], "localPort", (results) ->
           callback(results.shift())

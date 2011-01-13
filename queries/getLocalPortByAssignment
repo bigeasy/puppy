@@ -5,14 +5,8 @@ SELECT lp.machineId AS localPort__machineId,
        m.id AS localPort__machine__id,
        m.hostname AS localPort__machine__hostname,
        m.modified AS localPort__machine__modified,
-       m.created AS localPort__machine__created,
-       a.id AS localPort__application__id,
-       a.accountId AS localPort__application__accountId,
-       a.isHome AS localPort__application__isHome,
-       a.modified AS localPort__application__modified,
-       a.created AS localPort__application__created
+       m.created AS localPort__machine__created
   FROM LocalPort AS lp
   JOIN Machine AS m ON lp.machineId = m.id
-  JOIN ApplicationLocalPort AS alp ON alp.machineId = lp.machineId AND alp.port = lp.port
-  JOIN Application AS a ON alp.applicationId = a.id
- WHERE alp.id = ?
+  JOIN LocalUserLocalPort AS lulp ON lulp.machineId = lp.machineId AND lulp.port = lp.port
+ WHERE lulp.id = ?
