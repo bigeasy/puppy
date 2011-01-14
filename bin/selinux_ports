@@ -1,0 +1,3 @@
+#!/bin/bash
+
+/usr/bin/sudo /usr/sbin/semanage port -l | /bin/sed 1d | bin/filter_selinux_ports  | /bin/sort -g | /usr/bin/uniq > bin/ports.txt
