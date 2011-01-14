@@ -61,37 +61,24 @@ class Configuration
 
 module.exports.Configuration = Configuration
 
+invoke = (command, parameters, splat) ->
+  for parameter in splat
+    parameters.push(parameter)
+  program = spawn command, parameters
+  stdout = ""
+  stderr = ""
+  program.stdout.on "data", (chunk) -> stdout += chunk.toString()
+  program.stderr.on "data", (chunk) -> stderr += chunk.toString()
+  program.on "exit", (code) ->
+    if code
+      console.log stderr if code
+    else if stdout.length
+      process.stdout.write stdout
+
 module.exports.delegate = (command, splat...) ->
   if require("./location").server
-    exec "/bin/hostname", (error, stdout) ->
-      throw error if error
-      hostname = stdout.substring(0, stdout.length - 1)
-      parameters = [ "-H", "-u", "delegate", command ]
-      for parameter in splat
-        parameters.push(parameter)
-      sudo = spawn "/usr/bin/sudo", parameters
-      stdout = ""
-      stderr = ""
-      sudo.stdout.on "data", (chunk) -> stdout += chunk.toString()
-      sudo.stderr.on "data", (chunk) -> stderr += chunk.toString()
-      sudo.on "exit", (code) ->
-        if code
-          console.log stderr if code
-        else if stdout.length
-          process.stdout.write stdout
+    invoke("/usr/bin/sudo", [ "-H", "-u", "delegate", command ], splat)
   else
     configuration = new Configuration()
     configuration.home (home) ->
-      console.log home
-
-      command = argv.slice(0)
-
-      command.unshift("app:fetch")
-      command.unshift("/home/puppy/bin/puppy")
-
-      ssh = spawn "ssh", [ "-T", home, "/usr/bin/sudo", "/puppy/bin/app_fetch" ]
-      ssh.stdout.on "data", (chunk) -> process.stdout.write chunk.toString()
-      ssh.stderr.on "data", (chunk) -> process.stdout.write chunk.toString()
-      ssh.on "exit", (code) ->
-        if code != 0
-          process.stdout.write "Unable to create application.\n"
+      invoke("/usr/bin/ssh", [ "-T", home, "/usr/bin/sudo", "-H", "-u", "delegate", command ], splat)
