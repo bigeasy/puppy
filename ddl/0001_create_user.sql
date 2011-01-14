@@ -107,3 +107,8 @@ CREATE TABLE Hostname (
     FOREIGN KEY (machineId, port) REFERENCES LocalPort (machineId, port)
 )
 \g
+CREATE TABLE ReservedPort (
+    port INTEGER NOT NULL,
+    PRIMARY KEY (port)
+)
+\g

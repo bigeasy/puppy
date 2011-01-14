@@ -21,3 +21,5 @@ mysql_command "drop database puppy"
 mysql_command "create database puppy"
 mysql_script ddl/0001_create_user.sql 
 mysql_script ddl/0002_insert_account.sql 
+
+bin/load_ports | sudo -H -u janitor mysql -u root puppy

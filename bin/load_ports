@@ -1,0 +1,8 @@
+#!/bin/bash
+
+file=$(/bin/readlink -f $(/usr/bin/dirname $0))/ports.txt
+
+while read line; do
+    echo "INSERT INTO ReservedPort(port) VALUES($line)"
+    echo "\\g"
+done < $file
