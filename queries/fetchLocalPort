@@ -9,5 +9,6 @@ SELECT ?, ?, ?, port, CURRENT_TIMESTAMP()
                      FROM LocalUserLocalPort
                     WHERE machineId = lp.machineId
                       AND port = lp.port)
+   AND NOT EXISTS (SELECT * FROM ReservedPort WHERE port = lp.port)
 -- We only need one.
  LIMIT 1
