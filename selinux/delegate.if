@@ -130,3 +130,21 @@ template(`puppy_delegate_console',`
     ')
     userdom_use_user_ptys($1_delegate_t)
 ')
+
+########################################
+### <summary>
+###  Allow a delegate program to obtain the hostname.
+### </summary>
+### <param name="prefix">
+###  <summary>
+###  The prefix to be used for deriving type names.
+###  </summary>
+### </param>
+##
+#
+template(`puppy_delegate_hostname',`
+    gen_require(`
+        type $1_delegate_t;
+    ')
+    hostname_exec($1_delegate_t)
+')
