@@ -1,0 +1,17 @@
+#!/usr/bin/perl
+
+while (<>) {
+    chomp;
+    ($label, $type, $ports) = split /\s+/, $_, 3;
+    @ports = split /,\s*/, $ports;
+    foreach $port (@ports) {
+        if ($port =~ /-/ ) {
+            ($low, $high) = split /-/, $port;
+            for ($low .. $high) {
+                print "$_\n";
+            }
+        } else {
+            print "$port\n";
+        }
+    }
+}
