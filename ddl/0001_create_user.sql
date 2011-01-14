@@ -59,7 +59,6 @@ CREATE TABLE LocalUserLocalPort (
     machineId       INTEGER NOT NULL,
     localUserId     INTEGER NOT NULL,
     port            INTEGER NOT NULL,
-    applicationId   INTEGER NOT NULL,
     service         INTEGER NOT NULL,
     modified        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created         TIMESTAMP DEFAULT 0,
