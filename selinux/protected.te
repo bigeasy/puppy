@@ -30,6 +30,7 @@ allow account_activated_t user_devpts_t:chr_file rw_term_perms;
 puppy_sudo_delegate(protected, app_fetch)
 puppy_delegate(protected, app_fetch)
 puppy_delegate_database(app_fetch)
+puppy_delegate_hostname(app_fetch)
 puppy_delegate_enqueue(app_fetch)
 puppy_delegate_console(app_fetch)
 
