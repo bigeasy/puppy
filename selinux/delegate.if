@@ -49,8 +49,8 @@ template(`puppy_delegate', `
     type $2_delegate_t;
 
     # Allow the role to assume the generated domain types.
-    role $1 types $2_delegate_t;
-    role $1 types $2_delegate_sudo_t;
+    role $1_r types $2_delegate_t;
+    role $1_r types $2_delegate_sudo_t;
 
     # Run Node.js.
     puppy_node_exec($2_delegate_t)
@@ -64,8 +64,7 @@ template(`puppy_delegate', `
     # Allow sending of syslog messages.
     logging_send_syslog_msg($2_delegate_t)
 
-    # Allow the enqueue utility to write to distpatcher stdio.
-    allow enqueue_agent_t delegate_t:fifo_file rw_fifo_file_perms;
+    allow $2_delegate_t $1_t:fifo_file rw_fifo_file_perms;
 
     puppy_sudo($2_delegate)
 ')
@@ -109,6 +108,7 @@ template(`puppy_delegate_enqueue',`
     gen_require(`
         type enqueue_agent_t, enqueue_exec_t;
     ')
+    # Allow the enqueue utility to write to distpatcher stdio.
     allow enqueue_agent_t $1_delegate_t:fifo_file rw_fifo_file_perms;
     domtrans_pattern($1_delegate_sudo_t, enqueue_exec_t, enqueue_agent_t)
 ')
