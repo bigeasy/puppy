@@ -33,6 +33,7 @@ maybe_clone appliances
 maybe_clone vhosts
 maybe_clone database
 maybe_clone client
+maybe_clone liminal
 
 update_project common
 update_project private
@@ -46,3 +47,4 @@ update_project appliances
 update_project vhosts
 update_project database
 update_project client
+update_project liminal
