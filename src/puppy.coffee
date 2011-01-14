@@ -66,7 +66,7 @@ module.exports.delegate = (command, splat...) ->
     exec "/bin/hostname", (error, stdout) ->
       throw error if error
       hostname = stdout.substring(0, stdout.length - 1)
-      parameters = [ "-H", "-u", "delegate", command, hostname ]
+      parameters = [ "-H", "-u", "delegate", command ]
       for parameter in splat
         parameters.push(parameter)
       sudo = spawn "/usr/bin/sudo", parameters
