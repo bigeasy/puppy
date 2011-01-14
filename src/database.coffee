@@ -75,14 +75,14 @@ class Database
         @select "getLocalPortByAssignment", [ results.insertId ], "localPort", (results) ->
           callback(results.shift())
 
-  createLocalPort: (applicationId, machineId, service, callback) ->
+  createLocalPort: (machineId, localUserId, service, callback) ->
     @select "nextLocalPort", [ machineId ], (results) =>
       nextLocalPort = results[0].nextLocalPort
       @error = (error) =>
         throw error if error.number isnt 1062
-        @createLocalPort applicationId, machineId, callback
+        @createLocalPort machineId, localUserId, service, callback
       @select "insertLocalPort", [ machineId, nextLocalPort ], (results) =>
-        @fetchLocalPort applicationId, machineId, service, callback
+        @fetchLocalPort machineId, localUserId, service, callback
 
   fetchLocalUser: (applicationId, callback) ->
     @select "getMachines", [], "machine", (results) =>

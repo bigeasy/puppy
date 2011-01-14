@@ -4,10 +4,10 @@ INSERT INTO LocalUserLocalPort (
     machineId, localUserId, service, port, created
 )
 SELECT ?, ?, ?, port, CURRENT_TIMESTAMP()
-  FROM LocalPort as lu
+  FROM LocalPort as lp
  WHERE NOT EXISTS (SELECT *
                      FROM LocalUserLocalPort
-                    WHERE machineId = lu.machineId
-                      AND port = lu.port)
+                    WHERE machineId = lp.machineId
+                      AND port = lp.port)
 -- We only need one.
  LIMIT 1
