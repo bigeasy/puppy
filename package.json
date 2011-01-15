@@ -9,6 +9,7 @@
     , "app_fetch":          "./bin/app_fetch.js"
     , "policy_version":     "./bin/policy_version.js"
     , "port_fetch":         "./bin/port_fetch.js"
+    , "port_labeled":       "./bin/port_labeled.js"
     , "user_keys":          "./bin/user_keys.js"
     , "user_status":        "./bin/user_status.js"
     , "user_activation":    "./bin/user_activation.js"
