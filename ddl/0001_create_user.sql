@@ -91,6 +91,7 @@ CREATE TABLE LocalUser (
 CREATE TABLE LocalPort (
     machineId       INTEGER NOT NULL,
     port            INTEGER NOT NULL,
+    labeled         INTEGER NOT NULL DEFAULT 0,
     modified        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created         TIMESTAMP DEFAULT 0,
     PRIMARY KEY (machineId, port)

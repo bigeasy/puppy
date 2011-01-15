@@ -7,6 +7,7 @@ worker ALL = (root) NOPASSWD: \
     /puppy/sbin/user_login, \
     /puppy/sbin/user_restorecon, \
     /puppy/sbin/user_policy, \
+    /puppy/sbin/user_port, \
     /puppy/sbin/user_provision, \
     /puppy/sbin/user_skel
 worker ALL = (delegate) NOPASSWD: \

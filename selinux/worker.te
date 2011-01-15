@@ -388,3 +388,26 @@ job_sudo_private(private_user_policy)
 
 # Ready the hostname.
 hostname_exec(private_user_policy_t)
+
+############################################################################
+### Policy for `private user:port`.
+############################################################################
+
+# User port assignment is performed as root.
+puppy_job_sudo_root(private_user_port)
+
+type filter_selinux_ports_exec_t;
+
+application_domain(private_user_port_t, filter_selinux_ports_exec_t)
+
+allow private_user_port_t filter_selinux_ports_exec_t:file execute_no_trans;
+
+# Execute semanage to assign the protected port to the user.
+seutil_run_semanage(private_user_port_t, worker_r)
+allow semanage_t private_user_port_proxy_t:fifo_file rw_fifo_file_perms;
+
+# Read and write the database.
+job_sudo_private(private_user_port)
+
+# Ready the hostname.
+hostname_exec(private_user_port_t)
