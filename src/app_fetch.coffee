@@ -23,6 +23,7 @@ db.createDatabase syslog, (database) ->
             [ "user:provision", [ localUser.id ] ],
             [ "user:restorecon", [ localUser.id ] ],
             [ "user:skel", [ localUser.id ] ],
+            [ "user:policy", [ localUser.id ] ],
             [ "user:authorize", [ localUser.id ] ],
             [ "user:restorecon", [ localUser.id ] ],
             [ "user:group", [ localUser.id, "protected" ] ],
