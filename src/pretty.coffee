@@ -10,16 +10,23 @@ module.exports.prettify = prettify = (object, depth) ->
   switch typeof object
     when "object"
       if object instanceof Array
-        prefix = "["
-        for item in object
-          output.push indent(depth), prefix, " ", prettify(item, depth + 2)
-          prefix = ","
-        output.push " ]"
+        if object.length
+          prefix = "["
+          for item in object
+            output.push indent(depth), prefix, " ", prettify(item, depth + 2), "\n"
+            prefix = ","
+          output.push indent(depth), "]"
+        else
+          output.push "[]"
       else
         prefix = "{"
         for key, value of object
           if typeof value != "undefined" and typeof value != "function"
-            output.push indent(depth), prefix, " ", prettify(key, depth + 2), ": ", prettify(value, depth + 2), "\n"
+            output.push indent(depth), prefix, " ", prettify(key, depth + 2), ": "
+            value = prettify(value, depth + 2)
+            if value.indexOf("\n") != -1
+              output.push "\n"
+            output.push value, "\n"
             prefix = ","
         output.push "}"
     when "number"
