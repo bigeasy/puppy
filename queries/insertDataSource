@@ -1,0 +1,4 @@
+INSERT INTO DataStore(applicationId, password, dataServerId, created)
+SELECT ?, ?, id, CURRENT_TIMESTAMP
+FROM DataServer
+WHERE engine = ?
