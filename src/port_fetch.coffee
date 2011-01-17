@@ -18,5 +18,11 @@ db.createDatabase syslog, (database) ->
         for localUser in results
           shell.verify(localUser.application.account.id is account.id,
                 "User attempted to fetch a port for application of another user.")
-          database.fetchLocalPort localUser.machineId, localUser.id, 1, (localUser) ->
+          database.fetchLocalPort localUser.machineId, localUser.id, 1, (localPort) ->
+            shell.enqueue localPort.localUser.machine.hostname,
+              [ "user:port", [ localPort.localUser.id, localPort.port ] ],
+              [ "user:config", [ localPort.localUser.id ] ],
+              [ "user:restorecon", [ localPort.localUser.id ] ],
+              [ "user:group", [ localPort.localUser.id, "protected" ] ],
+              [ "user:chown", [ localPort.localUser.id ] ]
             process.stdout.write "Assigned port to application t#{applicationId}.\n"

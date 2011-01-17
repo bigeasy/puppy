@@ -22,9 +22,10 @@ db.createDatabase syslog, (database) ->
             [ "user:decommission", [ localUser.id ] ],
             [ "user:provision", [ localUser.id ] ],
             [ "user:restorecon", [ localUser.id ] ],
-            [ "user:skel", [ localUser.id ] ],
             [ "user:policy", [ localUser.id ] ],
+            [ "user:skel", [ localUser.id ] ],
             [ "user:authorize", [ localUser.id ] ],
+            [ "user:config", [ localUser.id ] ],
             [ "user:restorecon", [ localUser.id ] ],
             [ "user:group", [ localUser.id, "protected" ] ],
             [ "user:chown", [ localUser.id ] ]
