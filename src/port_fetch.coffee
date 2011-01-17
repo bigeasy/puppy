@@ -1,7 +1,7 @@
 require.paths.unshift("/puppy/lib/node")
 
 exec      = require("child_process").exec
-syslog    = new (require("common/syslog").Syslog)({ tag: "account_activate", pid: true })
+syslog    = new (require("common/syslog").Syslog)({ tag: "port_fetch", pid: true })
 shell     = new (require("common/shell").Shell)(syslog)
 db        = require("common/database")
 

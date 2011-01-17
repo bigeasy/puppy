@@ -8,6 +8,7 @@
     , "account_register":   "./bin/account_register.js"
     , "app_fetch":          "./bin/app_fetch.js"
     , "config_format":      "./bin/config_format.js"
+    , "db_fetch":           "./bin/db_fetch.js"
     , "policy_version":     "./bin/policy_version.js"
     , "port_fetch":         "./bin/port_fetch.js"
     , "port_labeled":       "./bin/port_labeled.js"
