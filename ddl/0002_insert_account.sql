@@ -16,3 +16,6 @@ VALUES(1, 10000, 1, CURRENT_TIMESTAMP())
 INSERT INTO ActivationLocalUser(machineId, localUserId, code, created)
 VALUES(1, 10000, '', CURRENT_TIMESTAMP())
 \g
+INSERT INTO DataServer(engine, hostname, port, created)
+VALUES("MySQL", "dvor.prettyrobots.com", 3306, CURRENT_TIMESTAMP())
+\g

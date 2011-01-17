@@ -45,4 +45,15 @@ puppy_delegate_enqueue(port_fetch)
 puppy_delegate_hostname(port_fetch)
 puppy_delegate_console(port_fetch)
 
+############################################################################
+### Policy for `db_fetch`.
+############################################################################
+
+puppy_sudo_delegate(protected, db_fetch)
+puppy_delegate(protected, db_fetch)
+puppy_delegate_database(db_fetch)
+puppy_delegate_enqueue(db_fetch)
+puppy_delegate_hostname(db_fetch)
+puppy_delegate_console(db_fetch)
+
 gen_user(protected_u,, protected_r, s0, s0)

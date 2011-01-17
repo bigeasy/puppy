@@ -113,3 +113,25 @@ CREATE TABLE ReservedPort (
     PRIMARY KEY (port)
 )
 \g
+CREATE TABLE DataServer (
+    id              INTEGER NOT NULL AUTO_INCREMENT,
+    engine          VARCHAR(32),
+    hostname        VARCHAR(2048),
+    port            INTEGER,
+    modified        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created         TIMESTAMP DEFAULT 0,
+    PRIMARY KEY (id)
+)
+\g
+CREATE TABLE DataStore (
+    id              INTEGER NOT NULL AUTO_INCREMENT,
+    applicationId   INTEGER NOT NULL,
+    dataServerId    INTEGER NOT NULL,
+    password        VARCHAR(32),
+    modified        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created         TIMESTAMP DEFAULT 0,
+    PRIMARY KEY (id),
+    FOREIGN KEY (dataServerId) REFERENCES DataServer (id),
+    FOREIGN KEY (applicationId) REFERENCES Application (id)
+)
+\g
