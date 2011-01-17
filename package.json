@@ -7,6 +7,7 @@
     , "account_home":       "./bin/account_home.js"
     , "account_register":   "./bin/account_register.js"
     , "app_fetch":          "./bin/app_fetch.js"
+    , "config_format":      "./bin/config_format.js"
     , "policy_version":     "./bin/policy_version.js"
     , "port_fetch":         "./bin/port_fetch.js"
     , "port_labeled":       "./bin/port_labeled.js"
