@@ -32,6 +32,8 @@ allow database_t delegate_t:fifo_file rw_fifo_file_perms;
 # Allow the enqueue utility to write to distpatcher stdio.
 allow enqueue_agent_t delegate_t:fifo_file rw_fifo_file_perms;
 
+hostname_exec(delegate_t)
+
 puppy_sudo(delegate)
 
 domtrans_pattern(delegate_sudo_t, database_exec_t, database_t)

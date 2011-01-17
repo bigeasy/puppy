@@ -73,6 +73,25 @@ template(`puppy_restricted_user_template',`
 ')
 ########################################
 ## <summary>
+##	Read Puppy configuration files.
+## </summary>
+## <param name="role">
+##	<summary>
+##	Role allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+template(`puppy_read_puppy_etc',`
+    gen_require(`
+        type puppy_t, puppy_etc_t;
+    ')
+    list_dirs_pattern($1, puppy_t, puppy_t)
+    read_files_pattern($1, puppy_etc_t, puppy_etc_t)
+    read_lnk_files_pattern($1, puppy_etc_t, puppy_etc_t)
+')
+########################################
+## <summary>
 ##	Read Puppy binary files.
 ## </summary>
 ## <param name="role">

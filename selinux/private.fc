@@ -7,5 +7,5 @@
 /puppy/bin/user_policy_version@.*   gen_context(system_u:object_r:private_exec_t, s0)
 /puppy/bin/policy_version           gen_context(system_u:object_r:private_exec_t, s0)
 /puppy/bin/policy_version@.*        gen_context(system_u:object_r:private_exec_t, s0)
-/puppy/bin/conf_format              gen_context(system_u:object_r:private_exec_t, s0)
-/puppy/bin/conf_format@.*           gen_context(system_u:object_r:private_exec_t, s0)
+/puppy/bin/config_format            gen_context(system_u:object_r:private_exec_t, s0)
+/puppy/bin/config_format@.*         gen_context(system_u:object_r:private_exec_t, s0)

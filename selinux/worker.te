@@ -386,7 +386,7 @@ puppy_manage_cache_files(private_user_policy_t)
 # Read and write the database.
 job_sudo_private(private_user_policy)
 
-# Ready the hostname.
+# Read the hostname.
 hostname_exec(private_user_policy_t)
 
 ############################################################################
@@ -409,5 +409,27 @@ allow semanage_t private_user_port_proxy_t:fifo_file rw_fifo_file_perms;
 # Read and write the database.
 job_sudo_private(private_user_port)
 
-# Ready the hostname.
+# Read the hostname.
 hostname_exec(private_user_port_t)
+
+############################################################################
+### Policy for `private user:config`.
+############################################################################
+
+# User config assignment is performed as root.
+puppy_job_sudo_root(private_user_config)
+
+# Execute semanage to assign the protected port to the user.
+seutil_run_semanage(private_user_config_t, worker_r)
+allow semanage_t private_user_config_proxy_t:fifo_file rw_fifo_file_perms;
+
+# Create the configuration directories.
+userdom_manage_home_role(system_r, private_user_config_t)
+
+puppy_read_puppy_etc(private_user_config_t)
+
+# Read the network state.
+allow private_user_config_t self:capability { dac_read_search dac_override };
+
+# Read and write the database.
+job_sudo_private(private_user_config)
