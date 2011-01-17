@@ -6,6 +6,7 @@
     { "job":                "./bin/job.js"
     , "user_authorize":     "./bin/user_authorize.js"
     , "user_chown":         "./bin/user_chown.js"
+    , "user_config":        "./bin/user_config.js"
     , "user_create":        "./bin/user_create.js"
     , "user_decommission":  "./bin/user_decommission.js"
     , "user_group":         "./bin/user_group.js"

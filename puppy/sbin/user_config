@@ -1,0 +1,18 @@
+#!/bin/bash
+
+. /puppy/bin/functions
+
+[ $# -ne 1 ] && abend "Incorrect count of arguments ($#)."
+
+uid=$1
+assert_valid_user $uid
+
+address=$(/bin/cat /puppy/etc/address)
+
+/bin/mkdir -p /home/u$uid/app
+/bin/mkdir -p /home/u$uid/var
+/bin/mkdir -p /home/u$uid/tmp
+
+config=$(/usr/bin/sudo -u delegate /puppy/bin/config_format $uid $address)
+
+echo "$config" > /home/u$uid/app/configuration.json
