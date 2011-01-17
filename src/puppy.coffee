@@ -75,10 +75,10 @@ invoke = (command, parameters, splat) ->
     else if stdout.length
       process.stdout.write stdout
 
-module.exports.delegate = (command, splat...) ->
+module.exports.delegate = (command, argv) ->
   if require("./location").server
-    invoke("/usr/bin/sudo", [ "-H", "-u", "delegate", command ], splat)
+    invoke("/usr/bin/sudo", [ "-H", "-u", "delegate", command ], argv)
   else
     configuration = new Configuration()
     configuration.home (home) ->
-      invoke("/usr/bin/ssh", [ "-T", home, "/usr/bin/sudo", "-H", "-u", "delegate", command ], splat)
+      invoke("/usr/bin/ssh", [ "-T", home, "/usr/bin/sudo", "-H", "-u", "delegate", command ], argv)
