@@ -6,17 +6,11 @@ db              = require("common/database")
 
 argv            = process.argv.slice 2
 
-hostname        = argv.shift()
-uid             = argv.shift()
 dataStoreId     = parseInt argv.shift(), 10
 
 db.createDatabase syslog, (database) ->
-  database.select "getDataStoresByLocalUser", [ hostname, uid ], "dataStore", (results) ->
-    found = null
-    for dataStore in results
-      if dataStore.id is dataStoreId
-        found = dataStore
-        break
-    if not found
+  database.select "getDataStore", [ dataStoreId ], "dataStore", (results) ->
+    if results.length is 0
       process.exit 1
-    process.stdout.write "#{found.dataServer.hostname} #{found.dataServer.port} #{found.password}\n"
+    dataStore = results.shift()
+    process.stdout.write "#{dataStore.dataServer.hostname} #{dataStore.dataServer.port} #{dataStore.password}\n"
