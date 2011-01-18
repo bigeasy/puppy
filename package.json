@@ -5,6 +5,7 @@
 ,   "bin":             
     { "job":                "./bin/job.js"
     , "mysql_create":       "./bin/mysql_create.js"
+    , "mysql_grant":        "./bin/mysql_grant.js"
     , "user_authorize":     "./bin/user_authorize.js"
     , "user_chown":         "./bin/user_chown.js"
     , "user_config":        "./bin/user_config.js"

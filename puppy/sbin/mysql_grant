@@ -1,0 +1,19 @@
+#!/bin/bash
+
+. /puppy/bin/functions
+
+[ $# -ne 2 ] && abend "Incorrect count of arguments ($#)."
+
+aid=$1
+dbid=$2
+
+output=$(/usr/bin/sudo -u delegate /puppy/bin/db_password $dbid)
+hostname=$(echo $output | awk '{ print $1 }')
+port=$(echo $output | awk '{ print $2 }')
+password=$(echo $output | awk '{ print $3 }')
+
+/usr/bin/sudo -u delegate /puppy/bin/app_users $aid | \
+    /bin/awk "{ \
+        printf(\"GRANT ALL PRIVILEGES ON d$dbid TO 'u%s'@'%s' IDENTIFIED BY '$password'\\n\\\\g\\n\", \$2, \$1, \$3) \
+    }"  | \
+    /usr/bin/sudo -H -u janitor /puppy/bin/janitor_mysql -u root -h $hostname -P $port d$dbid
