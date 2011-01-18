@@ -28,6 +28,7 @@ catch e
   usage()
 
 options.engine or= "mysql"
+options.name or= options.engine
 
 db.createDatabase syslog, (database) ->
   if not /^\d+$/.test(options.app)
@@ -39,5 +40,5 @@ db.createDatabase syslog, (database) ->
   urandom = fs.createReadStream "/dev/urandom", { start: 0, end: 4091 }
   urandom.on "data", (chunk) -> hash.update chunk
   urandom.on "end", ->
-    database.select "insertDataStore", [ options.app, hash.digest("hex"), options.engine ], (results) ->
+    database.select "insertDataStore", [ options.app, options.name, hash.digest("hex"), options.engine ], (results) ->
       console.log results
