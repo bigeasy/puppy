@@ -461,6 +461,7 @@ puppy_exec_puppy_sbin(janitor_mysql_t)
 corecmd_exec_bin(janitor_mysql_t)
 
 allow mysql_create_t self:capability { dac_read_search dac_override };
+
 files_read_usr_files(janitor_mysql_t)
 files_read_etc_files(janitor_mysql_t)
 files_search_home(janitor_mysql_t)
@@ -469,5 +470,20 @@ mysql_read_config(janitor_mysql_t)
 userdom_list_user_home_dirs(janitor_mysql_t)
 userdom_read_user_home_content_files(janitor_mysql_t)
 
+############################################################################
+### Policy for `mysql_grant`.
+############################################################################
 
-hostname_exec(mysql_create_t)
+puppy_job_sudo_root(mysql_grant)
+
+job_sudo_delegate(mysql_grant)
+job_delegate_trans(mysql_grant, db_password)
+job_delegate_trans(mysql_grant, app_users)
+
+allow mysql_grant_sudo_t mysql_grant_proxy_t:fifo_file rw_fifo_file_perms;
+allow janitor_mysql_t mysql_grant_t:fifo_file rw_fifo_file_perms;
+allow janitor_mysql_t mysql_grant_proxy_t:fifo_file rw_fifo_file_perms;
+allow app_users_delegate_t mysql_grant_proxy_t:fifo_file rw_fifo_file_perms;
+allow db_password_delegate_t mysql_grant_proxy_t:fifo_file rw_fifo_file_perms;
+
+domtrans_pattern(mysql_grant_sudo_t, janitor_mysql_exec_t, janitor_mysql_t)

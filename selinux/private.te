@@ -20,3 +20,10 @@ allow delegate_t private_exec_t:lnk_file read;
 
 puppy_delegate(db_password)
 puppy_delegate_database(db_password)
+
+############################################################################
+### Policy for `app_users`.
+############################################################################
+
+puppy_delegate(app_users)
+puppy_delegate_database(app_users)
