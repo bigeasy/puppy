@@ -28,7 +28,10 @@ module.exports.prettify = prettify = (object, depth) ->
               output.push "\n"
             output.push value, "\n"
             prefix = ","
-        output.push "}"
+        if output.length is 0
+          output.push "{}"
+        else
+          output.push indent(depth), "}"
     when "number"
       output.push if isFinite(object) then String(object) else "null"
     when "string"
