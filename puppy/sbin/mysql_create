@@ -1,0 +1,18 @@
+#!/bin/bash
+
+. /puppy/bin/functions
+
+[ $# -ne 2 ] && abend "Incorrect count of arguments ($#)."
+
+uid=$1
+dbid=$2
+
+assert_valid_user $uid
+
+output=$(/usr/bin/sudo -u delegate /puppy/bin/db_password $(/bin/hostname) $uid $dbid)
+hostname=$(echo $output | awk '{ print $1 }')
+port=$(echo $output | awk '{ print $2 }')
+password=$(echo $output | awk '{ print $3 }')
+
+echo "CREATE DATABASE d$dbid" | /usr/bin/sudo -H -u janitor /puppy/bin/janitor_mysql -u root -h $hostname -P $port
+echo "GRANT ALL PRIVIELGES ON d${dbid}.* TO u${uid} IDENTIFIED BY '${password}'" | /usr/bin/sudo -H -u janitor /puppy/bin/janitor_mysql -u root -h $hostname -P $port
