@@ -176,3 +176,11 @@ template(`job_sudo_private',`
     allow delegate_t $1_t:fifo_file rw_fifo_file_perms;
     allow delegate_t $1_proxy_t:fifo_file rw_fifo_file_perms;
 ')
+template(`job_sudo_delegate',`
+    puppy_sudo($1)
+    role system_r types $1_sudo_t;
+')
+template(`job_delegate_trans',`
+    puppy_sudo_delegate($1, $2)
+    puppy_delegate_role(system, $1, $2)
+')

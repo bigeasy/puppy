@@ -28,7 +28,8 @@ allow account_activated_t user_devpts_t:chr_file rw_term_perms;
 ############################################################################
 
 puppy_sudo_delegate(protected, app_fetch)
-puppy_delegate(protected, app_fetch)
+puppy_delegate(app_fetch)
+puppy_delegate_role(protected, protected, app_fetch)
 puppy_delegate_database(app_fetch)
 puppy_delegate_hostname(app_fetch)
 puppy_delegate_enqueue(app_fetch)
@@ -39,7 +40,8 @@ puppy_delegate_console(app_fetch)
 ############################################################################
 
 puppy_sudo_delegate(protected, port_fetch)
-puppy_delegate(protected, port_fetch)
+puppy_delegate(port_fetch)
+puppy_delegate_role(protected, protected, port_fetch)
 puppy_delegate_database(port_fetch)
 puppy_delegate_enqueue(port_fetch)
 puppy_delegate_hostname(port_fetch)
@@ -50,7 +52,8 @@ puppy_delegate_console(port_fetch)
 ############################################################################
 
 puppy_sudo_delegate(protected, db_fetch)
-puppy_delegate(protected, db_fetch)
+puppy_delegate(db_fetch)
+puppy_delegate_role(protected, protected, db_fetch)
 puppy_delegate_database(db_fetch)
 puppy_delegate_enqueue(db_fetch)
 puppy_delegate_hostname(db_fetch)

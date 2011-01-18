@@ -1,3 +1,4 @@
+# Policy module for private utilities.
 policy_module(private,1.0.0)
 
 require {
@@ -11,3 +12,11 @@ application_domain(delegate_t, private_exec_t)
 allow delegate_t private_exec_t:lnk_file read;
 
 #puppyish(private)
+
+##
+############################################################################
+### Policy for `db_password`.
+############################################################################
+
+puppy_delegate(db_password)
+puppy_delegate_database(db_password)

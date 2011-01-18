@@ -19,6 +19,10 @@ role system_r types database_t;
 role system_r types delegate_t;
 puppy_delegate_roles(system_r)
 
+type janitor_mysql_t;
+type janitor_mysql_exec_t;
+application_domain(janitor_mysql_t, janitor_mysql_exec_t)
+
 ############################################################################
 ### Policy for `job` program.
 ############################################################################
@@ -433,3 +437,37 @@ allow private_user_config_t self:capability { dac_read_search dac_override };
 
 # Read and write the database.
 job_sudo_private(private_user_config)
+
+############################################################################
+### Policy for `mysql_create`.
+############################################################################
+
+puppy_job_sudo_root(mysql_create)
+
+job_sudo_delegate(mysql_create)
+job_delegate_trans(mysql_create, db_password)
+
+domtrans_pattern(mysql_create_sudo_t, janitor_mysql_exec_t, janitor_mysql_t)
+
+role system_r types janitor_mysql_t;
+allow db_password_delegate_t mysql_create_proxy_t:fifo_file rw_fifo_file_perms;
+allow mysql_create_sudo_t mysql_create_proxy_t:fifo_file rw_fifo_file_perms;
+allow janitor_mysql_t mysql_create_proxy_t:fifo_file rw_fifo_file_perms;
+allow janitor_mysql_t mysql_create_t:fifo_file rw_fifo_file_perms;
+
+puppy_mysql(janitor_mysql_t)
+
+puppy_exec_puppy_sbin(janitor_mysql_t)
+corecmd_exec_bin(janitor_mysql_t)
+
+allow mysql_create_t self:capability { dac_read_search dac_override };
+files_read_usr_files(janitor_mysql_t)
+files_read_etc_files(janitor_mysql_t)
+files_search_home(janitor_mysql_t)
+kernel_read_system_state(janitor_mysql_t)
+mysql_read_config(janitor_mysql_t)
+userdom_list_user_home_dirs(janitor_mysql_t)
+userdom_read_user_home_content_files(janitor_mysql_t)
+
+
+hostname_exec(mysql_create_t)

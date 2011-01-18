@@ -19,10 +19,9 @@
 #
 template(`puppy_sudo_delegate', `
     gen_require(`
-        type $2_delegate_t;
+        type $2_delegate_t, $2_exec_t;
     ')
     allow $2_delegate_t $2_exec_t:lnk_file read;
-    type $2_exec_t;
     application_domain($2_delegate_t, $2_exec_t)
     domtrans_pattern($1_sudo_t, $2_exec_t, $2_delegate_t)
 ')
@@ -46,27 +45,34 @@ template(`puppy_sudo_delegate', `
 #
 template(`puppy_delegate', `
     # The delegate domain.
-    type $2_delegate_t;
-
-    # Allow the role to assume the generated domain types.
-    role $1_r types $2_delegate_t;
-    role $1_r types $2_delegate_sudo_t;
+    type $1_delegate_t;
+    type $1_exec_t;
 
     # Run Node.js.
-    puppy_node_exec($2_delegate_t)
+    puppy_node_exec($1_delegate_t)
 
     # Execute the puppy binary files.
-    puppy_exec_puppy_bin($2_delegate_t)
+    puppy_exec_puppy_bin($1_delegate_t)
 
     # Allow read and write of stdio.
-    allow $2_delegate_t self:fifo_file rw_fifo_file_perms;
+    allow $1_delegate_t self:fifo_file rw_fifo_file_perms;
 
     # Allow sending of syslog messages.
-    logging_send_syslog_msg($2_delegate_t)
+    logging_send_syslog_msg($1_delegate_t)
 
-    allow $2_delegate_t $1_t:fifo_file rw_fifo_file_perms;
+    puppy_sudo($1_delegate)
+')
 
-    puppy_sudo($2_delegate)
+template(`puppy_delegate_role',`
+    gen_require(`
+        type $3_delegate_sudo_t, $3_delegate_t, $2_t;
+    ')
+
+    # Allow the role to assume the generated domain types.
+    role $1_r types $3_delegate_t;
+    role $1_r types $3_delegate_sudo_t;
+
+    allow $3_delegate_t $2_t:fifo_file rw_fifo_file_perms;
 ')
 
 ########################################
