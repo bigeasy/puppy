@@ -479,6 +479,7 @@ puppy_job_sudo_root(mysql_grant)
 job_sudo_delegate(mysql_grant)
 job_delegate_trans(mysql_grant, db_password)
 job_delegate_trans(mysql_grant, app_users)
+job_delegate_trans(mysql_grant, app_config)
 
 allow mysql_grant_sudo_t mysql_grant_proxy_t:fifo_file rw_fifo_file_perms;
 allow janitor_mysql_t mysql_grant_t:fifo_file rw_fifo_file_perms;
