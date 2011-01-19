@@ -6,6 +6,7 @@
     { "account_activate":   "./bin/account_activate.js"
     , "account_home":       "./bin/account_home.js"
     , "account_register":   "./bin/account_register.js"
+    , "app_config":         "./bin/app_config.js"
     , "app_fetch":          "./bin/app_fetch.js"
     , "app_users":          "./bin/app_users.js"
     , "config_format":      "./bin/config_format.js"
