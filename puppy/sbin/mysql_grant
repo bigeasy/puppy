@@ -17,3 +17,5 @@ password=$(echo $output | awk '{ print $3 }')
         printf(\"GRANT ALL PRIVILEGES ON d$dbid TO 'u%s'@'%s' IDENTIFIED BY '$password'\\n\\\\g\\n\", \$2, \$1, \$3) \
     }"  | \
     /usr/bin/sudo -H -u janitor /puppy/bin/janitor_mysql -u root -h $hostname -P $port d$dbid
+
+/usr/bin/sudo -u delegate /puppy/bin/app_config $aid
