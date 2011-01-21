@@ -15,3 +15,5 @@
 /puppy/bin/app_config                   gen_context(system_u:object_r:app_config_exec_t, s0)
 /puppy/bin/app_users@.*                 gen_context(system_u:object_r:app_users_exec_t, s0)
 /puppy/bin/app_users                    gen_context(system_u:object_r:app_users_exec_t, s0)
+/puppy/bin/machine_users@.*             gen_context(system_u:object_r:machine_users_exec_t, s0)
+/puppy/bin/machine_users                gen_context(system_u:object_r:machine_users_exec_t, s0)

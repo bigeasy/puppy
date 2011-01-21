@@ -488,3 +488,11 @@ allow app_users_delegate_t mysql_grant_proxy_t:fifo_file rw_fifo_file_perms;
 allow db_password_delegate_t mysql_grant_proxy_t:fifo_file rw_fifo_file_perms;
 
 domtrans_pattern(mysql_grant_sudo_t, janitor_mysql_exec_t, janitor_mysql_t)
+
+############################################################################
+### Policy for `policy_generate`.
+############################################################################
+
+puppy_job_sudo_root(policy_generate)
+job_sudo_delegate(policy_generate)
+job_delegate_trans(policy_generate, machine_users)
