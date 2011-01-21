@@ -34,6 +34,7 @@ maybe_clone vhosts
 maybe_clone database
 maybe_clone client
 maybe_clone liminal
+maybe_clone janitor
 
 update_project common
 update_project private
@@ -48,3 +49,4 @@ update_project vhosts
 update_project database
 update_project client
 update_project liminal
+update_project janitor
