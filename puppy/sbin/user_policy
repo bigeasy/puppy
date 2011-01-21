@@ -13,36 +13,15 @@ uid=$1
 
 assert_valid_user $uid
 
-# Get the current policy version for the user.
-version=$(/usr/bin/sudo -u delegate /puppy/bin/user_policy_version $(/bin/hostname) $uid 2>/dev/null)
-[ $? -ne 0 ] && abend "MySQL not available."
+# Create a policy working directory.
+/bin/mkdir -p /var/cache/puppy/policy
 
-# Get the targeted policy version.
-target_version=$(/usr/bin/sudo -u delegate /puppy/bin/policy_version $(/bin/hostname) $uid)
-
-# Rebuild if it is brand new or less than the maximum version.
-rebuild=0
-updating=0
-if [ $version -eq 0 ]; then
-    rebuild=1
-elif [ $version -lt $target_version ]; then
-    rebuild=1
-    updating=1
-fi
-
-if [ $rebuild -eq 0 ]; then
-    exit 0
-fi
-
-# Create a directory.
-/bin/mkdir -p /var/cache/puppy/policy/u$uid
-
-cat <<EOL > /var/cache/puppy/policy/u$uid/protected_u$uid.fc
+cat <<EOL > /var/cache/puppy/policy/protected_u$uid.fc
 /var/cache/puppy/transitions/start_u${uid} gen_context(system_u:object_r:protected_u${uid}_exec_t, s0)
 EOL
 
 # Generate a policy file.
-cat <<EOL > /var/cache/puppy/policy/u$uid/protected_u${uid}.te
+cat <<EOL > /var/cache/puppy/policy/protected_u${uid}.te
 # Policy module for a user service.
 policy_module(protected_u$uid, 1.0.0)
 
@@ -140,19 +119,3 @@ allow protected_u${uid}_t self:process execmem;
 # Node.js generates some random numbers.
 dev_read_urand(protected_u${uid}_t)
 EOL
-
-# Build the policy. If the build is successful, reload it.
-output=$(cd /var/cache/puppy/policy/u$uid && /usr/bin/make -f /usr/share/selinux/devel/Makefile)
-if [ $? -eq 0 ]; then
-    /usr/sbin/semodule -i /var/cache/puppy/policy/u$uid/protected_u$uid.pp
-else
-    echo $output 1>&2
-    exit 1
-fi
-
-/usr/bin/sudo -u delegate /puppy/bin/user_policy_version $(/bin/hostname) $uid $target_version
-
-# If we are updating then enqueue the next update.
-if [ $updating -eq 1 ]; then
-    /usr/bin/sudo -u delegate /puppy/bin/policy_enqueue_update $(/bin/hostname)
-fi

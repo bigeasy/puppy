@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Generates a policy module for a user account on a Puppy machine and loads the
+# module into the kernel.
+
+# Import common functions for job shell programs.
+. /puppy/bin/functions
+
+# Assert that the arguments are valid.
+#[ $# -ne 1 ] && abend "Incorrect count of arguments ($#)."
+
+#uid=$1
+
+/usr/bin/sudo -u delegate /puppy/bin/machine_users $(/bin/hostname) | while read user
+do
+    /puppy/sbin/user_policy $user
+done
