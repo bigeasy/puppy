@@ -12,6 +12,7 @@
     , "config_format":      "./bin/config_format.js"
     , "db_password":        "./bin/db_password.js"
     , "db_fetch":           "./bin/db_fetch.js"
+    , "machine_users":      "./bin/machine_users.js"
     , "policy_version":     "./bin/policy_version.js"
     , "port_fetch":         "./bin/port_fetch.js"
     , "port_labeled":       "./bin/port_labeled.js"
