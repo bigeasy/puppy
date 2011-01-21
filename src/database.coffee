@@ -68,7 +68,7 @@ class Database
         callback(results.shift())
 
   fetchLocalPort: (machineId, localUserId, service, callback) ->
-    @select "fetchLocalPort", [ machineId, localUserId, service ], (results) =>
+    @select "fetchLocalPort", [ localUserId, service, machineId ], (results) =>
       if results.affectedRows is 0
         @createLocalPort machineId, localUserId, service, callback
       else

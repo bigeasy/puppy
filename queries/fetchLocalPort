@@ -3,12 +3,13 @@
 INSERT INTO LocalUserLocalPort (
     machineId, localUserId, service, port, created
 )
-SELECT ?, ?, ?, port, CURRENT_TIMESTAMP()
+SELECT machineId, ?, ?, port, CURRENT_TIMESTAMP()
   FROM LocalPort as lp
  WHERE NOT EXISTS (SELECT *
                      FROM LocalUserLocalPort
                     WHERE machineId = lp.machineId
                       AND port = lp.port)
    AND NOT EXISTS (SELECT * FROM ReservedPort WHERE port = lp.port)
--- We only need one.
+   AND lp.machineId = ?
+-- Get only one.
  LIMIT 1
