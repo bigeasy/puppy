@@ -8,13 +8,13 @@ INSERT INTO Machine (hostname, ip, created)
 VALUES ('dvor.prettyrobots.com', '127.0.0.1', CURRENT_TIMESTAMP())
 \g
 INSERT INTO LocalUser(machineId, id, policy, created)
-VALUES (1, 10000, 1, CURRENT_TIMESTAMP())
+VALUES (1, 20000, 1, CURRENT_TIMESTAMP())
 \g
 INSERT INTO ApplicationLocalUser(machineId, localUserId, applicationId, created)
-VALUES(1, 10000, 1, CURRENT_TIMESTAMP())
+VALUES(1, 20000, 1, CURRENT_TIMESTAMP())
 \g
 INSERT INTO ActivationLocalUser(machineId, localUserId, code, created)
-VALUES(1, 10000, '', CURRENT_TIMESTAMP())
+VALUES(1, 20000, '', CURRENT_TIMESTAMP())
 \g
 INSERT INTO DataServer(engine, hostname, port, created)
 VALUES("mysql", "dvor.prettyrobots.com", 3306, CURRENT_TIMESTAMP())
