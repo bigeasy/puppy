@@ -13,5 +13,7 @@
 
 /usr/bin/sudo -u delegate /puppy/bin/machine_users $(/bin/hostname) | while read user
 do
-    /puppy/sbin/user_policy $user
+    if [ $user -lt 20000 ]; then
+        /puppy/sbin/user_policy $user
+    fi
 done
