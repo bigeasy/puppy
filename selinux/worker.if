@@ -179,6 +179,7 @@ template(`job_sudo_private',`
 template(`job_sudo_delegate',`
     puppy_sudo($1)
     role system_r types $1_sudo_t;
+    allow $1_sudo_t $1_proxy_t:fifo_file rw_fifo_file_perms;
 ')
 template(`job_delegate_trans',`
     puppy_sudo_delegate($1, $2)
@@ -235,6 +236,8 @@ template(`puppy_job_execute',`
 
     # Alllow the proxy to read the NPM link to the executable.
     allow $1_proxy_t $1_exec_t:lnk_file read;
+
+    allow $1_t worker_t:fifo_file rw_fifo_file_perms;
 ')
 
 template(`puppy_job_as_root',`
@@ -256,4 +259,5 @@ template(`puppy_job_as_worker',`
     puppy_exec_puppy_sbin($1_t)
 
     corecmd_exec_shell($1_proxy_t)
+    corecmd_exec_shell($1_t)
 ')

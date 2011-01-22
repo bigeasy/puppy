@@ -504,21 +504,21 @@ domtrans_pattern(mysql_grant_sudo_t, janitor_mysql_exec_t, janitor_mysql_t)
 ############################################################################
 
 puppy_job_as_worker(policy_generate)
+
 job_sudo_delegate(policy_generate)
 job_delegate_trans(policy_generate, machine_users)
-corecmd_exec_shell(policy_generate_proxy_t)
-corecmd_exec_shell(policy_generate_t)
 
-allow policy_generate_sudo_t policy_generate_proxy_t:fifo_file rw_fifo_file_perms;
 allow policy_generate_sudo_t worker_t:fifo_file rw_fifo_file_perms;
 
-hostname_exec(policy_generate_t)
-
 allow machine_users_delegate_t policy_generate_proxy_t:fifo_file rw_fifo_file_perms;
+
+# Pass host name to `user_policy`.
+hostname_exec(policy_generate_t)
 
 # Create cache files as puppy_cache_t.
 puppy_manage_cache_files(policy_generate_t)
 
+# Execute the `/puppy/sbin/user_policy`.
 allow policy_generate_t policy_generate_exec_t:file execute_no_trans;
 
 # Allow script to create a temporary file for here-doc.
@@ -531,5 +531,3 @@ files_tmp_filetrans(policy_generate_t, user_policy_tmp_t, file)
 # the bash here-doc syntax. My guess is that the temp file creation checks for
 # available disk space prior to creating the temp file. 
 fs_getattr_xattr_fs(policy_generate_t)
-
-allow policy_generate_t worker_t:fifo_file rw_fifo_file_perms;
