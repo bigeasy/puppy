@@ -137,3 +137,13 @@ CREATE TABLE DataStore (
     FOREIGN KEY (applicationId) REFERENCES Application (id)
 )
 \g
+CREATE TABLE Job (
+    id              INTEGER NOT NULL AUTO_INCREMENT,
+    machineId       INTEGER NOT NULL,
+    command         TEXT,
+    modified        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created         TIMESTAMP DEFAULT 0,
+    PRIMARY KEY (id),
+    FOREIGN KEY (machineId) REFERENCES Machine (id)
+)
+\g
