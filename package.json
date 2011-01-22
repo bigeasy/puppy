@@ -3,8 +3,7 @@
 ,   "author":           "Alan Gutierrez"
 ,   "directories":      { "lib" : "./lib" }
 ,   "bin":             
-    { "job":                "./bin/job.js"
-    , "mysql_create":       "./bin/mysql_create.js"
+    { "mysql_create":       "./bin/mysql_create.js"
     , "mysql_grant":        "./bin/mysql_grant.js"
     , "policy_generate":    "./bin/policy_generate.js"
     , "user_authorize":     "./bin/user_authorize.js"
