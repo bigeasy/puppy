@@ -1,0 +1,2 @@
+DELETE FROM Job
+WHERE id = ?

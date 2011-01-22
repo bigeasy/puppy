@@ -105,3 +105,10 @@ class Database
         @createLocalUser applicationId, machineId, callback
       @select "insertLocalUser", [ machineId, nextLocalUserId ], (results) =>
         @fetchLocalUser applicationId, callback
+
+  enqueue: (hostname, commands, callback) ->
+    if commands.length
+      @select "insertJob", [ JSON.stringify(commands.shift()), hostname ], (results) =>
+        @enqueue(hostname, commands, callback)
+    else if callback
+      callback()
