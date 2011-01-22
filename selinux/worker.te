@@ -7,6 +7,8 @@ require {
     type ssh_home_t;
     type user_home_t;
     type bin_t;
+    type database_exec_t;
+    type database_t;
     role system_r;
     type private_exec_t;
     type database_t;
@@ -22,6 +24,11 @@ puppy_delegate_roles(system_r)
 type janitor_mysql_t;
 type janitor_mysql_exec_t;
 application_domain(janitor_mysql_t, janitor_mysql_exec_t)
+
+puppy_sudo(worker)
+role system_r types worker_sudo_t;
+domtrans_pattern(worker_sudo_t, database_exec_t, database_t)
+allow database_t worker_t:fifo_file rw_fifo_file_perms;
 
 ############################################################################
 ### Policy for `job` program.
