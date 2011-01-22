@@ -112,3 +112,6 @@ module.exports.sudo = (splat...)->
 module.exports.doas = (splat...)->
   shell = new Shell()
   shell.doas.apply shell, splat
+module.exports.medo = (splat...)->
+  shell = new Shell()
+  shell.medo.apply shell, splat
