@@ -90,7 +90,7 @@ fi
 
 # Install bash programs.
 copy_files puppy/bin $user:$user $mode
-copy_files puppy/sbin root:root 500
+copy_files puppy/sbin $user:root 550
 
 # Set ownership of Node.js programs.
 if [ -d src -a ! -d lib ]; then
