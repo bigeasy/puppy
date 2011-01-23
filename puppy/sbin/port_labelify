@@ -72,8 +72,6 @@ if ($unlabel) {
 }
 close $actions or die "Cannot close removals";
 
-print `/bin/cat $filename`;
-
 my $child_exit_status = system("/usr/sbin/semanage", "-i", $filename);
 if ($child_exit_status != 0) {
     print STDOUT "Error: Cannot run semanage.";
