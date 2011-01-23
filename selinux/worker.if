@@ -180,6 +180,7 @@ template(`job_sudo_delegate',`
     puppy_sudo($1)
     role system_r types $1_sudo_t;
     allow $1_sudo_t $1_proxy_t:fifo_file rw_fifo_file_perms;
+    allow $1_sudo_t worker_t:fifo_file rw_fifo_file_perms;
 ')
 template(`job_delegate_trans',`
     puppy_sudo_delegate($1, $2)

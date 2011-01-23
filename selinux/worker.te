@@ -522,6 +522,24 @@ seutil_read_config(policy_make_t)
 seutil_search_default_contexts(policy_make_t)
 
 ############################################################################
+### Policy for `policy_ready`.
+############################################################################
+
+# User policy assignment is performed as root.
+puppy_job_as_worker(policy_ready)
+
+job_sudo_delegate(policy_ready)
+job_delegate_trans(policy_ready, policy_users)
+job_delegate_trans(policy_ready, user_ready)
+
+# Execute semanage to assign the protected policy to the user.
+seutil_run_semanage(policy_ready_t, worker_r)
+allow semanage_t policy_ready_proxy_t:fifo_file rw_fifo_file_perms;
+
+# Pass host name to `policy_users`.
+hostname_exec(policy_ready_t)
+
+############################################################################
 ### Policy for `policy_unload`.
 ############################################################################
 

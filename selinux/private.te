@@ -48,3 +48,10 @@ puppy_delegate_database(policy_users)
 
 puppy_delegate(port_list)
 puppy_delegate_database(port_list)
+
+############################################################################
+### Policy for `user_ready`.
+############################################################################
+
+puppy_delegate(user_ready)
+puppy_delegate_database(user_ready)

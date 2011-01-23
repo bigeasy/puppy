@@ -19,3 +19,5 @@
 /puppy/bin/policy_users                 gen_context(system_u:object_r:policy_users_exec_t, s0)
 /puppy/bin/port_list                    gen_context(system_u:object_r:port_list_exec_t, s0)
 /puppy/bin/port_list@.*                 gen_context(system_u:object_r:port_list_exec_t, s0)
+/puppy/bin/user_ready                   gen_context(system_u:object_r:user_ready_exec_t, s0)
+/puppy/bin/user_ready@.*                gen_context(system_u:object_r:user_ready_exec_t, s0)
