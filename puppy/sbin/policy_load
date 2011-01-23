@@ -1,0 +1,3 @@
+#!/bin/bash
+
+/bin/find /var/cache/puppy/policy -name \*.pp | /usr/bin/xargs -n 200 /usr/sbin/semodule -i
