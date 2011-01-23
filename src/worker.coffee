@@ -15,6 +15,8 @@ work = (database, hostname) ->
     database.select "getNextJob", [ hostname ], "job", (jobs) ->
       # Perform the first job, if one exists.
       if job = jobs.shift()
+        start = new Date()
+
         # Commands are given as an array containing the program name, an array
         # of arguments to the program, and a string to feed to standard input.
         command = JSON.parse(job.command)
@@ -55,7 +57,13 @@ work = (database, hostname) ->
           outcome.command = command
           # Create a descriptive message for the logs.
           program += " #{args.join(", ")}" if args.length
-          syslog.send "info", "Worker ran [#{program}] with exit code #{code}.", outcome
+          end = new Date()
+          outcome.duration = end.getTime() - start.getTime()
+          if outcome.duration < 60000
+            timing = "#{outcome.duration / 1000} seconds" 
+          else
+            timing = "#{Math.floor(outcome.duration / 60000)} minutes #{(outcome.duration % 60000) / 1000} seconds" 
+          syslog.send "info", "Worker ran [#{program}] with exit code #{code} in #{timing}.", outcome
 
           # Execute the next task, if any.
           database.select "deleteJob", [ job.id ], (results) ->
