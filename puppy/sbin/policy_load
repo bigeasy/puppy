@@ -1,3 +1,10 @@
 #!/bin/bash
 
-/bin/find /var/cache/puppy/policy -name \*.pp | /usr/bin/xargs -n 200 /usr/sbin/semodule -i
+policies=$(
+    for line in $(/usr/bin/sudo -u delegate /puppy/bin/machine_users $(/bin/hostname))
+    do
+        echo "/var/cache/puppy/policy/protected_u${line}.pp"
+    done
+)
+
+echo "$policies" | /usr/bin/xargs -n 200 /usr/sbin/semodule -i
