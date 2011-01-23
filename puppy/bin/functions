@@ -26,10 +26,6 @@ function assert_valid_home_dir()
     if [ ! -d /home/u$uid ]; then
         abend "Home directory /home/u$uid does not exist."
     fi
-
-    if [ $(/usr/bin/sudo -H -u delegate /puppy/bin/user_status $(/bin/hostname) $user) -ne 1 ]; then
-        abend "User $uid has not been provisioned."
-    fi
 }
 
 # Write output to a temporary file, then write the temperary file to stdout.
