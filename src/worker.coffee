@@ -36,17 +36,20 @@ work = (database, hostname) ->
           # Record the stderr messages, which we do not expect from the launch
           # program.
           if stderr
-            syslog.send "err", "Worker recieved unexpected error messages from [#{program}] with exit code #{code}.", { command, stderr }
+            syslog.send "err", "Worker recieved unexpected error messages from [#{program}] with exit code #{code}.", { command, stdout, stderr }
             process.exit 1
           outcome = null
           try
             outcome = JSON.parse(stdout)
           catch e
-            syslog.send "err", "Worker recieved malformed stdout from [#{program}] with exit code #{code}.", { command, stdout }
+            syslog.send "err", "Worker recieved malformed stdout from [#{program}] with exit code #{code}.", { command, stdout, stderr }
             process.exit 1
           # Record the error if one was reported.
           if code
-            syslog.send "err", outcome.stdout if outcome and /^ERROR:/.test(outcome.stdout)
+            if outcome and /^ERROR:/.test(outcome.stdout)
+              syslog.send "err", outcome.stdout
+            else
+              syslog.send "err", "Worker recieved unexpected error messages from [#{program}] with exit code #{code}.", { command, stdout, stderr, outcome }
             process.exit 1
 
           outcome.command = command
