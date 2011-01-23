@@ -516,6 +516,41 @@ seutil_read_config(policy_make_t)
 seutil_search_default_contexts(policy_make_t)
 
 ############################################################################
+### Policy for `policy_unload`.
+############################################################################
+
+# User policy assignment is performed as root.
+puppy_job_as_root(policy_unload)
+
+job_sudo_delegate(policy_unload)
+job_delegate_trans(policy_unload, machine_users)
+
+# Execute semanage to assign the protected policy to the user.
+seutil_run_semanage(policy_unload_t, worker_r)
+allow semanage_t policy_unload_proxy_t:fifo_file rw_fifo_file_perms;
+
+# Get some output.
+allow setfiles_t policy_unload_proxy_t:fifo_file { read write };
+allow load_policy_t policy_unload_proxy_t:fifo_file { read write };
+
+# Read and SELinux properties during build.
+selinux_get_enforce_mode(policy_unload_t)
+seutil_search_default_contexts(policy_unload_t)
+seutil_read_config(policy_unload_t)
+
+# Create cache files as puppy_cache_t.
+puppy_read_cache_files(policy_unload_t)
+
+# Get the hostname.
+hostname_exec(policy_unload_t)
+
+############################################################################
+### Policy for `port_labelify`.
+############################################################################
+
+type port_labelify_exec_t;
+
+############################################################################
 ### Policy for `port_label`.
 ############################################################################
 
@@ -538,9 +573,6 @@ selinux_get_enforce_mode(port_label_t)
 seutil_search_default_contexts(port_label_t)
 seutil_read_config(port_label_t)
 
-# Create cache files as puppy_cache_t.
-puppy_read_cache_files(port_label_t)
-
 # Allow script to create a temporary file for here-doc.
 type port_label_tmp_t;
 files_tmp_file(port_label_tmp_t)
@@ -557,3 +589,55 @@ files_read_usr_files(port_label_t)
 
 # Get the hostname.
 hostname_exec(port_label_t)
+
+# Execute `port_labelify`.
+application_domain(port_label_t, port_labelify_exec_t)
+allow port_label_t port_labelify_exec_t:file execute_no_trans;
+
+############################################################################
+### Policy for `port_unlabel`.
+############################################################################
+
+# User policy assignment is performed as root.
+puppy_job_as_root(port_unlabel)
+
+job_sudo_delegate(port_unlabel)
+job_delegate_trans(port_unlabel, port_list)
+
+# Execute semanage to assign the protected policy to the user.
+seutil_run_semanage(port_unlabel_t, worker_r)
+allow semanage_t port_unlabel_proxy_t:fifo_file rw_fifo_file_perms;
+
+# Get some output.
+allow setfiles_t port_unlabel_proxy_t:fifo_file { read write };
+allow load_policy_t port_unlabel_proxy_t:fifo_file { read write };
+
+# Execute semanage to assign the protected policy to the user.
+seutil_run_semanage(port_unlabel_t, worker_r)
+allow semanage_t port_unlabel_proxy_t:fifo_file rw_fifo_file_perms;
+
+# Read and SELinux properties during build.
+selinux_get_enforce_mode(port_unlabel_t)
+seutil_search_default_contexts(port_unlabel_t)
+seutil_read_config(port_unlabel_t)
+
+# Allow script to create a temporary file for here-doc.
+type port_unlabel_tmp_t;
+files_tmp_file(port_unlabel_tmp_t)
+manage_files_pattern(port_unlabel_t, port_unlabel_tmp_t, port_unlabel_tmp_t)
+files_tmp_filetrans(port_unlabel_t, port_unlabel_tmp_t, file)
+
+# This allows the reading of fielsystem extended attributes. It is triggered by
+# the bash here-doc syntax. My guess is that the temp file creation checks for
+# available disk space prior to creating the temp file. 
+fs_getattr_xattr_fs(port_unlabel_t)
+
+# Read Perl libraries.
+files_read_usr_files(port_unlabel_t)
+
+# Get the hostname.
+hostname_exec(port_unlabel_t)
+
+# Execute `port_labelify`.
+application_domain(port_unlabel_t, port_labelify_exec_t)
+allow port_unlabel_t port_labelify_exec_t:file execute_no_trans;
