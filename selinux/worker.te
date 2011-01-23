@@ -514,3 +514,46 @@ allow policy_make_t policy_make_exec_t:file execute_no_trans;
 selinux_get_enforce_mode(policy_make_t)
 seutil_read_config(policy_make_t)
 seutil_search_default_contexts(policy_make_t)
+
+############################################################################
+### Policy for `port_label`.
+############################################################################
+
+# User policy assignment is performed as root.
+puppy_job_as_root(port_label)
+
+job_sudo_delegate(port_label)
+job_delegate_trans(port_label, port_list)
+
+# Execute semanage to assign the protected policy to the user.
+seutil_run_semanage(port_label_t, worker_r)
+allow semanage_t port_label_proxy_t:fifo_file rw_fifo_file_perms;
+
+# Get some output.
+allow setfiles_t port_label_proxy_t:fifo_file { read write };
+allow load_policy_t port_label_proxy_t:fifo_file { read write };
+
+# Read and SELinux properties during build.
+selinux_get_enforce_mode(port_label_t)
+seutil_search_default_contexts(port_label_t)
+seutil_read_config(port_label_t)
+
+# Create cache files as puppy_cache_t.
+puppy_read_cache_files(port_label_t)
+
+# Allow script to create a temporary file for here-doc.
+type port_label_tmp_t;
+files_tmp_file(port_label_tmp_t)
+manage_files_pattern(port_label_t, port_label_tmp_t, port_label_tmp_t)
+files_tmp_filetrans(port_label_t, port_label_tmp_t, file)
+
+# This allows the reading of fielsystem extended attributes. It is triggered by
+# the bash here-doc syntax. My guess is that the temp file creation checks for
+# available disk space prior to creating the temp file. 
+fs_getattr_xattr_fs(port_label_t)
+
+# Read Perl libraries.
+files_read_usr_files(port_label_t)
+
+# Get the hostname.
+hostname_exec(port_label_t)

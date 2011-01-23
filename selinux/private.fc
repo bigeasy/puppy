@@ -17,3 +17,5 @@
 /puppy/bin/app_users                    gen_context(system_u:object_r:app_users_exec_t, s0)
 /puppy/bin/machine_users@.*             gen_context(system_u:object_r:machine_users_exec_t, s0)
 /puppy/bin/machine_users                gen_context(system_u:object_r:machine_users_exec_t, s0)
+/puppy/bin/port_list                    gen_context(system_u:object_r:port_list_exec_t, s0)
+/puppy/bin/port_list@.*                 gen_context(system_u:object_r:port_list_exec_t, s0)

@@ -41,3 +41,10 @@ puppy_delegate_database(app_config)
 
 puppy_delegate(machine_users)
 puppy_delegate_database(machine_users)
+
+############################################################################
+### Policy for `port_list`.
+############################################################################
+
+puppy_delegate(port_list)
+puppy_delegate_database(port_list)

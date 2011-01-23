@@ -184,6 +184,7 @@ template(`job_sudo_delegate',`
 template(`job_delegate_trans',`
     puppy_sudo_delegate($1, $2)
     puppy_delegate_role(system, $1, $2)
+    allow $2_delegate_t $1_proxy_t:fifo_file rw_fifo_file_perms;
 ')
 ########################################
 ### <summary>
@@ -250,6 +251,11 @@ template(`puppy_job_as_root',`
     domtrans_pattern($1_proxy_sudo_t, $1_exec_t, $1_t)
 
     allow $1_proxy_t self:fifo_file write;
+
+    # The proxy sudo needs to read Puppy executables.
+    puppy_read_puppy_sbin($1_proxy_sudo_t)
+
+    allow $1_proxy_sudo_t worker_t:fifo_file rw_fifo_file_perms;
 ')
 
 template(`puppy_job_as_worker',`
