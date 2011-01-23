@@ -6,6 +6,7 @@
     { "mysql_create":       "./bin/mysql_create.js"
     , "mysql_grant":        "./bin/mysql_grant.js"
     , "policy_generate":    "./bin/policy_generate.js"
+    , "policy_make":        "./bin/policy_make.js"
     , "user_authorize":     "./bin/user_authorize.js"
     , "user_chown":         "./bin/user_chown.js"
     , "user_config":        "./bin/user_config.js"
