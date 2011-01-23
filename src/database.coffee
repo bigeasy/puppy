@@ -90,7 +90,7 @@ class Database
       @error = (error) =>
         throw error if error.number isnt 1062
         @fetchLocalUser applicationId, callback
-      @select "fetchLocalUser", [ applicationId, machine.id ], (results) =>
+      @select "fetchLocalUser", [ applicationId, machine.id, 0 ], (results) =>
         if results.affectedRows is 0
           @createLocalUser applicationId, machine.id, callback
         else
@@ -98,12 +98,12 @@ class Database
             callback(results.shift())
 
   createLocalUser: (applicationId, machineId, callback) ->
-    @select "nextLocalUser", [ machineId ], (results) =>
+    @select "nextLocalUser", [ machineId, 9999999999 ], (results) =>
       nextLocalUserId = results[0].nextLocalUserId
       @error = (error) =>
         throw error if error.number isnt 1062
         @createLocalUser applicationId, machineId, callback
-      @select "insertLocalUser", [ machineId, nextLocalUserId ], (results) =>
+      @select "insertLocalUser", [ machineId, nextLocalUserId, 0, 1 ], (results) =>
         @fetchLocalUser applicationId, callback
 
   enqueue: (hostname, commands, callback) ->

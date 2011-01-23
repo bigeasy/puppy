@@ -1,6 +1,5 @@
 SELECT lp.machineId AS localPort__machineId,
        lp.port AS localPort__port,
-       lp.ready AS localPort__ready,
        lp.modified AS localPort__modified,
        lp.created AS localPort__created,
        m.id AS localPort__machine__id,
