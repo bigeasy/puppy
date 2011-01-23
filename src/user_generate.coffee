@@ -28,7 +28,7 @@ generate = (database, hostname, machine, localUsers) ->
           database.error = (error) =>
             throw error if error.number isnt 1062
             database.createLocalUser machineId, count, callback
-          database.select "insertLocalUser", [ machine.id, nextLocalUserId, 1 ], (results) =>
+          database.select "insertLocalUser", [ machine.id, nextLocalUserId, 1, 0 ], (results) =>
             createLocalPorts(nextLocalUserId)
       else
         process.stdout.write "Done.\n"
