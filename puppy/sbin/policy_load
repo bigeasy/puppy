@@ -7,4 +7,6 @@ policies=$(
     done
 )
 
-echo "$policies" | /usr/bin/xargs -n 200 /usr/sbin/semodule -i
+if [ ! -z "$policies" ]; then
+    echo "$policies" | /usr/bin/xargs -n 200 /usr/sbin/semodule -i
+fi
