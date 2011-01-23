@@ -598,13 +598,13 @@ allow port_unlabel_t port_labelify_exec_t:file execute_no_trans;
 ############################################################################
 
 # User creation is performed as root.
-puppy_job_as_root(private_user_create)
+puppy_job_as_root(user_create)
 
 # Read /etc/passwd to determine if the user already exists.
-allow private_user_create_t etc_t:file read_file_perms;
+allow user_create_t etc_t:file read_file_perms;
 
 # Transition to the exising user management policy.
-usermanage_domtrans_useradd(private_user_create_t)
+usermanage_domtrans_useradd(user_create_t)
 
 ############################################################################
 ### Policy for `user_restorecon`.
