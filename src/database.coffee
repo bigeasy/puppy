@@ -7,10 +7,10 @@ Danger        = require("common/danger").Danger
 module.exports.createDatabase = (syslog, callback) ->
   shell = new (require("common/shell").Shell)(syslog)
   shell.doas "database", "/puppy/bin/database", [], null, (stdout) ->
-    callback(new Database(stdout.substring 0, 32))
+    callback(new Database(syslog, stdout.substring 0, 32))
 
 class Database
-  constructor: (@password) ->
+  constructor: (@syslog, @password) ->
     @queries = {}
     for file in fs.readdirSync __dirname + "/../queries"
       @queries[file] = fs.readFileSync __dirname + "/../queries/" + file , "utf8"
@@ -108,7 +108,9 @@ class Database
 
   enqueue: (hostname, commands, callback) ->
     if commands.length
-      @select "insertJob", [ JSON.stringify(commands.shift()), hostname ], (results) =>
+      command = commands.shift()
+      @select "insertJob", [ JSON.stringify(command), hostname ], (results) =>
+        @syslog.send "info", "Enqueued command #{command[0]}.", { command }
         @enqueue(hostname, commands, callback)
     else if callback
       callback()
