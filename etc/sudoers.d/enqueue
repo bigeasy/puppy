@@ -1,1 +1,0 @@
-enqueue ALL = (worker) NOPASSWD: /puppy/bin/job

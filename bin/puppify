@@ -61,9 +61,8 @@ make_user stunnel 206
 # Create the vhosts daemon user.
 make_user vhosts 208
 
-# Create the worker daemon and enqueue task users.
+# Create the worker daemon user.
 make_user worker 204
-make_user enqueue 203
 
 make_user delegate 210
 make_user janitor 201
@@ -166,7 +165,6 @@ function copy_public_key()
 # TODO Check the public key into source, but the keys do not live in source,
 # they live on a server and propagate.
 copy_public_key public home/public/ssh/authorized_keys /puppy/bin/public_receptionist
-copy_public_key enqueue /home/enqueue/.ssh/identity.pub /puppy/bin/enqueue_proxy
 
 # Copy the etc configuration files.
 copy_files etc root:root 644
@@ -181,7 +179,7 @@ copy_files etc root:root 600
 
 # We do not want the agent accounts to run `/etc/bashrc` at startup, so delete
 # the `~/.bashrc` files for those accounts.
-for agent in public enqueue; do
+for agent in public; do
     echo "# Do nothing." > /home/$agent/.bashrc
 done
 

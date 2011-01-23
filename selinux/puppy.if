@@ -1,7 +1,7 @@
 ## <summary></summary>
 template(`_puppy_sudo_delegate',`
     gen_require(`
-        type delegate_t, database_t, enqueue_agent_t, enqueue_exec_t, database_exec_t;
+        type delegate_t, database_t, database_exec_t;
     ')
     # The agent role will be able to assume the puppy_t and database_t domain types.
     # TODO Can I put these on one line?
@@ -22,7 +22,6 @@ template(`_puppy_sudo_delegate',`
     # When the agent domain comes out of sudo it is in the puppy_t domain.
     domtrans_pattern($1_sudo_t, $1_exec_t, puppy_t)
     domtrans_pattern($1_sudo_t, database_exec_t, database_t)
-    domtrans_pattern($1_sudo_t, enqueue_exec_t, enqueue_agent_t)
 
     # Allow both sudo and puppy domains to read the NPM link of the agent
     # program.
@@ -34,14 +33,13 @@ template(`_puppy_sudo_delegate',`
 ')
 template(`puppy_delegate_roles',`
     gen_require(`
-        type delegate_t, delegate_sudo_t, database_t, enqueue_agent_t;
+        type delegate_t, delegate_sudo_t, database_t;
     ')
     # The agent role will be able to assume the puppy_t and database_t domain types.
     # TODO Can I put these on one line?
     role $1 types delegate_t;
     role $1 types delegate_sudo_t;
     role $1 types database_t;
-    role $1 types enqueue_agent_t;
 ')
 template(`puppy_restricted_user_template',`
 	gen_require(`

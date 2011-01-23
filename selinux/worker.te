@@ -34,30 +34,6 @@ domtrans_pattern(worker_sudo_t, database_exec_t, database_t)
 allow database_t worker_t:fifo_file rw_fifo_file_perms;
 
 ############################################################################
-### Policy for `job` program.
-############################################################################
-type worker_job_t;      # The domain of the job program.
-type worker_job_exec_t; # The worker job executable type.
-
-
-# Read and write the puppy spool directory.
-files_search_spool(worker_job_t)
-allow worker_job_t worker_spool_t:dir rw_dir_perms;
-allow worker_job_t worker_spool_t:file manage_file_perms;
-
-# Worker needs to execute puppy binaries.
-puppy_exec_puppy_bin(worker_job_t)
-
-# The `job` program is a Node.js program.
-puppy_node_exec(worker_job_t)
-application_domain(worker_job_t, worker_job_exec_t)
-allow worker_job_t worker_job_exec_t:lnk_file read;
-allow worker_job_t self:fifo_file rw_file_perms;
-
-# Log succssful message enqueue.
-logging_send_syslog_msg(worker_job_t)
-
-############################################################################
 ### Policy for `worker` daemon.
 ############################################################################
 type worker_t;          # The worker type.

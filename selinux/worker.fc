@@ -1,5 +1,4 @@
 /puppy/bin/worker.*                             gen_context(system_u:object_r:worker_exec_t, s0)
-/puppy/bin/job.*                                gen_context(system_u:object_r:worker_job_exec_t, s0)
 /var/spool/puppy                                gen_context(system_u:object_r:worker_spool_t, s0)
 /var/spool/puppy/.*                          -- gen_context(system_u:object_r:worker_spool_t, s0)
 /puppy/bin/mysql_create@.*                      gen_context(system_u:object_r:mysql_create_exec_t, s0)

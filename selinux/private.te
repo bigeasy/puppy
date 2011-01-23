@@ -34,7 +34,6 @@ puppy_delegate_database(app_users)
 
 puppy_delegate(app_config)
 puppy_delegate_database(app_config)
-puppy_delegate_enqueue(app_config)
 
 ############################################################################
 ### Policy for `machine_users`.

@@ -101,26 +101,6 @@ template(`puppy_delegate_database',`
 
 ########################################
 ### <summary>
-###  Allow a delegate program to enqueue jobs.
-### </summary>
-### <param name="prefix">
-###  <summary>
-###  The prefix to be used for deriving type names.
-###  </summary>
-### </param>
-##
-#
-template(`puppy_delegate_enqueue',`
-    gen_require(`
-        type enqueue_agent_t, enqueue_exec_t;
-    ')
-    # Allow the enqueue utility to write to distpatcher stdio.
-    allow enqueue_agent_t $1_delegate_t:fifo_file rw_fifo_file_perms;
-    domtrans_pattern($1_delegate_sudo_t, enqueue_exec_t, enqueue_agent_t)
-')
-
-########################################
-### <summary>
 ###  Allow a delegate program to write to the console.
 ### </summary>
 ### <param name="prefix">

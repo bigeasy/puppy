@@ -2,7 +2,6 @@
 policy_module(delgate, 1.0.0)
 
 require {
-    type enqueue_agent_t, enqueue_exec_t;
     type database_t, database_exec_t;
 }
 
@@ -29,12 +28,8 @@ logging_send_syslog_msg(delegate_t)
 # Allow the database utility to write to distpatcher stdio.
 allow database_t delegate_t:fifo_file rw_fifo_file_perms;
 
-# Allow the enqueue utility to write to distpatcher stdio.
-allow enqueue_agent_t delegate_t:fifo_file rw_fifo_file_perms;
-
 hostname_exec(delegate_t)
 
 puppy_sudo(delegate)
 
 domtrans_pattern(delegate_sudo_t, database_exec_t, database_t)
-domtrans_pattern(delegate_sudo_t, enqueue_exec_t, enqueue_agent_t)

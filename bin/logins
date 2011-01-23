@@ -13,7 +13,7 @@ function assign_profile()
 }
 
 mapped=$(/usr/bin/sudo /usr/sbin/semanage login -l | /bin/sed 1,3d | /bin/awk '{ print $1 }')
-for user in public enqueue
+for user in public
 do
     echo "$mapped" | grep '^'$user'$' > /dev/null
     if [ $? -ne 0 ]
