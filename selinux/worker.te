@@ -110,19 +110,6 @@ miscfiles_read_localization(private_user_invite_job_t)
 hostname_exec(private_user_invite_job_t)
 
 ############################################################################
-### Policy for `private user:create`.
-############################################################################
-
-# User creation is performed as root.
-puppy_job_sudo_root(private_user_create)
-
-# Read /etc/passwd to determine if the user already exists.
-allow private_user_create_t etc_t:file read_file_perms;
-
-# Transition to the exising user management policy.
-usermanage_domtrans_useradd(private_user_create_t)
-
-############################################################################
 ### Policy for `user:group` job.
 ############################################################################
 
@@ -665,3 +652,16 @@ hostname_exec(port_unlabel_t)
 # Execute `port_labelify`.
 application_domain(port_unlabel_t, port_labelify_exec_t)
 allow port_unlabel_t port_labelify_exec_t:file execute_no_trans;
+
+############################################################################
+### Policy for `user_create` job.
+############################################################################
+
+# User creation is performed as root.
+puppy_job_as_root(private_user_create)
+
+# Read /etc/passwd to determine if the user already exists.
+allow private_user_create_t etc_t:file read_file_perms;
+
+# Transition to the exising user management policy.
+usermanage_domtrans_useradd(private_user_create_t)
