@@ -9,6 +9,6 @@ argv      = process.argv.slice 2
 hostname  = argv.shift()
 
 db.createDatabase syslog, (database) ->
-  database.select "getMachineLocalUsers", [ hostname ], "localUser", (results) ->
+  database.select "getMachineLocalUsers", [ hostname, 1 ], "localUser", (results) ->
     for localUser in results
       process.stdout.write "#{localUser.id}\n"
