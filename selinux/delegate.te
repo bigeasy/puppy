@@ -1,5 +1,5 @@
 # SELinux policy module for message dispatching.
-policy_module(delgate, 1.0.0)
+policy_module(delegate, 1.0.0)
 
 require {
     type database_t, database_exec_t;
