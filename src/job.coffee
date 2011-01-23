@@ -26,35 +26,18 @@ argv = process.argv.slice(2)
 
 hostname = argv.shift()
 
-stdin = process.openStdin()
-stdin.setEncoding "utf8"
 input = []
-stdin.on "data", (chunk) -> input.push chunk
-stdin.on "end", ->
+enqueue = ->
   db.createDatabase syslog, (database) ->
-    commands = []
-    input = input.join ""
-    for line in input.split /\n/
-      continue if /^\s*$/.test(line)
-      abend = (msg, e) ->
-        dump =
-          line: line
-          stdin: commands.substring(0, 256)
-        dump.e = e.message if e
-        syslog.send "err", "ERROR: #{msg}", dump
-        process.exit 1
-      try
-        command = JSON.parse line
-      catch e
-        abend "Invalid JSON line.", e
-      if not command.join
-        abend "Command is not an array."
-      if command.length > 3
-        abend "Command array is too long."
-      if command.length == 0
-        abend "Command array is empty."
-      if command.length != 1 and not command[1].join
-        abend "Command arguments must be contained in array."
-      syslog.send "info", "Queued command #{command[0]}.", { command }
-      commands.push command
-    database.enqueue hostname, commands
+    command = [ argv.shift(), argv ]
+    command.push(input.join("")) if input.length
+    database.enqueue hostname, [ command ]
+if argv[argv.length - 1] is "-"
+  argv.pop()
+  stdin = process.openStdin()
+  stdin.setEncoding "utf8"
+  stdin.on "data", (chunk) -> input.push chunk
+  stdin.on "end", ->
+    enqueue()
+else
+  enqueue()
