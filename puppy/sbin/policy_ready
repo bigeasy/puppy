@@ -1,0 +1,6 @@
+#!/bin/bash
+
+for user in $(/usr/bin/sudo -u delegate /puppy/bin/policy_users $(/bin/hostname))
+do
+    /usr/bin/sudo -u delegate /puppy/bin/user_ready $(/bin/hostname) $user
+done
