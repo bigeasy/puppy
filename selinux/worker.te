@@ -470,9 +470,15 @@ fs_getattr_xattr_fs(policy_generate_t)
 # User policy assignment is performed as root.
 puppy_job_as_root(policy_load)
 
+job_sudo_delegate(policy_load)
+job_delegate_trans(policy_load, machine_users)
+
 # Execute semanage to assign the protected policy to the user.
 seutil_run_semanage(policy_load_t, worker_r)
 allow semanage_t policy_load_proxy_t:fifo_file rw_fifo_file_perms;
+
+# Pass host name to `policy_users`.
+hostname_exec(policy_load_t)
 
 # Get some output.
 allow setfiles_t policy_load_proxy_t:fifo_file { read write };
