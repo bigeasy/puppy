@@ -333,51 +333,6 @@ userdom_manage_home_role(system_r, private_user_authorize_t)
 
 domtrans_pattern(private_user_authorize_t, private_exec_t, delegate_t)
 
-############################################################################
-### Policy for `private user:policy`.
-############################################################################
-
-# User policy assignment is performed as root.
-puppy_job_sudo_root(private_user_policy)
-
-# Execute semanage to assign the protected policy to the user.
-seutil_run_semanage(private_user_policy_t, worker_r)
-allow semanage_t private_user_policy_proxy_t:fifo_file rw_fifo_file_perms;
-
-# Get some output.
-allow setfiles_t private_user_policy_proxy_t:fifo_file { read write };
-allow load_policy_t private_user_policy_proxy_t:fifo_file { read write };
-
-# Allow script to create a temporary file for here-doc.
-type private_user_policy_tmp_t;
-files_tmp_file(private_user_policy_tmp_t)
-manage_files_pattern(private_user_policy_t, private_user_policy_tmp_t, private_user_policy_tmp_t)
-files_tmp_filetrans(private_user_policy_t, private_user_policy_tmp_t, file)
-
-# This allows the reading of fielsystem extended attributes. It is triggered by
-# the bash here-doc syntax. My guess is that the temp file creation checks for
-# available disk space prior to creating the temp file. 
-fs_getattr_xattr_fs(private_user_policy_t)
-
-# Read the Makefile.
-files_read_usr_files(private_user_policy_t)
-
-# Make runs the shell.
-corecmd_exec_shell(private_user_policy_t)
-
-# Read and SELinux properties during build.
-selinux_get_enforce_mode(private_user_policy_t)
-seutil_search_default_contexts(private_user_policy_t)
-seutil_read_config(private_user_policy_t)
-
-# Create cache files as puppy_cache_t.
-puppy_manage_cache_files(private_user_policy_t)
-
-# Read and write the database.
-job_sudo_private(private_user_policy)
-
-# Read the hostname.
-hostname_exec(private_user_policy_t)
 
 ############################################################################
 ### Policy for `private user:port`.
@@ -509,6 +464,29 @@ files_tmp_filetrans(policy_generate_t, user_policy_tmp_t, file)
 fs_getattr_xattr_fs(policy_generate_t)
 
 ############################################################################
+### Policy for `policy_load`.
+############################################################################
+
+# User policy assignment is performed as root.
+puppy_job_as_root(policy_load)
+
+# Execute semanage to assign the protected policy to the user.
+seutil_run_semanage(policy_load_t, worker_r)
+allow semanage_t policy_load_proxy_t:fifo_file rw_fifo_file_perms;
+
+# Get some output.
+allow setfiles_t policy_load_proxy_t:fifo_file { read write };
+allow load_policy_t policy_load_proxy_t:fifo_file { read write };
+
+# Read and SELinux properties during build.
+selinux_get_enforce_mode(policy_load_t)
+seutil_search_default_contexts(policy_load_t)
+seutil_read_config(policy_load_t)
+
+# Create cache files as puppy_cache_t.
+puppy_read_cache_files(policy_load_t)
+
+############################################################################
 ### Policy for `policy_make`.
 ############################################################################
 
@@ -527,6 +505,7 @@ hostname_exec(policy_make_t)
 # Create cache files as puppy_cache_t.
 puppy_manage_cache_files(policy_make_t)
 
+# Read the Makefile.
 files_read_usr_files(policy_make_t)
 
 # Execute the `/puppy/sbin/user_policy`.

@@ -241,7 +241,15 @@ template(`puppy_job_execute',`
 ')
 
 template(`puppy_job_as_root',`
-    allow policy_generate_proxy_t self:fifo_file write;
+    puppy_job_execute($1) 
+
+    # Transition from worker to the proxy domain, from the transition program to
+    # the sudo domain, from sudo domain to the job domain.
+    domtrans_pattern(worker_t, $1_exec_t, $1_proxy_t)
+    sudo_role_template($1_proxy, system_r, $1_proxy_t)
+    domtrans_pattern($1_proxy_sudo_t, $1_exec_t, $1_t)
+
+    allow $1_proxy_t self:fifo_file write;
 ')
 
 template(`puppy_job_as_worker',`

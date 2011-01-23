@@ -306,6 +306,14 @@ template(`puppy_sudo',`
     puppy_read_puppy_sbin($1_sudo_t)
 ')
 
+template(`puppy_read_cache_files',`
+    gen_require(`
+        type puppy_cache_t;
+    ')
+    list_dirs_pattern($1, puppy_cache_t, puppy_cache_t)
+    read_files_pattern($1, puppy_cache_t, puppy_cache_t)
+    files_var_filetrans($1, puppy_cache_t, { file dir })
+')
 template(`puppy_manage_cache_files',`
     gen_require(`
         type puppy_cache_t;
