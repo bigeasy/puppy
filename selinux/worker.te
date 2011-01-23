@@ -437,11 +437,11 @@ domtrans_pattern(mysql_grant_sudo_t, janitor_mysql_exec_t, janitor_mysql_t)
 puppy_job_as_worker(policy_generate)
 
 job_sudo_delegate(policy_generate)
-job_delegate_trans(policy_generate, machine_users)
+job_delegate_trans(policy_generate, policy_users)
 
 allow policy_generate_sudo_t worker_t:fifo_file rw_fifo_file_perms;
 
-allow machine_users_delegate_t policy_generate_proxy_t:fifo_file rw_fifo_file_perms;
+allow policy_users_delegate_t policy_generate_proxy_t:fifo_file rw_fifo_file_perms;
 
 # Pass host name to `user_policy`.
 hostname_exec(policy_generate_t)
@@ -471,7 +471,7 @@ fs_getattr_xattr_fs(policy_generate_t)
 puppy_job_as_root(policy_load)
 
 job_sudo_delegate(policy_load)
-job_delegate_trans(policy_load, machine_users)
+job_delegate_trans(policy_load, policy_users)
 
 # Execute semanage to assign the protected policy to the user.
 seutil_run_semanage(policy_load_t, worker_r)
@@ -499,11 +499,11 @@ puppy_read_cache_files(policy_load_t)
 puppy_job_as_worker(policy_make)
 
 job_sudo_delegate(policy_make)
-job_delegate_trans(policy_make, machine_users)
+job_delegate_trans(policy_make, policy_users)
 
 allow policy_make_sudo_t worker_t:fifo_file rw_fifo_file_perms;
 
-allow machine_users_delegate_t policy_make_proxy_t:fifo_file rw_fifo_file_perms;
+allow policy_users_delegate_t policy_make_proxy_t:fifo_file rw_fifo_file_perms;
 
 # Pass host name to `user_policy`.
 hostname_exec(policy_make_t)
@@ -529,7 +529,7 @@ seutil_search_default_contexts(policy_make_t)
 puppy_job_as_root(policy_unload)
 
 job_sudo_delegate(policy_unload)
-job_delegate_trans(policy_unload, machine_users)
+job_delegate_trans(policy_unload, policy_users)
 
 # Execute semanage to assign the protected policy to the user.
 seutil_run_semanage(policy_unload_t, worker_r)
