@@ -531,3 +531,31 @@ files_tmp_filetrans(policy_generate_t, user_policy_tmp_t, file)
 # the bash here-doc syntax. My guess is that the temp file creation checks for
 # available disk space prior to creating the temp file. 
 fs_getattr_xattr_fs(policy_generate_t)
+
+############################################################################
+### Policy for `policy_make`.
+############################################################################
+
+puppy_job_as_worker(policy_make)
+
+job_sudo_delegate(policy_make)
+job_delegate_trans(policy_make, machine_users)
+
+allow policy_make_sudo_t worker_t:fifo_file rw_fifo_file_perms;
+
+allow machine_users_delegate_t policy_make_proxy_t:fifo_file rw_fifo_file_perms;
+
+# Pass host name to `user_policy`.
+hostname_exec(policy_make_t)
+
+# Create cache files as puppy_cache_t.
+puppy_manage_cache_files(policy_make_t)
+
+files_read_usr_files(policy_make_t)
+
+# Execute the `/puppy/sbin/user_policy`.
+allow policy_make_t policy_make_exec_t:file execute_no_trans;
+
+selinux_get_enforce_mode(policy_make_t)
+seutil_read_config(policy_make_t)
+seutil_search_default_contexts(policy_make_t)
