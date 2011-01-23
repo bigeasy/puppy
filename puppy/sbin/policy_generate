@@ -11,6 +11,8 @@
 
 #uid=$1
 
+/bin/rm -rf /var/cache/puppy/policy/*
+
 /usr/bin/sudo -u delegate /puppy/bin/machine_users $(/bin/hostname) | while read user
 do
     if [ $user -lt 20000 ]; then
