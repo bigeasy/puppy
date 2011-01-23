@@ -3,7 +3,9 @@ INSERT INTO ApplicationLocalUser(
 )
 SELECT ?, ?, id, CURRENT_TIMESTAMP()
   FROM LocalUser as lu
- WHERE NOT EXISTS (SELECT *
+ WHERE lu.ready = 1
+   AND NOT EXISTS (SELECT *
                      FROM ApplicationLocalUser
                     WHERE machineId = lu.machineId
                       AND localUserId = lu.id)
+LIMIT 1
