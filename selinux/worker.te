@@ -83,33 +83,6 @@ corecmd_exec_bin(worker_t)
 logging_send_syslog_msg(worker_t)
 
 ############################################################################
-### Policy for `private user:invite`.
-############################################################################
-
-# Invite sending is performed as the worker user.
-puppy_worker_job(private_user_invite)
-
-puppy_sudo(private_user_invite_job)
-role system_r types private_user_invite_job_sudo_t;
-domtrans_pattern(private_user_invite_job_sudo_t, private_exec_t, delegate_t)
-allow private_user_invite_job_sudo_t worker_t:fifo_file rw_fifo_file_perms;
-allow delegate_t private_user_invite_job_t:fifo_file rw_fifo_file_perms;
-
-# Query MySQL.
-mysql_tcp_connect(private_user_invite_job_t)
-mysql_stream_connect(private_user_invite_job_t)
-mysql_rw_db_sockets(private_user_invite_job_t)
-
-# Write to the syslog.
-logging_send_syslog_msg(private_user_invite_job_t)
-
-# Send email.
-corenet_tcp_connect_smtp_port(private_user_invite_job_t)
-sysnet_dns_name_resolve(private_user_invite_job_t)
-miscfiles_read_localization(private_user_invite_job_t)
-hostname_exec(private_user_invite_job_t)
-
-############################################################################
 ### Policy for `private user:port`.
 ############################################################################
 
@@ -308,6 +281,27 @@ allow user_group_t etc_t:file read_file_perms;
 
 # Transition to the exising user management policy.
 usermanage_domtrans_useradd(user_group_t)
+
+############################################################################
+### Policy for `user_invite`.
+############################################################################
+
+# Invite sending is performed as the worker user.
+puppy_job_as_worker(user_invite)
+
+job_sudo_delegate(user_invite)
+job_delegate_trans(user_invite, user_activation)
+
+puppy_node_exec(user_invite_t)
+
+# Write to the syslog.
+logging_send_syslog_msg(user_invite_t)
+
+# Send email.
+corenet_tcp_connect_smtp_port(user_invite_t)
+sysnet_dns_name_resolve(user_invite_t)
+miscfiles_read_localization(user_invite_t)
+hostname_exec(user_invite_t)
 
 ############################################################################
 ### Policy for `user_provision`.

@@ -18,6 +18,8 @@
 /puppy/bin/policy_users                 gen_context(system_u:object_r:policy_users_exec_t, s0)
 /puppy/bin/port_list                    gen_context(system_u:object_r:port_list_exec_t, s0)
 /puppy/bin/port_list@.*                 gen_context(system_u:object_r:port_list_exec_t, s0)
+/puppy/bin/user_activation              gen_context(system_u:object_r:user_activation_exec_t, s0)
+/puppy/bin/user_activation@.*           gen_context(system_u:object_r:user_activation_exec_t, s0)
 /puppy/bin/user_keys                    gen_context(system_u:object_r:user_keys_exec_t, s0)
 /puppy/bin/user_keys@.*                 gen_context(system_u:object_r:user_keys_exec_t, s0)
 /puppy/bin/user_ready                   gen_context(system_u:object_r:user_ready_exec_t, s0)
