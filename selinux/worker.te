@@ -110,19 +110,6 @@ miscfiles_read_localization(private_user_invite_job_t)
 hostname_exec(private_user_invite_job_t)
 
 ############################################################################
-### Policy for `user:group` job.
-############################################################################
-
-# User creation is performed as root.
-puppy_job_sudo_root(private_user_group)
-
-# Read /etc/passwd to determine if the user already exists.
-allow private_user_group_t etc_t:file read_file_perms;
-
-# Transition to the exising user management policy.
-usermanage_domtrans_useradd(private_user_group_t)
-
-############################################################################
 ### Policy for `user:skel`.
 ############################################################################
 
@@ -331,6 +318,19 @@ allow policy_make_t policy_make_exec_t:file execute_no_trans;
 selinux_get_enforce_mode(policy_make_t)
 seutil_read_config(policy_make_t)
 seutil_search_default_contexts(policy_make_t)
+
+############################################################################
+### Policy for `user_group` job.
+############################################################################
+
+# User creation is performed as root.
+puppy_job_as_root(user_group)
+
+# Read /etc/passwd to determine if the user already exists.
+allow user_group_t etc_t:file read_file_perms;
+
+# Transition to the exising user management policy.
+usermanage_domtrans_useradd(user_group_t)
 
 ############################################################################
 ### Policy for `user_provision`.
