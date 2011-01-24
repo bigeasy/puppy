@@ -7,16 +7,10 @@
 uid=$1
 assert_valid_user $uid
 
-status=$(/usr/bin/sudo -H -u delegate /puppy/bin/user_status $(/bin/hostname) $uid)
-if [ $? -ne 0 ]; then
-    abend "Unable to check status of user $uid."
-fi
-
 umask 077
 
-if [ $status -ne 0 ]; then
+if [ -e /home/u${uid} ]; then
     directory="/var/cache/puppy/decommissioned/u${uid}/$(/bin/date --rfc-3339=seconds | /bin/sed 's/ /T/')"
     /bin/mkdir -p $(dirname $directory)
     /bin/mv /home/u${uid} $directory || abend "Cannot move home directory /home/u${uid}."
-    /usr/bin/sudo -H -u delegate /puppy/bin/user_status $(/bin/hostname) $uid 0
 fi
