@@ -183,35 +183,6 @@ manage_dirs_pattern(private_user_decommission_t, home_root_t, home_root_t)
 hostname_exec(private_user_decommission_t)
 
 ############################################################################
-### Policy for `user:chown`.
-############################################################################
-
-# User creation is performed as root.
-puppy_job_sudo_root(private_user_chown)
-
-# Execute hostname. 
-hostname_exec(private_user_chown_t)
-
-# Run the private utility.
-job_sudo_private(private_user_chown)
-
-# Read user home directory files.
-userdom_ro_home_role(system_r, private_user_chown_t)
-ssh_read_user_home_files(private_user_chown_t)
-
-# Allow root override of DAC and write of modes.
-allow private_user_chown_t self:capability { chown dac_override };
-allow private_user_chown_t user_home_t:dir setattr;
-allow private_user_chown_t user_home_t:file setattr;
-allow private_user_chown_t user_home_dir_t:dir setattr;
-allow private_user_chown_t ssh_home_t:dir setattr;
-allow private_user_chown_t ssh_home_t:file setattr;
-allow private_user_chown_t home_root_t:dir setattr;
-
-# Chown needs to read `/etc/passwd`.
-files_read_etc_files(private_user_chown_t)
-
-############################################################################
 ### Policy for `user:skel`.
 ############################################################################
 
@@ -592,6 +563,35 @@ hostname_exec(port_unlabel_t)
 # Execute `port_labelify`.
 application_domain(port_unlabel_t, port_labelify_exec_t)
 allow port_unlabel_t port_labelify_exec_t:file execute_no_trans;
+
+############################################################################
+### Policy for `user_chown`.
+############################################################################
+
+# User creation is performed as root.
+puppy_job_as_root(user_chown)
+
+# Execute hostname. 
+hostname_exec(user_chown_t)
+
+# Run the private utility.
+job_sudo_private(user_chown)
+
+# Read user home directory files.
+userdom_ro_home_role(system_r, user_chown_t)
+ssh_read_user_home_files(user_chown_t)
+
+# Allow root override of DAC and write of modes.
+allow user_chown_t self:capability { chown dac_override };
+allow user_chown_t user_home_t:dir setattr;
+allow user_chown_t user_home_t:file setattr;
+allow user_chown_t user_home_dir_t:dir setattr;
+allow user_chown_t ssh_home_t:dir setattr;
+allow user_chown_t ssh_home_t:file setattr;
+allow user_chown_t home_root_t:dir setattr;
+
+# Chown needs to read `/etc/passwd`.
+files_read_etc_files(user_chown_t)
 
 ############################################################################
 ### Policy for `user_create` job.
