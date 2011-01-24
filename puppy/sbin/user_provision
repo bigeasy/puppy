@@ -7,18 +7,10 @@
 uid=$1
 assert_valid_user $uid
 
-status=$(/usr/bin/sudo -H -u delegate /puppy/bin/user_status $(/bin/hostname) $uid)
-if [ $? -ne 0 ]; then
-    abend "Unable to check status of user $uid."
-fi
-
-if [ $status -ne 0 ]; then
-    abend "User $uid has already been provisioned."
+if [ -e /home/u$uid ]; then
+    abend "Home directory already exists for u$uid."
 fi
 
 umask 077
-/bin/rm -rf /home/u$uid
 /bin/mkdir /home/u$uid
 /bin/chown u$uid:liminal /home/u$uid
-
-/usr/bin/sudo -H -u delegate /puppy/bin/user_status $(/bin/hostname) $uid 1
