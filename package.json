@@ -12,6 +12,7 @@
     , "config_format":      "./bin/config_format.js"
     , "db_password":        "./bin/db_password.js"
     , "db_fetch":           "./bin/db_fetch.js"
+    , "mail_invitation":    "./bin/mail_invitation.js"
     , "policy_users":       "./bin/policy_users.js"
     , "policy_version":     "./bin/policy_version.js"
     , "port_fetch":         "./bin/port_fetch.js"

@@ -9,11 +9,14 @@ db        = require("common/database")
 
 argv      = process.argv.slice(2)
 
+email     = argv.shift()
+sshKey    = argv.shift()
+
 exec      = require("child_process").exec
 crypto    = require "crypto"
 
 db.createDatabase syslog, (database) ->
-  register = (email, sshKey) ->
+  register = () ->
     hash = crypto.createHash "md5"
     hash.update(email +  sshKey + (new Date().toString()) + process.pid)
     code = hash.digest "hex"
@@ -44,7 +47,7 @@ db.createDatabase syslog, (database) ->
         else
           database.select "getLocalUserByActivationCode", [ code ], "localUser", (results) =>
             localUser = results.shift()
-            shell.enqueue localUser.machine.hostname,
+            database.enqueue localUser.machine.hostname, [
               [ "user:create", [ localUser.id ] ],
               [ "user:restorecon", [ localUser.id ] ],
               [ "user:decommission", [ localUser.id ] ],
@@ -54,6 +57,6 @@ db.createDatabase syslog, (database) ->
               [ "user:restorecon", [ localUser.id ] ],
               [ "user:group", [ localUser.id, "liminal" ] ],
               [ "user:chown", [ localUser.id ] ],
-              [ "user:invite", [], code ]
-
-  register argv[0], argv[1]
+              [ "user:invite", [ email ] ]
+            ]
+  register()
