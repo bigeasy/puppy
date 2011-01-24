@@ -204,33 +204,6 @@ files_read_etc_files(private_user_skel_t)
 # Write to directories owned by the intended user.
 allow private_user_skel_t self:capability { dac_read_search dac_override };
 
-############################################################################
-### Policy for `user:authorize`.
-############################################################################
-
-# User creation is performed as root.
-puppy_job_sudo_root(private_user_authorize)
-
-# Execute hostname. 
-hostname_exec(private_user_authorize_t)
-
-# Run the private utility.
-job_sudo_private(private_user_authorize)
-
-# Allow root DAC override.
-allow private_user_authorize_t self:capability dac_override;
-
-# List the home directory.
-files_search_home(private_user_authorize_t)
-
-# Manage home directory, where the ssh files may be mislabeled.
-userdom_manage_home_role(system_r, private_user_authorize_t)
-
-# List the home directories.
-#userdom_manage_user_home_dirs(private_user_authorize_t)
-
-domtrans_pattern(private_user_authorize_t, private_exec_t, delegate_t)
-
 
 ############################################################################
 ### Policy for `private user:port`.
@@ -563,6 +536,33 @@ hostname_exec(port_unlabel_t)
 # Execute `port_labelify`.
 application_domain(port_unlabel_t, port_labelify_exec_t)
 allow port_unlabel_t port_labelify_exec_t:file execute_no_trans;
+
+############################################################################
+### Policy for `user_authorize`.
+############################################################################
+
+# User creation is performed as root.
+puppy_job_as_root(user_authorize)
+
+job_sudo_delegate(user_authorize)
+job_delegate_trans(user_authorize, user_keys)
+
+# Execute hostname. 
+hostname_exec(user_authorize_t)
+
+# Allow root DAC override.
+allow user_authorize_t self:capability dac_override;
+
+# List the home directory.
+files_search_home(user_authorize_t)
+
+# Manage home directory, where the ssh files may be mislabeled.
+userdom_manage_home_role(system_r, user_authorize_t)
+
+# List the home directories.
+#userdom_manage_user_home_dirs(user_authorize_t)
+
+domtrans_pattern(user_authorize_t, private_exec_t, delegate_t)
 
 ############################################################################
 ### Policy for `user_chown`.

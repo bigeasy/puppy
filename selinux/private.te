@@ -1,4 +1,8 @@
 # Policy module for private utilities.
+#
+# REMEMER: You can't use exec type, _exec_t,  in the file contexts until you
+# declare a domain_trans_pattern or application_domain somewhere else in the
+# policy with the exec type.
 policy_module(private,1.0.0)
 
 require {
@@ -48,6 +52,13 @@ puppy_delegate_database(policy_users)
 
 puppy_delegate(port_list)
 puppy_delegate_database(port_list)
+
+############################################################################
+### Policy for `user_keys`.
+############################################################################
+
+puppy_delegate(user_keys)
+puppy_delegate_database(user_keys)
 
 ############################################################################
 ### Policy for `user_ready`.
