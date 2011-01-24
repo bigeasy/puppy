@@ -43,7 +43,7 @@ db.createDatabase syslog, (database) ->
           console.log results
           database.fetchLocalUser results.insertId, (localUser) ->
             console.log localUser
-            shell.enqueue localUser.machine.hostname,
+            database.enqueue localUser.machine.hostname, [
               [ "user:create", [ localUser.id ] ],
               [ "user:restorecon", [ localUser.id ] ],
               [ "user:decommission", [ localUser.id ] ],
@@ -54,6 +54,7 @@ db.createDatabase syslog, (database) ->
               [ "user:restorecon", [ localUser.id ] ],
               [ "user:group", [ localUser.id, "protected" ] ],
               [ "user:chown", [ localUser.id ] ]
+            ]
             process.stdout.write "Activation successful. Welcome to Puppy.\n"
 
   shell.stdin 33, (error, stdin) ->
