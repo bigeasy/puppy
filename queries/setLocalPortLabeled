@@ -1,3 +1,0 @@
-UPDATE LocalPort
-   SET labeled = ?
- WHERE machineId = (SELECT id FROM Machine WHERE hostname = ?) AND port = ?
