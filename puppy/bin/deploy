@@ -26,7 +26,6 @@ if [ -e Cakefile ]; then
 
     npm_config_root=/puppy/lib/node npm_config_binroot=/puppy/bin npm_config_manroot=/puppy/share/man \
         /usr/bin/sudo -E /usr/bin/npm install .
-    /usr/bin/sudo /sbin/restorecon -R /puppy
 fi
 
 # Copy a file to a target directory assigning an owner and mode. Creates the
