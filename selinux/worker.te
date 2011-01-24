@@ -110,29 +110,6 @@ miscfiles_read_localization(private_user_invite_job_t)
 hostname_exec(private_user_invite_job_t)
 
 ############################################################################
-### Policy for `user:skel`.
-############################################################################
-
-# User creation is performed as root.
-puppy_job_sudo_root(private_user_skel)
-
-# Execute hostname. 
-hostname_exec(private_user_skel_t)
-
-# Run the private utility.
-job_sudo_private(private_user_skel)
-
-# Read user home directory files.
-userdom_manage_home_role(system_r, private_user_skel_t)
-
-# Read the `/etc/skel` files.
-files_read_etc_files(private_user_skel_t)
-
-# Write to directories owned by the intended user.
-allow private_user_skel_t self:capability { dac_read_search dac_override };
-
-
-############################################################################
 ### Policy for `private user:port`.
 ############################################################################
 
@@ -374,6 +351,25 @@ allow semanage_t policy_ready_proxy_t:fifo_file rw_fifo_file_perms;
 
 # Pass host name to `policy_users`.
 hostname_exec(policy_ready_t)
+
+############################################################################
+### Policy for `user_skel`.
+############################################################################
+
+# User creation is performed as root.
+puppy_job_as_root(user_skel)
+
+# Execute hostname. 
+hostname_exec(user_skel_t)
+
+# Read user home directory files.
+userdom_manage_home_role(system_r, user_skel_t)
+
+# Read the `/etc/skel` files.
+files_read_etc_files(user_skel_t)
+
+# Write to directories owned by the intended user.
+allow user_skel_t self:capability { dac_read_search dac_override };
 
 ############################################################################
 ### Policy for `policy_unload`.
