@@ -574,9 +574,6 @@ puppy_job_as_root(user_chown)
 # Execute hostname. 
 hostname_exec(user_chown_t)
 
-# Run the private utility.
-job_sudo_private(user_chown)
-
 # Read user home directory files.
 userdom_ro_home_role(system_r, user_chown_t)
 ssh_read_user_home_files(user_chown_t)
