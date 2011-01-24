@@ -23,3 +23,13 @@ mysql_script ddl/0001_create_user.sql
 mysql_script ddl/0002_insert_account.sql 
 
 bin/load_ports | sudo -H -u janitor mysql -u root puppy
+
+/usr/bin/sudo -u delegate /puppy/bin/user_generate 3
+
+/puppy/bin/job $(/bin/hostname) port:unlabel
+/puppy/bin/job $(/bin/hostname) policy:unload
+/puppy/bin/job $(/bin/hostname) policy:generate
+/puppy/bin/job $(/bin/hostname) policy:make
+/puppy/bin/job $(/bin/hostname) policy:load
+/puppy/bin/job $(/bin/hostname) port:label
+/puppy/bin/job $(/bin/hostname) policy:ready
