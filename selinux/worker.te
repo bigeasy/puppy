@@ -123,36 +123,6 @@ allow private_user_group_t etc_t:file read_file_perms;
 usermanage_domtrans_useradd(private_user_group_t)
 
 ############################################################################
-### Policy for `user:provision`.
-############################################################################
-
-# User creation is performed as root.
-puppy_job_sudo_root(private_user_provision)
-
-job_sudo_private(private_user_provision)
-
-allow puppy_t private_user_provision_t:fifo_file rw_fifo_file_perms;
-
-allow private_user_provision_t { home_root_t user_home_dir_t }:dir list_dir_perms;
-allow private_user_provision_t user_home_dir_t:dir read_file_perms;
-
-# Allow deletion of existing home directory.
-allow private_user_provision_t user_home_dir_t:dir delete_dir_perms;
-
-# Allow chown of home directory and DAC override for root.
-allow private_user_provision_t self:capability { chown dac_override };
-
-# Obliterate home directory.
-userdom_manage_home_role(system_r, private_user_provision_t)
-manage_dirs_pattern(private_user_provision_t, home_root_t, home_root_t)
-
-# Chown needs to read `/etc/passwd`.
-files_read_etc_files(private_user_provision_t)
-
-# Execute hostname. 
-hostname_exec(private_user_provision_t)
-
-############################################################################
 ### Policy for `user:skel`.
 ############################################################################
 
@@ -361,6 +331,31 @@ allow policy_make_t policy_make_exec_t:file execute_no_trans;
 selinux_get_enforce_mode(policy_make_t)
 seutil_read_config(policy_make_t)
 seutil_search_default_contexts(policy_make_t)
+
+############################################################################
+### Policy for `user_provision`.
+############################################################################
+
+# User creation is performed as root.
+puppy_job_as_root(user_provision)
+
+allow puppy_t user_provision_t:fifo_file rw_fifo_file_perms;
+
+allow user_provision_t { home_root_t user_home_dir_t }:dir list_dir_perms;
+allow user_provision_t user_home_dir_t:dir read_file_perms;
+
+# Allow deletion of existing home directory.
+allow user_provision_t user_home_dir_t:dir delete_dir_perms;
+
+# Allow chown of home directory and DAC override for root.
+allow user_provision_t self:capability { chown dac_override };
+
+# Obliterate home directory.
+userdom_manage_home_role(system_r, user_provision_t)
+manage_dirs_pattern(user_provision_t, home_root_t, home_root_t)
+
+# Chown needs to read `/etc/passwd`.
+files_read_etc_files(user_provision_t)
 
 ############################################################################
 ### Policy for `policy_ready`.
