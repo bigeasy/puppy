@@ -11,7 +11,7 @@ appId     = argv.shift()
 db.createDatabase syslog, (database) ->
   database.select "getApplicationLocalUsers", [ appId ], "localUser", (results) ->
     for localUser in results
-      shell.enqueue localUser.machine.hostname, [
+      database.enqueue localUser.machine.hostname, [
         [ "user:config", [ localUser.id ] ],
         [ "user:restorecon", [ localUser.id ] ],
         [ "user:group", [ localUser.id, "protected" ] ],
