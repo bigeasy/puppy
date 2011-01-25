@@ -21,6 +21,9 @@ module.exports.Syslog = class Syslog
     @port = options.port or 514
     @host = options.host or "127.0.0.1"
 
+  error: (message, dump) ->
+    @send "err", "ERROR: #{message}", dump
+
   send: (level, message, dump) ->
     message += " #{JSON.stringify(dump)}" if dump
     code = (LEVEL[level] or LEVEL["info"]) + (@facility * 8)
