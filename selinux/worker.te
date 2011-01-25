@@ -106,28 +106,6 @@ job_sudo_private(private_user_port)
 hostname_exec(private_user_port_t)
 
 ############################################################################
-### Policy for `private user:config`.
-############################################################################
-
-# User config assignment is performed as root.
-puppy_job_sudo_root(private_user_config)
-
-# Execute semanage to assign the protected port to the user.
-seutil_run_semanage(private_user_config_t, worker_r)
-allow semanage_t private_user_config_proxy_t:fifo_file rw_fifo_file_perms;
-
-# Create the configuration directories.
-userdom_manage_home_role(system_r, private_user_config_t)
-
-puppy_read_puppy_etc(private_user_config_t)
-
-# Read the network state.
-allow private_user_config_t self:capability { dac_read_search dac_override };
-
-# Read and write the database.
-job_sudo_private(private_user_config)
-
-############################################################################
 ### Policy for `app_config`.
 ############################################################################
 
@@ -277,6 +255,28 @@ allow policy_make_t policy_make_exec_t:file execute_no_trans;
 selinux_get_enforce_mode(policy_make_t)
 seutil_read_config(policy_make_t)
 seutil_search_default_contexts(policy_make_t)
+
+############################################################################
+### Policy for `user_config`.
+############################################################################
+
+# User config assignment is performed as root.
+puppy_job_as_root(user_config)
+
+job_sudo_delegate(user_config)
+job_delegate_trans(user_config, config_format)
+
+# Execute semanage to assign the protected port to the user.
+seutil_run_semanage(user_config_t, worker_r)
+allow semanage_t user_config_proxy_t:fifo_file rw_fifo_file_perms;
+
+# Create the configuration directories.
+userdom_manage_home_role(system_r, user_config_t)
+
+puppy_read_puppy_etc(user_config_t)
+
+# Read the network state.
+allow user_config_t self:capability { dac_read_search dac_override };
 
 ############################################################################
 ### Policy for `user_group` job.
