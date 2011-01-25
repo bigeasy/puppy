@@ -40,6 +40,14 @@ puppy_delegate_database(config_format)
 puppy_delegate_hostname(config_format)
 
 ############################################################################
+### Policy for `config_mysql`.
+############################################################################
+
+puppy_delegate(config_mysql)
+puppy_delegate_database(config_mysql)
+puppy_delegate_hostname(config_mysql)
+
+############################################################################
 ### Policy for `policy_users`.
 ############################################################################
 
