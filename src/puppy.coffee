@@ -64,16 +64,8 @@ module.exports.Configuration = Configuration
 invoke = (command, parameters, splat) ->
   for parameter in splat
     parameters.push(parameter)
-  program = spawn command, parameters
-  stdout = ""
-  stderr = ""
-  program.stdout.on "data", (chunk) -> stdout += chunk.toString()
-  program.stderr.on "data", (chunk) -> stderr += chunk.toString()
-  program.on "exit", (code) ->
-    if code
-      console.log stderr if code
-    else if stdout.length
-      process.stdout.write stdout
+  program = spawn command, parameters, { customFds: [ 0, 1, 2 ] }
+  program.on "exit", (code) -> process.exit code
 
 module.exports.delegate = (command, argv) ->
   if require("./location").server
