@@ -16,3 +16,13 @@ address=$(/bin/cat /puppy/etc/address)
 config=$(/usr/bin/sudo -u delegate /puppy/bin/config_format $uid $address)
 
 echo "$config" > /home/u$uid/app/configuration.json
+
+umask 077
+/usr/bin/sudo -u delegate /puppy/bin/config_mysql $uid | while read line
+do
+    name=${line%% *}
+    password=${line#* }
+    /bin/rm -f /home/u$uid/.my.${name}.cnf
+    echo "[client]" > /home/u${uid}/.my.${name}.cnf 
+    echo "password=${password}" >> /home/u${uid}/.my.${name}.cnf 
+done
