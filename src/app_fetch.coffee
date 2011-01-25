@@ -11,22 +11,32 @@ db.createDatabase syslog, (database) ->
   uid = parseInt process.env["SUDO_UID"], 10
   shell.verify(uid > 10000, "Inexplicable uid #{uid}")
   shell.hostname (hostname) ->
+    console.log [ hostname, uid ]
     database.select "getAccountByLocalUser", [ hostname, uid ], "account", (results) ->
       account = results.shift()
       database.select "insertApplication", [ account.id, 0 ], (results) ->
         applicationId = results.insertId
-        database.fetchLocalUser applicationId, (localUser) ->
-          shell.enqueue localUser.machine.hostname,
-            [ "user:create", [ localUser.id ] ],
-            [ "user:restorecon", [ localUser.id ] ],
-            [ "user:decommission", [ localUser.id ] ],
-            [ "user:provision", [ localUser.id ] ],
-            [ "user:restorecon", [ localUser.id ] ],
-            [ "user:policy", [ localUser.id ] ],
-            [ "user:skel", [ localUser.id ] ],
-            [ "user:authorize", [ localUser.id ] ],
-            [ "user:config", [ localUser.id ] ],
-            [ "user:restorecon", [ localUser.id ] ],
-            [ "user:group", [ localUser.id, "protected" ] ],
-            [ "user:chown", [ localUser.id ] ]
-          process.stdout.write "Application t#{applicationId} created.\n"
+        database.select "getMachines", [], "machine", (results) ->
+          machine = results[0]
+          database.select "fetchLocalUser", [ applicationId, machine.id, 1 ], (results) =>
+            if results.affectedRows
+              database.select "getLocalUserByAssignment", [ results.insertId ], "localUser", (results) ->
+                localUser = results.shift()
+                database.enqueue localUser.machine.hostname, [
+                  [ "user:create", [ localUser.id ] ],
+                  [ "user:restorecon", [ localUser.id ] ],
+                  [ "user:decommission", [ localUser.id ] ],
+                  [ "user:provision", [ localUser.id ] ],
+                  [ "user:restorecon", [ localUser.id ] ],
+                  [ "user:skel", [ localUser.id ] ],
+                  [ "user:authorize", [ localUser.id ] ],
+                  [ "user:config", [ localUser.id ] ],
+                  [ "user:restorecon", [ localUser.id ] ],
+                  [ "user:group", [ localUser.id, "protected" ] ],
+                  [ "user:chown", [ localUser.id ] ]
+                ], ->
+                  process.stdout.write "Application t#{applicationId} created.\n"
+            else
+              syslog.error "Unable to allocate local user account for application #{applicationId}."
+              process.stdout.write "Unable to allocate application."
+              process.exit 1
