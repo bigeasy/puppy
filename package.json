@@ -4,5 +4,6 @@
 ,   "directories":      { "lib" : "./lib" }
 ,   "bin":
     { "account_activated":          "./bin/account_activated.js"
+    , "mysql_prompt":               "./bin/mysql_prompt.js"
     }
 }
