@@ -113,6 +113,7 @@ invoke = (command, parameters, splat) ->
   program = spawn command, parameters, { customFds: [ 0, 1, 2 ] }
   program.on "exit", (code) -> process.exit code
 
+module.exports.invoke = invoke
 module.exports.application = (command, argv) ->
   if require("./location").server
     invoke("/usr/bin/sudo", [ "-H", "-u", "delegate", command ], argv)
