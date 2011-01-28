@@ -11,7 +11,6 @@ db.createDatabase syslog, (database) ->
   uid = parseInt process.env["SUDO_UID"], 10
   shell.verify(uid > 10000, "Inexplicable uid #{uid}")
   shell.hostname (hostname) ->
-    console.log [ hostname, uid ]
     database.select "getAccountByLocalUser", [ hostname, uid ], "account", (results) ->
       account = results.shift()
       database.select "insertApplication", [ account.id, 0 ], (results) ->
