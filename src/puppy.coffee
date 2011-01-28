@@ -1,17 +1,22 @@
 fs = require "fs"
 sys = require "sys"
+path = require "path"
 {spawn,exec} = require("child_process")
 
 class Configuration
   constructor: ->
     home = process.env["HOME"]
+    @local = {}
+    @global = {}
     try
-      @global = JSON.parse(fs.readFileSync("#{home}/.puppy"))
+      fs.statSync "#{home}/.puppy"
+      @global = JSON.parse(fs.readFileSync("#{home}/.puppy/configuration.json"))
     catch e
       throw e if process.binding("net").ENOENT isnt e.errno
       @global = {}
     try
-      @local = JSON.parse(fs.readFileSync("./.puppy"))
+      fs.statSync "./.puppy"
+      @local = JSON.parse(fs.readFileSync("./.puppy/configuration.json"))
     catch e
       throw e if process.binding("net").ENOENT isnt e.errno
       @local = {}
@@ -59,6 +64,47 @@ class Configuration
     else
       callback(home)
 
+  directory: (callback) ->
+    home = process.env["HOME"]
+    fs.stat "#{home}/.puppy", (error, stat) =>
+      if error
+        if process.binding("net").ENOENT is error.errno
+          fs.mkdir "#{home}/.puppy", 0755, (error) =>
+            throw error if error
+            @directory(callback)
+        else
+          throw error
+      callback()
+
+  applications: (callback) ->
+    @directory =>
+      try
+        home = process.env["HOME"]
+        callback(JSON.parse(fs.readFileSync("#{home}/.puppy/applications.json", "utf8")))
+      catch error
+        if process.binding("net").ENOENT is error.errno
+          @fetchApplications (applications) =>
+            fs.writeFileSync "#{home}/.puppy/applications.json", JSON.stringify(applications), "utf8"
+            @applications(callback)
+        else
+          throw error
+
+  fetchApplications: (callback) ->
+    console.log "FETCH"
+    @home (user) ->
+      console.log "FETCH"
+      config = spawn "/usr/bin/ssh", [ "-T", user, "/usr/bin/sudo", "-u", "delegate", "/puppy/bin/account_config" ]
+      stdout = ""
+      stderr = ""
+      config.stdout.on "data", (chunk) -> stdout += chunk.toString()
+      config.stderr.on "data", (chunk) -> stderr += chunk.toString()
+      config.on "exit", (code) ->
+        if code is 0
+          callback(JSON.parse(stdout))
+        else
+          throw new Error("Unable to list applications home for #{email}")
+
+
 module.exports.Configuration = Configuration
 
 invoke = (command, parameters, splat) ->
@@ -67,6 +113,14 @@ invoke = (command, parameters, splat) ->
   program = spawn command, parameters, { customFds: [ 0, 1, 2 ] }
   program.on "exit", (code) -> process.exit code
 
+module.exports.application = (command, argv) ->
+  if require("./location").server
+    invoke("/usr/bin/sudo", [ "-H", "-u", "delegate", command ], argv)
+  else
+    configuration = new Configuration()
+    configuration.applications (applications) ->
+      console.log applications
+#      invoke("/usr/bin/ssh", [ "-T", home, "/usr/bin/sudo", "-H", "-u", "delegate", command ], argv)
 module.exports.delegate = (command, argv) ->
   if require("./location").server
     invoke("/usr/bin/sudo", [ "-H", "-u", "delegate", command ], argv)
