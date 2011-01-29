@@ -19,30 +19,18 @@ db.createDatabase syslog, (database) ->
       activate(localUser, code)
 
   activate = (localUser, code) ->
-    console.log "ACTIVATING"
     database.select "activate", [ code ], (results) ->
-      console.log results
-      console.log code
-      console.log "ACTIVATED"
       if results.affectedRows != 0
         database.select "dropActivationLocalUser", [ localUser.machineId, localUser.id ], (results) ->
-          console.log "DROP"
-          console.log results
           database.select "dropApplicationLocalUser", [ localUser.machineId, localUser.id ], (results) ->
-            console.log "DROP"
-            console.log results
             account(code)
 
   account = (code) ->
     database.select "getActivationByCode", [ code ], "activation", (results) ->
-      console.log results
       activation = results.shift()
       database.select "insertAccount", [ activation.email, activation.sshKey ], (results) ->
-        console.log results
         database.select "insertApplication", [ results.insertId, 1 ], (results) ->
-          console.log results
           database.fetchLocalUser results.insertId, (localUser) ->
-            console.log localUser
             database.enqueue localUser.machine.hostname, [
               [ "user:create", [ localUser.id ] ],
               [ "user:restorecon", [ localUser.id ] ],
