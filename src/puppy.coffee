@@ -101,7 +101,7 @@ class Configuration
 
   fetchApplications: (callback) ->
     @home (user) ->
-      config = spawn "/usr/bin/ssh", [ "-T", user, "/usr/bin/sudo", "-u", "delegate", "/puppy/bin/account_config" ]
+      config = spawn "/usr/bin/ssh", [ "-T", user, "/usr/bin/sudo", "-u", "delegate", "/puppy/bin/account_apps" ]
       stdout = ""
       stderr = ""
       config.stdout.on "data", (chunk) -> stdout += chunk.toString()
@@ -110,7 +110,7 @@ class Configuration
         if code is 0
           callback(JSON.parse(stdout))
         else
-          throw new Error("Unable to list applications home for #{email}")
+          throw new Error("Unable to list applications.")
 
 
 module.exports.Configuration = Configuration
