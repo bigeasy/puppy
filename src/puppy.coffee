@@ -6,8 +6,6 @@ path = require "path"
 class Configuration
   constructor: ->
     home = process.env["HOME"]
-    @local = {}
-    @global = {}
     try
       fs.statSync "#{home}/.puppy"
       @global = JSON.parse(fs.readFileSync("#{home}/.puppy/configuration.json"))
@@ -34,11 +32,23 @@ class Configuration
         @global[k] = v
     @dirty.global = true
 
+  abend: (message) ->
+    process.stdout.write "ERROR: #{message}"
+    process.exit 1
+
   # Write the local and global property maps, if they are dirty.
   save: ->
     if @dirty.global
       pretty = JSON.stringify(@global)
-      fs.writeFileSync("#{process.env["HOME"]}/.puppy", pretty, "utf8")
+      try
+        stat = fs.statSync "#{process.env["HOME"]}/.puppy"
+        if not stat.isDirectory()
+          @abend "#{process.env["HOME"]}/.puppy is not a directory."
+        fs.writeFileSync("#{process.env["HOME"]}/.puppy/configuration.json", pretty, "utf8")
+      catch error
+        throw error if process.binding("net").ENOENT isnt error.errno
+        fs.mkdirSync "#{process.env["HOME"]}/.puppy", 0755
+        @save()
 
   # Get the value associated with the key looking first in the local property
   # map, then in the global property map. Returns undefined if the property is
