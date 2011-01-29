@@ -32,12 +32,12 @@ puppy_delegate(app_users)
 puppy_delegate_database(app_users)
 
 ############################################################################
-### Policy for `config_format`.
+### Policy for `config_app`.
 ############################################################################
 
-puppy_delegate(config_format)
-puppy_delegate_database(config_format)
-puppy_delegate_hostname(config_format)
+puppy_delegate(config_app)
+puppy_delegate_database(config_app)
+puppy_delegate_hostname(config_app)
 
 ############################################################################
 ### Policy for `config_mysql`.
