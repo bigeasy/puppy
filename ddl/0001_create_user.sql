@@ -127,7 +127,7 @@ CREATE TABLE DataStore (
     applicationId   INTEGER NOT NULL,
     dataServerId    INTEGER NOT NULL,
     password        VARCHAR(32),
-    name            VARCHAR(256),
+    alias           VARCHAR(256),
     modified        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created         TIMESTAMP DEFAULT 0,
     PRIMARY KEY (id),
