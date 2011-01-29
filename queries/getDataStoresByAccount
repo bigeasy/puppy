@@ -25,3 +25,5 @@ SELECT ds.id AS dataStore__id,
   JOIN Application AS app ON ds.applicationId = app.id
   JOIN Account AS acc ON app.accountId = acc.id
  WHERE acc.id = ?
+ ORDER
+    BY app.id, ds.id

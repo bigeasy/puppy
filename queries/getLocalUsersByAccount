@@ -23,3 +23,5 @@ SELECT lu.machineId AS localUser__machineId,
   JOIN Application AS app ON alu.applicationId = app.id
   JOIN Account AS acc ON app.accountId = acc.id
  WHERE acc.id = ?
+ ORDER
+    BY app.id, alu.id 
