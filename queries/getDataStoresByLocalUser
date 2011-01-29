@@ -1,7 +1,7 @@
 SELECT ds.id AS dataStore__id,
        ds.applicationId AS dataStore__applicationId,
        ds.dataServerId AS dataStore__dataServerId,
-       ds.name AS dataStore__name,
+       ds.alias AS dataStore__alias,
        ds.password AS dataStore__password,
        ds.modified AS dataStore__modified,
        ds.created AS dataStore__created,
