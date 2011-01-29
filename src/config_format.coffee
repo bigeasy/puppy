@@ -19,7 +19,7 @@ db.createDatabase syslog, (database) ->
         for dataStore in results
           databases[dataStore.name] =
             name: "d#{dataStore.id}"
-            alias: dataStore.name
+            alias: dataStore.alias
             engine: dataStore.dataServer.engine
             password: dataStore.password
             hostname: dataStore.dataServer.hostname

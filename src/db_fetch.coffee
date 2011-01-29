@@ -10,10 +10,8 @@ db              = require("common/database")
 
 argv            = process.argv.slice 2
 
-console.log     argv
-
 parser = new OptionParser [
-  [ "-n", "--name [NAME]", "database name" ]
+  [ "-A", "--alias [NAME]", "database alias" ]
   [ "-e", "--engine [mysql/mongodb]", "database engine" ]
   [ "-a", "--app [NAME]", "application name" ]
 ]
@@ -28,7 +26,7 @@ catch e
   usage()
 
 options.engine or= "mysql"
-options.name or= options.engine
+options.alias or= options.engine
 
 db.createDatabase syslog, (database) ->
   shell.hostname (hostname) ->
@@ -41,7 +39,7 @@ db.createDatabase syslog, (database) ->
     urandom = fs.createReadStream "/dev/urandom", { start: 0, end: 4091 }
     urandom.on "data", (chunk) -> hash.update chunk
     urandom.on "end", ->
-      database.select "insertDataStore", [ options.app, options.name, hash.digest("hex"), options.engine ], (results) ->
+      database.select "insertDataStore", [ options.app, options.alias, hash.digest("hex"), options.engine ], (results) ->
         dataStoreId = results.insertId
         database.enqueue hostname, [
           [ "mysql:create", [ dataStoreId ] ],

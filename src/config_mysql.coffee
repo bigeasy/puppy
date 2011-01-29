@@ -16,4 +16,4 @@ db.createDatabase syslog, (database) ->
       databases = {}
       for dataStore in results
         if dataStore.dataServer.engine is "mysql"
-          process.stdout.write "#{dataStore.name} #{dataStore.password}\n"
+          process.stdout.write "#{dataStore.alias} #{dataStore.password}\n"
