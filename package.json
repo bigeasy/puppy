@@ -9,7 +9,7 @@
     , "account_register":   "./bin/account_register.js"
     , "app_fetch":          "./bin/app_fetch.js"
     , "app_users":          "./bin/app_users.js"
-    , "config_format":      "./bin/config_format.js"
+    , "config_app":         "./bin/config_app.js"
     , "config_mysql":       "./bin/config_mysql.js"
     , "db_password":        "./bin/db_password.js"
     , "db_fetch":           "./bin/db_fetch.js"

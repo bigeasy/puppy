@@ -1,7 +1,7 @@
 require.paths.unshift("/puppy/lib/node")
 
 exec      = require("child_process").exec
-syslog    = new (require("common/syslog").Syslog)({ tag: "configuration_read", pid: true })
+syslog    = new (require("common/syslog").Syslog)({ tag: "config_app", pid: true })
 shell     = new (require("common/shell").Shell)(syslog)
 prettify  = require("common/pretty").prettify
 db        = require("common/database")
@@ -17,7 +17,7 @@ db.createDatabase syslog, (database) ->
       database.select "getDataStoresByLocalUser", [ hostname, uid ], "dataStore", (results) ->
         databases = {}
         for dataStore in results
-          databases[dataStore.name] =
+          databases[dataStore.alias] =
             name: "d#{dataStore.id}"
             alias: dataStore.alias
             engine: dataStore.dataServer.engine
