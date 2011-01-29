@@ -90,9 +90,7 @@ class Configuration
           throw error
 
   fetchApplications: (callback) ->
-    console.log "FETCH"
     @home (user) ->
-      console.log "FETCH"
       config = spawn "/usr/bin/ssh", [ "-T", user, "/usr/bin/sudo", "-u", "delegate", "/puppy/bin/account_config" ]
       stdout = ""
       stderr = ""
