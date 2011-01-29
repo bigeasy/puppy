@@ -122,14 +122,6 @@ invoke = (command, parameters, splat) ->
   program.on "exit", (code) -> process.exit code
 
 module.exports.invoke = invoke
-module.exports.application = (command, argv) ->
-  if require("./location").server
-    invoke("/usr/bin/sudo", [ "-H", "-u", "delegate", command ], argv)
-  else
-    configuration = new Configuration()
-    configuration.applications (applications) ->
-      console.log applications
-#      invoke("/usr/bin/ssh", [ "-T", home, "/usr/bin/sudo", "-H", "-u", "delegate", command ], argv)
 module.exports.delegate = (command, argv) ->
   if require("./location").server
     invoke("/usr/bin/sudo", [ "-H", "-u", "delegate", command ], argv)
