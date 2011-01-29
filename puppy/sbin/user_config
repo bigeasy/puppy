@@ -13,7 +13,7 @@ address=$(/bin/cat /puppy/etc/address)
 /bin/mkdir -p /home/u$uid/var
 /bin/mkdir -p /home/u$uid/tmp
 
-config=$(/usr/bin/sudo -u delegate /puppy/bin/config_format $uid $address)
+config=$(/usr/bin/sudo -u delegate /puppy/bin/config_app $uid $address)
 
 echo "$config" > /home/u$uid/app/configuration.json
 
