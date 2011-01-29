@@ -265,7 +265,7 @@ puppy_job_as_root(user_config)
 
 job_sudo_delegate(user_config)
 job_delegate_trans(user_config, config_format)
-job_delegate_trans(user_config, mysql_format)
+job_delegate_trans(user_config, config_mysql)
 
 # Execute semanage to assign the protected port to the user.
 seutil_run_semanage(user_config_t, worker_r)
