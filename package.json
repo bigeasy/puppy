@@ -7,6 +7,7 @@
     , "account_apps":       "./bin/account_apps.js"
     , "account_home":       "./bin/account_home.js"
     , "account_register":   "./bin/account_register.js"
+    , "app_deploy":         "./bin/app_deploy.js"
     , "app_fetch":          "./bin/app_fetch.js"
     , "app_users":          "./bin/app_users.js"
     , "config_app":         "./bin/config_app.js"
