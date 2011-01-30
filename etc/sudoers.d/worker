@@ -1,4 +1,5 @@
 worker ALL = (root) NOPASSWD: \
+    /puppy/sbin/init_restorecon, \
     /puppy/sbin/mysql_create, \
     /puppy/sbin/mysql_grant, \
     /puppy/sbin/policy_load, \
