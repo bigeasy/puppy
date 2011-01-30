@@ -86,6 +86,11 @@ class Configuration
           throw error
       callback()
 
+  application: (id, callback) ->
+    @applications (applications) ->
+      application = (applications.filter (application) -> application.id is id).shift()
+      callback(application)
+
   applications: (callback) ->
     @directory =>
       try
@@ -111,7 +116,49 @@ class Configuration
           callback(JSON.parse(stdout))
         else
           throw new Error("Unable to list applications.")
-
+  here: (command, parameters, callback) ->
+    program = spawn command, parameters
+    stdout = ""
+    stderr = ""
+    program.stdout.on "data", (chunk) -> stdout += chunk.toString()
+    program.stderr.on "data", (chunk) -> stderr += chunk.toString()
+    program.on "exit", (code) ->
+      if code is 0
+        callback(stdout)
+      else
+        console.log stdout
+        process.exit code
+  thereas: (app, user, command, parameters, callback) ->
+    params = [ "/usr/bin/sudo", "-u", user ]
+    for param in parameters.slice(0)
+      params.push param
+    @there(app, command, params, callback)
+  there: (app, command, parameters, callback) ->
+    localUser = app.localUsers[0]
+    params = [ "-T", "-l", "u#{localUser.id }", localUser.machine.hostname, command ]
+    for param in parameters.slice(0)
+      params.push param
+    @here "/usr/bin/ssh", params, callback
+  app: (id, command, parameters, callback) ->
+    @applications (applications) =>
+      application = (applications.filter (application) -> application.id is id).shift()
+      localUser = application.localUsers[0]
+      params = [ "-T", "-l", "u#{localUser.id }", localUser.machine.hostname, command ]
+      for param in parameters.slice(0)
+        params.push param
+      console.log params
+      program = spawn "/usr/bin/ssh", params
+      stdout = ""
+      stderr = ""
+      program.stdout.on "data", (chunk) -> stdout += chunk.toString()
+      program.stderr.on "data", (chunk) -> stderr += chunk.toString()
+      program.on "exit", (code) ->
+        console.log stdout
+        console.log stderr
+        if code is 0
+          callback()
+        else
+          process.stderr.write "Cannot execute #{command}."
 
 module.exports.Configuration = Configuration
 
@@ -122,6 +169,15 @@ invoke = (command, parameters, splat) ->
   program.on "exit", (code) -> process.exit code
 
 module.exports.invoke = invoke
+module.exports.app = (app, usage) ->
+  if /^\d+$/.test(app)
+    app = parseInt app, 10
+  else
+    id = /^t(\d+)$/.exec(app)
+    if not id
+      usage()
+    app = parseInt id[1], 10
+  app
 module.exports.delegate = (command, argv) ->
   if require("./location").server
     invoke("/usr/bin/sudo", [ "-H", "-u", "delegate", command ], argv)
