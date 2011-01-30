@@ -145,3 +145,10 @@ CREATE TABLE Job (
     FOREIGN KEY (machineId) REFERENCES Machine (id)
 )
 \g
+CREATE TABLE Deployment (
+    applicationId   INTEGER NOT NULL,
+    modified        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created         TIMESTAMP DEFAULT 0,
+    PRIMARY KEY (applicationId)
+)
+\g
