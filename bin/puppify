@@ -183,8 +183,10 @@ for agent in public; do
     echo "# Do nothing." > /home/$agent/.bashrc
 done
 
-# Create puppy worker spool directory.
-/bin/mkdir -p /var/log/puppy/worker
-/bin/chown worker:worker /var/log/puppy/worker
+# Create Puppy application log directory.
+/bin/mkdir -p /var/log/puppy/apps
 
-/sbin/restorecon -R /puppy /etc /home
+# Create Puppy user policy generation directory.
+/bin/mkdir -p /var/cache/puppy/policy
+
+/sbin/restorecon -R /puppy /etc /home /var/log/puppy
