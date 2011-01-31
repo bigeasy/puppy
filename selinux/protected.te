@@ -9,6 +9,9 @@ userdom_unpriv_user_template(protected)
 
 puppy_sudo(protected)
 
+attribute puppy_daemon_log_type;
+attribute puppy_daemon_exec_type;
+
 # The proxy needs to read Puppy executables.
 puppy_read_puppy_bin(protected_t)
 

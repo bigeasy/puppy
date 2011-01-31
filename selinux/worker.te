@@ -14,6 +14,8 @@ require {
     type database_t;
     type puppy_t;
     type setfiles_exec_t;
+    attribute puppy_daemon_log_type;
+    attribute puppy_daemon_exec_type;
 }
 
 # When we sudo to other roles.
@@ -114,6 +116,26 @@ puppy_job_as_worker(app_config)
 
 job_sudo_delegate(app_config)
 job_delegate_trans(app_config, queue_config)
+
+############################################################################
+### Policy for `init_restorecon`.
+############################################################################
+#
+# Note that the `init_restorecon` command may not be able to relabel from
+# anything to anything. It exists to apply the correct labels during 
+
+# Run security context restoration as root.
+puppy_job_as_root(init_restorecon)
+
+# Run restorecon.
+seutil_domtrans_setfiles(init_restorecon_t)
+
+allow setfiles_t init_restorecon_proxy_t:fifo_file rw_fifo_file_perms;
+
+allow init_restorecon_t puppy_cache_t:dir list_dir_perms;
+allow init_restorecon_t var_log_t:dir list_dir_perms;
+allow init_restorecon_t file_type:dir getattr;
+allow init_restorecon_t file_type:file getattr;
 
 ############################################################################
 ### Policy for `mysql_create`.
