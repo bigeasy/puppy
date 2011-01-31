@@ -334,6 +334,23 @@ puppy_read_puppy_etc(user_config_t)
 allow user_config_t self:capability { dac_read_search dac_override };
 
 ############################################################################
+### Policy for `user_deploy`.
+############################################################################
+
+# Run security context restoration as root.
+puppy_job_as_root(user_deploy)
+
+allow user_deploy_t self:capability { dac_override };
+
+# Copy the files from staging to application.
+userdom_manage_home_role(system_r, user_deploy_t)
+
+# Run `rsync`.
+rsync_exec(user_deploy_t)
+files_read_etc_files(user_deploy_t)
+allow user_deploy_t self:process signal;
+
+############################################################################
 ### Policy for `user_group` job.
 ############################################################################
 
