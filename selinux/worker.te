@@ -350,6 +350,8 @@ rsync_exec(user_deploy_t)
 files_read_etc_files(user_deploy_t)
 allow user_deploy_t self:process signal;
 
+allow user_deploy_t self:capability { fowner chown };
+
 ############################################################################
 ### Policy for `user_group` job.
 ############################################################################
