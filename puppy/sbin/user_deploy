@@ -1,0 +1,9 @@
+#!/bin/bash
+
+. /puppy/bin/functions
+
+uid=$1
+
+assert_valid_user $uid
+
+/usr/bin/rsync --exclude=configuration.json --delete -azog /home/u${uid}/.puppy/stage/ /home/u${uid}/app/

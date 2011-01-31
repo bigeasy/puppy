@@ -20,6 +20,7 @@
     , "user_config":        "./bin/user_config.js"
     , "user_create":        "./bin/user_create.js"
     , "user_decommission":  "./bin/user_decommission.js"
+    , "user_deploy":        "./bin/user_deploy.js"
     , "user_group":         "./bin/user_group.js"
     , "user_invite":        "./bin/user_invite.js"
     , "user_port":          "./bin/user_port.js"
