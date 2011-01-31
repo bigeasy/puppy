@@ -118,6 +118,38 @@ job_sudo_delegate(app_config)
 job_delegate_trans(app_config, queue_config)
 
 ############################################################################
+### Policy for `init_generate`.
+############################################################################
+#
+# Note that the `init_generate` command may not be able to relabel from
+# anything to anything. It exists to apply the correct labels during 
+
+# Run security context restoration as root.
+puppy_job_as_root(init_generate)
+
+# Allow script to create a temporary file for here-doc.
+type init_generate_tmp_t;
+files_tmp_file(init_generate_tmp_t)
+manage_files_pattern(init_generate_t, init_generate_tmp_t, init_generate_tmp_t)
+files_tmp_filetrans(init_generate_t, init_generate_tmp_t, file)
+
+# This allows the reading of fielsystem extended attributes. It is triggered by
+# the bash here-doc syntax. My guess is that the temp file creation checks for
+# available disk space prior to creating the temp file. 
+fs_getattr_xattr_fs(init_generate_t)
+
+allow init_generate_t { puppy_daemon_exec_type puppy_daemon_log_type }:file manage_file_perms;
+allow init_generate_t { puppy_daemon_log_type }:dir manage_dir_perms;
+
+# Allow chown of home directory and DAC override for root.
+allow init_generate_t self:capability { fsetid fowner chown dac_override };
+
+allow init_generate_t etc_t:file manage_file_perms;
+allow init_generate_t puppy_cache_t:dir list_dir_perms;
+allow init_generate_t var_log_t:dir manage_dir_perms;
+allow init_generate_t var_log_t:file manage_file_perms;
+
+############################################################################
 ### Policy for `init_restorecon`.
 ############################################################################
 #
