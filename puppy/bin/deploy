@@ -97,10 +97,8 @@ if [ -d src -a ! -d lib ]; then
         program=$(echo $coffee | /bin/sed 's/src\/\(.*\).coffee$/\1/')
         if [ -e /puppy/bin/$program ]; then
             ownership=$user:$user
-            /usr/bin/sudo /bin/chmod $mode /puppy/bin/$program@*
-            /usr/bin/sudo /bin/chown $ownership /puppy/bin/$program@*
-            /usr/bin/sudo /bin/chmod $mode /puppy/bin/$program
-            /usr/bin/sudo /bin/chown $ownership /puppy/bin/$program
+            /usr/bin/sudo /bin/chmod $mode /puppy/bin/$program@* /puppy/bin/$program
+            /usr/bin/sudo /bin/chown $ownership /puppy/bin/$program@* /puppy/bin/$program
         fi
     done
 fi
