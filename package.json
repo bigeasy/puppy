@@ -4,6 +4,7 @@
 ,   "directories":      { "lib" : "./lib" }
 ,   "bin":             
     { "app_config":         "./bin/app_config.js"
+    , "init_generate":      "./bin/init_generate.js"
     , "init_restorecon":    "./bin/init_restorecon.js"
     , "mysql_create":       "./bin/mysql_create.js"
     , "mysql_grant":        "./bin/mysql_grant.js"
