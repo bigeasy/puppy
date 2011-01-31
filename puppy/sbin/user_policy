@@ -14,10 +14,12 @@ uid=$1
 assert_valid_user $uid
 
 # Create a policy working directory.
+# TODO: This doesn't belong here.
 /bin/mkdir -p /var/cache/puppy/policy
 
 cat <<EOL > /var/cache/puppy/policy/protected_u$uid.fc
-/var/cache/puppy/transitions/start_u${uid} gen_context(system_u:object_r:protected_u${uid}_exec_t, s0)
+/var/cache/puppy/transitions/start_u${uid}  gen_context(system_u:object_r:protected_u${uid}_exec_t, s0)
+/var/log/puppy/apps/app_u${uid}.*           gen_context(system_u:object_r:protected_u${uid}_log_t, s0)
 EOL
 
 # Generate a policy file.
@@ -27,15 +29,23 @@ policy_module(protected_u$uid, 1.0.0)
 
 require {
     attribute port_type;
+    attribute puppy_daemon_log_type;
+    attribute puppy_daemon_exec_type;
     type puppy_cache_t;
 };
 
 ########################################
 # Declarations
 
-type protected_u${uid}_t;             # The user service domain.
-type protected_u${uid}_exec_t;        # The user service executable.
+type protected_u${uid}_t;               # The user service domain.
+type protected_u${uid}_exec_t;          # The user service executable.
 type protected_u${uid}_port_t, port_type;        # The user service port type.
+type protected_u${uid}_log_t;           # The daemon log type.
+
+files_type(protected_u${uid}_log_t)
+
+typeattribute protected_u${uid}_log_t puppy_daemon_log_type;
+typeattribute protected_u${uid}_exec_t puppy_daemon_exec_type;
 
 userdom_manage_home_role(system_r, protected_u${uid}_t)
 
@@ -52,6 +62,9 @@ files_config_file(protected_u${uid}_conf_t)
 
 ########################################
 # Local policy
+
+# Write to logfiles.
+allow protected_u${uid}_t protected_u${uid}_log_t:file write;
 
 # Configuration files - read
 allow protected_u${uid}_t protected_u${uid}_conf_t : dir list_dir_perms;
