@@ -131,4 +131,6 @@ allow protected_u${uid}_t self:process execmem;
 
 # Node.js generates some random numbers.
 dev_read_urand(protected_u${uid}_t)
+
+allow protected_u${uid}_t protected_u${uid}_log_t:file manage_file_perms;
 EOL
