@@ -10,6 +10,10 @@ type protected_exec_t;
 userdom_unpriv_user_template(protected)
 
 application_domain(protected_t, protected_exec_t)
+allow protected_t protected_exec_t:lnk_file read;
+allow protected_t puppy_lib_t:dir list_dir_perms;
+allow protected_t puppy_lib_t:file read_file_perms;
+allow protected_t puppy_lib_t:lnk_file read;
 
 puppy_sudo(protected)
 
