@@ -41,3 +41,28 @@ function redirect()
     /bin/rm /var/run/puppy/tmp/$$.out
     /bin/rm /var/run/puppy/tmp/$$.err
 }
+
+function normalize_path()
+{
+    local path=$1
+    while [[ $path =~ \/\.\/ ]]; do
+    # Remove all /./ sequences.
+        path=${path//\/\.\//\/}
+    done
+    
+    while [[ $path =~ \/\/ ]]; do
+    # Remove all /./ sequences.
+        path=${path//\/\//\/}
+    done
+
+    # Remove dir/.. sequences.
+    while [[ $path =~ ([^/][^/]*/\.\./) ]]
+    do
+        path=${path/${BASH_REMATCH[0]}/}
+    done
+
+    # See if there is a /. at the end of the string.
+    path=${path/%\/\./}
+
+    echo $path
+}
