@@ -152,3 +152,15 @@ CREATE TABLE Deployment (
     PRIMARY KEY (applicationId)
 )
 \g
+CREATE TABLE VirtualHost (
+    id              INTEGER NOT NULL AUTO_INCREMENT,
+    name            VARCHAR(512) NOT NULL,
+    ip              VARCHAR(32),
+    port            INTEGER,
+    modified        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created         TIMESTAMP DEFAULT 0,
+    PRIMARY KEY (id)
+)
+\g
+CREATE UNIQUE INDEX VirtualHost_Name ON VirtualHost(name)
+\g
