@@ -36,7 +36,12 @@ db.createDatabase syslog, (database) ->
                   [ "init:generate", [ localUser.id ] ]
                   [ "init:restorecon", [ localUser.id ] ]
                 ], ->
-                  process.stdout.write "Application t#{applicationId} created.\n"
+                  database.select "getLocalPorts", [ localUser.machine.hostname, localUser.id ], "localPort", (localPorts) ->
+                    console.log localPorts
+                    localPort = localPorts.shift()
+                    console.log localPort
+                    database.virtualHost "t#{applicationId}.portoroz.runpup.com", localUser.machine.ip,  localPort.port, ->
+                      process.stdout.write "Application t#{applicationId} created.\n"
             else
               syslog.error "Unable to allocate local user account for application #{applicationId}."
               process.stdout.write "Unable to allocate application."
