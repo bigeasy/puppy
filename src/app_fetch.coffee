@@ -33,6 +33,8 @@ db.createDatabase syslog, (database) ->
                   [ "user:restorecon", [ localUser.id ] ],
                   [ "user:group", [ localUser.id, "protected" ] ],
                   [ "user:chown", [ localUser.id ] ]
+                  [ "init:generate", [ localUser.id ] ]
+                  [ "init:restorecon", [ localUser.id ] ]
                 ], ->
                   process.stdout.write "Application t#{applicationId} created.\n"
             else
