@@ -16,7 +16,17 @@ module.exports.command = (argv) ->
   catch e
     usage()
 
-  console.log process.env
+  try
+    stat = fs.statSync "./server.js"
+  catch e
+    if process.binding("net").ENOENT is e.errno
+      process.stdout.write "No server.js found: this does not appear to be a project directory.\n"
+      process.exit 1
+
+  if not stat.isFile()
+    process.stdout.write "server.js is not a file: this does not appear to be a project directory.\n"
+    process.exit 1
+
 
   configuration = new Configuration()
   if require("./location").server
