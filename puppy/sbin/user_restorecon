@@ -2,9 +2,23 @@
 
 . /puppy/bin/functions
 
-[ $# -ne 1 ] && abend "Incorrect count of arguments ($#)."
+[ $# -lt 1 ] && abend "Incorrect count of arguments ($#)."
 
 uid=$1
 assert_valid_user $uid
 
-/sbin/restorecon -R "/home/u$uid"
+if [ $# -eq 1 ]; then
+    /sbin/restorecon -R "/home/u$uid"
+else
+    shift
+    while [ $# -gt 0 ]; do
+        path=$1
+        file=$(/bin/readlink -f /home/u$uid/$path)
+        if [[ $file == /home/u$uid/* ]]; then
+            /sbin/restorecon -R $file
+        else
+            abend "Invalid home directory path $1."
+        fi
+        shift
+    done
+fi
