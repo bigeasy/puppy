@@ -15,10 +15,13 @@ if [ $# -eq 1 ]; then
 else
     shift
     while [ $# -gt 0 ]; do
-        path=$1
-        file=$(/bin/readlink -f /home/u$uid/$path)
-        if [[ $file == /home/u$uid/* ]]; then
-            /bin/chown -R $uid:$gid $file
+        file=$(normalize_path /home/u$uid/$1)
+        if [ $file == /home/u$uid ] || [[ $file == /home/u$uid/* ]]; then
+            if [[ $file == */ ]]; then
+                /bin/chown -R $uid:$gid $file
+            else
+                /bin/chown $uid:$gid $file
+            fi
         else
             abend "Invalid home directory path $1."
         fi
