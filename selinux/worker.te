@@ -118,6 +118,14 @@ job_sudo_delegate(app_config)
 job_delegate_trans(app_config, queue_config)
 
 ############################################################################
+### Policy for `daemon_start`.
+############################################################################
+
+puppy_job_sudo_root(daemon_start)
+
+allow daemon_start_t init_t:unix_stream_socket connectto;
+
+############################################################################
 ### Policy for `init_generate`.
 ############################################################################
 #
