@@ -4,6 +4,7 @@ SELECT lu.machineId AS localUser__machineId,
        lu.created AS localUser__created,
        m.id AS localUser__machine__id,
        m.hostname AS localUser__machine__hostname,
+       m.ip AS localUser__machine__ip,
        m.modified AS localUser__machine__modified,
        m.created AS localUser__machine__created
   FROM LocalUser AS lu

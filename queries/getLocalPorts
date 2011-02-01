@@ -17,3 +17,5 @@ SELECT lp.machineId AS localPort__machineId,
   JOIN LocalUserLocalPort AS lulp ON lulp.machineId = lp.machineId AND lulp.port = lp.port
   JOIN LocalUser AS lu ON lulp.machineId = lu.machineId AND lulp.localUserId = lu.id
  WHERE m.hostname = ? AND lulp.localUserId = ?
+ ORDER
+    BY lp.port

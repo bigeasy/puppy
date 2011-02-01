@@ -114,3 +114,10 @@ class Database
         @enqueue(hostname, commands, callback)
     else if callback
       callback()
+
+  virtualHost: (name, ip, port, callback) ->
+    @select "deleteVirtualHost", [ name ], (results) =>
+      @select "insertVirtualHost", [ name, ip, port ], (results) =>
+        if results.affectedRows is 0
+          throw new Error("Unable to insert virtual host #{name}.")
+        callback()
