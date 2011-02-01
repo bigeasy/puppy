@@ -695,3 +695,5 @@ puppy_job_as_root(user_restorecon)
 
 # Run restorecon.
 seutil_domtrans_setfiles(user_restorecon_t)
+
+allow setfiles_t user_restorecon_proxy_t:fifo_file rw_fifo_file_perms;
