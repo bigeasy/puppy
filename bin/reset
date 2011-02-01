@@ -17,6 +17,8 @@ function mysql_script()
     /usr/bin/sudo -H -u janitor /usr/bin/mysql -u root puppy < $1
 }
 
+/usr/bin/sudo /sbin/initctl stop worker
+
 mysql_command "drop database puppy"
 mysql_command "create database puppy"
 mysql_script ddl/0001_create_user.sql 
@@ -33,3 +35,5 @@ bin/load_ports | sudo -H -u janitor mysql -u root puppy
 /puppy/bin/job $(/bin/hostname) policy:load
 /puppy/bin/job $(/bin/hostname) port:label
 /puppy/bin/job $(/bin/hostname) policy:ready
+
+/usr/bin/sudo /sbin/initctl start worker
