@@ -1,3 +1,5 @@
+/puppy/bin/app_deploy@.*                        gen_context(system_u:object_r:app_deploy_exec_t, s0)
+/puppy/bin/app_deploy                           gen_context(system_u:object_r:app_deploy_exec_t, s0)
 /puppy/bin/app_fetch@.*                         gen_context(system_u:object_r:app_fetch_exec_t, s0)
 /puppy/bin/app_fetch                            gen_context(system_u:object_r:app_fetch_exec_t, s0)
 /puppy/bin/port_fetch@.*                        gen_context(system_u:object_r:port_fetch_exec_t, s0)
