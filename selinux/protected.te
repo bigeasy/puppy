@@ -5,7 +5,11 @@ role protected_r;
 role protected_r types protected_sudo_t;
 puppy_delegate_roles(protected_r)
 
+type protected_exec_t;
+
 userdom_unpriv_user_template(protected)
+
+application_domain(protected_t, protected_exec_t)
 
 puppy_sudo(protected)
 
