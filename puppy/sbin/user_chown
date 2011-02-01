@@ -18,7 +18,7 @@ else
         path=$1
         file=$(/bin/readlink -f /home/u$uid/$path)
         if [[ $file == /home/u$uid/* ]]; then
-            /bin/chown -R $uid:$gid /home/u$uid/$path
+            /bin/chown -R $uid:$gid $file
         else
             abend "Invalid home directory path $1."
         fi
