@@ -161,8 +161,15 @@ allow init_generate_t { puppy_daemon_log_type }:dir manage_dir_perms;
 # Allow chown of home directory and DAC override for root.
 allow init_generate_t self:capability { fsetid fowner chown dac_override };
 
+# Write the etc init files.
 allow init_generate_t etc_t:file manage_file_perms;
-allow init_generate_t puppy_cache_t:dir list_dir_perms;
+allow init_generate_t etc_t:dir manage_dir_perms;
+
+# Write the transition program.
+allow init_generate_t puppy_cache_t:dir manage_dir_perms;
+allow init_generate_t puppy_cache_t:file manage_file_perms;
+
+# Create the log directory and files.
 allow init_generate_t var_log_t:dir manage_dir_perms;
 allow init_generate_t var_log_t:file manage_file_perms;
 
