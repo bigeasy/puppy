@@ -1,5 +1,6 @@
 worker ALL = (root) NOPASSWD: \
     /puppy/sbin/daemon_start, \
+    /puppy/sbin/daemon_stop, \
     /puppy/sbin/init_generate, \
     /puppy/sbin/init_restorecon, \
     /puppy/sbin/mysql_create, \
