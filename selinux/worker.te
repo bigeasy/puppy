@@ -126,6 +126,15 @@ puppy_job_sudo_root(daemon_start)
 allow daemon_start_t init_t:unix_stream_socket connectto;
 
 ############################################################################
+### Policy for `daemon_stop`.
+############################################################################
+
+puppy_job_sudo_root(daemon_stop)
+
+allow daemon_stop_t init_t:unix_stream_socket connectto;
+files_read_etc_files(daemon_stop_t)
+
+############################################################################
 ### Policy for `init_generate`.
 ############################################################################
 #
