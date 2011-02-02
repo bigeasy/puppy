@@ -26,18 +26,14 @@ module.exports.command = (argv) ->
     port = parseInt(argv.shift() || "8080", 10)
 
     server = http.createServer (request, response) ->
-      console.log request.url
-      console.log url.parse(request.url, true)
-      console.log query
-      console.log request
       query = url.parse(request.url)
-      if query.host
-        vhost = vhosts[query.host]
-      else if request.headers.host
-        vhost = vhosts[request.headers.host]
+      # The request has the host in URL. Does this matter?
+      host = query.host or request.headers.host or ""
+      nameAndPort = /(.*)(?::\d+)$/.exec(host)
+      vhost = vhosts[if nameAndPort then nameAndPort[1] else ""]
       if not vhost
-        response.writeHeader 400, { "Content-Type": "text/plain" }
-        response.end "Bad Request."
+        response.writeHead 400, { "Content-Type": "text/plain" }
+        response.end "Bad request for host #{host}."
 
       # We have a proxy, so create a proxy and invoke it.
       else
@@ -48,7 +44,7 @@ module.exports.command = (argv) ->
           if error.errno is process.ECONNREFUSED
             console.log error
         forward.addListener "response", (backward) ->
-          response.writeHeader backward.statusCode, backward.headers
+          response.writeHead backward.statusCode, backward.headers
           backward.addListener "data", (chunk) -> response.write chunk
           backward.addListener "end", () -> response.end()
         request.addListener "data", (chunk) -> forward.write chunk, "binary"
