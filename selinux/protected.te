@@ -24,6 +24,16 @@ attribute puppy_daemon_exec_type;
 puppy_read_puppy_bin(protected_t)
 
 ############################################################################
+### Policy for `account_apps`.
+############################################################################
+
+puppy_sudo_delegate(protected, account_apps)
+puppy_delegate(account_apps)
+puppy_delegate_role(protected, protected, account_apps)
+puppy_delegate_database(account_apps)
+puppy_delegate_hostname(account_apps)
+
+############################################################################
 ### Policy for `account_protected`.
 ############################################################################
 
