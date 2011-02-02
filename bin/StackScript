@@ -1,4 +1,10 @@
 #!/bin/sh
+
+# Create a new instance using a StackScript. It will initialize using the
+# default Fedora 13 configuration. Boot that and it will run this. Then reboot
+# using pv-grub-x86_32 as the kernel. You'll be able to login as root through
+# ssh using the root password. Continue building from there.
+
 # My system IP/set ip address of server
 SERVER_IP=`ifconfig | grep 'inet addr:' | grep -v '127.0.0.1' | sed 's/.*inet addr:\([0-9.]\+\).*/\1/g'`
 
