@@ -72,9 +72,6 @@ make_user database 205
 make_user liminal 211
 make_user protected 212
 
-# Create the worker spool directory.
-make_dir /var/spool/puppy worker:worker 770
-
 # Creates a directory tree by copying a directory tree, selecting the
 # directories with a particular permissions setting.
 function make_directories()
@@ -184,9 +181,11 @@ for agent in public; do
 done
 
 # Create Puppy application log directory.
-/bin/mkdir -p /var/log/puppy/apps
+/bin/mkdir -p /var/log/puppy/apps /var/log/puppy/worker
 
 # Create Puppy user policy generation directory.
-/bin/mkdir -p /var/cache/puppy/policy
+/bin/mkdir -p /var/cache/puppy/policy /var/cache/puppy/transitions /var/cache/puppy/decommissioned
 
-/sbin/restorecon -R /puppy /etc /home /var/log/puppy
+/bin/chown worker:worker /var/cache/puppy/policy
+
+/sbin/restorecon -R /puppy /etc /home /var/log/puppy /var/cache/puppy /puppy
