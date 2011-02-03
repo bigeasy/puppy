@@ -42,6 +42,10 @@ function make_user()
 # Update yum, because we may freeze the image and reuse it much later.
 /usr/bin/yum update -y
 
+# Install rpms the are not already installed.
+dirname=$(dirname $0)
+/bin/cat "$dirname/rpms.txt" | /usr/bin/xargs /usr/bin/sudo /usr/bin/yum -y install 
+
 # Create the development user.
 make_group $user 701
 make_user $user 701 701
@@ -68,15 +72,18 @@ EOL
 /bin/chmod 440 /root/wheel
 /bin/mv /root/wheel /etc/sudoers.d/
 
-/bin/chmod 600 /boot/grub/grub.conf
+if [ -e /boot/grub/grub.conf ]; then
+    /bin/chmod 600 /boot/grub/grub.conf
+
+    # Recreate grub.conf with selinux on.
+    /bin/sed -ie "s/ selinux=0//" /boot/grub/grub.conf
+fi
 
 /usr/bin/yum install -y selinux-policy-targeted policycoreutils-python
 
 # Relabel the drive at the next boot.
 touch /.autorelabel 
 
-# Recreate grub.conf with selinux on.
-/bin/sed -ie "s/ selinux=0//" /boot/grub/grub.conf
 
 # Rebuild the policy.
 /usr/sbin/semodule -B
