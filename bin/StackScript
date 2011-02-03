@@ -1,4 +1,5 @@
 #!/bin/sh
+# <UDF NAME="PUBLIC_KEY" LABEL="Public SSH Key" />
 
 # Create a new instance using a StackScript. It will initialize using the
 # default Fedora 13 configuration. Boot that and it will run this. Then reboot
@@ -39,6 +40,8 @@ vmlinuz=`ls /boot/vmlinuz-*`
 initramfs=`ls /boot/initramfs-*`
 kernel=`ls /boot/vmlinuz-* | sed 's/\/boot\/vmlinuz-//'`
 
+#rm -f /boot/grub/menu.lst
+
 cat <<HERE > /boot/grub/menu.lst
 timeout 0
 
@@ -47,3 +50,17 @@ root            (hd0)
 kernel          $vmlinuz root=/dev/xvda ro quiet
 initrd          $initramfs
 HERE
+
+/bin/mkdir -p /root/.ssh
+echo "$PUBLIC_KEY" > /root/.ssh/authorized_keys
+/bin/chmod 600 /root/.ssh/authorized_keys
+
+cat <<HERE > /root/continue
+#!/bin/bash
+
+/usr/bin/scp alan@porotoroz.prettyrobots.com:/home/alan/git/ecma/puppy/system/bin/bootstrap /root/bootstrap
+/usr/bin/scp alan@porotoroz.prettyrobots.com:/home/alan/git/ecma/puppy/system/bin/rpms.txt /root/rpms.txt
+/bin/chmod 755 /root/bootstrap
+HERE
+
+/bin/chmod 755 /root/continue
