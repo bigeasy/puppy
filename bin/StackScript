@@ -40,8 +40,6 @@ vmlinuz=`ls /boot/vmlinuz-*`
 initramfs=`ls /boot/initramfs-*`
 kernel=`ls /boot/vmlinuz-* | sed 's/\/boot\/vmlinuz-//'`
 
-#rm -f /boot/grub/menu.lst
-
 cat <<HERE > /boot/grub/menu.lst
 timeout 0
 
@@ -58,9 +56,11 @@ echo "$PUBLIC_KEY" > /root/.ssh/authorized_keys
 cat <<HERE > /root/continue
 #!/bin/bash
 
-/usr/bin/scp alan@porotoroz.prettyrobots.com:/home/alan/git/ecma/puppy/system/bin/bootstrap /root/bootstrap
-/usr/bin/scp alan@porotoroz.prettyrobots.com:/home/alan/git/ecma/puppy/system/bin/rpms.txt /root/rpms.txt
+/usr/bin/scp alan@portoroz.prettyrobots.com:/home/alan/git/ecma/puppy/system/bin/bootstrap /root/bootstrap
+/usr/bin/scp alan@portoroz.prettyrobots.com:/home/alan/git/ecma/puppy/system/bin/rpms.txt /root/rpms.txt
 /bin/chmod 755 /root/bootstrap
 HERE
 
 /bin/chmod 755 /root/continue
+
+/sbin/shutdown -h now
