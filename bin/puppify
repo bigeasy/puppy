@@ -98,14 +98,18 @@ function make_directories()
 
 # git does not perserve file permissions, in case you're wondering.
 #  http://kerneltrap.org/mailarchive/git/2008/12/5/4327894
-/bin/find etc puppy -type d -exec /bin/chmod 755 {} \;
+/bin/find var etc puppy -type d -exec /bin/chmod 755 {} \;
+/bin/chmod 644 var/lib/unbound/etc/unbound/*
 /bin/chmod 644 etc/init/*
+/bin/chmod 644 etc/unbound/*
+/bin/chmod 755 etc/rc.d/init.d/*
 /bin/chmod 440 etc/sudoers.d/*
 /bin/chmod 644 etc/selinux/targeted/contexts/users/*
 /bin/chmod 600 etc/ssh/sshd_config
 
 # Copy the etc and puppy directory structures.
 make_directories etc / 755 root:root
+make_directories var / 755 root:root
 
 function copy_file()
 {
@@ -168,6 +172,8 @@ copy_public_key public home/public/ssh/authorized_keys /puppy/bin/public_recepti
 # Copy the etc configuration files.
 copy_files etc root:root 644
 copy_files etc root:root 440
+copy_files etc root:root 755
+copy_files var root:root 644
 
 if [ ! -e /etc/ssh/sshd_config.org ]; then
     /bin/mv /etc/ssh/sshd_config /etc/ssh/sshd_config.org
@@ -192,5 +198,10 @@ done
 
 /bin/mkdir -p /puppy /node /opt
 /bin/chown puppy:puppy /puppy /node /opt
+
+/bin/chown -R unbound /var/lib/unbound
+
+/sbin/chkconfig --add unbound
+/sbin/chkconfig unbound on
 
 /sbin/restorecon -R /puppy /etc /home /var/log/puppy /var/cache/puppy /node /opt
