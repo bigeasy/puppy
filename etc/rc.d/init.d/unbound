@@ -39,8 +39,6 @@ start() {
     # /var/run could (and should) be tmpfs
     [ -d $piddir ] || mkdir $piddir
 
-    echo "FOO"
-
     if [ ! -f /etc/unbound/unbound_control.key ]
     then
 	echo -n $"Generating unbound control key and certificate: "
