@@ -72,6 +72,8 @@ make_user database 205
 make_user liminal 211
 make_user protected 212
 
+make_user unbound 228
+
 # Creates a directory tree by copying a directory tree, selecting the
 # directories with a particular permissions setting.
 function make_directories()
@@ -188,4 +190,7 @@ done
 
 /bin/chown worker:worker /var/cache/puppy/policy
 
-/sbin/restorecon -R /puppy /etc /home /var/log/puppy /var/cache/puppy /puppy
+/bin/mkdir -p /puppy /node /opt
+/bin/chown puppy:puppy /puppy /node /opt
+
+/sbin/restorecon -R /puppy /etc /home /var/log/puppy /var/cache/puppy /node /opt
