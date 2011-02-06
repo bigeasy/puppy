@@ -3,6 +3,8 @@
 # https://github.com/dazed1/pvgrub2ebs/raw/master/createfedora13bootebs.sh
 
 # Start by creating a partition and then running `sudo mkfs.ext4 /dev/sdb1`.
+#
+# Use fdisk and create a single primary partition.
 
 user=$1
 
@@ -70,7 +72,7 @@ EOL
 dirname=$(dirname $0)
 /bin/cat "$dirname/rpms.txt" | /usr/bin/xargs /usr/bin/sudo /usr/bin/yum \
     -c /tmp/yumec2.conf --installroot=/mnt/chroot -y install 
-/usr/bin/sudo /usr/bin/yum -c /tmp/yumec2.conf --installroot=/mnt/chroot clean all
+/usr/bin/yum -c /tmp/yumec2.conf --installroot=/mnt/chroot clean all
 
 /usr/sbin/chroot /mnt/chroot chkconfig --level 2345 network on
 /usr/sbin/chroot /mnt/chroot chkconfig --level 2345 sshd on
