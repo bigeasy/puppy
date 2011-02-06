@@ -159,7 +159,6 @@ nss
 nss-softokn
 nss-softokn-freebl
 nss-sysinit
-nss-tools
 nss-util
 ntp
 ntpdate
@@ -169,7 +168,6 @@ openssh
 openssh-clients
 openssh-server
 openssl
-openswan
 pam
 passwd
 pciutils-libs
