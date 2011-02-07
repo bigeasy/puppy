@@ -53,6 +53,9 @@ HERE
 echo "$PUBLIC_KEY" > /root/.ssh/authorized_keys
 /bin/chmod 600 /root/.ssh/authorized_keys
 
+echo "portoroz.prettyrobots.com,72.14.189.246 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCyDD/JdcbtS2/+scdHbQBpSNoaaJOYUBXtkGpO83t3f1PT48Wi2XPN6IsBPHnj+DQXzBCxfFnClmzK64/eBpYwrnuJlueqHAc8lMsYybTUh+URnD8Bh/XowMTxxRFt5piXdEkfvp6CTBZDH14lQdtI+M75fC29FrVDa7JCoBArV9QVHmT/+rjxFZJKPRs65BkmCVL6dDReBYpoQq+Bl/CkIEw8m/L81GPggbGJ5Fuje9uj5b3Q5xLmnNvwVRO/Niej3Obj8MOUIqKfXsOmu+r1uTLWaSvR1TLzJwQ2MUA4EXJ545CeZC1oGINnyAhZdCV85g+1pzT3YcCfKNSu2tYX" > /root/.ssh/known_hosts
+echo "bled.prettyrobots.com,67.23.79.184 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAr8mJgXTqaCz2TOkeW8mY0swuNxF1PH9sCB+TIvTQP18e3a0ygiN0N3V9OXbfTXA4ur/xlm2YPO/gmhWv2rLyYh+s+Snt1BLcgsYiAR3/AGX43E7ZWd1sW2xZC1VTou4GP3kIxHX7BkNrDLoW8qTFeID/5gxaulYhc1jI4WJOg3qIJIvwqgqd9ixDDd9CCGRNWaUQaNf2B0DsyfWSTyVLHaUWAMBop0P1tmFuWSX8TNdfawrIB0Y3pk30diVeiFjOlkvIQyMDAnNpQ5UCf5Cx/VrH/u25bsP8OdW2vAoNfrffw9rlaJ46Zgu6dHbtradBTk8Yq5phc+iRwYCy9TyQlQ==" >> /root/.ssh/known_hosts
+
 cat <<HERE > /root/continue
 #!/bin/bash
 
@@ -62,5 +65,28 @@ cat <<HERE > /root/continue
 HERE
 
 /bin/chmod 755 /root/continue
+
+cat <<'FINGERPRINT' > /etc/rc.d/init.d/zfingerprint
+#!/bin/bash
+
+# chkconfig: 2345 95 20
+# description: Display the RSA fingerprint.
+
+case "$1" in
+        start)
+                echo "Fingerprint is $(/usr/bin/ssh-keygen -lf /etc/ssh/ssh_host_rsa_key)"
+                ;;
+        stop)
+                ;;
+        *)
+                echo $"Usage: $0 {start}"
+                RETVAL=2
+esac
+exit $RETVAL
+FINGERPRINT
+
+/bin/chmod 755 /etc/rc.d/init.d/zfingerprint
+/sbin/chkconfig --add zfingerprint
+/sbin/chkconfig zfingerprint on
 
 /sbin/shutdown -h now
