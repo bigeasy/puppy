@@ -66,27 +66,4 @@ HERE
 
 /bin/chmod 755 /root/continue
 
-cat <<'FINGERPRINT' > /etc/rc.d/init.d/zfingerprint
-#!/bin/bash
-
-# chkconfig: 2345 95 20
-# description: Display the RSA fingerprint.
-
-case "$1" in
-        start)
-                echo "Fingerprint is $(/usr/bin/ssh-keygen -lf /etc/ssh/ssh_host_rsa_key)"
-                ;;
-        stop)
-                ;;
-        *)
-                echo $"Usage: $0 {start}"
-                RETVAL=2
-esac
-exit $RETVAL
-FINGERPRINT
-
-/bin/chmod 755 /etc/rc.d/init.d/zfingerprint
-/sbin/chkconfig --add zfingerprint
-/sbin/chkconfig zfingerprint on
-
 /sbin/shutdown -h now
