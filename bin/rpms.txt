@@ -91,7 +91,6 @@ iptables
 iptables-ipv6
 iputils
 kbd
-kernel
 keyutils-libs
 kpartx
 krb5-libs
