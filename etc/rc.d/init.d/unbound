@@ -46,7 +46,7 @@ start() {
 	chgrp unbound /etc/unbound/unbound_*key /etc/unbound/unbound_*pem
 	[ -x /usr/sbin/selinuxenabled ] && /usr/sbin/selinuxenabled && \
 	    [ -x /sbin/restorecon ] && /sbin/restorecon /etc/unbound/*
-        sudo mv /etc/unbound/unbound_server* $rootdir/etc/unbound
+        sudo mv /etc/unbound/unbound_*key /etc/unbound/unbound_*pem $rootdir/etc/unbound
 	echo
     else
 	# old init script created these as root instead of unbound.
