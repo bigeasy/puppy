@@ -1,2 +1,2 @@
-/home/database/password     gen_context(system_u:object_r:database_conf_t, s0)
-/puppy/bin/database.*       gen_context(system_u:object_r:database_exec_t, s0)
+/home/database/configuration    gen_context(system_u:object_r:database_conf_t, s0)
+/puppy/bin/database.*           gen_context(system_u:object_r:database_exec_t, s0)
