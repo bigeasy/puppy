@@ -26,6 +26,12 @@ function gitignore()
     /opt/bin/cake gitignore
 }
 
+function deploy()
+{
+    branch=$1
+    /puppy/bin/deploy $HOME/git/ecma/puppy/$branch
+}
+
 /bin/mkdir -p $HOME/git/ecma/puppy
 
 maybe_clone common
@@ -67,3 +73,19 @@ gitignore vhosts
 gitignore database
 gitignore client
 gitignore liminal
+
+dir=$(/usr/bin/dirname $0)
+$dir/../puppy/bin/deploy $dir/..
+
+deploy system
+deploy common
+deploy private
+deploy protected
+deploy public
+deploy worker
+deploy job
+deploy vhosts
+deploy database
+deploy client
+deploy liminal
+deploy janitor
