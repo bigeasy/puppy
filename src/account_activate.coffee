@@ -37,7 +37,7 @@ db.createDatabase syslog, (database) ->
               [ "user:decommission", [ localUser.id ] ],
               [ "user:provision", [ localUser.id ] ],
               [ "user:restorecon", [ localUser.id ] ],
-              [ "user:skel", [ localUser.id ] ],
+              [ "user:skel", [ localUser.id, "protected" ] ],
               [ "user:authorize", [ localUser.id ] ],
               [ "user:restorecon", [ localUser.id ] ],
               [ "user:group", [ localUser.id, "protected" ] ],
