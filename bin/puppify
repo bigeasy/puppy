@@ -207,6 +207,6 @@ done
 /sbin/chkconfig --add unbound
 /sbin/chkconfig unbound on
 
-/bin/sed -ie 's/^\(Defaults \+secure_path = \).\*/\1\/sbin:\/bin:\/usr\/sbin:\/usr\/bin:\/opt\/bin/' /etc/sudoers
+/bin/sed -ie 's/^\(Defaults \+secure_path = \).*/\1\/sbin:\/bin:\/usr\/sbin:\/usr\/bin:\/opt\/bin/' /etc/sudoers
 
 /sbin/restorecon -R /puppy /etc /home /var/log/puppy /var/cache/puppy /node /opt
