@@ -7,23 +7,20 @@ then
     exit 1
 fi
 
-echo "show databases" | /usr/bin/sudo -H -u janitor /usr/bin/mysql -u root | /bin/sed 1d | /bin/grep '^'puppy'$'
-if [ $? -eq 0 ]
+echo "show databases" | /usr/bin/sudo -H -u janitor /usr/bin/mysql -u root | /bin/sed 1d | /bin/grep '^'puppy'$' > /dev/null
+if [ $? -ne 0 ]
 then
-    echo "Database puppy already exists." 2>&1
-    exit 1
+    echo "CREATE DATABASE puppy" | \
+        /usr/bin/sudo -H -u janitor /usr/bin/mysql -u root
 fi
-
-echo "CREATE DATABASE puppy" | \
-    /usr/bin/sudo -H -u janitor /usr/bin/mysql -u root
 
 password=$(ps ax | md5sum | cut -c 1-32)
 
-/bin/rm -f /home/database/password
-/bin/touch /home/database/password
-/bin/chown database:database /home/database/password
-/bin/chmod 400 /home/database/password
-echo $password >> /home/database/password
+/bin/rm -f /home/database/configuration
+/bin/touch /home/database/configuration
+/bin/chown database:database /home/database/configuration
+/bin/chmod 400 /home/database/configuration
+echo "$(/bin/hostname) $password" >> /home/database/configuration
 
 echo "GRANT ALL PRIVILEGES ON puppy.* TO 'puppy'@'localhost' IDENTIFIED BY '"$password"'" | \
     /usr/bin/sudo -H -u janitor /usr/bin/mysql -u root
