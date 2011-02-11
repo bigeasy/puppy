@@ -2,10 +2,10 @@
 
 . /puppy/bin/functions
 
-[ $# -ne 1 ] && abend "Incorrect count of arguments ($#)."
+[ $# -ne 2 ] && abend "Incorrect count of arguments ($#)."
 
 uid=$1
-status=$1
+status=$2
 assert_valid_user $uid
 assert_valid_home_dir $uid
 
@@ -19,10 +19,11 @@ function copy_files()
     done
 }
 
-copy_files /etc/skel
 
 if [ $status == "liminal" ]; then
     echo 'export PATH=$PATH:/opt/bin' > /home/u$uid/.bashrc
-elif [ $status != "protected" ]; then
+elif [ $status == "protected" ]; then
+    copy_files /etc/skel
+else
     abend "Invalid status."
 fi
