@@ -1,4 +1,4 @@
-#!/usr/bin/coffee
+#!/opt/bin/coffee
 
 require.paths.unshift("/puppy/lib/node")
 
@@ -7,7 +7,7 @@ shell     = new (require("common/shell").Shell)(syslog)
 
 mail      = require "mail"
 
-email     = process.argv.shift()
+email     = process.argv.slice(2).shift()
 
 sendActivation = (activation) ->
   # Note that, if we don't provide the domain name, then the mail module will
