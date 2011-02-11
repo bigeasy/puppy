@@ -1,5 +1,7 @@
 #!/bin/bash
 
+dir=$(/usr/bin/dirname $(/bin/readlink -f $0))
+
 function maybe_clone()
 {
     branch=$1
@@ -74,7 +76,6 @@ gitignore database
 gitignore client
 gitignore liminal
 
-dir=$(/usr/bin/dirname $0)
 $dir/../puppy/bin/deploy $dir/..
 
 deploy system
