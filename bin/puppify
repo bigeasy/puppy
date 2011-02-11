@@ -66,6 +66,7 @@ make_user worker 204
 
 make_user delegate 210
 make_user puppy 201
+make_user janitor 202
 
 make_user database 205
 
@@ -173,6 +174,7 @@ copy_public_key public home/public/ssh/authorized_keys /puppy/bin/public_recepti
 copy_files etc root:root 644
 copy_files etc root:root 440
 copy_files etc root:root 755
+copy_files usr root:root 755
 copy_files var root:root 644
 
 if [ ! -e /etc/ssh/sshd_config.org ]; then

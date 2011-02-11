@@ -9,12 +9,12 @@ fi
 
 function mysql_command()
 {
-    echo $1 | /usr/bin/sudo -H -u puppy /usr/bin/mysql -u root
+    echo $1 | /usr/bin/sudo -H -u janitor /usr/bin/mysql -u root
 }
 
 function mysql_script()
 {
-    /usr/bin/sudo -H -u puppy /usr/bin/mysql -u root puppy < $1
+    /usr/bin/sudo -H -u janitor /usr/bin/mysql -u root puppy < $1
 }
 
 /usr/bin/sudo /sbin/initctl stop worker
@@ -24,7 +24,7 @@ mysql_command "create database puppy"
 mysql_script ddl/0001_create_user.sql 
 mysql_script ddl/0002_insert_account.sql 
 
-bin/load_ports | sudo -H -u puppy mysql -u root puppy
+bin/load_ports | sudo -H -u janitor mysql -u root puppy
 
 /usr/bin/sudo -u delegate /puppy/bin/user_generate 3
 
