@@ -19,6 +19,13 @@ function update_project()
     /usr/bin/git pull
 }
 
+function gitignore()
+{
+    branch=$1
+    cd $HOME/git/ecma/puppy/$branch
+    /opt/bin/cake gitignore
+}
+
 /bin/mkdir -p $HOME/git/ecma/puppy
 
 maybe_clone common
@@ -48,3 +55,15 @@ update_project database
 update_project client
 update_project liminal
 update_project janitor
+
+gitignore common
+gitignore private
+gitignore protected
+gitignore public
+gitignore system
+gitignore worker
+gitignore job
+gitignore vhosts
+gitignore database
+gitignore client
+gitignore liminal
