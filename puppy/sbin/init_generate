@@ -24,7 +24,7 @@ cat <<EOL > /var/cache/puppy/transitions/start_u${uid}
 #!/bin/bash
 
 cd /home/u${uid}/app
-exec /usr/bin/node /home/u${uid}/app/server.js
+exec /node/v0.2.6/bin/node /home/u${uid}/app/server.js
 EOL
 
 umask 077 
