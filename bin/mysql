@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# You can run as root by via `sudo -H -u janitor mysql -u root`. This runs as
-# the janitor user and `-H` sets the home directory.
+# You can run as root by via `sudo -H -u puppy mysql -u root`. This runs as
+# the puppy user and `-H` sets the home directory.
 
 user=$(whoami)
 if [ $user != "root" ]
@@ -14,8 +14,8 @@ password=$(ps ax | md5sum | cut -c 1-32)
 
 MYSQL_OPTS=""
 
-if [ -e /home/janitor/.my.cnf ]; then
-    MYSQL_OPTS="--defaults-file=/home/janitor/.my.cnf"
+if [ -e /home/puppy/.my.cnf ]; then
+    MYSQL_OPTS="--defaults-file=/home/puppy/.my.cnf"
 fi
 
 echo 'update user set password=PASSWORD("'$password'") where User='"'root'"';' | \
@@ -25,12 +25,12 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-/bin/rm -f /home/janitor/.my.cnf
-/bin/touch /home/janitor/.my.cnf
-/bin/chown janitor:janitor /home/janitor/.my.cnf 
-/bin/chmod 400 /home/janitor/.my.cnf 
+/bin/rm -f /home/puppy/.my.cnf
+/bin/touch /home/puppy/.my.cnf
+/bin/chown puppy:puppy /home/puppy/.my.cnf 
+/bin/chmod 400 /home/puppy/.my.cnf 
 
-echo "[client]" >> /home/janitor/.my.cnf
-echo "password=$password" >> /home/janitor/.my.cnf
+echo "[client]" >> /home/puppy/.my.cnf
+echo "password=$password" >> /home/puppy/.my.cnf
 
 /sbin/service mysqld restart
