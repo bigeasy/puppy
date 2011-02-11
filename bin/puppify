@@ -104,6 +104,7 @@ function make_directories()
 /bin/chmod 644 etc/init/*
 /bin/chmod 644 etc/unbound/*
 /bin/chmod 755 etc/rc.d/init.d/*
+/bin/chmod 755 usr/bin/*
 /bin/chmod 440 etc/sudoers.d/*
 /bin/chmod 644 etc/selinux/targeted/contexts/users/*
 /bin/chmod 600 etc/ssh/sshd_config
