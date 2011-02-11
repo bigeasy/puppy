@@ -104,6 +104,7 @@ function make_directories()
 /bin/chmod 644 etc/init/*
 /bin/chmod 644 etc/unbound/*
 /bin/chmod 755 etc/rc.d/init.d/*
+/bin/chmod 755 usr/bin/*
 /bin/chmod 440 etc/sudoers.d/*
 /bin/chmod 644 etc/selinux/targeted/contexts/users/*
 /bin/chmod 600 etc/ssh/sshd_config
@@ -206,6 +207,6 @@ done
 /sbin/chkconfig --add unbound
 /sbin/chkconfig unbound on
 
-/bin/sed -ie 's/^\(Defaults \+secure_path = \).\*/\1\/sbin:\/bin:\/usr\/sbin:\/usr\/bin:\/opt\/bin/' /etc/sudoers
+/bin/sed -ie 's/^\(Defaults \+secure_path = \).*/\1\/sbin:\/bin:\/usr\/sbin:\/usr\/bin:\/opt\/bin/' /etc/sudoers
 
 /sbin/restorecon -R /puppy /etc /home /var/log/puppy /var/cache/puppy /node /opt
