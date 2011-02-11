@@ -5,6 +5,7 @@
 [ $# -ne 1 ] && abend "Incorrect count of arguments ($#)."
 
 uid=$1
+status=$1
 assert_valid_user $uid
 assert_valid_home_dir $uid
 
@@ -19,3 +20,9 @@ function copy_files()
 }
 
 copy_files /etc/skel
+
+if [ $status == "liminal" ]; then
+    echo 'export PATH=$PATH:/opt/bin' > /home/u$uid/.bashrc
+elif [ $status != "protected" ]; then
+    abend "Invalid status."
+fi
