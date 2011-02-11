@@ -14,9 +14,11 @@ class Database
     @queries = {}
     for file in fs.readdirSync __dirname + "/../queries"
       @queries[file] = fs.readFileSync __dirname + "/../queries/" + file , "utf8"
+    {@host, @password} = JSON.parse(fs.readFileSync("/puppy/etc/database", "utf8"))
 
   createClient: ->
     client            = new Client()
+    client.host       = @host
     client.user       = "puppy"
     client.password   = @password
     client.database   = "puppy"
