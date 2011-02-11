@@ -185,7 +185,7 @@ copy_files etc root:root 600
 # We do not want the agent accounts to run `/etc/bashrc` at startup, so delete
 # the `~/.bashrc` files for those accounts.
 for agent in public; do
-    echo "# Do nothing." > /home/$agent/.bashrc
+    echo 'export PATH=$PATH:/opt/bin' > /home/$agent/.bashrc
 done
 
 # Create Puppy application log directory.
