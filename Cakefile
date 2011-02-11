@@ -4,14 +4,14 @@ path            = require("path")
 
 compile = (sources, output) ->
   coffee =          spawn "coffee", "-c -o #{output}".split(/\s/).concat(sources)
-  coffee.stderr.on  "data", (buffer) -> puts buffer.toString()
+  coffee.stderr.on  "data", (buffer) -> process.stdout.write buffer.toString()
   coffee.on         "exit", (status) -> process.exit(1) if status != 0
 
 currentBranch = (callback) ->
   branches =        ""
   git =             spawn "git", [ "branch" ]
   git.stdout.on     "data", (buffer) -> branches += buffer.toString()
-  git.stderr.on     "data", (buffer) -> puts buffer.toString()
+  git.stderr.on     "data", (buffer) -> process.stdout.write buffer.toString()
   git.on            "exit", (status) ->
     process.exit(1) if status != 0
     branch = /\*\s+(.*)/.exec(branches)[1]
@@ -29,14 +29,14 @@ task "gitignore", "create a .gitignore for node-ec2 based on git branch", ->
 
     if branch is "gh-pages"
       gitignore += '''
-                   lib
+                   bin
                    '''
     else if branch is "database"
       gitignore += '''
                    documentation
                    index.html
                    site/idl.css
-                   lib
+                   bin
                    '''
     fs.writeFile(".gitignore", gitignore)
 
@@ -53,14 +53,14 @@ task "index", "rebuild the Node IDL landing page.", ->
   idl.generate "#{package.name}.idl", "index.html"
 
 task "compile", "compile the CoffeeScript into JavaScript", ->
-  path.exists "./lib", (exists) ->
-    fs.mkdirSync("./lib", 0755) if not exists
+  path.exists "./bin", (exists) ->
+    fs.mkdirSync("./bin", 0755) if not exists
     sources = fs.readdirSync("src")
     sources = "src/" + source for source in sources when source.match(/\.coffee$/)
-    compile sources, "./lib"
+    compile sources, "./bin"
 
 task "clean", "rebuild the CoffeeScript docco documentation.", ->
   currentBranch (branch) ->
     if branch is "database"
-      exec "rm -rf documentation lib _site site/idl.css index.html", (err) ->
+      exec "rm -rf documentation bin _site site/idl.css index.html", (err) ->
         throw err if err
