@@ -6,8 +6,4 @@
 
 dbid=$1
 
-output=$(/usr/bin/sudo -u delegate /puppy/bin/db_password $dbid)
-hostname=$(echo $output | awk '{ print $1 }')
-port=$(echo $output | awk '{ print $2 }')
-
-echo "CREATE DATABASE d$dbid" | /usr/bin/sudo -H -u janitor /puppy/bin/janitor_mysql -u root -h $hostname -P $port
+echo "CREATE DATABASE d$dbid" | /usr/bin/sudo -H -u janitor /puppy/bin/janitor_mysql -u root
