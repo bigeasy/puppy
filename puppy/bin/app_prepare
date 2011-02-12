@@ -1,0 +1,17 @@
+#!/bin/bash
+
+uid=$(/usr/bin/id -u)
+home=/home/u$uid
+
+function abend()
+{
+    message=$1
+    echo "ERROR: $1" 1>&2
+    exit 1
+}
+
+if [ ! -d /home/u$uid ]; then
+    abend "Home directory does not exist."
+fi
+
+/bin/mkdir -p /home/u$uid/.puppy || abend "Unable to create ~/.puppy directory."

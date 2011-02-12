@@ -29,14 +29,14 @@ task "gitignore", "create a .gitignore for node-ec2 based on git branch", ->
 
     if branch is "gh-pages"
       gitignore += '''
-                   bin
+                   bin/*
                    '''
     else if branch is "protected"
       gitignore += '''
                    documentation
                    index.html
                    site/idl.css
-                   bin
+                   bin/*
                    '''
     fs.writeFile(".gitignore", gitignore)
 
