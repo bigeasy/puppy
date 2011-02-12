@@ -40,10 +40,11 @@ db.createDatabase syslog, (database) ->
     urandom.on "data", (chunk) -> hash.update chunk
     urandom.on "end", ->
       database.select "insertDataStore", [ options.app, options.alias, hash.digest("hex"), options.engine ], (results) ->
-        dataStoreId = results.insertId
-        database.enqueue hostname, [
-          [ "mysql:create", [ dataStoreId ] ],
-          [ "mysql:grant", [ options.app, dataStoreId ] ]
-          [ "app:config", [ options.app ] ]
-        ], ->
-          process.stdout.write "Database d#{dataStoreId} for application t#{options.app} pending.\n"
+        database.select "getDataStore", [ results.insertId ], "dataStore", (dataStores) ->
+          dataStore = dataStores.shift()
+          database.enqueue dataStore.dataServer.hostname, [
+            [ "mysql:create", [ dataStore.id ] ],
+            [ "mysql:grant", [ options.app, dataStore.id ] ]
+            [ "app:config", [ options.app ] ]
+          ], ->
+            process.stdout.write "Database d#{dataStoreId} for application t#{options.app} pending.\n"
