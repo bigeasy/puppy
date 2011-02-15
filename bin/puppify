@@ -67,6 +67,7 @@ make_user worker 204
 make_user delegate 210
 make_user puppy 201
 make_user janitor 202
+make_user haproxy 203
 
 make_user database 205
 
@@ -103,6 +104,7 @@ function make_directories()
 /bin/chmod 644 var/lib/unbound/etc/unbound/*
 /bin/chmod 644 etc/init/*
 /bin/chmod 644 etc/unbound/*
+/bin/chmod 644 etc/haproxy/*
 /bin/chmod 755 etc/rc.d/init.d/*
 /bin/chmod 755 usr/bin/*
 /bin/chmod 440 etc/sudoers.d/*
