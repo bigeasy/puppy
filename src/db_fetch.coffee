@@ -47,4 +47,4 @@ db.createDatabase syslog, (database) ->
             [ "mysql:grant", [ options.app, dataStore.id ] ]
             [ "app:config", [ options.app ] ]
           ], ->
-            process.stdout.write "Database d#{dataStoreId} for application t#{options.app} pending.\n"
+            process.stdout.write "Database d#{dataStore.id} for application t#{options.app} pending.\n"
