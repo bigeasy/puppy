@@ -30,7 +30,7 @@ module.exports.command = (argv) ->
       # The request has the host in URL. Does this matter?
       host = query.host or request.headers.host or ""
       nameAndPort = /(.*)(?::\d+)$/.exec(host)
-      vhost = vhosts[if nameAndPort then nameAndPort[1] else ""]
+      vhost = vhosts[if nameAndPort then nameAndPort[1] else host]
       if not vhost
         response.writeHead 400, { "Content-Type": "text/plain" }
         response.end "Bad request for host #{host}."
