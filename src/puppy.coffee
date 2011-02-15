@@ -126,13 +126,13 @@ class Configuration
       if code is 0
         callback(stdout)
       else
-        console.log stdout
+        console.log stderr
         process.exit code
   thereas: (app, user, command, parameters, callback) ->
-    params = [ "/usr/bin/sudo", "-u", user ]
+    params = [  "-u", user, command ]
     for param in parameters.slice(0)
       params.push param
-    @there(app, command, params, callback)
+    @there(app, "/usr/bin/sudo", params, callback)
   there: (app, command, parameters, callback) ->
     localUser = app.localUsers[0]
     params = [ "-T", "-l", "u#{localUser.id }", localUser.machine.hostname, command ]
@@ -153,8 +153,6 @@ class Configuration
       program.stdout.on "data", (chunk) -> stdout += chunk.toString()
       program.stderr.on "data", (chunk) -> stderr += chunk.toString()
       program.on "exit", (code) ->
-        console.log stdout
-        console.log stderr
         if code is 0
           callback()
         else
