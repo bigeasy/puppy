@@ -1,10 +1,16 @@
+# Require Node.js libraries.
 fs = require "fs"
 sys = require "sys"
 path = require "path"
 {spawn,exec} = require("child_process")
 
+# Encapsulates a command to invoke using `spawn`.
 class Command
+  # Create a command with the given `command` and command `parameters`.
   constructor: (@command, @parameters) ->
+
+  # Execute the command and assert a successful error code before invoking the
+  # callback.
   assert: (callback) ->
     program = spawn @command, @parameters
     stdout = ""
@@ -17,6 +23,8 @@ class Command
       else
         console.log stderr
         process.exit code
+
+  # Inherit the standard I/O handles of the parent process.
   passthrough: (callback) ->
     program = spawn @command, @parameters, { customFds: [ 0, 1, 2 ] }
     program.on "exit", (code) ->
@@ -55,7 +63,7 @@ class Configuration
     @dirty.global = true
 
   abend: (message) ->
-    process.stdout.write "ERROR: #{message}"
+    process.stdout.write message
     process.exit 1
 
   # Write the local and global property maps, if they are dirty.
