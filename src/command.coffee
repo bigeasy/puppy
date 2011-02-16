@@ -1,6 +1,7 @@
 {Configuration} = require "./puppy"
 {OptionParser}  = require "coffee-script/optparse"
 fs              = require "fs"
+path            = require "path"
 
 usage = (parser, message) ->
   commands = []
@@ -48,14 +49,21 @@ module.exports.command = (argv) ->
   try
     options         = parser.parse process.argv.slice(2)
   catch e
-    usage(parser, "Invalid parameters. See usage.")
+    usage parser, "Invalid parameters. See usage."
 
   if options.help
-    usage(parser)
+    usage parser
 
   if options.arguments.length is 0
-    usage(parser, "Invalid parameters. See usage.", 1)
+    usage parser, "Command missing. See usage."
 
-  [noun, verb] = options.arguments.shift().split(/:/)
-  configuration = new Configuration(parser, options)
-  require("../lib/#{noun}_#{verb}").command(configuration)
+  name = options.arguments.shift()
+  if not /^\w{1,12}:\w{1,12}$/.test(name)
+    usage parser, "Invalid command name. See usage."
+  command = name.replace /:/, "_"
+
+  path.exists "../lib/#{command}.js", (exists) ->
+    if not exists
+      usage parser, "Unknown command `#{name}`. See usage."
+    configuration = new Configuration(parser, options)
+    require("../lib/#{command}").command.execute(configuration)
