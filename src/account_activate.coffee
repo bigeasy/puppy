@@ -25,26 +25,28 @@ usage: puppy account:activate [activation code]
 
 # The JavaScript dispatch program slices `argv` to the first command line
 # argument and passes it in as `args`. 
-module.exports.command = (configuration) ->
-  server = configuration.get("server") or "portoroz.prettyrobots.com"
+module.exports.command =
+  description: "Verify account registration email and ssh key."
+  execute: (configuration) ->
+    server = configuration.get("server") or "portoroz.prettyrobots.com"
 
-  delete configuration.local["home"]
-  delete configuration.global["home"]
+    delete configuration.local["home"]
+    delete configuration.global["home"]
 
-  # Request the host server for the account. Then invoke the account
-  # registration command on the host server via SSH using the user's default
-  # identity. That is, the identities provided by the SSH configuration or the
-  # SSH agent, and not a specific identity.
-  configuration.home (home) ->
-    [ code ] = configuration.options.arguments
-    if not code
-      configuration.usage "Required parameters missing. See usage.", usage
+    # Request the host server for the account. Then invoke the account
+    # registration command on the host server via SSH using the user's default
+    # identity. That is, the identities provided by the SSH configuration or the
+    # SSH agent, and not a specific identity.
+    configuration.home (home) ->
+      [ code ] = configuration.options.arguments
+      if not code
+        configuration.usage "Required parameters missing. See usage.", usage
 
-    stdout = ""
-    ssh = spawn "ssh", [ "-T", home, "/puppy/bin/account_activated" ]
-    ssh.stdin.end(code)
-    ssh.stdout.on "data", (chunk) -> process.stdout.write chunk.toString()
-    ssh.stderr.on "data", (chunk) -> process.stdout.write chunk.toString()
-    ssh.on "exit", (code) ->
-      if code != 0
-        configuration.usage "Unable to activate. Most likely an invalid code.", usage
+      stdout = ""
+      ssh = spawn "ssh", [ "-T", home, "/puppy/bin/account_activated" ]
+      ssh.stdin.end(code)
+      ssh.stdout.on "data", (chunk) -> process.stdout.write chunk.toString()
+      ssh.stderr.on "data", (chunk) -> process.stdout.write chunk.toString()
+      ssh.on "exit", (code) ->
+        if code != 0
+          configuration.usage "Unable to activate. Most likely an invalid code.", usage

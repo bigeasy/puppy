@@ -34,7 +34,7 @@ class Command
         process.exit code
 
 class Configuration
-  constructor: (@options) ->
+  constructor: (@parser, @options) ->
     home = process.env["HOME"]
     try
       fs.statSync "#{home}/.puppy"
