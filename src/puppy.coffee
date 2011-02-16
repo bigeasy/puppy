@@ -3,8 +3,30 @@ sys = require "sys"
 path = require "path"
 {spawn,exec} = require("child_process")
 
+class Command
+  constructor: (@command, @parameters) ->
+  assert: (callback) ->
+    program = spawn @command, @parameters
+    stdout = ""
+    stderr = ""
+    program.stdout.on "data", (chunk) -> stdout += chunk.toString()
+    program.stderr.on "data", (chunk) -> stderr += chunk.toString()
+    program.on "exit", (code) ->
+      if code is 0
+        callback(stdout)
+      else
+        console.log stderr
+        process.exit code
+  passthrough: (callback) ->
+    program = spawn @command, @parameters, { customFds: [ 0, 1, 2 ] }
+    program.on "exit", (code) ->
+      if callback
+        callback(code)
+      else
+        process.exit code
+
 class Configuration
-  constructor: ->
+  constructor: (@options, @usage) ->
     home = process.env["HOME"]
     try
       fs.statSync "#{home}/.puppy"
@@ -86,9 +108,17 @@ class Configuration
           throw error
       callback()
 
-  application: (id, callback) ->
+  application: (app, callback) ->
     @applications (applications) ->
-      application = (applications.filter (application) -> application.id is id).shift()
+      if app
+        if /^\d+$/.test(app)
+          app = parseInt app, 10
+        else
+          id = /^t(\d+)$/.exec(app)
+          app = if id then parseInt(id[1], 10) else 0
+        application = (applications.filter (application) -> application.id is id).shift()
+      else
+        application = (applications.filter (application) -> application.isHome is 1).shift()
       callback(application)
 
   applications: (callback) ->
@@ -97,6 +127,7 @@ class Configuration
         home = process.env["HOME"]
         callback(JSON.parse(fs.readFileSync("#{home}/.puppy/applications.json", "utf8")))
       catch error
+
         if process.binding("net").ENOENT is error.errno
           @fetchApplications (applications) =>
             fs.writeFileSync "#{home}/.puppy/applications.json", JSON.stringify(applications), "utf8"
@@ -116,29 +147,19 @@ class Configuration
           callback(JSON.parse(stdout))
         else
           throw new Error("Unable to list applications.")
-  here: (command, parameters, callback) ->
-    program = spawn command, parameters
-    stdout = ""
-    stderr = ""
-    program.stdout.on "data", (chunk) -> stdout += chunk.toString()
-    program.stderr.on "data", (chunk) -> stderr += chunk.toString()
-    program.on "exit", (code) ->
-      if code is 0
-        callback(stdout)
-      else
-        console.log stderr
-        process.exit code
-  thereas: (app, user, command, parameters, callback) ->
-    params = [  "-u", user, command ]
+  here: (command, parameters) ->
+    new Command command, parameters
+  thereas: (app, user, command, parameters) ->
+    params = [  "-H", "-u", user, command ]
     for param in parameters.slice(0)
       params.push param
-    @there(app, "/usr/bin/sudo", params, callback)
-  there: (app, command, parameters, callback) ->
+    @there(app, "/usr/bin/sudo", params)
+  there: (app, command, parameters) ->
     localUser = app.localUsers[0]
     params = [ "-T", "-l", "u#{localUser.id }", localUser.machine.hostname, command ]
     for param in parameters.slice(0)
       params.push param
-    @here "/usr/bin/ssh", params, callback
+    @here "/usr/bin/ssh", params
   app: (id, command, parameters, callback) ->
     @applications (applications) =>
       application = (applications.filter (application) -> application.id is id).shift()
@@ -146,7 +167,6 @@ class Configuration
       params = [ "-T", "-l", "u#{localUser.id }", localUser.machine.hostname, command ]
       for param in parameters.slice(0)
         params.push param
-      console.log params
       program = spawn "/usr/bin/ssh", params
       stdout = ""
       stderr = ""
@@ -157,29 +177,14 @@ class Configuration
           callback()
         else
           process.stderr.write "Cannot execute #{command}."
+  delegate: (command, parameters) ->
+    if require("./location").server
+      command = @hereas "delegate", @command @parameters
+      command.passthrough()
+    else
+      @application @options.app, (app) =>
+        @abend "No such application #{@options.app}.\n" unless app
+        command = @thereas app, "delegate", command, parameters
+        command.passthrough()
 
 module.exports.Configuration = Configuration
-
-invoke = (command, parameters, splat) ->
-  for parameter in splat
-    parameters.push(parameter)
-  program = spawn command, parameters, { customFds: [ 0, 1, 2 ] }
-  program.on "exit", (code) -> process.exit code
-
-module.exports.invoke = invoke
-module.exports.app = (app, usage) ->
-  if /^\d+$/.test(app)
-    app = parseInt app, 10
-  else
-    id = /^t(\d+)$/.exec(app)
-    if not id
-      usage()
-    app = parseInt id[1], 10
-  app
-module.exports.delegate = (command, argv) ->
-  if require("./location").server
-    invoke("/usr/bin/sudo", [ "-H", "-u", "delegate", command ], argv)
-  else
-    configuration = new Configuration()
-    configuration.home (home) ->
-      invoke("/usr/bin/ssh", [ "-T", home, "/usr/bin/sudo", "-H", "-u", "delegate", command ], argv)

@@ -34,12 +34,15 @@ module.exports.command = (argv) ->
 
   options.app = app(options.app, usage)
   configuration.application options.app, (app) ->
-    configuration.there app, "/puppy/bin/app_prepare", [], ->
+    prepare = configuration.there app, "/puppy/bin/app_prepare", []
+    prepare.assert ->
       localUser = app.localUsers[0]
       excludeFrom = "#{__dirname}/../etc/rsync.exclude"
-      configuration.here "/usr/bin/rsync", [
+      rsync = configuration.here "/usr/bin/rsync", [
         "--exclude=configuration.json", "--exclude-from=#{excludeFrom}", "--delete", "-aqz", "-e", "/usr/bin/ssh",
         "./", "u#{localUser.id}@#{localUser.machine.hostname}:/home/u#{localUser.id}/.puppy/stage/"
-      ], ->
+      ]
+      rsync.assert ->
         console.log "HERE"
-        configuration.thereas app, "delegate", "/puppy/bin/app_deploy", [], ->
+        deploy = configuration.thereas app, "delegate", "/puppy/bin/app_deploy", []
+        deploy.assert ->
