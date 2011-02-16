@@ -34,7 +34,7 @@ class Command
         process.exit code
 
 class Configuration
-  constructor: (@options, @usage) ->
+  constructor: (@options) ->
     home = process.env["HOME"]
     try
       fs.statSync "#{home}/.puppy"
@@ -61,6 +61,8 @@ class Configuration
       else
         @global[k] = v
     @dirty.global = true
+
+  usage: (error, usage) -> @abend "\nerror: #{error}\n\n#{usage}\n\n"
 
   abend: (message) ->
     process.stdout.write message
