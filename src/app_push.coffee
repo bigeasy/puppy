@@ -11,7 +11,7 @@ usage = ->
   process.exit 1
 
 module.exports.command =
-  description: "Deploy an application at Puppy."
+  description: "Deploy an application to Puppy."
   execute: (argv) ->
     try
       options         = parser.parse argv
