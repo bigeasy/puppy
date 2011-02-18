@@ -62,8 +62,8 @@ module.exports.command = (argv) ->
     usage parser, "Invalid command name. See usage."
   command = name.replace /:/, "_"
 
-  path.exists "../lib/#{command}.js", (exists) ->
+  path.exists "#{__dirname}/#{command}.js", (exists) ->
     if not exists
       usage parser, "Unknown command `#{name}`. See usage."
     configuration = new Configuration(parser, options)
-    require("../lib/#{command}").command.execute(configuration)
+    require("./#{command}").command.execute(configuration)
