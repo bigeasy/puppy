@@ -52,6 +52,7 @@ fetchLocalUser = (database, account, applicationId, machine) ->
           [ "user:chown", [ localUser.id ] ]
           [ "init:generate", [ localUser.id ] ]
           [ "init:restorecon", [ localUser.id ] ]
+          [ "user:provisioned", [ localUser.id ] ]
         ], ->
           database.select "getLocalPorts", [ localUser.machine.hostname, localUser.id ], "localPort", (localPorts) ->
             localPort = localPorts.shift()
