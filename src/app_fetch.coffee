@@ -7,40 +7,83 @@ db        = require("common/database")
 
 argv      = process.argv.slice 2
 
+# Choose a machine based on a weighted random where the weights are the
+# determined by the number of available machine users with policies.
+chooseMachine = (database, callback) ->
+  database.select "getMachines", [], "machine", (machines) ->
+    machines = machines.filter (machine) -> machine.localUsers >
+    machine.localUsersInUse
+    for machine in machines
+      machine.weight = 1 - (machine.localUsersInUse / machine.localUsers)
+    sum = machines.reduce(((sum, machine) -> sum + machine.weight), 0)
+    point = Math.random() * sum
+    for machine in machines
+      if machine.weight >= point
+        callback(machine)
+        return
+      point -= machine.weight
+    callback(null)
+
+localUserUnavailable = ->
+  syslog.error "Unable to allocate local user account for application."
+  process.stdout.write JSON.stringify({
+    error: true
+    message: "No new application accounts available at this time."
+  })
+  process.exit 0
+
+fetchLocalUser = (database, applicationId, machine) ->
+  localUserUnavailable() unless machine
+  database.select "fetchLocalUser", [ applicationId, machine.id, 1 ], (results) =>
+    if results.affectedRows
+      database.select "getLocalUserByAssignment", [ results.insertId ], "localUser", (results) ->
+        localUser = results.shift()
+        database.enqueue localUser.machine.hostname, [
+          [ "user:create", [ localUser.id ] ],
+          [ "user:restorecon", [ localUser.id ] ],
+          [ "user:decommission", [ localUser.id ] ],
+          [ "user:provision", [ localUser.id ] ],
+          [ "user:restorecon", [ localUser.id ] ],
+          [ "user:skel", [ localUser.id, "protected" ] ],
+          [ "user:authorize", [ localUser.id ] ],
+          [ "user:config", [ localUser.id ] ],
+          [ "user:restorecon", [ localUser.id ] ],
+          [ "user:group", [ localUser.id, "protected" ] ],
+          [ "user:chown", [ localUser.id ] ]
+          [ "init:generate", [ localUser.id ] ]
+          [ "init:restorecon", [ localUser.id ] ]
+        ], ->
+          database.select "getLocalPorts", [ localUser.machine.hostname, localUser.id ], "localPort", (localPorts) ->
+            localPort = localPorts.shift()
+            database.properties (properties) ->
+              database.virtualHost "t#{applicationId}.#{properties.applicationHost}", localUser.machine.ip,  localPort.port, ->
+                database.select "getApplications", [ application.accountId ], "application", (results) ->
+                  applications = []
+                  for application in results
+                    if application.id is applicationId
+                      application.status = "new"
+                      applications.unshift application
+                    else
+                      application.status = if application.ready is 1 then "ready" else "pending"
+                      applications.push application
+                  process.stdout.write JSON.stringify({
+                    error: false
+                    applications
+                  })
+    else
+      chooseMachine database, (machine) ->
+        fetchLocalUser(database, applicationId, machine)
+
+# Select the machine at random, but there is only one machine for now.
+# Check that there are localUsers available on the machine.
 db.createDatabase syslog, (database) ->
   uid = parseInt process.env["SUDO_UID"], 10
   shell.verify(uid > 10000, "Inexplicable uid #{uid}")
   shell.hostname (hostname) ->
-    database.select "getAccountByLocalUser", [ hostname, uid ], "account", (results) ->
-      account = results.shift()
-      database.select "insertApplication", [ account.id, 0 ], (results) ->
-        applicationId = results.insertId
-        database.select "getMachines", [], "machine", (results) ->
-          machine = results[0]
-          database.select "fetchLocalUser", [ applicationId, machine.id, 1 ], (results) =>
-            if results.affectedRows
-              database.select "getLocalUserByAssignment", [ results.insertId ], "localUser", (results) ->
-                localUser = results.shift()
-                database.enqueue localUser.machine.hostname, [
-                  [ "user:create", [ localUser.id ] ],
-                  [ "user:restorecon", [ localUser.id ] ],
-                  [ "user:decommission", [ localUser.id ] ],
-                  [ "user:provision", [ localUser.id ] ],
-                  [ "user:restorecon", [ localUser.id ] ],
-                  [ "user:skel", [ localUser.id, "protected" ] ],
-                  [ "user:authorize", [ localUser.id ] ],
-                  [ "user:config", [ localUser.id ] ],
-                  [ "user:restorecon", [ localUser.id ] ],
-                  [ "user:group", [ localUser.id, "protected" ] ],
-                  [ "user:chown", [ localUser.id ] ]
-                  [ "init:generate", [ localUser.id ] ]
-                  [ "init:restorecon", [ localUser.id ] ]
-                ], ->
-                  database.select "getLocalPorts", [ localUser.machine.hostname, localUser.id ], "localPort", (localPorts) ->
-                    localPort = localPorts.shift()
-                    database.virtualHost "t#{applicationId}.portoroz.runpup.com", localUser.machine.ip,  localPort.port, ->
-                      process.stdout.write "Application t#{applicationId} created.\n"
-            else
-              syslog.error "Unable to allocate local user account for application #{applicationId}."
-              process.stdout.write "Unable to allocate application."
-              process.exit 1
+    chooseMachine database, (machine) ->
+      localUserUnavailable() unless machine
+      database.select "getAccountByLocalUser", [ hostname, uid ], "account", (results) ->
+        account = results.shift()
+        database.select "insertApplication", [ account.id, 0 ], (results) ->
+          applicationId = results.insertId
+          fetchLocalUser(database, applicationId, machine)
