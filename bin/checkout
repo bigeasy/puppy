@@ -87,6 +87,5 @@ deploy worker
 deploy job
 deploy vhosts
 deploy database
-deploy client
 deploy liminal
 deploy janitor
