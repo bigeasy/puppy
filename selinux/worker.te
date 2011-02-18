@@ -436,6 +436,16 @@ manage_dirs_pattern(user_provision_t, home_root_t, home_root_t)
 files_read_etc_files(user_provision_t)
 
 ############################################################################
+### Policy for `user_provisioned`.
+############################################################################
+
+# User policy assignment is performed as root.
+puppy_job_as_worker(user_provisioned)
+
+job_sudo_delegate(user_provisioned)
+job_delegate_trans(user_provisioned, app_user_ready)
+
+############################################################################
 ### Policy for `policy_ready`.
 ############################################################################
 
