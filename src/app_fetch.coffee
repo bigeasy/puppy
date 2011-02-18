@@ -32,7 +32,7 @@ localUserUnavailable = ->
   })
   process.exit 0
 
-fetchLocalUser = (database, applicationId, machine) ->
+fetchLocalUser = (database, account, applicationId, machine) ->
   localUserUnavailable() unless machine
   database.select "fetchLocalUser", [ applicationId, machine.id, 1 ], (results) =>
     if results.affectedRows
@@ -57,7 +57,7 @@ fetchLocalUser = (database, applicationId, machine) ->
             localPort = localPorts.shift()
             database.properties (properties) ->
               database.virtualHost "t#{applicationId}.#{properties.applicationHost}", localUser.machine.ip,  localPort.port, ->
-                database.select "getApplications", [ application.accountId ], "application", (results) ->
+                database.select "getApplications", [ account.id ], "application", (results) ->
                   applications = []
                   for application in results
                     if application.id is applicationId
@@ -72,7 +72,7 @@ fetchLocalUser = (database, applicationId, machine) ->
                   })
     else
       chooseMachine database, (machine) ->
-        fetchLocalUser(database, applicationId, machine)
+        fetchLocalUser(database, account, applicationId, machine)
 
 # Select the machine at random, but there is only one machine for now.
 # Check that there are localUsers available on the machine.
@@ -86,4 +86,4 @@ db.createDatabase syslog, (database) ->
         account = results.shift()
         database.select "insertApplication", [ account.id, 0 ], (results) ->
           applicationId = results.insertId
-          fetchLocalUser(database, applicationId, machine)
+          fetchLocalUser(database, account, applicationId, machine)
