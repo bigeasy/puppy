@@ -2,5 +2,6 @@
     /puppy/bin/account_apps, \
     /puppy/bin/app_deploy, \
     /puppy/bin/app_fetch, \
+    /puppy/bin/app_list, \
     /puppy/bin/db_fetch, \
     /puppy/bin/port_fetch
