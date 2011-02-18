@@ -117,6 +117,13 @@ class Database
     else if callback
       callback()
 
+  properties: (callback) ->
+    @select "properties", [], (results) =>
+      properties = {}
+      for property in results
+        properties[property.name] = property.value
+      callback(properties)
+
   virtualHost: (name, ip, port, callback) ->
     @select "deleteVirtualHost", [ name ], (results) =>
       @select "insertVirtualHost", [ name, ip, port ], (results) =>
