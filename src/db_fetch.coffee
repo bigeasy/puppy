@@ -26,8 +26,16 @@ module.exports.command =
     """
 
     try
-      options         = parser.parse process.argv.slice(2)
+      options         = parser.parse configuration.options.arguments
     catch e
       configuration.usage "Invalid parameters. See usage.", usage
 
-    configuration.delegate "/puppy/bin/db_fetch", configuration.options.arguments
+    configuration.application (app) ->
+      if app.isHome is 1
+        configuration.usage "Which application? No application directory and no application parameter.", usage
+      parameters = [ "--app", app.id ]
+      for param in configuration.options.arguments
+        parameters.push param
+      console.log [ "/puppy/bin/db_fetch", parameters ]
+      process.exit 1
+      configuration.delegate "/puppy/bin/db_fetch", parameters

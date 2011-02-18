@@ -43,6 +43,9 @@ usage = (parser, message) ->
 module.exports.command = (argv) ->
   parser = new OptionParser [
     [ "-a", "--app [NAME]", "application name" ]
+    [ "-l", "--list", "display listing output" ]
+    [ "-j", "--json", "display json output" ]
+    [ "-q", "--quiet", "display no output" ]
     [ "-h", "--help", "display puppy help" ]
   ]
 

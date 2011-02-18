@@ -50,6 +50,10 @@ class Configuration
       @local = {}
     @global.server or= "portoroz.prettyrobots.com"
     @dirty = {}
+    @output = "text"
+    @output = "json" if @options.json
+    @output = "list" if @options.list
+    @output = "none" if @options.quiet
 
   # Write a map of properties to the global property map. This marks the global
   # property map dirty so that it will be written in a call to `save`. A `null`
@@ -118,15 +122,15 @@ class Configuration
           throw error
       callback()
 
-  application: (app, callback) ->
-    @applications (applications) ->
-      if app
-        if /^\d+$/.test(app)
-          app = parseInt app, 10
+  application: (callback) ->
+    @applications (applications) =>
+      if @options.app
+        if /^\d+$/.test(@options.app)
+          appId = parseInt @options.app, 10
         else
-          id = /^t(\d+)$/.exec(app)
-          app = if id then parseInt(id[1], 10) else 0
-        application = (applications.filter (application) -> application.id is id).shift()
+          id = /^t(\d+)$/.exec(@options.app)
+          appId = if id then parseInt(id[1], 10) else 0
+        application = (applications.filter (application) -> application.id is appId).shift()
       else
         application = (applications.filter (application) -> application.isHome is 1).shift()
       callback(application)
@@ -187,14 +191,56 @@ class Configuration
           callback()
         else
           process.stderr.write "Cannot execute #{command}."
-  delegate: (command, parameters) ->
+  delegate: (command, parameters, callback) ->
     if require("./location").server
-      command = @hereas "delegate", @command @parameters
-      command.passthrough()
+      callback(@hereas "delegate", @command @parameters)
     else
-      @application @options.app, (app) =>
-        @abend "No such application #{@options.app}.\n" unless app
-        command = @thereas app, "delegate", command, parameters
-        command.passthrough()
+      @application (app) =>
+        callback(@thereas app, "delegate", command, parameters)
 
 module.exports.Configuration = Configuration
+module.exports.format = (rows) ->
+  lines = []
+  left = []
+  for row in rows
+    for i in [0...row.length]
+      left[i] = true
+  for row in rows.slice(1)
+    for i in [0...row.length]
+      if row[i] and not /^\w?\d+/.test(row[i])
+        left[i] = false
+  widths = []
+  for row in rows
+    for i in [0...row.length]
+      widths[i] = 0
+  for row in rows
+    for i in [0...row.length]
+      length = "#{row[i]}".length
+      if widths[i] < length
+        widths[i] = length
+  sum = widths.reduce(((sum, width) -> sum + width), 0)
+  line = []
+  for i in [0...rows[0].length]
+    if i > 0
+      line.push " "
+    pad = new Array(Math.abs(widths[i]) - "#{rows[0][i]}".length + 1).join " "
+    if pad < 0
+      line.push rows[0][i]
+    else
+      line.push "#{rows[0][i]}#{pad}"
+  lines.push line.join ""
+  for row in rows.slice(1)
+    line = []
+    for i in [0...row.length]
+      pad = new Array(Math.abs(widths[i]) - "#{row[i]}".length + 1).join " "
+      if i > 0
+        line.push " "
+      if pad < 0
+        line.push row[i]
+      else if left[i]
+        line.push "#{pad}#{row[i]}"
+      else
+        line.push "#{row[i]}#{pad}"
+    lines.push line.join ""
+  lines.push ""
+  lines.join "\n"
