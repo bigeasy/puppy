@@ -2,6 +2,7 @@ format = require("./puppy").format
 
 module.exports.command =
   description: "Create a new application."
+  registered: true
   execute: (configuration) ->
     configuration.delegate "/puppy/bin/app_fetch", [], (command) ->
       command.assert (stdout) ->

@@ -195,8 +195,7 @@ class Configuration
     if require("./location").server
       callback(@hereas "delegate", @command @parameters)
     else
-      @application (app) =>
-        callback(@thereas app, "delegate", command, parameters)
+      callback(@thereas @application, "delegate", command, parameters)
 
 module.exports.Configuration = Configuration
 module.exports.format = (rows) ->
