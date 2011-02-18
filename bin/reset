@@ -23,10 +23,14 @@ mysql_command "drop database puppy"
 mysql_command "create database puppy"
 mysql_script ddl/0001_create_user.sql 
 mysql_script ddl/0002_insert_account.sql 
+mysql_script ddl/0003_property.sql
+mysql_script ddl/0004_set_application_host.sql
+mysql_script ddl/0005_domain.sql
+mysql_script ddl/0006_application_local_user_ready.sql
 
 bin/load_ports | sudo -H -u janitor mysql -u root puppy
 
-/usr/bin/sudo -u delegate /puppy/bin/user_generate 3
+/usr/bin/sudo -u delegate /puppy/bin/user_generate 12
 
 /puppy/bin/job $(/bin/hostname) port:unlabel
 /puppy/bin/job $(/bin/hostname) policy:unload
