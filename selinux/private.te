@@ -37,7 +37,6 @@ puppy_delegate_database(app_users)
 
 puppy_delegate(app_user_ready)
 puppy_delegate_database(app_user_ready)
-puppy_delegate_hostname(app_user_ready)
 
 ############################################################################
 ### Policy for `config_app`.

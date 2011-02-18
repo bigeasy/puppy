@@ -435,6 +435,8 @@ manage_dirs_pattern(user_provision_t, home_root_t, home_root_t)
 # Chown needs to read `/etc/passwd`.
 files_read_etc_files(user_provision_t)
 
+hostname_exec(user_provision_t)
+
 ############################################################################
 ### Policy for `user_provisioned`.
 ############################################################################
