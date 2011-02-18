@@ -17,3 +17,4 @@ SELECT a.id as application__id,
   FROM Application AS a
   JOIN Account AS acc ON a.accountId = acc.id
  WHERE acc.id = ?
+   AND a.isHome = 0
