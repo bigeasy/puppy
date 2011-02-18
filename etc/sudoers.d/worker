@@ -25,6 +25,7 @@ worker ALL = (root) NOPASSWD: \
 worker ALL = (delegate) NOPASSWD: \
     /puppy/bin/policy_users, \
     /puppy/bin/queue_config, \
+    /puppy/bin/app_user_ready, \
     /puppy/bin/user_ready, \
     /puppy/bin/user_activation
 worker ALL = (database) NOPASSWD: \
