@@ -209,7 +209,6 @@ class Configuration
           process.stderr.write "Cannot execute #{command}."
   delegate: (command, parameters, callback) ->
     if require("./location").server
-      console.log "HELLO"
       callback(@hereas "delegate", command, parameters)
     else
       callback(@thereas @application, "delegate", command, parameters)
