@@ -16,6 +16,7 @@
     , "config_mysql":       "./bin/config_mysql.js"
     , "db_password":        "./bin/db_password.js"
     , "db_fetch":           "./bin/db_fetch.js"
+    , "db_list":            "./bin/db_list.js"
     , "policy_users":       "./bin/policy_users.js"
     , "policy_version":     "./bin/policy_version.js"
     , "port_fetch":         "./bin/port_fetch.js"
