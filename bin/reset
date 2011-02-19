@@ -41,3 +41,8 @@ bin/load_ports | sudo -H -u janitor mysql -u root puppy
 /puppy/bin/job $(/bin/hostname) policy:ready
 
 /usr/bin/sudo /sbin/initctl start worker
+
+for db in $(echo "SHOW DATABASES" | /usr/bin/sudo -u janitor -H /puppy/bin/janitor_mysql -u root puppy | grep '^d[0-9]\+')
+do
+    echo "DROP DATABASE $db" | /usr/bin/sudo -u janitor -H /puppy/bin/janitor_mysql -u root puppy
+done
