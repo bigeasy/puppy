@@ -24,10 +24,11 @@ module.exports.Syslog = class Syslog
   error: (message, dump) ->
     @send "err", "ERROR: #{message}", dump
 
-  send: (level, message, dump) ->
+  send: (level, message, dump, callback) ->
     message += " #{JSON.stringify(dump)}" if dump
     code = (LEVEL[level] or LEVEL["info"]) + (@facility * 8)
     buffer = new Buffer("<#{code}>#{@tag}#{message}")
     client = dgram.createSocket("unix_dgram")
-    client.send(buffer, 0, buffer.length, "/dev/log")
-    client.close()
+    client.send buffer, 0, buffer.length, "/dev/log", ->
+      callback() if callback
+      client.close()

@@ -4,6 +4,11 @@ exec          = require("child_process").exec
 spawn         = require("child_process").spawn
 Danger        = require("common/danger").Danger
 
+class Abend
+  constructor: (@syslog, @message, @dump) ->
+  die: ->
+    @syslog.send "err", @message, @dump, -> process.exit 1
+
 module.exports.createDatabase = (syslog, callback) ->
   shell = new (require("common/shell").Shell)(syslog)
   shell.doas "database", "/puppy/bin/database", [], null, (stdout) ->
@@ -130,3 +135,43 @@ class Database
         if results.affectedRows is 0
           throw new Error("Unable to insert virtual host #{name}.")
         callback()
+
+  verify: (condition, message, context) ->
+    unless condition
+      context or= {}
+      throw new Abend @syslog, message, context
+
+  application: (applicationId, callback) ->
+    @hostname (hostname) =>
+      uid = process.env["SUDO_UID"]
+      @verify uid > 10000, "Inexplicable uid #{uid}."
+      @select "getApplicationByIdAndLocalUser", [ applicationId, hostname, uid ], "application", (applications) =>
+        @verify applications.length, "No such application t#{applicationId} for u#{uid} on #{hostname}."
+        callback(applications.shift())
+
+  hostname: (callback) ->
+    hostname = spawn "/bin/hostname"
+    stdout = ""
+    stderr = ""
+    hostname.stderr.on "data", (data) -> stderr += data.toString()
+    hostname.stdout.on "data", (data) -> stdout += data.toString()
+    hostname.on "exit", (code) =>
+      if code != 0
+        @abend "Unable to execute hostname.", { code, stderr, stdout }
+      callback(stdout.substring(0, stdout.length - 1))
+
+  account: (callback) ->
+    @hostname (hostname) =>
+      uid = process.env["SUDO_UID"]
+      @verify uid > 10000, "Inexplicable uid #{uid}."
+      @select "getAccountByLocalUser", [ applicationId, hostname, uid ], "application", (application) =>
+        @verify application, "No such application t#{applicationId} for u#{uid} on #{hostname}."
+        callback(application)
+
+  uncaughtException: ->
+    process.on "uncaughtException", (e) =>
+      if e.die
+        e.die()
+      else
+        @syslog.send "err", "Unexpected exception.", { message: e.message, stack: e.stack }, ->
+          process.exit 1
