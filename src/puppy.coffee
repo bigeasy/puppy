@@ -136,18 +136,29 @@ class Configuration
       callback(application)
 
   applications: (callback) ->
-    @directory =>
-      try
-        home = process.env["HOME"]
-        callback(JSON.parse(fs.readFileSync("#{home}/.puppy/applications.json", "utf8")))
-      catch error
-
-        if process.binding("net").ENOENT is error.errno
-          @fetchApplications (applications) =>
-            fs.writeFileSync "#{home}/.puppy/applications.json", JSON.stringify(applications), "utf8"
-            @applications(callback)
+    if require("./location").server
+      config = spawn "/usr/bin/sudo", [ "-u", "delegate", "/puppy/bin/account_apps" ]
+      stdout = ""
+      stderr = ""
+      config.stdout.on "data", (chunk) -> stdout += chunk.toString()
+      config.stderr.on "data", (chunk) -> stderr += chunk.toString()
+      config.on "exit", (code) ->
+        if code is 0
+          callback(JSON.parse(stdout))
         else
-          throw error
+          throw new Error("Unable to list applications.")
+    else
+      @directory =>
+        try
+          home = process.env["HOME"]
+          callback(JSON.parse(fs.readFileSync("#{home}/.puppy/applications.json", "utf8")))
+        catch error
+          if process.binding("net").ENOENT is error.errno
+            @fetchApplications (applications) =>
+              fs.writeFileSync "#{home}/.puppy/applications.json", JSON.stringify(applications), "utf8"
+              @applications(callback)
+          else
+            throw error
 
   fetchApplications: (callback) ->
     @home (user) ->
@@ -161,6 +172,11 @@ class Configuration
           callback(JSON.parse(stdout))
         else
           throw new Error("Unable to list applications.")
+  hereas: (user, command, parameters) ->
+    params = [  "-H", "-u", user, command ]
+    for param in parameters.slice(0)
+      params.push param
+    @here("/usr/bin/sudo", params)
   here: (command, parameters) ->
     new Command command, parameters
   thereas: (app, user, command, parameters) ->
@@ -193,7 +209,8 @@ class Configuration
           process.stderr.write "Cannot execute #{command}."
   delegate: (command, parameters, callback) ->
     if require("./location").server
-      callback(@hereas "delegate", @command @parameters)
+      console.log "HELLO"
+      callback(@hereas "delegate", command, parameters)
     else
       callback(@thereas @application, "delegate", command, parameters)
 
