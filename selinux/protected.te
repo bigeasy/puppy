@@ -93,4 +93,14 @@ puppy_delegate_database(db_fetch)
 puppy_delegate_hostname(db_fetch)
 puppy_delegate_console(db_fetch)
 
+############################################################################
+### Policy for `db_list`.
+############################################################################
+
+puppy_sudo_delegate(protected, db_list)
+puppy_delegate(db_list)
+puppy_delegate_role(protected, protected, db_list)
+puppy_delegate_database(db_list)
+puppy_delegate_hostname(db_list)
+
 gen_user(protected_u,, protected_r, s0, s0)
