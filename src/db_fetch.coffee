@@ -8,43 +8,33 @@ shell           = new (require("common/shell").Shell)(syslog)
 db              = require("common/database")
 {OptionParser}  = require("coffee-script/optparse")
 
-argv            = process.argv.slice 2
-
-parser = new OptionParser [
-  [ "-A", "--alias [NAME]", "database alias" ]
-  [ "-e", "--engine [mysql/mongodb]", "database engine" ]
-  [ "-a", "--app [NAME]", "application name" ]
-]
-
-usage = ->
-  process.stdout.write parser.help()
-  process.exit 1
-
-try
-  options         = parser.parse argv
-catch e
-  usage()
-
-options.engine or= "mysql"
-options.alias or= options.engine
+[ app, engine, alias ] = process.argv.slice 2
 
 db.createDatabase syslog, (database) ->
-  shell.hostname (hostname) ->
-    if not /^\d+$/.test(options.app)
-      id = /^t(\d+)$/.exec(options.app)
-      if not id
-        usage()
-      options.app = id[1]
+  database.uncaughtException()
+  database.application app, (application) ->
     hash = crypto.createHash "md5"
     urandom = fs.createReadStream "/dev/urandom", { start: 0, end: 4091 }
     urandom.on "data", (chunk) -> hash.update chunk
     urandom.on "end", ->
-      database.select "insertDataStore", [ options.app, options.alias, hash.digest("hex"), options.engine ], (results) ->
+      database.select "insertDataStore", [ app, alias, hash.digest("hex"), engine ], (results) ->
         database.select "getDataStore", [ results.insertId ], "dataStore", (dataStores) ->
           dataStore = dataStores.shift()
           database.enqueue dataStore.dataServer.hostname, [
             [ "mysql:create", [ dataStore.id ] ],
-            [ "mysql:grant", [ options.app, dataStore.id ] ]
-            [ "app:config", [ options.app ] ]
+            [ "mysql:grant", [ app, dataStore.id ] ]
+            [ "app:config", [ app ] ]
           ], ->
-            process.stdout.write "Database d#{dataStore.id} for application t#{options.app} pending.\n"
+            database.select "getDataStoresByApplication", [ app ], "dataStore", (results) ->
+              dataStores = []
+              for ds in results
+                if ds.id is dataStore.id
+                  ds.status = "new"
+                  dataStores.unshift ds
+                else
+                  ds.status = "ready"
+                  dataStores.push ds
+              process.stdout.write JSON.stringify({
+                error: false
+                dataStores
+              })
