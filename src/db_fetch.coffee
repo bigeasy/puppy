@@ -1,4 +1,5 @@
 {OptionParser}  = require "coffee-script/optparse"
+format = require("./puppy").format
 
 module.exports.command =
   description: "Create a new database for an application."
