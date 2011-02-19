@@ -22,5 +22,5 @@ module.exports.command =
                 applications.push [ application.account.email, "t#{application.id}", application.status ]
               process.stdout.write format(applications)
             when "text"
-              application = applications[0]
+              application = response.applications[0]
               process.stdout.write "Created application t#{application.id}.\n"
