@@ -15,7 +15,11 @@ email     =  argv.shift()
 sendEmailOrElse = (results, orElse) ->
   if results.length
     localUser = results.shift()
-    process.stdout.write "u#{localUser.id}@#{localUser.machine.hostname}\n"
+    console.log localUser
+    if localUser.application.account.ready
+      process.stdout.write "u#{localUser.id}@#{localUser.machine.hostname}\n"
+    else
+      process.stdout.write "pending\n"
   else
     orElse()
 
@@ -24,6 +28,7 @@ sendEmailOrElse = (results, orElse) ->
 db.createDatabase syslog, (database) ->
   database.select "getLocalUserByEmail", [ email ], "localUser", (results) ->
     sendEmailOrElse results, ->
+      console.log "HERE"
       database.select "getLocalUserByActivationEmail", [ email ], "localUser", (results) ->
         sendEmailOrElse results, ->
           process.exit 1
