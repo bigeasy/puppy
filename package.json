@@ -3,7 +3,8 @@
 ,   "author":           "Alan Gutierrez"
 ,   "directories":      { "lib" : "./lib" }
 ,   "bin":             
-    { "app_config":         "./bin/app_config.js"
+    { "account_ready":      "./bin/account_ready.js"
+    , "app_config":         "./bin/app_config.js"
     , "daemon_start":       "./bin/daemon_start.js"
     , "daemon_stop":        "./bin/daemon_stop.js"
     , "init_generate":      "./bin/init_generate.js"

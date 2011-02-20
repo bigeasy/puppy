@@ -1,0 +1,9 @@
+#!/bin/bash
+
+. /puppy/bin/functions
+
+[ $# -ne 1 ] && abend "Incorrect count of arguments ($#)."
+
+aid=$1
+
+/usr/bin/sudo -u delegate /puppy/bin/account_ready $aid
