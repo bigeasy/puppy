@@ -27,6 +27,7 @@ mysql_script ddl/0003_property.sql
 mysql_script ddl/0004_set_application_host.sql
 mysql_script ddl/0005_domain.sql
 mysql_script ddl/0006_application_local_user_ready.sql
+mysql_script ddl/0007_account_ready.sql
 
 bin/load_ports | sudo -H -u janitor mysql -u root puppy
 
