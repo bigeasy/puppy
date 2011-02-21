@@ -1,4 +1,4 @@
-require.paths.unshift("/puppy/lib/node")
+require.paths.unshift("/puppy/common/lib/node")
 
 # Require Node.js dependencies.
 fs        = require "fs"
@@ -23,7 +23,7 @@ work = (database, hostname) ->
         # of arguments to the program, and a string to feed to standard input.
         command = JSON.parse(job.command)
         [ program, args, input ] = command
-        child = spawn "/puppy/bin/#{program.replace(/:/, "_")}", args
+        child = spawn "/puppy/worker/bin/#{program.replace(/:/, "_")}", args
         child.stdin.write(input) if input
         child.stdin.end()
 
@@ -79,7 +79,9 @@ work = (database, hostname) ->
 
 syslog.send "info", "Initializing."
 module.exports.work = ->
+  console.log "DATABASE"
   db.createDatabase syslog, (database) ->
+    console.log "DATABASE"
     # Run this method every second to check for jobs to perform on a machine on
     # behalf of the greater puppy ecosystem.
     shell.hostname (hostname) ->
