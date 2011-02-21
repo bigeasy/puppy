@@ -1,0 +1,20 @@
+#!/bin/bash
+
+declare -A users
+for line in $(/usr/bin/sudo -u delegate /puppy/bin/policy_users $(/bin/hostname))
+do
+    users+=([$line]=1)
+done
+
+outgoing=$(
+    for line in $(/usr/sbin/semodule -l | /bin/awk '/^protected_u/ { print $1 }' | sed 's/^protected_u//')
+    do
+        if [ ${users[$line]}"x" != "1x" ]; then
+            echo protected_u$line
+        fi
+    done
+)
+
+if [ ! -z "$outgoing" ]; then
+    echo "$outgoing" | /usr/bin/xargs -n 100 /usr/sbin/semodule -r
+fi

@@ -1,0 +1,3 @@
+#!/bin/bash
+
+/puppy/worker/sbin/port_labelify 1

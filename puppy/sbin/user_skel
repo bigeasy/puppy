@@ -1,0 +1,29 @@
+#!/bin/bash
+
+. /puppy/bin/functions
+
+[ $# -ne 2 ] && abend "Incorrect count of arguments ($#)."
+
+uid=$1
+status=$2
+assert_valid_user $uid
+assert_valid_home_dir $uid
+
+function copy_files()
+{
+    source=$1
+    for file in $(/bin/find $source -type f -printf "%P\n"); do
+        dest=/home/u${uid}/$file
+        /bin/mkdir -p $(/usr/bin/dirname /home/u${uid}/$file)
+        /bin/cp $source/$file $dest
+    done
+}
+
+
+if [ $status == "liminal" ]; then
+    echo 'export PATH=$PATH:/opt/bin' > /home/u$uid/.bashrc
+elif [ $status == "protected" ]; then
+    copy_files /etc/skel
+else
+    abend "Invalid status."
+fi

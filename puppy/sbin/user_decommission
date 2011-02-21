@@ -1,0 +1,16 @@
+#!/bin/bash
+
+. /puppy/bin/functions
+
+[ $# -ne 1 ] && abend "Incorrect count of arguments ($#)."
+
+uid=$1
+assert_valid_user $uid
+
+umask 077
+
+if [ -e /home/u${uid} ]; then
+    directory="/var/cache/puppy/decommissioned/u${uid}/$(/bin/date --rfc-3339=seconds | /bin/sed 's/ /T/')"
+    /bin/mkdir -p $(dirname $directory)
+    /bin/mv /home/u${uid} $directory || abend "Cannot move home directory /home/u${uid}."
+fi

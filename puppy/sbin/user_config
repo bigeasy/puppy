@@ -1,0 +1,28 @@
+#!/bin/bash
+
+. /puppy/bin/functions
+
+[ $# -ne 1 ] && abend "Incorrect count of arguments ($#)."
+
+uid=$1
+assert_valid_user $uid
+
+address=$(/bin/cat /puppy/etc/address)
+
+/bin/mkdir -p /home/u$uid/app
+/bin/mkdir -p /home/u$uid/var
+/bin/mkdir -p /home/u$uid/tmp
+
+config=$(/usr/bin/sudo -u delegate /puppy/bin/config_app $uid $address)
+
+echo "$config" > /home/u$uid/app/configuration.json
+
+umask 077
+/usr/bin/sudo -u delegate /puppy/bin/config_mysql $uid | while read line
+do
+    name=${line%% *}
+    password=${line#* }
+    /bin/rm -f /home/u$uid/.my.${name}.cnf
+    echo "[client]" > /home/u${uid}/.my.${name}.cnf 
+    echo "password=${password}" >> /home/u${uid}/.my.${name}.cnf 
+done

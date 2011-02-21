@@ -1,0 +1,27 @@
+#!/bin/bash
+
+. /puppy/bin/functions
+
+[ $# -lt 1 ] && abend "Incorrect count of arguments ($#)."
+
+uid=$1
+assert_valid_user $uid
+
+if [ $# -eq 1 ]; then
+    /sbin/restorecon -R "/home/u$uid"
+else
+    shift
+    while [ $# -gt 0 ]; do
+        file=$(normalize_path /home/u$uid/$1)
+        if [ $file == /home/u$uid ] || [[ $file == /home/u$uid/* ]]; then
+            if [[ $file == */ ]]; then
+                /sbin/restorecon -R $file
+            else
+                /sbin/restorecon $file
+            fi
+        else
+            abend "Invalid home directory path $1."
+        fi
+        shift
+    done
+fi

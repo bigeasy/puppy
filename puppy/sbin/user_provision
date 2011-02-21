@@ -1,0 +1,16 @@
+#!/bin/bash
+
+. /puppy/bin/functions
+
+[ $# -ne 1 ] && abend "Incorrect count of arguments ($#)."
+
+uid=$1
+assert_valid_user $uid
+
+if [ -e /home/u$uid ]; then
+    abend "Home directory already exists for u$uid."
+fi
+
+umask 077
+/bin/mkdir /home/u$uid
+/bin/chown u$uid:liminal /home/u$uid

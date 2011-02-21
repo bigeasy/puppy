@@ -1,0 +1,12 @@
+#!/bin/bash
+
+policies=$(
+    for line in $(/usr/bin/sudo -u delegate /puppy/bin/policy_users $(/bin/hostname))
+    do
+        echo "/var/cache/puppy/policy/protected_u${line}.pp"
+    done
+)
+
+if [ ! -z "$policies" ]; then
+    echo "$policies" | /usr/bin/xargs -n 200 /usr/sbin/semodule -i
+fi

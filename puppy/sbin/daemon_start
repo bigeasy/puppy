@@ -1,0 +1,9 @@
+#!/bin/bash
+
+. /puppy/bin/functions
+
+uid=$1
+
+assert_valid_user $uid
+
+/sbin/initctl start --quiet protected_u${uid} || abend "Cannot start protected_u${uid}."

@@ -1,0 +1,136 @@
+#!/bin/bash
+
+# Generates a policy module for a user account on a Puppy machine and loads the
+# module into the kernel.
+
+# Import common functions for job shell programs.
+. /puppy/bin/functions
+
+# Assert that the arguments are valid.
+[ $# -ne 1 ] && abend "Incorrect count of arguments ($#)."
+
+uid=$1
+
+assert_valid_user $uid
+
+# Create a policy working directory.
+# TODO: This doesn't belong here.
+/bin/mkdir -p /var/cache/puppy/policy
+
+cat <<EOL > /var/cache/puppy/policy/protected_u$uid.fc
+/var/cache/puppy/transitions/start_u${uid}  gen_context(system_u:object_r:protected_u${uid}_exec_t, s0)
+/var/log/puppy/apps/app_u${uid}.*           gen_context(system_u:object_r:protected_u${uid}_log_t, s0)
+EOL
+
+# Generate a policy file.
+cat <<EOL > /var/cache/puppy/policy/protected_u${uid}.te
+# Policy module for a user service.
+policy_module(protected_u$uid, 1.0.0)
+
+require {
+    attribute port_type;
+    attribute puppy_daemon_log_type;
+    attribute puppy_daemon_exec_type;
+    type puppy_cache_t;
+};
+
+########################################
+# Declarations
+
+type protected_u${uid}_t;               # The user service domain.
+type protected_u${uid}_exec_t;          # The user service executable.
+type protected_u${uid}_port_t, port_type;        # The user service port type.
+type protected_u${uid}_log_t;           # The daemon log type.
+
+files_type(protected_u${uid}_log_t)
+
+typeattribute protected_u${uid}_log_t puppy_daemon_log_type;
+typeattribute protected_u${uid}_exec_t puppy_daemon_exec_type;
+
+userdom_manage_home_role(system_r, protected_u${uid}_t)
+
+# Define user service as a daemon.
+init_daemon_domain(protected_u${uid}_t, protected_u${uid}_exec_t)
+
+# Define user service pid file type.
+type protected_u${uid}_var_run_t;
+files_pid_file(protected_u${uid}_var_run_t)
+
+# Define user service configuration file type.
+type protected_u${uid}_conf_t;
+files_config_file(protected_u${uid}_conf_t)
+
+########################################
+# Local policy
+
+# Write to logfiles.
+allow protected_u${uid}_t protected_u${uid}_log_t:file write;
+
+# Configuration files - read
+allow protected_u${uid}_t protected_u${uid}_conf_t : dir list_dir_perms;
+list_dirs_pattern(protected_u${uid}_t, protected_u${uid}_conf_t, protected_u${uid}_conf_t)
+read_files_pattern(protected_u${uid}_t, protected_u${uid}_conf_t, protected_u${uid}_conf_t)
+read_lnk_files_pattern(protected_u${uid}_t, protected_u${uid}_conf_t, protected_u${uid}_conf_t)
+
+# PID and socket file - create, read, and write
+files_pid_filetrans(protected_u${uid}_t, protected_u${uid}_var_run_t, { file sock_file })
+allow protected_u${uid}_t protected_u${uid}_var_run_t:file manage_file_perms;
+allow protected_u${uid}_t protected_u${uid}_var_run_t:sock_file { create rename link setattr unlink };
+
+# Allow syslog messages.
+logging_send_syslog_msg(protected_u${uid}_t)
+
+# Read and write to all mannor of network connections.
+allow protected_u${uid}_t self: tcp_socket create_stream_socket_perms;
+allow protected_u${uid}_t self: udp_socket create_socket_perms;
+allow protected_u${uid}_t self: capability { setgid setuid sys_chroot sys_resource kill };
+allow protected_u${uid}_t self: process { setrlimit signal };
+
+#corenet_tcp_bind_all_ports(protected_u${uid}_t)
+corenet_tcp_connect_all_ports(protected_u${uid}_t)
+corenet_tcp_bind_all_nodes(protected_u${uid}_t)
+corenet_tcp_sendrecv_all_ports(protected_u${uid}_t)
+corenet_tcp_recvfrom_unlabeled(protected_u${uid}_t)
+
+allow protected_u${uid}_t protected_u${uid}_port_t:tcp_socket name_bind;
+allow protected_u${uid}_t protected_u${uid}_port_t:udp_socket name_bind;
+
+corecmd_exec_bin(protected_u${uid}_t)
+corecmd_exec_shell(protected_u${uid}_t)
+
+# use shared libraries
+libs_use_ld_so(protected_u${uid}_t)
+libs_use_shared_libs(protected_u${uid}_t)
+
+# Read /etc/localtime.
+miscfiles_read_localization(protected_u${uid}_t)
+# Read /etc/passwd and more.
+files_read_etc_files(protected_u${uid}_t)
+
+# Read /etc/hosts and /etc/resolv.conf.
+sysnet_read_config(protected_u${uid}_t)
+
+# RHEL5 specific:
+require {
+	type unlabeled_t;
+	type protected_u${uid}_t;
+	class packet send;
+	class packet recv;
+}
+
+allow protected_u${uid}_t unlabeled_t:packet { send recv };
+
+# Node.js wants to know the memory page size, other things.
+kernel_read_system_state(protected_u${uid}_t)
+
+list_dirs_pattern(protected_u${uid}_t, puppy_cache_t, puppy_cache_t)
+read_files_pattern(protected_u${uid}_t, puppy_cache_t, puppy_cache_t)
+
+# Node.js executes JIT code.
+allow protected_u${uid}_t self:process execmem;
+
+# Node.js generates some random numbers.
+dev_read_urand(protected_u${uid}_t)
+
+allow protected_u${uid}_t protected_u${uid}_log_t:file manage_file_perms;
+EOL

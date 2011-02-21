@@ -1,0 +1,79 @@
+#!/usr/bin/perl
+
+use File::Temp;
+
+my $unlabel = shift @ARGV;
+
+$hostname = `/bin/hostname`;
+chomp  $hostname;
+
+my %types = ();
+$types{"udp"} = {};
+$types{"tcp"} = {};
+open(my $ports, "/usr/bin/sudo -u private /puppy/private/bin/port_list $hostname |") || die "Cannot read ports.";
+while (<$ports>) {
+    chomp;
+    my ($user, $port) = split /\s+/;
+    $types{"tcp"}{$user} ||= {};
+    $types{"udp"}{$user} ||= {};
+    $types{"tcp"}{$user}{$port} = 1;
+    $types{"udp"}{$user}{$port} = 1;
+}
+
+my %removals;
+$removals{"tcp"} = {};
+$removals{"udp"} = {};
+
+sub test {
+    my ($label, $type, $port) = @_;
+    my ($user) = $label =~ /^protected_u(\d+)_port_t$/;
+    if ($user) {
+        if ($types{$type}{$user}{$port}) {
+            delete $types{$type}{$user}{$port};
+        } else {
+            $removals{$type}{$port} = 1;
+        }
+    }
+}
+
+open(my $fh, "/usr/sbin/semanage port -l |") || die "Cannot run semanage.";
+while (<$fh>) {
+    chomp;
+    ($label, $type, $ports) = split /\s+/, $_, 3;
+    @ports = split /,\s*/, $ports;
+    foreach $port (@ports) {
+        if ($port =~ /-/ ) {
+            ($low, $high) = split /-/, $port;
+            for ($low .. $high) {
+                test($label, $type, $_);
+            }
+        } else {
+            test($label, $type, $port);
+        }
+    }
+}
+
+my $actions = File::Temp->new();
+my $filename = $actions->filename();
+if ($unlabel) {
+    for my $type ("tcp", "udp") {
+        for my $port (keys %{$removals{$type}}) {
+            print $actions "port -d -p $type $port\n";
+        }
+    }
+} else {
+    for my $type ("tcp", "udp") {
+        for my $user (keys %{$types{$type}}) {
+            for my $port (keys %{$types{$type}{$user}}) {
+                print $actions "port -a -t protected_u${user}_port_t -p $type $port\n";
+            }
+        }
+    }
+}
+close $actions or die "Cannot close removals";
+
+my $child_exit_status = system("/usr/sbin/semanage", "-i", $filename);
+if ($child_exit_status != 0) {
+    print STDOUT "Error: Cannot run semanage.";
+    exit 1;
+}

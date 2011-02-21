@@ -1,0 +1,13 @@
+#!/bin/bash
+
+. /puppy/bin/functions
+
+uid=$1
+
+assert_valid_user $uid
+
+if [ -e /etc/init/protected_u${uid}.conf ]; then
+    /sbin/initctl stop --quiet protected_u${uid} 2>/dev/null
+fi
+
+exit 0
