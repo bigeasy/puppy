@@ -78,11 +78,8 @@ work = (database, hostname) ->
   poll()
 
 syslog.send "info", "Initializing."
-module.exports.work = ->
-  console.log "DATABASE"
-  db.createDatabase syslog, (database) ->
-    console.log "DATABASE"
-    # Run this method every second to check for jobs to perform on a machine on
-    # behalf of the greater puppy ecosystem.
-    shell.hostname (hostname) ->
-      work(database, hostname)
+db.createDatabase syslog, (database) ->
+  # Run this method every second to check for jobs to perform on a machine on
+  # behalf of the greater puppy ecosystem.
+  shell.hostname (hostname) ->
+    work(database, hostname)
