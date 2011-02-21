@@ -27,7 +27,6 @@
     , "user_deploy":        "./bin/user_deploy.js"
     , "user_group":         "./bin/user_group.js"
     , "user_invite":        "./bin/user_invite.js"
-    , "user_port":          "./bin/user_port.js"
     , "user_skel":          "./bin/user_skel.js"
     , "user_provision":     "./bin/user_provision.js"
     , "user_restorecon":    "./bin/user_restorecon.js"
