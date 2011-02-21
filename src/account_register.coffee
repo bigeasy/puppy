@@ -38,7 +38,7 @@ module.exports.command =
       configuration.abend "\nerror: Invalid public ssh key.\n\n#{usage}"
 
     ssh = spawn "ssh", [ "-T", "-i", public, "-l", "public", server ]
-    ssh.stdin.end(JSON.stringify([ "/puppy/bin/account_register", email, sshKey ]))
+    ssh.stdin.end(JSON.stringify([ "/puppy/private/bin/account_register", email, sshKey ]))
     ssh.stdout.on "data", (chunk) -> process.stdout.write chunk.toString()
     ssh.stderr.on "data", (chunk) -> process.stdout.write chunk.toString()
     ssh.on "exit", (code) ->

@@ -92,20 +92,22 @@ class Configuration
   get: (key) ->
     @local[key] or @global[key]
 
-  home: (callback) ->
-    if not home = @get("home")
+  home: (force, callback) ->
+    if force or not home = @get("home")
       if not email = @get("email")
         throw new Error("Email not configured.")
       public = "#{__dirname}/../etc/public.pub"
       ssh = spawn "ssh", [ "-T", "-i", public, "-l", "public", @get("server") ]
-      ssh.stdin.end(JSON.stringify([ "/puppy/bin/account_home", email ]))
+      ssh.stdin.end(JSON.stringify([ "/puppy/private/bin/account_home", email ]))
       home = ""
+      stderr = ""
       ssh.stdout.on "data", (chunk) -> home += chunk.toString()
-      ssh.stderr.on "data", (chunk) -> process.stdout.write chunk.toString()
+      ssh.stderr.on "data", (chunk) -> stderr += chunk.toString()
       ssh.on "exit", (code) ->
         if code is 0
           callback(home.substring(0, home.length - 1))
         else
+          console.log stderr
           throw new Error("Unable to determine home for #{email}")
     else
       callback(home)
@@ -137,7 +139,7 @@ class Configuration
 
   applications: (callback) ->
     if require("./location").server
-      config = spawn "/usr/bin/sudo", [ "-u", "delegate", "/puppy/bin/account_apps" ]
+      config = spawn "/usr/bin/sudo", [ "-u", "private", "/puppy/private/bin/account_apps" ]
       stdout = ""
       stderr = ""
       config.stdout.on "data", (chunk) -> stdout += chunk.toString()
@@ -161,8 +163,8 @@ class Configuration
             throw error
 
   fetchApplications: (callback) ->
-    @home (user) ->
-      config = spawn "/usr/bin/ssh", [ "-T", user, "/usr/bin/sudo", "-u", "delegate", "/puppy/bin/account_apps" ]
+    @home false, (user) ->
+      config = spawn "/usr/bin/ssh", [ "-T", user, "/usr/bin/sudo", "-u", "private", "/puppy/private/bin/account_apps" ]
       stdout = ""
       stderr = ""
       config.stdout.on "data", (chunk) -> stdout += chunk.toString()
@@ -207,11 +209,11 @@ class Configuration
           callback()
         else
           process.stderr.write "Cannot execute #{command}."
-  delegate: (command, parameters, callback) ->
+  private: (command, parameters, callback) ->
     if require("./location").server
-      callback(@hereas "delegate", command, parameters)
+      callback(@hereas "private", command, parameters)
     else
-      callback(@thereas @application, "delegate", command, parameters)
+      callback(@thereas @application, "private", command, parameters)
 
 module.exports.Configuration = Configuration
 module.exports.format = (rows) ->

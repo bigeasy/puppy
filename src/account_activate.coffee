@@ -37,13 +37,13 @@ module.exports.command =
     # registration command on the host server via SSH using the user's default
     # identity. That is, the identities provided by the SSH configuration or the
     # SSH agent, and not a specific identity.
-    configuration.home (home) ->
+    configuration.home true, (home) ->
       [ code ] = configuration.options.arguments
       if not code
         configuration.usage "Required parameters missing. See usage.", usage
 
       stdout = ""
-      ssh = spawn "ssh", [ "-T", home, "/puppy/bin/account_activated" ]
+      ssh = spawn "ssh", [ "-T", home, "/puppy/protected/bin/account_activated" ]
       ssh.stdin.end(code)
       ssh.stdout.on "data", (chunk) -> process.stdout.write chunk.toString()
       ssh.stderr.on "data", (chunk) -> process.stdout.write chunk.toString()

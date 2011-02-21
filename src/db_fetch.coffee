@@ -44,7 +44,7 @@ module.exports.command =
                Only period, hyphen and underscore allowed for punctuation.
       """, usage
 
-    configuration.delegate "/puppy/bin/db_fetch", [ configuration.application.id, engine, alias ], (command) ->
+    configuration.private "/puppy/private/bin/db_fetch", [ configuration.application.id, engine, alias ], (command) ->
       command.assert (stdout) ->
         response = JSON.parse(stdout)
         if response.error
