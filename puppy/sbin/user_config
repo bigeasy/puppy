@@ -7,7 +7,7 @@
 uid=$1
 assert_valid_user $uid
 
-address=$(/bin/cat /puppy/etc/address)
+address=$(/bin/cat /etc/puppy/address)
 
 /bin/mkdir -p /home/u$uid/app
 /bin/mkdir -p /home/u$uid/var
