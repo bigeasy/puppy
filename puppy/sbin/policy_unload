@@ -1,7 +1,7 @@
 #!/bin/bash
 
 declare -A users
-for line in $(/usr/bin/sudo -u delegate /puppy/bin/policy_users $(/bin/hostname))
+for line in $(/usr/bin/sudo -u private /puppy/private/bin/policy_users $(/bin/hostname))
 do
     users+=([$line]=1)
 done

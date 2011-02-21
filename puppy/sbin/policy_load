@@ -1,7 +1,7 @@
 #!/bin/bash
 
 policies=$(
-    for line in $(/usr/bin/sudo -u delegate /puppy/bin/policy_users $(/bin/hostname))
+    for line in $(/usr/bin/sudo -u private /puppy/private/bin/policy_users $(/bin/hostname))
     do
         echo "/var/cache/puppy/policy/protected_u${line}.pp"
     done

@@ -1,7 +1,4 @@
 #!/bin/bash
 
-# Import common functions for job shell programs.
-. /puppy/bin/functions
-
 cd /var/cache/puppy/policy
 /usr/bin/make -f /usr/share/selinux/devel/Makefile > /dev/null
