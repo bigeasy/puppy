@@ -1,16 +1,16 @@
 #!/bin/bash
 
-. /puppy/bin/functions
+. /puppy/system/bin/functions
 
 [ $# -ne 2 ] && abend "Incorrect count of arguments ($#)."
 
 aid=$1
 dbid=$2
 
-output=$(/usr/bin/sudo -u delegate /puppy/bin/db_password $dbid)
+output=$(/usr/bin/sudo -u private /puppy/private/bin/db_password $dbid)
 password=$(echo $output | awk '{ print $3 }')
 
-/usr/bin/sudo -u delegate /puppy/bin/app_users $aid | \
+/usr/bin/sudo -u private /puppy/private/bin/app_users $aid | \
     /bin/awk "{ \
         printf(\"GRANT ALL PRIVILEGES ON d$dbid TO 'u%s'@'%s' IDENTIFIED BY '$password'\\n\\\\g\\n\", \$2, \$1, \$3) \
     }"  | \

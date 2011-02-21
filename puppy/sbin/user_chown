@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. /puppy/bin/functions
+. /puppy/system/bin/functions
 
 [ $# -lt 1 ] && abend "Incorrect count of arguments ($#)."
 

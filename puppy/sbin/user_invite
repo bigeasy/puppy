@@ -1,6 +1,6 @@
 #!/opt/bin/coffee
 
-require.paths.unshift("/puppy/lib/node")
+require.paths.unshift("/puppy/common/lib/node")
 
 syslog    = new (require("common/syslog").Syslog)({ tag: "user_invite", pid: true })
 shell     = new (require("common/shell").Shell)(syslog)
@@ -50,5 +50,5 @@ sendActivation = (activation) ->
       throw error
     syslog.send "info", "Invitation sent to #{activation.email}."
 
-shell.doas "delegate", "/puppy/bin/user_activation", [ email ], null, (stdout) ->
+shell.doas "private", "/puppy/private/bin/user_activation", [ email ], null, (stdout) ->
   sendActivation(JSON.parse(stdout))
