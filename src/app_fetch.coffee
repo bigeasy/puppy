@@ -39,20 +39,20 @@ fetchLocalUser = (database, account, applicationId, machine) ->
       database.select "getLocalUserByAssignment", [ results.insertId ], "localUser", (results) ->
         localUser = results.shift()
         database.enqueue localUser.machine.hostname, [
-          [ "user:create", [ localUser.id ] ],
-          [ "user:restorecon", [ localUser.id ] ],
-          [ "user:decommission", [ localUser.id ] ],
-          [ "user:provision", [ localUser.id ] ],
-          [ "user:restorecon", [ localUser.id ] ],
-          [ "user:skel", [ localUser.id, "protected" ] ],
-          [ "user:authorize", [ localUser.id ] ],
-          [ "user:config", [ localUser.id ] ],
-          [ "user:restorecon", [ localUser.id ] ],
-          [ "user:group", [ localUser.id, "protected" ] ],
+          [ "user:create", [ localUser.id ] ]
+          [ "user:restorecon", [ localUser.id ] ]
+          [ "user:decommission", [ localUser.id ] ]
+          [ "user:provision", [ localUser.id ] ]
+          [ "user:restorecon", [ localUser.id ] ]
+          [ "user:skel", [ localUser.id, "protected" ] ]
+          [ "user:authorize", [ localUser.id ] ]
+          [ "user:config", [ localUser.id ] ]
+          [ "user:restorecon", [ localUser.id ] ]
+          [ "user:group", [ localUser.id, "protected" ] ]
           [ "user:chown", [ localUser.id ] ]
           [ "init:generate", [ localUser.id ] ]
           [ "init:restorecon", [ localUser.id ] ]
-          [ "user:provisioned", [ localUser.id ] ]
+          [ "node:ready", [ localUser.id ] ]
         ], ->
           database.select "getLocalPorts", [ localUser.machine.hostname, localUser.id ], "localPort", (localPorts) ->
             localPort = localPorts.shift()

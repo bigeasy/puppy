@@ -33,16 +33,17 @@ db.createDatabase syslog, (database) ->
         database.select "insertApplication", [ accountId, 1 ], (results) ->
           database.fetchLocalUser results.insertId, (localUser) ->
             database.enqueue localUser.machine.hostname, [
-              [ "user:create", [ localUser.id ] ],
-              [ "user:restorecon", [ localUser.id ] ],
-              [ "user:decommission", [ localUser.id ] ],
-              [ "user:provision", [ localUser.id ] ],
-              [ "user:restorecon", [ localUser.id ] ],
-              [ "user:skel", [ localUser.id, "protected" ] ],
-              [ "user:authorize", [ localUser.id ] ],
-              [ "user:restorecon", [ localUser.id ] ],
-              [ "user:group", [ localUser.id, "protected" ] ],
-              [ "user:chown", [ localUser.id ] ],
+              [ "user:create", [ localUser.id ] ]
+              [ "user:restorecon", [ localUser.id ] ]
+              [ "user:decommission", [ localUser.id ] ]
+              [ "user:provision", [ localUser.id ] ]
+              [ "user:restorecon", [ localUser.id ] ]
+              [ "user:skel", [ localUser.id, "protected" ] ]
+              [ "user:authorize", [ localUser.id ] ]
+              [ "user:restorecon", [ localUser.id ] ]
+              [ "user:group", [ localUser.id, "protected" ] ]
+              [ "user:chown", [ localUser.id ] ]
+              [ "node:ready", [ localUser.id ] ]
               [ "account:ready", [ accountId ] ]
             ]
             process.stdout.write "Activation successful. Welcome to Puppy.\n"

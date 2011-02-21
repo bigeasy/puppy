@@ -58,6 +58,7 @@ db.createDatabase syslog, (database) ->
               [ "user:restorecon", [ localUser.id ] ],
               [ "user:group", [ localUser.id, "liminal" ] ],
               [ "user:chown", [ localUser.id ] ],
+              [ "node:ready", [ localUser.id ] ],
               [ "user:invite", [ email ] ]
             ]
   register()
