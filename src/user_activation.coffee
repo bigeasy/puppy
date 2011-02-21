@@ -1,4 +1,4 @@
-require.paths.unshift("/puppy/lib/node")
+require.paths.unshift("/puppy/common/lib/node")
 
 syslog    = new (require("common/syslog").Syslog)({ tag: "user_activation", pid: true })
 shell     = new (require("common/shell").Shell)(syslog)

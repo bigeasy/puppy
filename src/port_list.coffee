@@ -1,5 +1,5 @@
 # Prepend the puppy library directory to the path.
-require.paths.unshift("/puppy/lib/node")
+require.paths.unshift("/puppy/common/lib/node")
 
 # Import Puppy libraries.
 syslog    = new (require("common/syslog").Syslog)({ tag: "port_list", pid: true })

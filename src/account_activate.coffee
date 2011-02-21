@@ -1,4 +1,4 @@
-require.paths.unshift("/puppy/lib/node")
+require.paths.unshift("/puppy/common/lib/node")
 
 exec      = require("child_process").exec
 syslog    = new (require("common/syslog").Syslog)({ tag: "account_activate", pid: true })

@@ -1,5 +1,5 @@
 # Prepend the Puppy node libraries to the library path.
-require.paths.unshift("/puppy/lib/node")
+require.paths.unshift("/puppy/common/lib/node")
 
 # Create syslog and import the database library.
 syslog    = new (require("common/syslog").Syslog)({ tag: "account_register", pid: true })
