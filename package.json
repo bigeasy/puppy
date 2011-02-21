@@ -20,7 +20,6 @@
     , "node_ready":         "./bin/node_ready.js"
     , "policy_users":       "./bin/policy_users.js"
     , "policy_version":     "./bin/policy_version.js"
-    , "port_fetch":         "./bin/port_fetch.js"
     , "port_labeled":       "./bin/port_labeled.js"
     , "port_list":          "./bin/port_list.js"
     , "queue_config":       "./bin/queue_config.js"
