@@ -39,11 +39,11 @@ puppy_delegate(app_users)
 puppy_delegate_database(app_users)
 
 ############################################################################
-### Policy for `app_user_ready`.
+### Policy for `node_ready`.
 ############################################################################
 
-puppy_delegate(app_user_ready)
-puppy_delegate_database(app_user_ready)
+puppy_delegate(private_node_ready)
+puppy_delegate_database(private_node_ready)
 
 ############################################################################
 ### Policy for `config_app`.

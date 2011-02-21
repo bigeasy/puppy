@@ -446,16 +446,16 @@ manage_dirs_pattern(user_provision_t, home_root_t, home_root_t)
 files_read_etc_files(user_provision_t)
 
 ############################################################################
-### Policy for `user_provisioned`.
+### Policy for `worker_node_ready`.
 ############################################################################
 
 # User policy assignment is performed as root.
-puppy_job_as_worker(user_provisioned)
+puppy_job_as_worker(worker_node_ready)
 
-job_sudo_delegate(user_provisioned)
-job_delegate_trans(user_provisioned, app_user_ready)
+job_sudo_delegate(worker_node_ready)
+job_delegate_trans(worker_node_ready, private_node_ready)
 
-hostname_exec(user_provisioned_t)
+hostname_exec(worker_node_ready_t)
 
 ############################################################################
 ### Policy for `policy_ready`.
