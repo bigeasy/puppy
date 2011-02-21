@@ -29,7 +29,8 @@ db.createDatabase syslog, (database) ->
     database.select "getActivationByCode", [ code ], "activation", (results) ->
       activation = results.shift()
       database.select "insertAccount", [ activation.email, activation.sshKey ], (results) ->
-        database.select "insertApplication", [ results.insertId, 1 ], (results) ->
+        accountId = results.insertId
+        database.select "insertApplication", [ accountId, 1 ], (results) ->
           database.fetchLocalUser results.insertId, (localUser) ->
             database.enqueue localUser.machine.hostname, [
               [ "user:create", [ localUser.id ] ],
@@ -41,7 +42,8 @@ db.createDatabase syslog, (database) ->
               [ "user:authorize", [ localUser.id ] ],
               [ "user:restorecon", [ localUser.id ] ],
               [ "user:group", [ localUser.id, "protected" ] ],
-              [ "user:chown", [ localUser.id ] ]
+              [ "user:chown", [ localUser.id ] ],
+              [ "account:ready", [ accountId ] ]
             ]
             process.stdout.write "Activation successful. Welcome to Puppy.\n"
 
