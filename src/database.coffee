@@ -11,7 +11,7 @@ class Abend
 
 module.exports.createDatabase = (syslog, callback) ->
   shell = new (require("common/shell").Shell)(syslog)
-  shell.doas "database", "/puppy/bin/database", [], null, (stdout) ->
+  shell.doas "database", "/puppy/database/bin/database", [], null, (stdout) ->
     {host, password} = JSON.parse(stdout)
     callback(new Database(syslog, host, password))
 
