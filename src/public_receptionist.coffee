@@ -1,4 +1,4 @@
-require.paths.unshift("/puppy/lib/node")
+require.paths.unshift("/puppy/common/lib/node")
 
 spawn = require("child_process").spawn
 body = ""
@@ -13,11 +13,11 @@ stdin.on "data", (chunk) ->
 stdin.on "end", ->
   command = JSON.parse(body)
 
-  if ! /^\/puppy\/bin\/account_(register|home)$/.test(command[0])
+  if ! /^\/puppy\/private\/bin\/account_(register|home)$/.test(command[0])
     syslog.send "err", "Invalid command #{command[0]}.", {}
     process.exit(1)
 
-  command.unshift "delegate"
+  command.unshift "private"
   command.unshift "-u"
 
   syslog.send "info", "Executing public request.", { command }
