@@ -85,29 +85,6 @@ corecmd_exec_bin(worker_t)
 logging_send_syslog_msg(worker_t)
 
 ############################################################################
-### Policy for `private user:port`.
-############################################################################
-
-# User port assignment is performed as root.
-puppy_job_sudo_root(private_user_port)
-
-type filter_selinux_ports_exec_t;
-
-application_domain(private_user_port_t, filter_selinux_ports_exec_t)
-
-allow private_user_port_t filter_selinux_ports_exec_t:file execute_no_trans;
-
-# Execute semanage to assign the protected port to the user.
-seutil_run_semanage(private_user_port_t, worker_r)
-allow semanage_t private_user_port_proxy_t:fifo_file rw_fifo_file_perms;
-
-# Read and write the database.
-job_sudo_private(private_user_port)
-
-# Read the hostname.
-hostname_exec(private_user_port_t)
-
-############################################################################
 ### Policy for `account_ready`.
 ############################################################################
 
@@ -446,7 +423,7 @@ manage_dirs_pattern(user_provision_t, home_root_t, home_root_t)
 files_read_etc_files(user_provision_t)
 
 ############################################################################
-### Policy for `worker_node_ready`.
+### Policy for `node_ready`.
 ############################################################################
 
 # User policy assignment is performed as root.

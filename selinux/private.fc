@@ -14,8 +14,6 @@
 /puppy/private/bin/app_fetch                    gen_context(system_u:object_r:app_fetch_exec_t, s0)
 /puppy/private/bin/app_list@.*                  gen_context(system_u:object_r:app_list_exec_t, s0)
 /puppy/private/bin/app_list                     gen_context(system_u:object_r:app_list_exec_t, s0)
-/puppy/private/bin/port_fetch@.*                gen_context(system_u:object_r:port_fetch_exec_t, s0)
-/puppy/private/bin/port_fetch                   gen_context(system_u:object_r:port_fetch_exec_t, s0)
 /puppy/private/bin/db_fetch@.*                  gen_context(system_u:object_r:db_fetch_exec_t, s0)
 /puppy/private/bin/db_fetch                     gen_context(system_u:object_r:db_fetch_exec_t, s0)
 /puppy/private/bin/db_list@.*                   gen_context(system_u:object_r:db_list_exec_t, s0)

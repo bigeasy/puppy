@@ -1,4 +1,5 @@
 /puppy                                              -d gen_context(system_u:object_r:puppy_t, s0)
+/etc/puppy.*                                           gen_context(system_u:object_r:puppy_etc_t, s0)
 /puppy/[^/]+                                        -d gen_context(system_u:object_r:puppy_t, s0)
 /puppy/[^/]+/etc                                    -d gen_context(system_u:object_r:puppy_etc_t, s0)
 /puppy/[^/]+/etc/.*                                    gen_context(system_u:object_r:puppy_etc_t, s0)

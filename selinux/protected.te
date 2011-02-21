@@ -72,17 +72,6 @@ puppy_delegate_database(app_list)
 puppy_delegate_hostname(app_list)
 
 ############################################################################
-### Policy for `port_fetch`.
-############################################################################
-
-puppy_sudo_delegate(protected, port_fetch)
-puppy_delegate(port_fetch)
-puppy_delegate_role(protected, protected, port_fetch)
-puppy_delegate_database(port_fetch)
-puppy_delegate_hostname(port_fetch)
-puppy_delegate_console(port_fetch)
-
-############################################################################
 ### Policy for `db_fetch`.
 ############################################################################
 
