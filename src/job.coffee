@@ -1,4 +1,4 @@
-require.paths.unshift("/puppy/lib/node")
+require.paths.unshift("/puppy/common/lib/node")
 
 # Require Node.js core modules.
 fs = require "fs"

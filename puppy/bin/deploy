@@ -24,8 +24,8 @@ if [ -e Cakefile ]; then
         /opt/bin/cake compile
     fi
 
-    npm_config_root=/puppy/lib/node npm_config_binroot=/puppy/bin npm_config_manroot=/puppy/share/man \
-        /usr/bin/sudo -E /opt/bin/npm install .
+    npm_config_root=/puppy/$basename/lib/node npm_config_binroot=/puppy/$basename/bin \
+        npm_config_manroot=/puppy/$basename/share/man /usr/bin/sudo -E /opt/bin/npm install .
 fi
 
 # Copy a file to a target directory assigning an owner and mode. Creates the
@@ -62,12 +62,13 @@ function copy_file()
 # Copy a collection of files found in a directory with a specific mode.
 function copy_files()
 {
-    dir=$1
-    if [ -e $dir ]; then
-        ownership=$2
-        mode=$3
-        for file in $(/bin/find $dir -type f); do
-            copy_file $file $(dirname /$file)  $ownership $mode
+    source=$1
+    dest=$2
+    if [ -e $source ]; then
+        ownership=$3
+        mode=$4
+        for file in $(/bin/find $source -type f); do
+            copy_file $file $dest  $ownership $mode
         done
     fi
 }
@@ -76,9 +77,6 @@ function copy_files()
 if [ $basename == "system" ]; then
     user=root
     mode=755
-elif [ $basename == "private" ]; then
-    user=delegate
-    mode=500
 elif [ $basename == "job" ]; then
     user=worker
     mode=500
@@ -88,17 +86,17 @@ else
 fi
 
 # Install bash programs.
-copy_files puppy/bin $user:$user $mode
-copy_files puppy/sbin $user:root 550
+copy_files puppy/bin /puppy/$basename/bin $user:$user $mode
+copy_files puppy/sbin /puppy/$basename/sbin $user:root 550
 
 # Set ownership of Node.js programs.
 if [ -d src -a ! -d lib ]; then
     for coffee in $(ls src/*.coffee | /bin/sort); do
         program=$(echo $coffee | /bin/sed 's/src\/\(.*\).coffee$/\1/')
-        if [ -e /puppy/bin/$program ]; then
+        if [ -e /puppy/$basename/bin/$program ]; then
             ownership=$user:$user
-            /usr/bin/sudo /bin/chmod $mode /puppy/bin/$program@* /puppy/bin/$program
-            /usr/bin/sudo /bin/chown $ownership /puppy/bin/$program@* /puppy/bin/$program
+            /usr/bin/sudo /bin/chmod $mode /puppy/$basename/bin/$program@* /puppy/$basename/bin/$program
+            /usr/bin/sudo /bin/chown $ownership /puppy/$basename/bin/$program@* /puppy/$basename/bin/$program
         fi
     done
 fi

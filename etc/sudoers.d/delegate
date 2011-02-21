@@ -1,2 +1,0 @@
-delegate ALL = (database) NOPASSWD: /puppy/bin/database
-delegate ALL = (enqueue) NOPASSWD: /puppy/bin/enqueue

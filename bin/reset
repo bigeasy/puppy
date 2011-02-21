@@ -31,19 +31,19 @@ mysql_script ddl/0007_account_ready.sql
 
 bin/load_ports | sudo -H -u janitor mysql -u root puppy
 
-/usr/bin/sudo -u delegate /puppy/bin/user_generate 12
+/usr/bin/sudo -u private /puppy/private/bin/user_generate 12
 
-/puppy/bin/job $(/bin/hostname) port:unlabel
-/puppy/bin/job $(/bin/hostname) policy:unload
-/puppy/bin/job $(/bin/hostname) policy:generate
-/puppy/bin/job $(/bin/hostname) policy:make
-/puppy/bin/job $(/bin/hostname) policy:load
-/puppy/bin/job $(/bin/hostname) port:label
-/puppy/bin/job $(/bin/hostname) policy:ready
+/puppy/system/bin/job $(/bin/hostname) port:unlabel
+/puppy/system/bin/job $(/bin/hostname) policy:unload
+/puppy/system/bin/job $(/bin/hostname) policy:generate
+/puppy/system/bin/job $(/bin/hostname) policy:make
+/puppy/system/bin/job $(/bin/hostname) policy:load
+/puppy/system/bin/job $(/bin/hostname) port:label
+/puppy/system/bin/job $(/bin/hostname) policy:ready
 
 /usr/bin/sudo /sbin/initctl start worker
 
-for db in $(echo "SHOW DATABASES" | /usr/bin/sudo -u janitor -H /puppy/bin/janitor_mysql -u root puppy | grep '^d[0-9]\+')
+for db in $(echo "SHOW DATABASES" | /usr/bin/sudo -u janitor -H /puppy/janitor/bin/janitor_mysql -u root puppy | grep '^d[0-9]\+')
 do
-    echo "DROP DATABASE $db" | /usr/bin/sudo -u janitor -H /puppy/bin/janitor_mysql -u root puppy
+    echo "DROP DATABASE $db" | /usr/bin/sudo -u janitor -H /puppy/janitor/bin/janitor_mysql -u root puppy
 done

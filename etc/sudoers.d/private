@@ -1,0 +1,1 @@
+private ALL = (database) NOPASSWD: /puppy/database/bin/database

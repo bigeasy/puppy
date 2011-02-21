@@ -64,7 +64,7 @@ make_user vhosts 208
 # Create the worker daemon user.
 make_user worker 204
 
-make_user delegate 210
+make_user private 210
 make_user puppy 201
 make_user janitor 202
 make_user haproxy 203
