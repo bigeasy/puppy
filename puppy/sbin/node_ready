@@ -7,4 +7,4 @@
 uid=$1
 assert_valid_user $uid
 
-/usr/bin/sudo -u private /puppy/private/bin/app_user_ready $(/bin/hostname) $uid
+/usr/bin/sudo -u private /puppy/private/bin/node_ready $(/bin/hostname) $uid
