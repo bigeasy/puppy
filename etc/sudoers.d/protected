@@ -1,8 +1,8 @@
-%protected ALL = (delegate) NOPASSWD: \
-    /puppy/bin/account_apps, \
-    /puppy/bin/app_deploy, \
-    /puppy/bin/app_fetch, \
-    /puppy/bin/app_list, \
-    /puppy/bin/db_fetch, \
-    /puppy/bin/db_list, \
-    /puppy/bin/port_fetch
+%protected ALL = (private) NOPASSWD: \
+    /puppy/private/bin/account_apps, \
+    /puppy/private/bin/app_deploy, \
+    /puppy/private/bin/app_fetch, \
+    /puppy/private/bin/app_list, \
+    /puppy/private/bin/db_fetch, \
+    /puppy/private/bin/db_list, \
+    /puppy/private/bin/port_fetch
