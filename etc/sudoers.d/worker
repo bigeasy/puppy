@@ -23,6 +23,7 @@ worker ALL = (root) NOPASSWD: \
     /puppy/worker/sbin/user_provision, \
     /puppy/worker/sbin/user_skel
 worker ALL = (private) NOPASSWD: \
+    /puppy/private/bin/account_ready, \
     /puppy/private/bin/policy_users, \
     /puppy/private/bin/queue_config, \
     /puppy/private/bin/app_user_ready, \

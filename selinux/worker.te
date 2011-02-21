@@ -108,6 +108,16 @@ job_sudo_private(private_user_port)
 hostname_exec(private_user_port_t)
 
 ############################################################################
+### Policy for `account_ready`.
+############################################################################
+
+# Invite sending is performed as the worker user.
+puppy_job_as_worker(worker_account_ready)
+
+job_sudo_delegate(worker_account_ready)
+job_delegate_trans(worker_account_ready, private_account_ready)
+
+############################################################################
 ### Policy for `app_config`.
 ############################################################################
 

@@ -25,6 +25,13 @@ puppy_delegate(db_password)
 puppy_delegate_database(db_password)
 
 ############################################################################
+### Policy for `account_ready`.
+############################################################################
+
+puppy_delegate(private_account_ready)
+puppy_delegate_database(private_account_ready)
+
+############################################################################
 ### Policy for `app_users`.
 ############################################################################
 

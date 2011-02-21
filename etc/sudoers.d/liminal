@@ -1,1 +1,1 @@
-%liminal ALL = (delegate) NOPASSWD: /puppy/bin/account_activate
+%liminal ALL = (private) NOPASSWD: /puppy/private/bin/account_activate

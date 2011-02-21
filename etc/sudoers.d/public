@@ -1,3 +1,3 @@
-public ALL = (delegate) NOPASSWD: \
-    /puppy/bin/account_home, \
-    /puppy/bin/account_register
+public ALL = (private) NOPASSWD: \
+    /puppy/private/bin/account_home, \
+    /puppy/private/bin/account_register
