@@ -1,2 +1,2 @@
-INSERT INTO Property(name, value) VALUES('applicationHost', 'portoroz.prettyrobots.com')
+INSERT INTO Property(name, value) VALUES('applicationHost', 'portoroz.runpup.com')
 \g
