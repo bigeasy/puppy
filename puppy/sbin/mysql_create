@@ -6,4 +6,4 @@
 
 dbid=$1
 
-echo "CREATE DATABASE d$dbid" | /usr/bin/sudo -H -u janitor /puppy/bin/janitor_mysql -u root
+echo "CREATE DATABASE d$dbid" | /usr/bin/sudo -H -u janitor /puppy/janitor/bin/janitor_mysql -u root
