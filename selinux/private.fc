@@ -18,8 +18,6 @@
 /puppy/private/bin/db_fetch                     gen_context(system_u:object_r:db_fetch_exec_t, s0)
 /puppy/private/bin/db_list@.*                   gen_context(system_u:object_r:db_list_exec_t, s0)
 /puppy/private/bin/db_list                      gen_context(system_u:object_r:db_list_exec_t, s0)
-/puppy/private/bin/app_prepare@.*               gen_context(system_u:object_r:protected_exec_t, s0)
-/puppy/private/bin/app_prepare                  gen_context(system_u:object_r:protected_exec_t, s0)
 /puppy/private/bin/user_status.*                gen_context(system_u:object_r:private_exec_t, s0)
 /puppy/private/bin/port_labeled.*               gen_context(system_u:object_r:private_exec_t, s0)
 /puppy/private/bin/user_activation.*            gen_context(system_u:object_r:private_exec_t, s0)
