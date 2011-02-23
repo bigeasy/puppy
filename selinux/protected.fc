@@ -4,3 +4,4 @@
 /puppy/protected/bin/mysql_prompt                         gen_context(system_u:object_r:protected_exec_t, s0)
 /puppy/protected/bin/app_prepare@.*                     gen_context(system_u:object_r:protected_exec_t, s0)
 /puppy/protected/bin/app_prepare                        gen_context(system_u:object_r:protected_exec_t, s0)
+/puppy/protected/bin/node_path                          gen_context(system_u:object_r:protected_exec_t, s0)

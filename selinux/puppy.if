@@ -104,6 +104,7 @@ template(`puppy_read_puppy_bin',`
         type puppy_t, puppy_bin_t;
     ')
     list_dirs_pattern($1, puppy_t, puppy_t)
+    list_dirs_pattern($1, puppy_bin_t, puppy_bin_t)
     read_files_pattern($1, puppy_bin_t, puppy_bin_t)
     read_lnk_files_pattern($1, puppy_bin_t, puppy_bin_t)
 ')

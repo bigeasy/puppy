@@ -20,6 +20,8 @@ puppy_sudo(protected)
 attribute puppy_daemon_log_type;
 attribute puppy_daemon_exec_type;
 
+allow protected_t protected_exec_t:lnk_file read_lnk_file_perms;
+
 # The proxy needs to read Puppy executables.
 puppy_read_puppy_bin(protected_t)
 
