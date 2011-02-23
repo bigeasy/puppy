@@ -7,6 +7,12 @@ then
     exit 1
 fi
 
+hostname=$(/bin/hostname)
+if [ $hostname != "dvor.prettyrobots.com" ]; then
+    echo "Where are you trying to run this?" 2>&1
+    exit 1
+fi
+
 function mysql_command()
 {
     echo $1 | /usr/bin/sudo -H -u janitor /usr/bin/mysql -u root
