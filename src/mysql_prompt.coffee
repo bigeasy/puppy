@@ -1,27 +1,11 @@
-require.paths.unshift("/puppy/lib/node")
+require.paths.unshift("/puppy/common/lib/node")
 
 fs        = require "fs"
 spawn     = require("child_process").spawn
 syslog    = new (require("common/syslog").Syslog)({ tag: "account_activate", pid: true })
 shell     = new (require("common/shell").Shell)(syslog)
-db        = require("common/database")
-{OptionParser}  = require("coffee-script/optparse")
 
-argv      = process.argv.slice 2
-
-parser = new OptionParser [
-  [ "-n", "--name [NAME]", "database name" ]
-  [ "-a", "--app [NAME]", "application name" ]
-]
-
-usage = ->
-  process.stdout.write parser.help()
-  process.exit 1
-
-try
-  options         = parser.parse argv
-catch e
-  usage()
+argv          = process.argv.slice 2
 
 uid = process.getuid()
 shell.verify(uid > 10000, "Inexplicable uid #{uid}")

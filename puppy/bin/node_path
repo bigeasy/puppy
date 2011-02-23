@@ -1,0 +1,4 @@
+#!/bin/bash
+
+program=$1
+PATH=/opt/bin:$PATH $program
