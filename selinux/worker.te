@@ -6,6 +6,7 @@ require {
     type policy_src_t, policy_config_t;
     type ssh_home_t;
     type user_home_t;
+    type home_bin_t;
     type bin_t;
     type database_exec_t;
     type database_t;
@@ -636,17 +637,10 @@ puppy_job_as_root(user_chown)
 hostname_exec(user_chown_t)
 
 # Read user home directory files.
-userdom_ro_home_role(system_r, user_chown_t)
+userdom_manage_home_role(system_r, user_chown_t)
 ssh_read_user_home_files(user_chown_t)
 
-# Allow root override of DAC and write of modes.
-allow user_chown_t self:capability { chown dac_override };
-allow user_chown_t user_home_t:dir setattr;
-allow user_chown_t user_home_t:file setattr;
-allow user_chown_t user_home_dir_t:dir setattr;
-allow user_chown_t ssh_home_t:dir setattr;
-allow user_chown_t ssh_home_t:file setattr;
-allow user_chown_t home_root_t:dir setattr;
+allow user_chown_t self:capability { dac_read_search dac_override chown };
 
 # Chown needs to read `/etc/passwd`.
 files_read_etc_files(user_chown_t)
