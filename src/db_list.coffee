@@ -1,10 +1,13 @@
 format = require("./puppy").format
 
 module.exports.command =
-  description: "Create a new database for an application."
+  description: "List databases for an account or application."
   application: true
+  account: true
   execute: (configuration) ->
-    configuration.private "/puppy/private/bin/db_list", [ configuration.application.id ], (command) ->
+    params = []
+    params.push configuration.application.id unless configuration.application.isHome
+    configuration.private "/puppy/private/bin/db_list", params, (command) ->
       command.assert (stdout) ->
         response = JSON.parse(stdout)
         if response.error
