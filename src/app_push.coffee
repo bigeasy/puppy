@@ -2,22 +2,10 @@
 {Configuration,invoke,app} = require "./puppy"
 fs = require "fs"
 
-parser = new OptionParser [
-  [ "-a", "--app [NAME]", "application name" ]
-]
-
-usage = ->
-  process.stdout.write parser.help()
-  process.exit 1
-
 module.exports.command =
   description: "Deploy an application to Puppy."
-  execute: (argv) ->
-    try
-      options         = parser.parse argv
-    catch e
-      usage()
-
+  application: true
+  execute: (configuration) ->
     try
       stat = fs.statSync "./server.js"
     catch e
@@ -29,22 +17,17 @@ module.exports.command =
       process.stdout.write "server.js is not a file: this does not appear to be a project directory.\n"
       process.exit 1
 
-
-    configuration = new Configuration()
     if require("./location").server
       configuration.abend "puppy app:push does not run on the server."
 
-    options.app = app(options.app, usage)
-    configuration.application options.app, (app) ->
-      prepare = configuration.there app, "/puppy/bin/app_prepare", []
-      prepare.assert ->
-        localUser = app.localUsers[0]
-        excludeFrom = "#{__dirname}/../etc/rsync.exclude"
-        rsync = configuration.here "/usr/bin/rsync", [
-          "--exclude=configuration.json", "--exclude-from=#{excludeFrom}", "--delete", "-aqz", "-e", "/usr/bin/ssh",
-          "./", "u#{localUser.id}@#{localUser.machine.hostname}:/home/u#{localUser.id}/.puppy/stage/"
-        ]
-        rsync.assert ->
-          console.log "HERE"
-          deploy = configuration.thereas app, "delegate", "/puppy/bin/app_deploy", []
-          deploy.assert ->
+    prepare = configuration.there configuration.application, "/puppy/protected/bin/app_prepare", []
+    prepare.assert ->
+      localUser = configuration.application.localUsers[0]
+      excludeFrom = "#{__dirname}/../etc/rsync.exclude"
+      rsync = configuration.here "/usr/bin/rsync", [
+        "--exclude=configuration.json", "--exclude-from=#{excludeFrom}", "--delete", "-aqz", "-e", "/usr/bin/ssh",
+        "./", "u#{localUser.id}@#{localUser.machine.hostname}:/home/u#{localUser.id}/.puppy/stage/"
+      ]
+      rsync.assert ->
+        deploy = configuration.thereas configuration.application, "private", "/puppy/private/bin/app_deploy", []
+        deploy.assert ->
