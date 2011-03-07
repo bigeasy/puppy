@@ -74,7 +74,7 @@ module.exports.command = (argv) ->
         throw new Usage "Unknown command `#{name}`. See usage."
       configuration = new Configuration(parser, options)
       command = require("./#{commandFile}").command
-      if command.registered or command.application
+      if command.registered or command.application or command.account
         configuration.applications (applications) =>
           if options.app
             if /^\d+$/.test(options.app)
@@ -85,7 +85,7 @@ module.exports.command = (argv) ->
             application = (applications.filter (application) -> application.id is appId).shift()
           else
             application = (applications.filter (application) -> application.isHome is 1).shift()
-          if command.application and application.isHome
+          if (not command.account) and (command.application and application.isHome)
             throw new Usage "No application specified."
           configuration.application = application
           command.execute(configuration)
