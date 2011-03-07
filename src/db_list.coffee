@@ -4,7 +4,7 @@ module.exports.command =
   description: "Create a new database for an application."
   application: true
   execute: (configuration) ->
-    configuration.delegate "/puppy/bin/db_list", [ configuration.application.id ], (command) ->
+    configuration.private "/puppy/private/bin/db_list", [ configuration.application.id ], (command) ->
       command.assert (stdout) ->
         response = JSON.parse(stdout)
         if response.error
