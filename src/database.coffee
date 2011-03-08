@@ -141,6 +141,10 @@ class Database
       context or= {}
       throw new Abend @syslog, message, context
 
+  # Get the application by application id, verifying that it is associated with
+  # the machine user of the sudoer that invoked the current program.
+  #
+  # This method is invoked by programs run by an end user via `sudo`.
   application: (applicationId, callback) ->
     @hostname (hostname) =>
       uid = process.env["SUDO_UID"]
@@ -164,9 +168,9 @@ class Database
     @hostname (hostname) =>
       uid = process.env["SUDO_UID"]
       @verify uid > 10000, "Inexplicable uid #{uid}."
-      @select "getAccountByLocalUser", [ applicationId, hostname, uid ], "application", (application) =>
-        @verify application, "No such application t#{applicationId} for u#{uid} on #{hostname}."
-        callback(application)
+      @select "getAccountByLocalUser", [ hostname, uid ], "account", (accounts) =>
+        @verify accounts.length, "No account for u#{uid} on #{hostname}."
+        callback(accounts.shift())
 
   uncaughtException: ->
     process.on "uncaughtException", (e) =>
