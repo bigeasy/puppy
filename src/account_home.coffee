@@ -7,8 +7,7 @@ db        = require("common/database")
 
 
 # Get the program arguments.
-argv      = process.argv.slice(2)
-email     =  argv.shift()
+[ email ] = process.argv.slice(2)
 
 # Check the results of a query. If empty, fire a callback to try again. If
 # non-empty, write the user name and host machine to stdout.
