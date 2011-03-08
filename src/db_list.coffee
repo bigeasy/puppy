@@ -20,13 +20,14 @@ module.exports.command =
               process.stdout.write "\n"
             when "list"
               dataStores = [[
-                "Account", "AppId", "DatabaseId", "Status"
+                "Account", "AppId", "DatabaseId", "Alias", "Status"
               ]]
               for dataStore in response.dataStores
                 dataStores.push [
                   dataStore.application.account.email
                   "t#{dataStore.application.id}"
                   "d#{dataStore.id}"
+                  dataStore.alias
                   dataStore.status
                 ]
               process.stdout.write format(dataStores)
