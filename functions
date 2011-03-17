@@ -1,0 +1,22 @@
+function assert()
+{
+    message=$1
+    expected=$2
+    actual=$3
+    echo -n "$message "
+    if [ "$expected" == "$actual" ]; then
+        echo "[ OK ]"
+    else
+        echo "[ FAILED ]"
+        echo "expected: $expected"
+        echo "got: $actual"
+        exit 1
+    fi
+}
+
+function error_message()
+{
+    out=$1
+    echo "$out" | grep '^error: ' | /usr/bin/sed 's/error: //'
+}
+
