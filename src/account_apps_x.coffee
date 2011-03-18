@@ -3,7 +3,6 @@ require.paths.unshift("/puppy/common/lib/node")
 
 # Open the system.
 require("system").createSystem __filename, (system) ->
-  throw new Error("Gerg.")
   # Get the account for the current machine user.
   system.account (account) ->
     # Build a list of applications by reading all the local users assigned to
