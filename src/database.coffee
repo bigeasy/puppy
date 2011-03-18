@@ -2,21 +2,46 @@ fs            = require "fs"
 Client        = require("mysql").Client
 exec          = require("child_process").exec
 spawn         = require("child_process").spawn
-Danger        = require("common/danger").Danger
 
+# An Abend exception class thrown by the `abend` method. The `abend` method
+# cannot log a message and exit in the abend method itself, since writing to the
+# log is asynchronous. The abend method throws an Abend exception to interrupt
+# program flow. The exception implements a die method that send the abend
+# message to the syslog. The die method is invoked by a special
+# `uncaughtException` handler.
+# -------------------------------------------------------------------------
+# The Abend exception class contains the syslog, message and context map.
 class Abend
-  constructor: (@syslog, @message, @dump) ->
+  constructor: (@syslog, @message, @context) ->
   die: ->
-    @syslog.send "err", @message, @dump, -> process.exit 1
+    @syslog.send "err", @message, @context, -> process.exit 1
+
+# The system can only be created once in the life of a program.
+systemCreated = false
+
+module.exports.createSystem = (filename, callback) ->
+  # Assert that the system has not already been created.
+  if systemCreated
+    throw new Error("System has already been created.")
+  systemCreated = true
+
+  programName = filename.replace(/^.*\/(.*?)(?:_x)?.js$/, "$1")
+  syslog = new (require("system").Syslog)({ tag: programName, pid: true })
+
+  shell = new (require("system").Shell)(syslog)
+  shell.doas "database", "/puppy/database/bin/database", [], null, (stdout) ->
+    {host, password} = JSON.parse(stdout)
+    callback(new Database(syslog, shell, host, password))
 
 module.exports.createDatabase = (syslog, callback) ->
   shell = new (require("common/shell").Shell)(syslog)
+  # NO! Do this here and the error message propagates to the user.
   shell.doas "database", "/puppy/database/bin/database", [], null, (stdout) ->
     {host, password} = JSON.parse(stdout)
-    callback(new Database(syslog, host, password))
+    callback(new Database(syslog, shell, host, password))
 
 class Database
-  constructor: (@syslog, @host, @password) ->
+  constructor: (@syslog, @shell, @host, @password) ->
     @queries = {}
     for file in fs.readdirSync __dirname + "/../queries"
       @queries[file] = fs.readFileSync __dirname + "/../queries/" + file , "utf8"
@@ -136,10 +161,19 @@ class Database
           throw new Error("Unable to insert virtual host #{name}.")
         callback()
 
+  err: (message, context) ->
+    if context
+      json = JSON.stringify(context, null, 2).replace(/^(\s*\S.*)$/mg, "    $1")
+      "#{message}\n\nContext:\n#{json}\n"
+    else
+      message
+
+  abend: (message, context) ->
+    throw new Error @err message, context
+
   verify: (condition, message, context) ->
     unless condition
-      context or= {}
-      throw new Abend @syslog, message, context
+      throw new Error @err message, context
 
   # Get the application by application id, verifying that it is associated with
   # the machine user of the sudoer that invoked the current program.
@@ -165,17 +199,15 @@ class Database
       callback(stdout.substring(0, stdout.length - 1))
 
   account: (callback) ->
+    # Check that the uid is sane.
+    uid = parseInt process.env["SUDO_UID"], 10
+    @verify uid > 10000, "Inexplicable uid #{uid}"
+
+    # Get hostname in order to get the account by hostname and local user.
     @hostname (hostname) =>
-      uid = process.env["SUDO_UID"]
-      @verify uid > 10000, "Inexplicable uid #{uid}."
+      # Get the account for the local user. The verify will always be true in this
+      # case, but we do it anyway out of habit. If not we'd have to explain here
+      # why we didn't, so it's easy to to just do it.
       @select "getAccountByLocalUser", [ hostname, uid ], "account", (accounts) =>
         @verify accounts.length, "No account for u#{uid} on #{hostname}."
-        callback(accounts.shift())
-
-  uncaughtException: ->
-    process.on "uncaughtException", (e) =>
-      if e.die
-        e.die()
-      else
-        @syslog.send "err", "Unexpected exception.", { message: e.message, stack: e.stack }, ->
-          process.exit 1
+        callback(accounts.shift(), hostname, uid)
