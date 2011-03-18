@@ -55,7 +55,7 @@ class Database
 
     client
 
-  select: (query, parameters, get, callback) ->
+  sql: (query, parameters, get, callback) ->
     if typeof get is "function"
       callback = get
       get = null
@@ -96,67 +96,67 @@ class Database
     exec "/bin/hostname", (error, stdout) =>
       throw error if error
       hostname = stdout.substring(0, stdout.length - 1)
-      @select "getLocalUserAccount", [ hostname, localUserId ], "account", (results) ->
+      @sql "getLocalUserAccount", [ hostname, localUserId ], "account", (results) ->
         callback(results.shift())
 
   fetchLocalPort: (machineId, localUserId, service, callback) ->
-    @select "fetchLocalPort", [ localUserId, service, machineId ], (results) =>
+    @sql "fetchLocalPort", [ localUserId, service, machineId ], (results) =>
       if results.affectedRows is 0
         @createLocalPort machineId, localUserId, service, callback
       else
-        @select "getLocalPortByAssignment", [ results.insertId ], "localPort", (results) ->
+        @sql "getLocalPortByAssignment", [ results.insertId ], "localPort", (results) ->
           callback(results.shift())
 
   createLocalPort: (machineId, localUserId, service, callback) ->
-    @select "nextLocalPort", [ machineId ], (results) =>
+    @sql "nextLocalPort", [ machineId ], (results) =>
       nextLocalPort = results[0].nextLocalPort
       @error = (error) =>
         throw error if error.number isnt 1062
         @createLocalPort machineId, localUserId, service, callback
-      @select "insertLocalPort", [ machineId, nextLocalPort ], (results) =>
+      @sql "insertLocalPort", [ machineId, nextLocalPort ], (results) =>
         @fetchLocalPort machineId, localUserId, service, callback
 
   fetchLocalUser: (applicationId, callback) ->
-    @select "getMachines", [], "machine", (results) =>
+    @sql "getMachines", [], "machine", (results) =>
       machine = results[0]
       @error = (error) =>
         throw error if error.number isnt 1062
         @fetchLocalUser applicationId, callback
-      @select "fetchLocalUser", [ applicationId, machine.id, 0 ], (results) =>
+      @sql "fetchLocalUser", [ applicationId, machine.id, 0 ], (results) =>
         if results.affectedRows is 0
           @createLocalUser applicationId, machine.id, callback
         else
-          @select "getLocalUserByAssignment", [ results.insertId ], "localUser", (results) ->
+          @sql "getLocalUserByAssignment", [ results.insertId ], "localUser", (results) ->
             callback(results.shift())
 
   createLocalUser: (applicationId, machineId, callback) ->
-    @select "nextLocalUser", [ machineId, 9999999999 ], (results) =>
+    @sql "nextLocalUser", [ machineId, 9999999999 ], (results) =>
       nextLocalUserId = results[0].nextLocalUserId
       @error = (error) =>
         throw error if error.number isnt 1062
         @createLocalUser applicationId, machineId, callback
-      @select "insertLocalUser", [ machineId, nextLocalUserId, 0, 1 ], (results) =>
+      @sql "insertLocalUser", [ machineId, nextLocalUserId, 0, 1 ], (results) =>
         @fetchLocalUser applicationId, callback
 
   enqueue: (hostname, commands, callback) ->
     if commands.length
       command = commands.shift()
-      @select "insertJob", [ JSON.stringify(command), hostname ], (results) =>
+      @sql "insertJob", [ JSON.stringify(command), hostname ], (results) =>
         @syslog.send "info", "Enqueued command #{command[0]}.", { command }
         @enqueue(hostname, commands, callback)
     else if callback
       callback()
 
   properties: (callback) ->
-    @select "properties", [], (results) =>
+    @sql "properties", [], (results) =>
       properties = {}
       for property in results
         properties[property.name] = property.value
       callback(properties)
 
   virtualHost: (name, ip, port, callback) ->
-    @select "deleteVirtualHost", [ name ], (results) =>
-      @select "insertVirtualHost", [ name, ip, port ], (results) =>
+    @sql "deleteVirtualHost", [ name ], (results) =>
+      @sql "insertVirtualHost", [ name, ip, port ], (results) =>
         if results.affectedRows is 0
           throw new Error("Unable to insert virtual host #{name}.")
         callback()
@@ -183,7 +183,7 @@ class Database
     @hostname (hostname) =>
       uid = process.env["SUDO_UID"]
       @verify uid > 10000, "Inexplicable uid #{uid}."
-      @select "getApplicationByIdAndLocalUser", [ applicationId, hostname, uid ], "application", (applications) =>
+      @sql "getApplicationByIdAndLocalUser", [ applicationId, hostname, uid ], "application", (applications) =>
         @verify applications.length, "No such application t#{applicationId} for u#{uid} on #{hostname}."
         callback(applications.shift())
 
@@ -208,6 +208,6 @@ class Database
       # Get the account for the local user. The verify will always be true in this
       # case, but we do it anyway out of habit. If not we'd have to explain here
       # why we didn't, so it's easy to to just do it.
-      @select "getAccountByLocalUser", [ hostname, uid ], "account", (accounts) =>
+      @sql "getAccountByLocalUser", [ hostname, uid ], "account", (accounts) =>
         @verify accounts.length, "No account for u#{uid} on #{hostname}."
         callback(accounts.shift(), hostname, uid)
