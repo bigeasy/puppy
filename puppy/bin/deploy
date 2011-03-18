@@ -22,9 +22,12 @@ cd $project
 if [ -e Cakefile ]; then
     if [ -d src ]; then
         /opt/bin/cake compile
+        if [ -d bin ]; then
+            /bin/sed -i '0,/^\((function() {\)/s//#!\/usr\/bin\/env node\n\1/' bin/*.js
+        fi
     fi
 
-    npm_config_root=/puppy/$basename/lib/node npm_config_binroot=/puppy/$basename/bin \
+    PATH=/opt/bin:$PATH npm_config_root=/puppy/$basename/lib/node npm_config_binroot=/puppy/$basename/bin \
         npm_config_manroot=/puppy/$basename/share/man /usr/bin/sudo -E /opt/bin/npm install .
 fi
 
@@ -99,6 +102,10 @@ if [ -d src -a ! -d lib ]; then
             /usr/bin/sudo /bin/chown $ownership /puppy/$basename/bin/$program@* /puppy/$basename/bin/$program
         fi
     done
+fi
+
+if [ -e ./deployment ]; then
+    ./deployment
 fi
 
 /usr/bin/sudo /sbin/restorecon -R /puppy

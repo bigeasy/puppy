@@ -1,0 +1,2 @@
+/home/database/configuration        gen_context(system_u:object_r:database_conf_t, s0)
+database                            direct

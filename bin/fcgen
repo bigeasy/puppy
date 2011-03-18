@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Maintaining the file context definitions got tedious. NPM went from generating
+# two artifacts that need labeling to three, and the third is buried deep in the
+# library directory tree. At the same time, many programs will be launched
+# through an exception reporting launcher, adding another artifact.
+
+# This script will generate the appropriate file context definitions for based
+# on a template that names the program and describes its type. It will print a
+# line verbatim if it does not recognize the type, so that ordinary file context
+# definitions can be added to a template and they will pass through.
+
+cd $(dirname $0)
+cd ..
+
+for file in $(ls selinux/*.fc.template)
+do
+    project=$(/bin/basename $file | sed s/.fc.template$//)
+    while read line
+    do
+        if [ "${line:0:1}" == "#" ]; then
+            continue
+        fi
+        fields=($line)
+        gen_context="gen_context(system_u:object_r:${fields[0]}_exec_t, s0)"
+        if [ ${fields[1]} == "launcher" ]; then
+            echo "/puppy/$project/bin/${fields[0]} $gen_context"
+            echo "/puppy/$project/bin/${fields[0]}_x $gen_context"
+            echo "/puppy/$project/bin/${fields[0]}_x@0.0.1 $gen_context"
+            echo "/puppy/$project/lib/node/.npm/$project/0.0.1/package/bin/${fields[0]}_x.js $gen_context"
+        elif [ ${fields[1]} == "direct" ]; then
+            echo "/puppy/$project/bin/${fields[0]} $gen_context"
+            echo "/puppy/$project/bin/${fields[0]}@0.0.1 $gen_context"
+            echo "/puppy/$project/lib/node/.npm/$project/0.0.1/package/bin/${fields[0]}.js $gen_context"
+        else
+            echo $line
+        fi
+    done < $file > selinux/$project.fc
+done

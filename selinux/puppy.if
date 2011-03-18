@@ -105,6 +105,7 @@ template(`puppy_read_puppy_bin',`
     ')
     list_dirs_pattern($1, puppy_t, puppy_t)
     list_dirs_pattern($1, puppy_bin_t, puppy_bin_t)
+    list_dirs_pattern($1, puppy_lib_t, puppy_lib_t)
     read_files_pattern($1, puppy_bin_t, puppy_bin_t)
     read_lnk_files_pattern($1, puppy_bin_t, puppy_bin_t)
 ')
@@ -125,6 +126,7 @@ template(`puppy_read_puppy_sbin',`
     ')
     list_dirs_pattern($1, puppy_t, puppy_t)
     read_files_pattern($1, puppy_sbin_t, puppy_sbin_t)
+    list_dirs_pattern($1, puppy_lib_t, puppy_lib_t)
 ')
 template(`puppy_exec_puppy_bin',`
     gen_require(`

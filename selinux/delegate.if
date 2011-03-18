@@ -61,6 +61,10 @@ template(`puppy_delegate', `
     logging_send_syslog_msg($1_delegate_t)
 
     puppy_sudo($1_delegate)
+
+    # For stderr reporting delegates.
+    allow $1_delegate_t $1_exec_t:file execute_no_trans;
+    allow $1_delegate_t $1_exec_t:lnk_file  read_lnk_file_perms;
 ')
 
 template(`puppy_delegate_role',`
