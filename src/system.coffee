@@ -26,9 +26,9 @@ module.exports.createSystem = (filename, callback) ->
   systemCreated = true
 
   programName = filename.replace(/^.*\/(.*?)(?:_x)?.js$/, "$1")
-  syslog = new (require("system").Syslog)({ tag: programName, pid: true })
+  syslog = new (require("common").Syslog)({ tag: programName, pid: true })
 
-  shell = new (require("system").Shell)(syslog)
+  shell = new (require("common").Shell)(syslog)
   shell.doas "database", "/puppy/database/bin/database", [], null, (stdout) ->
     {host, password} = JSON.parse(stdout)
     callback(new Database(syslog, shell, host, password))
