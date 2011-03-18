@@ -26,6 +26,7 @@ task "gitignore", "create a .gitignore for node-ec2 based on git branch", ->
                 selinux/tmp
                 _site
                 **/.DS_Store
+                bin/*.js
                 
                 '''
 

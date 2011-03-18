@@ -3,5 +3,6 @@
 ,   "author":           "Alan Gutierrez"
 ,   "bin":             
     { "job":                "./bin/job.js"
+    , "user_generate":      "./bin/user_generate.js"
     }
 }
