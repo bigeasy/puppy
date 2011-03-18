@@ -58,7 +58,7 @@ task "compile", "compile the CoffeeScript into JavaScript", ->
   path.exists "./bin", (exists) ->
     fs.mkdirSync("./bin", 0755) if not exists
     sources = fs.readdirSync("src")
-    sources = "src/" + source for source in sources when source.match(/\.coffee$/)
+    sources = ("src/" + source for source in sources when source.match(/\.coffee$/))
     compile sources, "./bin"
 
 task "clean", "rebuild the CoffeeScript docco documentation.", ->
