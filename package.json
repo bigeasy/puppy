@@ -4,7 +4,7 @@
 ,   "directories":      { "lib" : "./lib" }
 ,   "bin":             
     { "account_activate":   "./bin/account_activate.js"
-    , "account_apps":       "./bin/account_apps.js"
+    , "account_apps_x":     "./bin/account_apps_x.js"
     , "account_home":       "./bin/account_home.js"
     , "account_ready":      "./bin/account_ready.js"
     , "account_register":   "./bin/account_register.js"

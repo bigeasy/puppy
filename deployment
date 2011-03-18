@@ -1,0 +1,11 @@
+#!/bin/bash
+
+source=$(dirname $0)
+
+for file in $(ls src/*_x.coffee)
+do
+    dest=$(/bin/basename $file | /bin/sed 's/^\(.*\)_x.coffee/\1/')
+    /usr/bin/sudo /bin/cp $source/launch/launcher /puppy/private/bin/$dest
+    /usr/bin/sudo chown private:private /puppy/private/bin/$dest
+    /usr/bin/sudo chmod 550 /puppy/private/bin/$dest
+done

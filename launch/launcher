@@ -1,0 +1,22 @@
+#!/usr/bin/env node
+
+function log (message, code, stderr) {
+  require.paths.unshift("/puppy/common/lib/node");
+  var syslog = new (require("system").Syslog)({ tag: __filename.replace(/^.*\/(.*)$/, "$1"), pid: true });
+  syslog.send("err", message, { code: code, stderr: stderr });
+}
+
+var spawn = require("child_process").spawn
+var program = spawn(__filename.replace(/\/([^\/]+)$/, "/$1_x"), process.argv.slice(2), { customFds: [ 0, 1, -1 ] });
+stderr = "";
+program.stderr.on("data", function (chunk) {
+  stderr += chunk.toString();
+});
+program.on("exit", function (code) {
+  if (code != 0) {
+    log("Unexpected program failure.", code, stderr);
+    process.exit(code);
+  } else if (stderr.length) {
+    log("Unexpected error output.", code, stderr);
+  }
+});
