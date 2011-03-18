@@ -1,13 +1,5 @@
 require.paths.unshift("/puppy/common/lib/node")
 
-# Require Node.js core modules.
-fs = require "fs"
-
-# Require Puppy command execution and logging.
-syslog  = new (require("common/syslog").Syslog)({ tag: "job", pid: true })
-shell   = new (require("common/shell").Shell)(syslog)
-db      = require("common/database")
-
 # Need to set a limit to the size of the incoming buffer. It should never be
 # more than a kilobyte, so at 4K and we need to report an attack.
 #
@@ -22,22 +14,24 @@ db      = require("common/database")
 # to sifting through a morass of log files.
 #
 # The error level should trigger an audit by the system administrator.
-argv = process.argv.slice(2)
+require("common").createSystem __filename, (system) ->
+  argv = process.argv.slice(2)
 
-hostname = argv.shift()
+  hostname = argv.shift()
 
-input = []
-enqueue = ->
-  db.createDatabase syslog, (database) ->
+  input = []
+  enqueue = ->
     command = [ argv.shift(), argv ]
     command.push(input.join("")) if input.length
-    database.enqueue hostname, [ command ]
-if argv[argv.length - 1] is "-"
-  argv.pop()
-  stdin = process.openStdin()
-  stdin.setEncoding "utf8"
-  stdin.on "data", (chunk) -> input.push chunk
-  stdin.on "end", ->
+    system.enqueue hostname, [ command ]
+
+  # A hyphen at the end of commands indicates that the enqueued command expects
+  # standard input, so gather some to add to the queue.
+  if argv[argv.length - 1] is "-"
+    argv.pop()
+    stdin = process.openStdin()
+    stdin.setEncoding "utf8"
+    stdin.on "data", (chunk) -> input.push chunk
+    stdin.on "end", -> enqueue()
+  else
     enqueue()
-else
-  enqueue()
