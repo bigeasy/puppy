@@ -2,7 +2,7 @@
 require.paths.unshift("/puppy/common/lib/node")
 
 # Open the system.
-require("system").createSystem __filename, (system) ->
+require("common").createSystem __filename, (system) ->
   # Get the account for the current machine user.
   system.account (account) ->
     # Build a list of applications by reading all the local users assigned to
