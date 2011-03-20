@@ -148,30 +148,54 @@ readLog = (fd, buffer, contents, size, output, callback) ->
       readBuffer buffer, read, contents, output, ->
         readLog fd, buffer, contents, size - read, output, callback
 
-writeExceptions = (exceptions, message) ->
-  exception = exceptions.shift()
-  dashes = new Array((78 - message.length) / 2).join(" -")
-  if exception.process
-    proc = exception.process
-    proc = "#{proc.program}[#{proc.pid}/#{proc.uid}]"
-    length = (dashes.length - proc.length - 1)
+makeDashes = (prefix, suffix) ->
+  dashes = new Array((78 - prefix.length) / 2).join(" -")
+  if suffix?
+    length = (dashes.length - suffix.length - 1)
     length-- if length % 2
     dashes = dashes.substring 0, length
-  process.stdout.write "\n  #{message} #{dashes} #{proc}\n"
+    "#{prefix} #{dashes} #{suffix}"
+  else
+    "#{prefix} #{dashes}"
+
+writeExceptions = (exceptions, message) ->
+  exception = exceptions.shift()
+
+  # Write the exception divider.
+  if exception.process
+    suffix = (-> "#{@program}[#{@pid}/#{@uid}]").apply(exception.process)
+    process.stdout.write "\n  #{makeDashes(message, suffix)}\n"
+  else
+    process.stdout.write "\n  #{makeDashes(message)}\n"
+
+  # Print the context message if one exists.
   if exception.location
-    location = exception.location
-    process.stdout.write "  #{location.file}:#{location.line}.\n"
-    process.stdout.write "  #{location.text}\n"
-    process.stdout.write "  #{new Array(location.column).join(" ")}^\n"
+    (->
+      process.stdout.write "  #{@file}:#{@line}.\n"
+      process.stdout.write "  #{@text}\n"
+      process.stdout.write "  #{new Array(@column).join(" ")}^\n"
+    ).apply(exception.location)
+  
+  # Print the actual message, indented.
   process.stdout.write "#{exception.message.replace(/^(\s*\S.*)$/mg, "  $1")}\n"
+
+  # Print JSON if any exists. If there is stderr output, replace it with a message
+  # to look for the output below.
   if exception.json
-    exception.json.stderr = "[Nested exception: See below.]" if exceptions.length
+    if exceptions.length
+      exception.json.stderr = "v-V-v Nested exception: See below. v-V-v"
+    else if exception.json.stderr? and exception.json.stderr.length
+      stderr = exception.json.stderr
+      exception.json.stderr = "v-V-v See below. v-V-v"
     json = inspect(exception.json, false, 1000).replace(/^(\s*\S.*)$/mg, "    $1")
     process.stdout.write "#{json}\n"
   for element in exception.stack
     process.stdout.write "    at #{element.method} (#{element.file})\n"
   if exceptions.length
     writeExceptions(exceptions, "Nested exception")
+  else if stderr
+    process.stdout.write "\n  #{makeDashes("Output from stderr")}\n"
+    process.stdout.write stderr.replace(/^(\s*\S.*)$/mg, "  $1")
               
 fs.open "/var/log/messages", "r", (error, fd) ->
   throw error if error
