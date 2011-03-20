@@ -36,6 +36,56 @@ catch e
 options.lines or= 4
 options.output or= "text"
 
+readExceptions = (stderr, exceptions) ->
+  # Split stderr into lines and pop the last blank line.
+  stderr = stderr.split("\n")
+  stderr.pop()
+
+  # Read the stack backwards popping the all the stack lines and the blank line
+  # before the stack.
+  stack = []
+  while stderr.length and match = /^\s{4}at\s(\S+)\s+\(([^:]+):(\d+):(\d+)\)$/.exec(stderr[stderr.length - 1])
+    [ method, file, line, column ] = match.slice(1)
+    stack.unshift { method, file, line, column }
+    stderr.pop()
+
+  # If we have a stack, then we have an exception.
+  if stack.length
+    # Pull the location display off the top of the lines, if it exists.
+    if stderr.length >= 4 and stderr[0] is "" and (location = /^(.*):(\d+)$/.exec(stderr[1])) and (column = /^(\s*)\^$/.exec(stderr[3]))
+      snippet =
+        file: location[1]
+        text: stderr[2]
+        line: parseInt(location[2], 10)
+        column: column[1].length + 1
+      stderr = stderr.slice(4)
+
+    # Read any JSON output, if it exists.
+    json = []
+    if /^\s{4}}/.test(stderr[stderr.length - 2])
+      while not /^\s{4}{$/.test(line = stderr.pop())
+        json.unshift line
+      json.unshift line
+      json = json.join "\n"
+      stderr.pop()
+
+    # What remains is the exception message. 
+    message = stderr.join "\n"
+
+    # Build the exception record.
+    exception = { message, stack }
+    if json.length
+      try
+        exception.json = JSON.parse(json)
+      catch e
+        exception.json = json
+        exception.jsonInvalid = true
+    exception.location = snippet if snippet
+
+    exceptions.push exception
+    if exception.json and exception.json.stderr
+      readExceptions(exception.json.stderr, exceptions)
+
 readBuffer = (buffer, end, contents, output, callback) ->
   chunkSize = 1024 * 2
   offset = end - chunkSize
@@ -66,38 +116,9 @@ readBuffer = (buffer, end, contents, output, callback) ->
           record.json = json
           record.jsonInvalid = true
         if record.json.stderr
-          stderr = record.json.stderr.split("\n")
-          stderr.pop() if stderr[stderr.length - 1] is ""
-          stack = []
-          while stderr.length and match = /^\s{4}at\s(\S+)\s+\(([^:]+):(\d+):(\d+)\)$/.exec(stderr.pop())
-            [ method, file, line, column ] = match.slice(1)
-            stack.unshift { method, file, line, column }
-          if stack.length
-            # Pull the location display off the top.
-            if stderr.length >= 4 and stderr[0] is "" and (location = /^(.*):(\d+)$/.exec(stderr[1])) and (column = /^(\s*)\^$/.exec(stderr[3]))
-              snippet =
-                file: location[1]
-                text: stderr[2]
-                line: parseInt(location[2], 10)
-                column: column[1].length + 1
-              stderr = stderr.slice(4)
-            # Ready an JSON context output.
-            json = []
-            if /^\s{4}}/.test(stderr[stderr.length - 1])
-              while not /^\s{4}{$/.test(line = stderr.pop())
-                json.unshift line
-              json.unshift line
-              json = json.join "\n"
-              stderr.pop()
-            message = stderr.join "\n"
-            record.exception = { message, stack }
-            if json.length
-              try
-                record.exception.json = JSON.parse(json)
-              catch e
-                record.exception.json = json
-                record.exception.jsonInvalid = true
-            record.exception.location = snippet if snippet
+          exceptions = []
+          readExceptions(record.json.stderr, exceptions)
+          record.exceptions = exceptions if exceptions.length > 0 
 
       output.unshift record
   if offset > 0 and output.length < options.lines
@@ -114,6 +135,25 @@ readLog = (fd, buffer, contents, size, output, callback) ->
       readBuffer buffer, read, contents, output, ->
         readLog fd, buffer, contents, size - read, output, callback
 
+writeExceptions = (exceptions, message) ->
+  exception = exceptions.shift()
+  process.stdout.write "  #{message} #{new Array((78 - message.length) / 2).join(" -")}\n"
+  if exception.location
+    location = exception.location
+    process.stdout.write "  #{location.file}:#{location.line}.\n"
+    process.stdout.write "  #{location.text}\n"
+    process.stdout.write "  #{new Array(location.column).join(" ")}^\n"
+  process.stdout.write "#{exception.message.replace(/^(\s*\S.*)$/mg, "  $1")}\n"
+  if exception.json
+    exception.json.stderr = "[Nested exception: See below.]" if exceptions.length
+    json = inspect(exception.json, false, 1000).replace(/^(\s*\S.*)$/mg, "    $1")
+    process.stdout.write "#{json}\n"
+  for element in exception.stack
+    process.stdout.write "    at #{element.method} (#{element.file})\n"
+  process.stdout.write "\n"
+  if exceptions.length
+    writeExceptions(exceptions, "Nested exception")
+              
 fs.open "/var/log/messages", "r", (error, fd) ->
   throw error if error
   buffer = new Buffer(1024 * 1024 * 64)
@@ -133,21 +173,9 @@ fs.open "/var/log/messages", "r", (error, fd) ->
             process.stdout.write "#{header}\n\n"
             process.stdout.write "#{record.message}\n\n"
             if record.json
-              if record.exception
+              if record.exceptions
                 record.json.stderr = "[Uncaught exception: See below.]"
-              json = inspect(record.json, 1000).replace(/^(\s*\S.*)$/mg, "  $1")
+              json = inspect(record.json, false, 1000).replace(/^(\s*\S.*)$/mg, "  $1")
               process.stdout.write "#{json}\n\n"
-            if record.exception
-              process.stdout.write "  Uncaught exception - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n\n"
-              if record.exception.location
-                location = record.exception.location
-                process.stdout.write "  #{location.file}:#{location.line}.\n"
-                process.stdout.write "  #{location.text}\n"
-                process.stdout.write "  #{new Array(location.column).join(" ")}^\n"
-              process.stdout.write "#{record.exception.message.replace(/^(\s*\S.*)$/mg, "  $1")}\n\n"
-              if record.exception.json
-                json = inspect(record.exception.json, 1000).replace(/^(\s*\S.*)$/mg, "    $1")
-                process.stdout.write "#{json}\n\n"
-              for element in record.exception.stack
-                process.stdout.write "    at #{element.method} (#{element.file})\n"
-              process.stdout.write "\n"
+            if record.exceptions
+              writeExceptions(record.exceptions, "Uncaught exception")
