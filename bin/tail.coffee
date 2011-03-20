@@ -154,9 +154,9 @@ makeDashes = (prefix, suffix) ->
     length = (dashes.length - suffix.length - 1)
     length-- if length % 2
     dashes = dashes.substring 0, length
-    "#{prefix} #{dashes} #{suffix}"
+    "#{prefix} -#{dashes} #{suffix}"
   else
-    "#{prefix} #{dashes}"
+    "#{prefix} -#{dashes}"
 
 writeExceptions = (exceptions, message) ->
   exception = exceptions.shift()
@@ -214,9 +214,10 @@ fs.open "/var/log/messages", "r", (error, fd) ->
           for record in output
             process.stdout.write separator
             separator = "\n"
-            header = "#{tz("%Y/%m/%d %H:%M:%S", record.date)} on #{record.host} "
-            header += new Array(80 - header.length).join("-")
-            process.stdout.write "#{header}\n\n"
+            prefix = "#{tz("%Y/%m/%d %H:%M:%S", record.date)} on #{record.host}"
+            suffix = "#{record.program}[#{record.pid}]"
+            dashes = new Array(80 - (prefix.length + suffix.length + 1)).join("-")
+            process.stdout.write "#{prefix} #{dashes} #{suffix}\n\n"
             process.stdout.write "#{record.message}\n"
             if record.json
               if record.exceptions
