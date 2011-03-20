@@ -201,7 +201,42 @@ writeExceptions = (exceptions, message) ->
   else if stderr
     process.stdout.write "\n  #{makeDashes("Output from stderr")}\n"
     process.stdout.write stderr.replace(/^(\s*\S.*)$/mg, "  $1")
-              
+
+# In case you forget, you put this in its own method to get an empty namespace.
+sendOutput = (output) ->
+  switch options.output
+    when "raw", "json"
+      process.stdout.write JSON.stringify(output, null, 2)
+      process.stdout.write "\n"
+    else
+      separator = ""
+      for record in output
+        process.stdout.write separator
+        separator = "\n"
+
+        prefix = "#{tz("%Y/%m/%d %H:%M:%S", record.date)} on #{record.host}"
+        suffix = "#{record.program}[#{record.pid}]"
+        dashes = new Array(80 - (prefix.length + suffix.length + 1)).join("-")
+
+        process.stdout.write "#{prefix} #{dashes} #{suffix}\n\n"
+        process.stdout.write "#{record.message}\n"
+
+        stderr = null
+        if record.json
+          if record.exceptions
+            record.json.stderr = "v-V-v Uncaught exception: See below. v-V-v"
+          else if record.json.stderr? and record.json.stderr.length
+            stderr = record.json.stderr
+            record.json.stderr = "v-V-v  See below. v-V-v"
+          json = inspect(record.json, false, 1000).replace(/^(\s*\S.*)$/mg, "  $1")
+          process.stdout.write "#{json}\n"
+
+        if record.exceptions
+          writeExceptions(record.exceptions, "Uncaught exception")
+        else if stderr
+          process.stdout.write "\n  #{makeDashes("Output from stderr")}\n"
+          process.stdout.write stderr.replace(/^(\s*\S.*)$/mg, "  $1")
+
 fs.open "/var/log/messages", "r", (error, fd) ->
   throw error if error
   buffer = new Buffer(1024 * 1024 * 64)
@@ -209,25 +244,4 @@ fs.open "/var/log/messages", "r", (error, fd) ->
     throw error if error
     contents = ""
     output = []
-    readLog fd, buffer, "", stats.size, output, ->
-      switch options.output
-        when "raw", "json"
-          process.stdout.write JSON.stringify(output, null, 2)
-          process.stdout.write "\n"
-        else
-          separator = ""
-          for record in output
-            process.stdout.write separator
-            separator = "\n"
-            prefix = "#{tz("%Y/%m/%d %H:%M:%S", record.date)} on #{record.host}"
-            suffix = "#{record.program}[#{record.pid}]"
-            dashes = new Array(80 - (prefix.length + suffix.length + 1)).join("-")
-            process.stdout.write "#{prefix} #{dashes} #{suffix}\n\n"
-            process.stdout.write "#{record.message}\n"
-            if record.json
-              if record.exceptions
-                record.json.stderr = "[Uncaught exception: See below.]"
-              json = inspect(record.json, false, 1000).replace(/^(\s*\S.*)$/mg, "  $1")
-              process.stdout.write "#{json}\n"
-            if record.exceptions
-              writeExceptions(record.exceptions, "Uncaught exception")
+    readLog fd, buffer, "", stats.size, output, -> sendOutput(output)
