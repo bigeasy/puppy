@@ -7,3 +7,4 @@
 
 worker                                  try
 port_unlabel                            job
+policy_unload                           job
