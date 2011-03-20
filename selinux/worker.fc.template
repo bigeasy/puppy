@@ -14,6 +14,7 @@ worker                                  try
 policy_generate                         job
 policy_load                             job
 policy_make                             job
+policy_ready                            job
 policy_unload                           job
 port_label                              job
 port_unlabel                            job

@@ -1,3 +1,7 @@
+/puppy/system/bin/policy_ready gen_context(system_u:object_r:policy_ready_system_exec_t, s0)
+/puppy/system/bin/policy_ready@0.0.1 gen_context(system_u:object_r:policy_ready_system_exec_t, s0)
+/puppy/system/lib/node/.npm/system/0.0.1/package/bin/policy_ready.js gen_context(system_u:object_r:policy_ready_system_exec_t, s0)
+
 /puppy/system/bin/policy_users gen_context(system_u:object_r:policy_users_system_exec_t, s0)
 /puppy/system/bin/policy_users@0.0.1 gen_context(system_u:object_r:policy_users_system_exec_t, s0)
 /puppy/system/lib/node/.npm/system/0.0.1/package/bin/policy_users.js gen_context(system_u:object_r:policy_users_system_exec_t, s0)

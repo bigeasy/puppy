@@ -27,7 +27,7 @@ worker ALL = (system) NOPASSWD: \
     /puppy/system/bin/policy_users, \
     /puppy/system/bin/queue_config, \
     /puppy/system/bin/node_ready, \
-    /puppy/system/bin/user_ready, \
+    /puppy/system/bin/policy_ready, \
     /puppy/system/bin/user_activation
 worker ALL = (database) NOPASSWD: \
     /puppy/database/bin/database

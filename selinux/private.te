@@ -89,10 +89,3 @@ puppy_delegate_database(user_activation)
 
 puppy_delegate(user_keys)
 puppy_delegate_database(user_keys)
-
-############################################################################
-### Policy for `user_ready`.
-############################################################################
-
-puppy_delegate(user_ready)
-puppy_delegate_database(user_ready)

@@ -21,6 +21,9 @@
 /puppy/worker/bin/policy_make gen_context(system_u:object_r:policy_make_job_exec_t, s0)
 /puppy/worker/sbin/policy_make gen_context(system_u:object_r:policy_make_job_exec_t, s0)
 
+/puppy/worker/bin/policy_ready gen_context(system_u:object_r:policy_ready_job_exec_t, s0)
+/puppy/worker/sbin/policy_ready gen_context(system_u:object_r:policy_ready_job_exec_t, s0)
+
 /puppy/worker/bin/policy_unload gen_context(system_u:object_r:policy_unload_job_exec_t, s0)
 /puppy/worker/sbin/policy_unload gen_context(system_u:object_r:policy_unload_job_exec_t, s0)
 
