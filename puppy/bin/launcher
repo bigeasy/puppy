@@ -3,7 +3,13 @@
 function log (message, code, stderr) {
   require.paths.unshift("/puppy/common/lib/node");
   var syslog = new (require("common").Syslog)({ tag: __filename.replace(/^.*\/(.*)$/, "$1"), pid: true });
-  syslog.send("err", message, { code: code, stderr: stderr });
+  var context = { code: code }
+  if (stderr.length > 0) {
+    context.stderr = stderr;
+  }
+  syslog.send("err", "CATCH: " + message, context, function () {
+    process.exit(code);
+  });
 }
 
 var spawn = require("child_process").spawn
@@ -11,11 +17,13 @@ var program = spawn(__filename.replace(/\/([^\/]+)$/, "/$1_try"), process.argv.s
 stderr = "";
 program.stderr.on("data", function (chunk) {
   stderr += chunk.toString();
+  if (stderr.length > 4 * 1024) {
+    log("Spewed over 4K to stderr.", 1, stderr);
+  }
 });
 program.on("exit", function (code) {
   if (code != 0) {
     log("Unexpected program failure.", code, stderr);
-    process.exit(code);
   } else if (stderr.length) {
     log("Unexpected error output.", code, stderr);
   }
