@@ -2,6 +2,7 @@
 ,   "version":          "0.0.1"
 ,   "author":           "Alan Gutierrez"
 ,   "bin":             
-    { "port_list":          "./bin/port_list.js"
+    { "policy_users":   "./bin/policy_users.js"
+    , "port_list":      "./bin/port_list.js"
     }
 }
