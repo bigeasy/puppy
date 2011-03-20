@@ -1,0 +1,3 @@
+login -d public
+login -d %liminal
+login -d %protected
