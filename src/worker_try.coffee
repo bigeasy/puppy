@@ -29,15 +29,13 @@ require("common").createSystem __filename, "hostname", (system, hostname) ->
         child.stdout.on "data", (chunk) -> stdout += chunk.toString()
         child.stderr.on "data", (chunk) -> stderr += chunk.toString()
         child.on "exit", (code) ->
+          # Record the error if one was reported.
+          if code
+            throw new Error system.err "Worker received error exit from [#{program}].", { command, code, stderr, stdout }
           # Record the stderr messages, which we do not expect from the launch
           # program.
           if stderr
-            syslog.send "err", "Worker recieved unexpected error messages from [#{program}] with exit code #{code}.", { command, stdout, stderr }
-            process.exit 1
-          # Record the error if one was reported.
-          if code
-            syslog.send "err", "Worker recieved error exit from [#{program}] with exit code #{code}.", { command, stdout, stderr }
-            process.exit 1
+            throw new Error system.err "Worker received error messages from [#{program}].", { command, code, stderr, stdout }
 
           # Create a descriptive message for the logs.
           end = new Date()
