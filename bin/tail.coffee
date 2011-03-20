@@ -44,7 +44,9 @@ readExceptions = (stderr, exceptions) ->
   # Read the stack backwards popping the all the stack lines and the blank line
   # before the stack.
   stack = []
-  while stderr.length and match = /^\s{4}at\s(\S+)\s+\(([^:]+):(\d+):(\d+)\)$/.exec(stderr[stderr.length - 1])
+  while stderr.length and
+    ((match = /^\s{4}at\s(\S+)\s+\(([^:]+):(\d+):(\d+)\)$/.exec(stderr[stderr.length - 1]) or
+        (match = /^\s{4}at(.*)\s([^:]+):(\d+):(\d+)$/.exec(stderr[stderr.length - 1]))))
     [ method, file, line, column ] = match.slice(1)
     stack.unshift { method, file, line, column }
     stderr.pop()
@@ -73,7 +75,7 @@ readExceptions = (stderr, exceptions) ->
 
     process = null
     # What remains is the exception message. 
-    message = stderr.join "\n"
+    message = stderr.join "\n -> "
     if match = /^Error:\s([\w_]+)\[(\d+)\/(\d+)\]:\s(.*)$/.exec(message)
       [ program, pid, uid, body ] = match.slice(1)
       message = "Error: #{body}"
@@ -190,7 +192,10 @@ writeExceptions = (exceptions, message) ->
     json = inspect(exception.json, false, 1000).replace(/^(\s*\S.*)$/mg, "    $1")
     process.stdout.write "#{json}\n"
   for element in exception.stack
-    process.stdout.write "    at #{element.method} (#{element.file})\n"
+    if element.method
+      process.stdout.write "    at #{element.method} (#{element.file}:#{element.line}:#{element.column})\n"
+    else
+      process.stdout.write "    at #{element.file}:#{element.line}:#{element.column}\n"
   if exceptions.length
     writeExceptions(exceptions, "Nested exception")
   else if stderr
