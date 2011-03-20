@@ -1,0 +1,11 @@
+#!/bin/bash
+
+while read line
+do
+    fields=($line)
+    if [ "${fields[1]}" == "sudo" ]; then
+        /usr/bin/sudo /bin/cp src/sudo.js "/puppy/worker/bin/${fields[0]}"
+    fi
+    /usr/bin/sudo chown worker:worker  "/puppy/worker/bin/${fields[0]}"
+    /usr/bin/sudo chmod 550 "/puppy/worker/bin/${fields[0]}"
+done < src/doers.conf

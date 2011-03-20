@@ -1,20 +1,13 @@
 require.paths.unshift("/puppy/common/lib/node")
 
 # Require Node.js dependencies.
-fs        = require "fs"
 spawn     = require("child_process").spawn
 
-# Require logging.
-syslog    = new (require("common/syslog").Syslog)({ tag: "worker", pid: true })
-shell     = new (require("common/shell").Shell)(syslog)
-db        = require("common/database")
-
-argv      = process.argv.slice(2)
-hostname  = argv.shift()
-
-work = (database, hostname) ->
+require("common").createSystem __filename, "hostname", (system, hostname) ->
+  syslog = system.syslog
+  syslog.send "info", "Initializing."
   poll = ->
-    database.select "getNextJob", [ hostname ], "job", (jobs) ->
+    system.sql "getNextJob", [ hostname ], "job", (jobs) ->
       # Perform the first job, if one exists.
       if job = jobs.shift()
         start = new Date()
@@ -25,7 +18,6 @@ work = (database, hostname) ->
         [ program, args, input ] = command
         child = spawn "/puppy/worker/bin/#{program.replace(/:/, "_")}", args
         child.stdin.write(input) if input
-        child.stdin.end()
 
         # Children are supposed to write an error on stdout in the event of an
         # error and exit with a non-zero status in the event of an error. This
@@ -42,33 +34,28 @@ work = (database, hostname) ->
           if stderr
             syslog.send "err", "Worker recieved unexpected error messages from [#{program}] with exit code #{code}.", { command, stdout, stderr }
             process.exit 1
-          outcome = null
-          try
-            outcome = JSON.parse(stdout)
-          catch e
-            syslog.send "err", "Worker recieved malformed stdout from [#{program}] with exit code #{code}.", { command, stdout, stderr }
-            process.exit 1
           # Record the error if one was reported.
           if code
-            if outcome and /^ERROR:/.test(outcome.stdout)
-              syslog.send "err", outcome.stdout
-            else
-              syslog.send "err", "Worker recieved unexpected error messages from [#{program}] with exit code #{code}.", { command, stdout, stderr, outcome }
+            syslog.send "err", "Worker recieved error exit from [#{program}] with exit code #{code}.", { command, stdout, stderr }
             process.exit 1
 
-          outcome.command = command
           # Create a descriptive message for the logs.
-          program += " #{args.join(", ")}" if args.length
           end = new Date()
+
           outcome.duration = end.getTime() - start.getTime()
+          outcome.command = command
+          outcome.args = args
+          outcome.input = input if input
+
           if outcome.duration < 60000
-            timing = "#{outcome.duration / 1000} seconds" 
+            timing = "#{outcome.duration / 1000} seconds"
           else
-            timing = "#{Math.floor(outcome.duration / 60000)} minutes #{(outcome.duration % 60000) / 1000} seconds" 
+            timing = "#{Math.floor(outcome.duration / 60000)} minutes #{(outcome.duration % 60000) / 1000} seconds"
+
           syslog.send "info", "Worker ran [#{program}] with exit code #{code} in #{timing}.", outcome
 
           # Execute the next task, if any.
-          database.select "deleteJob", [ job.id ], (results) ->
+          system.sql "deleteJob", [ job.id ], (results) ->
             if not results.affectedRows
               syslog.send "err", "Unable to delete job.", { results, command, stdout }
               process.exit 1
@@ -76,10 +63,3 @@ work = (database, hostname) ->
       else
         setTimeout poll, 1000
   poll()
-
-syslog.send "info", "Initializing."
-db.createDatabase syslog, (database) ->
-  # Run this method every second to check for jobs to perform on a machine on
-  # behalf of the greater puppy ecosystem.
-  shell.hostname (hostname) ->
-    work(database, hostname)
