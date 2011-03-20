@@ -41,10 +41,11 @@ require("common").createSystem __filename, "hostname", (system, hostname) ->
           # Create a descriptive message for the logs.
           end = new Date()
 
-          outcome.duration = end.getTime() - start.getTime()
-          outcome.command = command
-          outcome.args = args
-          outcome.input = input if input
+          outcome =
+            duration: end.getTime() - start.getTime()
+            command: command
+            args: args
+            input: input if input
 
           if outcome.duration < 60000
             timing = "#{outcome.duration / 1000} seconds"
