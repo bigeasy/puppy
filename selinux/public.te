@@ -1,53 +1,48 @@
 # Policy module for the public interface.
 policy_module(public, 1.1.2)
 
-require {
-    type delegate_t;
-}
+gen_require(`
+    type private_public_exec_t, private_public_t;
+')
 
-########################################
-# Declarations
+type private_public_t;
+type private_public_exec_t;
 
-role public_r;                          # The public role.
+type public_receptionist_exec_t;     # The public receptionist executable.
+type public_receptionist_t;          # The public receptionist domain.
+
+puppy_sudo(public_receptionist)      # The public role exists soley to sudo.
+puppy_sudo(private_public)          # The public role exists soley to sudo.
+
+# The public roles.
 role public_r types public_receptionist_t;
-role public_r types public_sudo_t;
-puppy_delegate_roles(public_r)
+role public_r types public_receptionist_sudo_t;
 
-type public_exec_t;     # Use for both the proxy and the receptionist program.
-type public_receptionist_t;    # Invokes the public program as the puppy user.
-puppy_sudo(public)
-
-allow delegate_t public_receptionist_t:fifo_file rw_fifo_file_perms;
+# The public role 
+puppy_private_role_redux(public_r, public)
 
 # Create a restricted user, this will create basic roll and the public_t. 
 puppy_restricted_user_template(public)
 
-# The public_t is allowed to assume public_r.
-role public_r types public_t;
-
 # Domain transition to the public angent domain.
-domtrans_pattern(public_t, public_exec_t, public_receptionist_t)
-application_domain(public_receptionist_t, public_exec_t)
-allow public_t public_exec_t:lnk_file read;
+domtrans_pattern(public_t, public_receptionist_exec_t, public_receptionist_t)
+application_domain(public_receptionist_t, public_receptionist_exec_t)
+puppy_read_puppy_bin(public_t)
+read_lnk_files_pattern(public_t, public_receptionist_exec_t, public_receptionist_exec_t);
 
 # The public proxy program is a Node.js program.
 puppy_node_exec(public_receptionist_t)
 allow public_receptionist_t self:fifo_file rw_fifo_file_perms;
 puppy_exec_puppy_bin(public_receptionist_t)
-puppy_read_puppy_bin(public_t)
+puppy_read_puppy_bin(public_receptionist_t)
 
-allow public_receptionist_t public_exec_t:lnk_file read;
-allow public_t public_exec_t:lnk_file read;
+read_lnk_files_pattern(public_receptionist_t, public_receptionist_exec_t, public_receptionist_exec_t);
 
-# Write piped output.
-allow public_t self:fifo_file rw_file_perms;
-
-# Transition from public to delegate using sudo.
-
-domtrans_pattern(public_receptionist_t, sudo_exec_t, public_sudo_t)
-
-puppy_public_private(account_home)
-puppy_public_private(account_register)
+# Transition to the private_public_t type.
+domtrans_pattern(public_receptionist_sudo_t, private_public_exec_t, private_public_t)
+read_lnk_files_pattern(public_receptionist_t, private_public_t, private_public_t)
+allow private_public_t public_receptionist_t:fifo_file rw_fifo_file_perms;
+allow private_public_t public_receptionist_t:fifo_file rw_fifo_file_perms;
 
 # Write to the system log.
 logging_send_syslog_msg(public_receptionist_t)

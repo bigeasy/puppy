@@ -11,6 +11,11 @@ require {
 }
 
 type private_exec_t;
+type private_public_t;
+type private_public_exec_t;
+
+application_domain(private_public_t, private_public_exec_t)
+puppy_sudo(private_public)
 
 application_domain(delegate_t, private_exec_t)
 allow delegate_t private_exec_t:lnk_file read;

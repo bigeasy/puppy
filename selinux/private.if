@@ -47,6 +47,15 @@ template(`puppy_private_role',`
     role $1_r types $2_private_t;
     role $1_r types $2_private_sudo_t;
 ')
+template(`puppy_private_role_redux',`
+    gen_require(`
+        type private_$2_sudo_t, private_$2_t;
+    ')
+
+    # Allow the role to assume the generated domain types.
+    role $1_r types private_$2_t;
+    role $1_r types private_$2_sudo_t;
+')
 # Allow a private program to read the database password.
 template(`puppy_private_database',`
     gen_require(`
