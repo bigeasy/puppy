@@ -144,7 +144,8 @@ template(`job_system_trans',`
     puppy_sudo_system($1_job, $2)
     puppy_system_role(system, $2)
     # Allow the utility to write error messages.
-    allow policy_users_system_t worker_t:fifo_file rw_fifo_file_perms;
+    allow $2_system_t $1_job_t:fifo_file rw_fifo_file_perms;
+    allow $2_system_t worker_t:fifo_file rw_fifo_file_perms;
 ')
 ##  Create a set of derived types for Puppy worker jobs.
 template(`puppy_job_execute_redux',`
@@ -302,4 +303,8 @@ template(`puppy_job_as_worker',`
 
     corecmd_exec_shell($1_proxy_t)
     corecmd_exec_shell($1_t)
+')
+template(`puppy_rw_worker_fifo',`
+    allow $1 $2_job_proxy_t:fifo_file rw_fifo_file_perms;
+    allow $1 worker_t:fifo_file rw_fifo_file_perms;
 ')

@@ -265,29 +265,29 @@ fs_getattr_xattr_fs(policy_generate_job_t)
 ############################################################################
 
 # User policy assignment is performed as root.
-puppy_job_as_root(policy_load)
+puppy_job_as_root_redux(policy_load)
 
-job_sudo_delegate(policy_load)
-#job_delegate_trans(policy_load, policy_users)
+job_sudo_system(policy_load)
+job_system_trans(policy_load, policy_users)
 
 # Execute semanage to assign the protected policy to the user.
-seutil_run_semanage(policy_load_t, worker_r)
-allow semanage_t policy_load_proxy_t:fifo_file rw_fifo_file_perms;
+seutil_run_semanage(policy_load_job_t, worker_r)
+allow semanage_t policy_load_job_proxy_t:fifo_file rw_fifo_file_perms;
 
 # Pass host name to `policy_users`.
-hostname_exec(policy_load_t)
+hostname_exec(policy_load_job_t)
 
-# Get some output.
-allow setfiles_t policy_load_proxy_t:fifo_file { read write };
-allow load_policy_t policy_load_proxy_t:fifo_file { read write };
+# Allow output to the worker daemon.
+puppy_rw_worker_fifo(setfiles_t, policy_load)
+puppy_rw_worker_fifo(load_policy_t, policy_load)
 
 # Read and SELinux properties during build.
-selinux_get_enforce_mode(policy_load_t)
-seutil_search_default_contexts(policy_load_t)
-seutil_read_config(policy_load_t)
+selinux_get_enforce_mode(policy_load_job_t)
+seutil_search_default_contexts(policy_load_job_t)
+seutil_read_config(policy_load_job_t)
 
 # Create cache files as puppy_cache_t.
-puppy_read_cache_files(policy_load_t)
+puppy_read_cache_files(policy_load_job_t)
 
 ############################################################################
 ### Policy for `policy_make`.
@@ -309,7 +309,7 @@ puppy_manage_cache_files(policy_make_job_t)
 files_read_usr_files(policy_make_job_t)
 
 # Execute the `/puppy/sbin/user_policy`.
-allow policy_make_job_t policy_make_job_exec_t:file execute_no_trans;
+# DUBIOUS: allow policy_make_job_t policy_make_job_exec_t:file execute_no_trans;
 
 selinux_get_enforce_mode(policy_make_job_t)
 seutil_read_config(policy_make_job_t)
@@ -480,9 +480,9 @@ job_system_trans(policy_unload, policy_users)
 seutil_run_semanage(policy_unload_job_t, worker_r)
 allow semanage_t policy_unload_job_proxy_t:fifo_file rw_fifo_file_perms;
 
-# Get some output.
-allow setfiles_t policy_unload_job_proxy_t:fifo_file { read write };
-allow load_policy_t policy_unload_job_proxy_t:fifo_file { read write };
+# Allow output to the worker daemon.
+puppy_rw_worker_fifo(setfiles_t, policy_unload)
+puppy_rw_worker_fifo(load_policy_t, policy_unload)
 
 # Read and SELinux properties during build.
 selinux_get_enforce_mode(policy_unload_job_t)
@@ -516,8 +516,8 @@ seutil_run_semanage(port_label_job_t, worker_r)
 allow semanage_t port_label_job_proxy_t:fifo_file rw_fifo_file_perms;
 
 # Get some output.
-allow setfiles_t port_label_job_proxy_t:fifo_file { read write };
-allow load_policy_t port_label_job_proxy_t:fifo_file { read write };
+allow setfiles_t worker_t:fifo_file rw_fifo_file_perms;
+allow load_policy_t worker_t:fifo_file rw_fifo_file_perms;
 
 # Read and SELinux properties during build.
 selinux_get_enforce_mode(port_label_job_t)
@@ -561,13 +561,13 @@ seutil_run_semanage(port_unlabel_job_t, worker_r)
 # The semanage may report some errors to our proxy.
 
 # Get some output.
-allow setfiles_t port_unlabel_job_proxy_t:fifo_file { read write };
-allow load_policy_t port_unlabel_job_proxy_t:fifo_file { read write };
+puppy_rw_worker_fifo(setfiles_t, port_unlabel)
+puppy_rw_worker_fifo(load_policy_t, port_unlabel)
 
 # Execute semanage to assign the protected policy to the user. Allow semanage to
 # write any errors to the stderr of the proxy.
 seutil_run_semanage(port_unlabel_job_t, worker_r)
-allow semanage_t worker_t:fifo_file rw_fifo_file_perms;
+puppy_rw_worker_fifo(semanage_t, port_unlabel)
 
 # Read and SELinux properties during build.
 selinux_get_enforce_mode(port_unlabel_job_t)
