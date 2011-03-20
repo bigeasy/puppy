@@ -1,40 +1,3 @@
-########################################
-### <summary>
-###  Assign permissions for a Node.js executable.
-### </summary>
-### <param name="domain">
-###  <summary>
-###  The application domain that will run node.
-###  </summary>
-### </param>
-##
-#
-template(`puppy_node_exec',`
-    # Node.js is a bin_t.
-    corecmd_exec_bin($1)
-    # The JIT generates executable code in writable memory.
-    allow $1 self:process execmem;
-    # The Aries DNS library read nsswitch.conf for DNS lookups, regardless of
-    # whether node performs DNS lookups.
-    sysnet_read_config($1)
-    # Read the system page size from /proc/meminfo.
-    kernel_read_system_state($1)
-    # The Aries DNS library reads urandom for an encryption key it does not use.
-    dev_read_urand($1)
-    # Read and write stdin, stdout, and stderr.
-    allow $1 self:fifo_file read;
-    # The Aries DNS library reads /etc/nsswitch.conf.
-    files_read_etc_files($1)
-')
-
-template(`puppy_shell_exec',`
-    # Read system page size from /proc/meminfo. 
-    kernel_read_system_state($1)
-    # Shell programs use utility programs.
-    corecmd_exec_bin($1)
-    # Read common shell functions.
-    allow $1 private_functions_t:file read_file_perms;
-')
 
 ########################################
 ### <summary>
@@ -155,26 +118,13 @@ template(`puppy_job_sudo_root',`
 ### </param>
 ##
 #
+# Allow a job to sudo to execute a private facility.
+#   $1 - job program name, i.e. port_unlabel
 template(`job_sudo_private',`
-    gen_require(`
-        type private_exec_t, delegate_t;
-    ')
-
-    # Create a generated sudo_t type.
-    sudo_role_template($1, system_r, $1_t)
-
-    # Transition to delegate_t from the generated sudo_t.
-    domtrans_pattern($1_sudo_t, private_exec_t, delegate_t)
-
-    # Allow the sudo_t to read and write the proxy_t.
-    allow $1_sudo_t $1_proxy_t:fifo_file rw_fifo_file_perms;
-
-    # Generally sudo means running private as the delegate user.
-    puppy_read_puppy_bin($1_sudo_t)
-
-    # Allow delegate_t to read and write stdio of caller.
-    allow delegate_t $1_t:fifo_file rw_fifo_file_perms;
-    allow delegate_t $1_proxy_t:fifo_file rw_fifo_file_perms;
+    puppy_sudo($1_job)
+    role system_r types $1_job_sudo_t;
+    allow $1_job_sudo_t $1_job_proxy_t:fifo_file rw_fifo_file_perms;
+    allow $1_job_sudo_t worker_t:fifo_file rw_fifo_file_perms;
 ')
 template(`job_sudo_delegate',`
     puppy_sudo($1)
@@ -187,17 +137,62 @@ template(`job_delegate_trans',`
     puppy_delegate_role(system, $1, $2)
     allow $2_delegate_t $1_proxy_t:fifo_file rw_fifo_file_perms;
 ')
-########################################
-### <summary>
-###  Create a set of derived types for Puppy worker jobs that operate as root.
-### </summary>
-### <param name="prefix">
-###  <summary>
-###  The prefix to be used for deriving type names.
-###  </summary>
-### </param>
-##
-#
+# Transition from a job program to a private utility program.
+#   $1 - the job program, i.e. port_unlabel
+#   $2 - the private utility program, i.e. port_list
+template(`job_private_trans',`
+    gen_require(`
+        type $2_private_t;
+    ')
+    puppy_sudo_private($1_job, $2)
+    puppy_private_role(system, $2)
+    allow $2_private_t $1_job_proxy_t:fifo_file rw_fifo_file_perms;
+')
+##  Create a set of derived types for Puppy worker jobs.
+template(`puppy_job_execute_redux',`
+    # Domain types for proxy and job.
+    type $1_job_proxy_t;
+    type $1_job_t;
+
+    # Role assignments for proxy and job.
+    role system_r types $1_job_proxy_t;
+    role system_r types $1_job_t;
+
+    # The executable type.
+    type $1_job_exec_t;
+
+    # Application domains for proxy and job.
+    application_domain($1_job_t, $1_job_exec_t)
+    application_domain($1_job_proxy_t, $1_job_exec_t)
+
+    # The working script will report to the proxy script via stdio.
+    allow $1_job_t $1_job_proxy_t:fifo_file rw_fifo_file_perms;
+
+    # The transition program is always a Node.js program.
+    puppy_node_exec($1_job_proxy_t)
+
+    # The working program is always a shell program.
+    puppy_shell_exec($1_job_t)
+
+    # Read and write to stdin, stout and stderr.
+    allow $1_job_t self:fifo_file rw_fifo_file_perms;
+    allow $1_job_proxy_t self:fifo_file rw_fifo_file_perms;
+
+    # The proxy needs to execute Puppy executables.
+    puppy_exec_puppy_bin($1_job_proxy_t)
+
+    # The agent needs to execute Puppy system executables.
+    puppy_exec_puppy_sbin($1_job_t)
+
+    # Allow worker to read the NPM link to the executable.
+    allow worker_t $1_job_exec_t:lnk_file read;
+
+    # Alllow the proxy to read the NPM link to the executable.
+    allow $1_job_proxy_t $1_job_exec_t:lnk_file read;
+
+    allow $1_job_t worker_t:fifo_file rw_fifo_file_perms;
+')
+
 template(`puppy_job_execute',`
     # Domain types for proxy and job.
     type $1_proxy_t;
@@ -240,6 +235,23 @@ template(`puppy_job_execute',`
     allow $1_proxy_t $1_exec_t:lnk_file read;
 
     allow $1_t worker_t:fifo_file rw_fifo_file_perms;
+')
+
+template(`puppy_job_as_root_redux',`
+    puppy_job_execute_redux($1) 
+
+    # Transition from worker to the proxy domain, from the transition program to
+    # the sudo domain, from sudo domain to the job domain.
+    domtrans_pattern(worker_t, $1_job_exec_t, $1_job_proxy_t)
+    sudo_role_template($1_job_proxy, system_r, $1_job_proxy_t)
+    domtrans_pattern($1_job_proxy_sudo_t, $1_job_exec_t, $1_job_t)
+
+    allow $1_job_proxy_t self:fifo_file write;
+
+    # The proxy sudo needs to read Puppy executables.
+    puppy_read_puppy_sbin($1_job_proxy_sudo_t)
+
+    allow $1_job_proxy_sudo_t worker_t:fifo_file rw_fifo_file_perms;
 ')
 
 template(`puppy_job_as_root',`

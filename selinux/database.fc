@@ -2,3 +2,4 @@
 /puppy/database/bin/database gen_context(system_u:object_r:database_exec_t, s0)
 /puppy/database/bin/database@0.0.1 gen_context(system_u:object_r:database_exec_t, s0)
 /puppy/database/lib/node/.npm/database/0.0.1/package/bin/database.js gen_context(system_u:object_r:database_exec_t, s0)
+

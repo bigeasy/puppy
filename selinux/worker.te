@@ -33,6 +33,8 @@ application_domain(janitor_mysql_t, janitor_mysql_exec_t)
 
 puppy_sudo(worker)
 role system_r types worker_sudo_t;
+role system_r types worker_t;
+
 domtrans_pattern(worker_sudo_t, database_exec_t, database_t)
 allow database_t worker_t:fifo_file rw_fifo_file_perms;
 
@@ -50,12 +52,10 @@ files_type(worker_tmp_t)
 type private_functions_t;
 files_type(private_functions_t)
 
-## Daemonize.
-init_daemon_domain(worker_t, worker_exec_t)
+puppy_try_catch(worker)
 
-## Worker spool directory.
-type worker_spool_t;
-files_type(worker_spool_t)
+## Daemonize.
+init_daemon_domain(worker_catch_t, worker_catch_exec_t)
 
 # The worker daemon is a Node.js program.
 puppy_node_exec(worker_t)
@@ -63,9 +63,7 @@ allow worker_t worker_exec_t:lnk_file read_lnk_file_perms;
 
 # Worker needs to execute Puppy binaries.
 puppy_exec_puppy_bin(worker_t)
-
-allow worker_t worker_spool_t:dir rw_dir_perms;
-allow worker_t worker_spool_t:file manage_file_perms;
+allow worker_t worker_exec_t:file execute_no_trans;
 
 allow worker_t etc_t:file read_file_perms;
 
@@ -505,99 +503,101 @@ hostname_exec(policy_unload_t)
 ### Policy for `port_labelify`.
 ############################################################################
 
-type port_labelify_exec_t;
+type port_labelify_job_exec_t;
 
 ############################################################################
 ### Policy for `port_label`.
 ############################################################################
 
 # User policy assignment is performed as root.
-puppy_job_as_root(port_label)
+puppy_job_as_root_redux(port_label)
 
-job_sudo_delegate(port_label)
-job_delegate_trans(port_label, port_list)
+job_sudo_private(port_label)
+job_private_trans(port_label, port_list)
 
 # Execute semanage to assign the protected policy to the user.
-seutil_run_semanage(port_label_t, worker_r)
-allow semanage_t port_label_proxy_t:fifo_file rw_fifo_file_perms;
+seutil_run_semanage(port_label_job_t, worker_r)
+allow semanage_t port_label_job_proxy_t:fifo_file rw_fifo_file_perms;
 
 # Get some output.
-allow setfiles_t port_label_proxy_t:fifo_file { read write };
-allow load_policy_t port_label_proxy_t:fifo_file { read write };
+allow setfiles_t port_label_job_proxy_t:fifo_file { read write };
+allow load_policy_t port_label_job_proxy_t:fifo_file { read write };
 
 # Read and SELinux properties during build.
-selinux_get_enforce_mode(port_label_t)
-seutil_search_default_contexts(port_label_t)
-seutil_read_config(port_label_t)
+selinux_get_enforce_mode(port_label_job_t)
+seutil_search_default_contexts(port_label_job_t)
+seutil_read_config(port_label_job_t)
 
 # Allow script to create a temporary file for here-doc.
-type port_label_tmp_t;
-files_tmp_file(port_label_tmp_t)
-manage_files_pattern(port_label_t, port_label_tmp_t, port_label_tmp_t)
-files_tmp_filetrans(port_label_t, port_label_tmp_t, file)
+type port_label_job_tmp_t;
+files_tmp_file(port_label_job_tmp_t)
+manage_files_pattern(port_label_job_t, port_label_job_tmp_t, port_label_job_tmp_t)
+files_tmp_filetrans(port_label_job_t, port_label_job_tmp_t, file)
 
 # This allows the reading of fielsystem extended attributes. It is triggered by
 # the bash here-doc syntax. My guess is that the temp file creation checks for
 # available disk space prior to creating the temp file. 
-fs_getattr_xattr_fs(port_label_t)
+fs_getattr_xattr_fs(port_label_job_t)
 
 # Read Perl libraries.
-files_read_usr_files(port_label_t)
+files_read_usr_files(port_label_job_t)
 
 # Get the hostname.
-hostname_exec(port_label_t)
+hostname_exec(port_label_job_t)
 
 # Execute `port_labelify`.
-application_domain(port_label_t, port_labelify_exec_t)
-allow port_label_t port_labelify_exec_t:file execute_no_trans;
+application_domain(port_label_job_t, port_labelify_job_exec_t)
+allow port_label_job_t port_labelify_job_exec_t:file execute_no_trans;
 
 ############################################################################
 ### Policy for `port_unlabel`.
 ############################################################################
 
 # User policy assignment is performed as root.
-puppy_job_as_root(port_unlabel)
+puppy_job_as_root_redux(port_unlabel)
 
-job_sudo_delegate(port_unlabel)
-job_delegate_trans(port_unlabel, port_list)
+job_sudo_private(port_unlabel)
+job_private_trans(port_unlabel, port_list)
 
 # Execute semanage to assign the protected policy to the user.
-seutil_run_semanage(port_unlabel_t, worker_r)
-allow semanage_t port_unlabel_proxy_t:fifo_file rw_fifo_file_perms;
+seutil_run_semanage(port_unlabel_job_t, worker_r)
+
+# The semanage may report some errors to our proxy.
 
 # Get some output.
-allow setfiles_t port_unlabel_proxy_t:fifo_file { read write };
-allow load_policy_t port_unlabel_proxy_t:fifo_file { read write };
+allow setfiles_t port_unlabel_job_proxy_t:fifo_file { read write };
+allow load_policy_t port_unlabel_job_proxy_t:fifo_file { read write };
 
-# Execute semanage to assign the protected policy to the user.
-seutil_run_semanage(port_unlabel_t, worker_r)
-allow semanage_t port_unlabel_proxy_t:fifo_file rw_fifo_file_perms;
+# Execute semanage to assign the protected policy to the user. Allow semanage to
+# write any errors to the stderr of the proxy.
+seutil_run_semanage(port_unlabel_job_t, worker_r)
+allow semanage_t port_unlabel_job_proxy_t:fifo_file rw_fifo_file_perms;
 
 # Read and SELinux properties during build.
-selinux_get_enforce_mode(port_unlabel_t)
-seutil_search_default_contexts(port_unlabel_t)
-seutil_read_config(port_unlabel_t)
+selinux_get_enforce_mode(port_unlabel_job_t)
+seutil_search_default_contexts(port_unlabel_job_t)
+seutil_read_config(port_unlabel_job_t)
 
 # Allow script to create a temporary file for here-doc.
-type port_unlabel_tmp_t;
-files_tmp_file(port_unlabel_tmp_t)
-manage_files_pattern(port_unlabel_t, port_unlabel_tmp_t, port_unlabel_tmp_t)
-files_tmp_filetrans(port_unlabel_t, port_unlabel_tmp_t, file)
+type port_unlabel_job_tmp_t;
+files_tmp_file(port_unlabel_job_tmp_t)
+manage_files_pattern(port_unlabel_job_t, port_unlabel_job_tmp_t, port_unlabel_job_tmp_t)
+files_tmp_filetrans(port_unlabel_job_t, port_unlabel_job_tmp_t, file)
 
 # This allows the reading of fielsystem extended attributes. It is triggered by
 # the bash here-doc syntax. My guess is that the temp file creation checks for
 # available disk space prior to creating the temp file. 
-fs_getattr_xattr_fs(port_unlabel_t)
+fs_getattr_xattr_fs(port_unlabel_job_t)
 
 # Read Perl libraries.
-files_read_usr_files(port_unlabel_t)
+files_read_usr_files(port_unlabel_job_t)
 
 # Get the hostname.
-hostname_exec(port_unlabel_t)
+hostname_exec(port_unlabel_job_t)
 
 # Execute `port_labelify`.
-application_domain(port_unlabel_t, port_labelify_exec_t)
-allow port_unlabel_t port_labelify_exec_t:file execute_no_trans;
+application_domain(port_unlabel_job_t, port_labelify_job_exec_t)
+allow port_unlabel_job_t port_labelify_job_exec_t:file execute_no_trans;
 
 ############################################################################
 ### Policy for `user_authorize`.

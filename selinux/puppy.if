@@ -1,36 +1,47 @@
-## <summary></summary>
-template(`_puppy_sudo_delegate',`
-    gen_require(`
-        type delegate_t, database_t, database_exec_t;
-    ')
-    # The agent role will be able to assume the puppy_t and database_t domain types.
-    # TODO Can I put these on one line?
-#    puppy_role($1)
-
-    # The agent program is an application in the puppy_t domain. 
-    application_domain(puppy_t, $1_exec_t)
-
-    # TODO I can probably make my own sudo template that is stricter, by
-    # forbidding execute_notrans, forcing the specification of a transition.
-
-    # The agent domain type can sudo.
-    sudo_role_template($1, $1_r, $1_agent_t)
-
-    allow $1_sudo_t puppy_t:key search;
-    domtrans_pattern(puppy_t, sudo_exec_t, $1_sudo_t)
-
-    # When the agent domain comes out of sudo it is in the puppy_t domain.
-    domtrans_pattern($1_sudo_t, $1_exec_t, puppy_t)
-    domtrans_pattern($1_sudo_t, database_exec_t, database_t)
-
-    # Allow both sudo and puppy domains to read the NPM link of the agent
-    # program.
-    allow $1_sudo_t $1_exec_t:lnk_file read;
-    allow puppy_t $1_exec_t:lnk_file read;
-
-    # Read and write to the agent program via stdio.
-    allow puppy_t $1_agent_t:fifo_file rw_fifo_file_perms;
+########################################
+### <summary>
+###  Assign permissions for a Node.js executable.
+### </summary>
+### <param name="domain">
+###  <summary>
+###  The application domain that will run node.
+###  </summary>
+### </param>
+##
+#
+# Permissions necessary to execute a Puppy Node.js program.
+#   $1 - full context type, i.e. worker_t
+template(`puppy_node_exec',`
+    # Node.js is a bin_t.
+    corecmd_exec_bin($1)
+    # The JIT generates executable code in writable memory.
+    allow $1 self:process execmem;
+    # The Aries DNS library read nsswitch.conf for DNS lookups, regardless of
+    # whether node performs DNS lookups.
+    sysnet_read_config($1)
+    # Read the system page size from /proc/meminfo.
+    kernel_read_system_state($1)
+    # The Aries DNS library reads urandom for an encryption key it does not use.
+    dev_read_urand($1)
+    # Read and write stdin, stdout, and stderr.
+    allow $1 self:fifo_file read;
+    # The Aries DNS library reads /etc/nsswitch.conf.
+    files_read_etc_files($1)
 ')
+
+# Permissions necessary to execute a Puppy shell program.
+#   $1 - full context type, i.e. worker_t
+template(`puppy_shell_exec',`
+    # Read system page size from /proc/meminfo. 
+    kernel_read_system_state($1)
+    # Shell programs use utility programs.
+    corecmd_exec_bin($1)
+    # Read common shell functions.
+    allow $1 private_functions_t:file read_file_perms;
+')
+
+# Assign the delegate type to a number of roles.
+#   $1 - full role, i.e. liminal_r
 template(`puppy_delegate_roles',`
     gen_require(`
         type delegate_t, delegate_sudo_t, database_t;
@@ -41,6 +52,9 @@ template(`puppy_delegate_roles',`
     role $1 types delegate_sudo_t;
     role $1 types database_t;
 ')
+
+# Highly restricted user template for the public ssh gateway.
+#   $1 - prefix for role and context type, i.e. public
 template(`puppy_restricted_user_template',`
 	gen_require(`
 		attribute unpriv_userdomain;
@@ -69,17 +83,8 @@ template(`puppy_restricted_user_template',`
 	dev_read_urand($1_t)
 	typeattribute $1_t unpriv_userdomain;
 ')
-########################################
-## <summary>
-##	Read Puppy configuration files.
-## </summary>
-## <param name="role">
-##	<summary>
-##	Role allowed access.
-##	</summary>
-## </param>
-## <rolecap/>
-#
+# Read Puppy configuration files in "/etc/puppy".
+#   $1 - full type context, i.e. user_config_t
 template(`puppy_read_puppy_etc',`
     gen_require(`
         type puppy_t, puppy_etc_t;
@@ -88,17 +93,8 @@ template(`puppy_read_puppy_etc',`
     read_files_pattern($1, puppy_etc_t, puppy_etc_t)
     read_lnk_files_pattern($1, puppy_etc_t, puppy_etc_t)
 ')
-########################################
-## <summary>
-##	Read Puppy binary files.
-## </summary>
-## <param name="role">
-##	<summary>
-##	Role allowed access.
-##	</summary>
-## </param>
-## <rolecap/>
-#
+# Read Puppy binary direcotries and files in /puppy/[^\/]+/bin.
+#   $1 - full type context, i.e. protected_t
 template(`puppy_read_puppy_bin',`
     gen_require(`
         type puppy_t, puppy_bin_t;
@@ -109,17 +105,8 @@ template(`puppy_read_puppy_bin',`
     read_files_pattern($1, puppy_bin_t, puppy_bin_t)
     read_lnk_files_pattern($1, puppy_bin_t, puppy_bin_t)
 ')
-########################################
-## <summary>
-##	Read Puppy system binary files.
-## </summary>
-## <param name="role">
-##	<summary>
-##	Role allowed access.
-##	</summary>
-## </param>
-## <rolecap/>
-#
+# Read Puppy binary direcotries and files in /puppy/[^\/]+/sbin.
+#   $1 - full type context, i.e. protected_t
 template(`puppy_read_puppy_sbin',`
     gen_require(`
         type puppy_t, puppy_sbin_t;
@@ -127,6 +114,37 @@ template(`puppy_read_puppy_sbin',`
     list_dirs_pattern($1, puppy_t, puppy_t)
     read_files_pattern($1, puppy_sbin_t, puppy_sbin_t)
     list_dirs_pattern($1, puppy_lib_t, puppy_lib_t)
+')
+# Execute a launcher program that in turn launches the real program.
+#   $1 - the program prefix, i.e. worker
+template(`puppy_try_catch',`
+    type $1_catch_t;
+
+    # Catch launchers are all copies the same node program.
+    puppy_node_exec($1_catch_t)
+
+    # Read puppy executables.
+    puppy_exec_puppy_bin($1_catch_t)
+
+    # The executable type.
+    type $1_catch_exec_t;
+
+    # Create the application domains.
+    application_domain($1_catch_t, $1_catch_exec_t)
+    application_domain($1_t, $1_exec_t)
+
+    # Transition from catch to the main domain.
+    domtrans_pattern($1_catch_t, $1_exec_t, $1_t)
+
+    # Send the logging message.
+    logging_send_syslog_msg($1_catch_t)
+
+    # Allow the program to read and write to the catch proxy.
+    allow $1_catch_t self:fifo_file write;
+    allow $1_t $1_catch_t:fifo_file rw_fifo_file_perms;
+
+    # Allow the catch proxy to read the NPM link to the executable.
+    read_lnk_files_pattern($1_catch_t, $1_exec_t, $1_exec_t)
 ')
 template(`puppy_exec_puppy_bin',`
     gen_require(`

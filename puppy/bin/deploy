@@ -92,20 +92,27 @@ fi
 copy_files puppy/bin /puppy/$basename/bin $user:$user $mode
 copy_files puppy/sbin /puppy/$basename/sbin $user:root 550
 
+ownership=$user:$user
+
 # Set ownership of Node.js programs.
 if [ -d src -a ! -d lib ]; then
     for coffee in $(ls src/*.coffee | /bin/sort); do
         program=$(echo $coffee | /bin/sed 's/src\/\(.*\).coffee$/\1/')
         if [ -e /puppy/$basename/bin/$program ]; then
-            ownership=$user:$user
             /usr/bin/sudo /bin/chmod $mode /puppy/$basename/bin/$program@* /puppy/$basename/bin/$program
             /usr/bin/sudo /bin/chown $ownership /puppy/$basename/bin/$program@* /puppy/$basename/bin/$program
         fi
     done
 fi
 
-if [ -e ./deployment ]; then
-    ./deployment
-fi
+source=$(dirname $project)
+
+for file in $(ls src/*.coffee | grep '_try.coffee$')
+do
+    dest=$(/bin/basename $file | /bin/sed 's/^\(.*\)_try.coffee/\1/')
+    /usr/bin/sudo /bin/cp /puppy/system/bin/launcher /puppy/$basename/bin/$dest
+    /usr/bin/sudo chown $ownership /puppy/$basename/bin/$dest
+    /usr/bin/sudo chmod 550 /puppy/$basename/bin/$dest
+done
 
 /usr/bin/sudo /sbin/restorecon -R /puppy

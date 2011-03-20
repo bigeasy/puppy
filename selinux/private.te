@@ -72,8 +72,8 @@ puppy_delegate_database(policy_users)
 ### Policy for `port_list`.
 ############################################################################
 
-puppy_delegate(port_list)
-puppy_delegate_database(port_list)
+puppy_private(port_list)
+puppy_private_database(port_list)
 
 ############################################################################
 ### Policy for `queue_config`.
