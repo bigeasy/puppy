@@ -571,7 +571,7 @@ allow load_policy_t port_unlabel_job_proxy_t:fifo_file { read write };
 # Execute semanage to assign the protected policy to the user. Allow semanage to
 # write any errors to the stderr of the proxy.
 seutil_run_semanage(port_unlabel_job_t, worker_r)
-allow semanage_t port_unlabel_job_proxy_t:fifo_file rw_fifo_file_perms;
+allow semanage_t worker_t:fifo_file rw_fifo_file_perms;
 
 # Read and SELinux properties during build.
 selinux_get_enforce_mode(port_unlabel_job_t)

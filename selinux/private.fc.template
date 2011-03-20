@@ -20,7 +20,7 @@ account_apps                try         private
 #app_users                   try
 #node_ready                  try
 #policy_users                try
-port_list                   try         private
+port_list                   direct        private
 #user_activation             try
 #user_keys                   try
 #user_ready                  try
