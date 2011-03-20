@@ -1,0 +1,69 @@
+# 
+template(`puppy_sudo_private', `
+    gen_require(`
+        type $2_private_sudo_t, $2_private_t, $2_private_catch_t, $2_private_catch_exec_t;
+    ')
+    domtrans_pattern($1_sudo_t, $2_private_catch_exec_t, $2_private_catch_t)
+')
+# Create a definition for a private program.
+#   $1 - the type name prefix used to derive type names, i.e. app_list
+template(`puppy_private', `
+    # The delegate domain.
+    type $1_private_t;
+    type $1_private_exec_t;
+    
+    puppy_try_catch($1_private)
+
+    # Run Node.js.
+    puppy_node_exec($1_private_t)
+
+    # Execute the puppy binary files.
+    puppy_exec_puppy_bin($1_private_t)
+
+    # Allow read and write of stdio.
+    allow $1_private_t self:fifo_file rw_fifo_file_perms;
+
+    # Allow sending of syslog messages.
+    logging_send_syslog_msg($1_private_t)
+
+    # Allow sudo to database.
+    puppy_sudo($1_private)
+
+    # Read link files created by NPM to the actual executable.
+    read_lnk_files_pattern($1_private_t, $1_private_exec_t, $1_private_exec_t)
+
+    # Create the application domain.
+    application_domain($1_private_t, $1_private_exec_t)
+')
+# Allow the private type context to execute in a given role.
+#   $1 - the role, i.e. system
+#   $2 - 
+template(`puppy_private_role',`
+    gen_require(`
+        type $2_private_sudo_t, $2_private_t;
+    ')
+
+    # Allow the role to assume the generated domain types.
+    role $1_r types $2_private_t;
+    role $1_r types $2_private_sudo_t;
+')
+# Allow a private program to read the database password.
+template(`puppy_private_database',`
+    gen_require(`
+        type database_t, database_exec_t, $1_private_sudo_t;
+    ')
+    # Allow the database utility to write to distpatcher stdio.
+    allow database_t $1_private_t:fifo_file rw_fifo_file_perms;
+
+    # Query MySQL.
+    puppy_mysql($1_private_t)
+
+    # Execute the configuration reader.
+    domtrans_pattern($1_private_sudo_t, database_exec_t, database_t)
+')
+template(`puppy_private_hostname',`
+    gen_require(`
+        type $1_private_t;
+    ')
+    hostname_exec($1_private_t)
+')

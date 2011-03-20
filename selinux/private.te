@@ -18,6 +18,14 @@ allow delegate_t private_exec_t:lnk_file read;
 #puppyish(private)
 
 ############################################################################
+### Policy for `account_apps`.
+############################################################################
+
+puppy_private(account_apps)
+puppy_private_database(account_apps)
+puppy_private_hostname(account_apps)
+
+############################################################################
 ### Policy for `db_password`.
 ############################################################################
 
@@ -67,13 +75,6 @@ puppy_delegate_hostname(config_mysql)
 
 puppy_delegate(policy_users)
 puppy_delegate_database(policy_users)
-
-############################################################################
-### Policy for `port_list`.
-############################################################################
-
-puppy_private(port_list)
-puppy_private_database(port_list)
 
 ############################################################################
 ### Policy for `queue_config`.

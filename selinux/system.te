@@ -1,0 +1,13 @@
+# Policy module for private utilities.
+#
+# REMEMER: You can't use exec type, _exec_t,  in the file contexts until you
+# declare a domain_trans_pattern or application_domain somewhere else in the
+# policy with the exec type.
+policy_module(private,1.0.0)
+
+############################################################################
+### Policy for `port_list`.
+############################################################################
+
+puppy_system(port_list)
+puppy_system_database(port_list)

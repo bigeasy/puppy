@@ -35,10 +35,6 @@ template(`puppy_worker_job',`
     
     ## Read/Write Pipes.
     allow $1_job_t self:fifo_file rw_fifo_file_perms;
-
-    # Execute the private program.
-    can_exec($1_job_t, private_exec_t)
-    allow $1_job_t private_exec_t:lnk_file read_lnk_file_perms;
 ')
 
 ########################################
@@ -120,7 +116,7 @@ template(`puppy_job_sudo_root',`
 #
 # Allow a job to sudo to execute a private facility.
 #   $1 - job program name, i.e. port_unlabel
-template(`job_sudo_private',`
+template(`job_sudo_system',`
     puppy_sudo($1_job)
     role system_r types $1_job_sudo_t;
     allow $1_job_sudo_t $1_job_proxy_t:fifo_file rw_fifo_file_perms;
@@ -138,16 +134,16 @@ template(`job_delegate_trans',`
     puppy_delegate_role(system, $1, $2)
     allow $2_delegate_t $1_proxy_t:fifo_file rw_fifo_file_perms;
 ')
-# Transition from a job program to a private utility program.
+# Transition from a job program to a system utility program.
 #   $1 - the job program, i.e. port_unlabel
-#   $2 - the private utility program, i.e. port_list
-template(`job_private_trans',`
+#   $2 - the system utility program, i.e. port_list
+template(`job_system_trans',`
     gen_require(`
-        type $2_private_t;
+        type $2_system_t;
     ')
-    puppy_sudo_private($1_job, $2)
-    puppy_private_role(system, $2)
-    allow $2_private_t $1_job_proxy_t:fifo_file rw_fifo_file_perms;
+    puppy_sudo_system($1_job, $2)
+    puppy_system_role(system, $2)
+    allow $2_system_t $1_job_proxy_t:fifo_file rw_fifo_file_perms;
 ')
 ##  Create a set of derived types for Puppy worker jobs.
 template(`puppy_job_execute_redux',`

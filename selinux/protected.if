@@ -1,3 +1,8 @@
+template(`protected_sudo_private',`
+    gen_require(`
+        type $2_private_catch_t, $2_private_catch_exec_t;
+    ')
+')
 # TODO Probably unnecessary.
 template(`protected_program',`
     # Domain types for proxy and job.

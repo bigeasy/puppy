@@ -11,7 +11,6 @@ require {
     type database_exec_t;
     type database_t;
     role system_r;
-    type private_exec_t;
     type database_t;
     type puppy_t;
     type setfiles_exec_t;
@@ -91,7 +90,7 @@ logging_send_syslog_msg(worker_t)
 puppy_job_as_worker(worker_account_ready)
 
 job_sudo_delegate(worker_account_ready)
-job_delegate_trans(worker_account_ready, private_account_ready)
+#job_delegate_trans(worker_account_ready, private_account_ready)
 
 ############################################################################
 ### Policy for `app_config`.
@@ -101,7 +100,7 @@ job_delegate_trans(worker_account_ready, private_account_ready)
 puppy_job_as_worker(app_config)
 
 job_sudo_delegate(app_config)
-job_delegate_trans(app_config, queue_config)
+#job_delegate_trans(app_config, queue_config)
 
 ############################################################################
 ### Policy for `daemon_start`.
@@ -186,12 +185,12 @@ allow init_restorecon_t file_type:file getattr;
 puppy_job_sudo_root(mysql_create)
 
 job_sudo_delegate(mysql_create)
-job_delegate_trans(mysql_create, db_password)
+#job_delegate_trans(mysql_create, db_password)
 
 domtrans_pattern(mysql_create_sudo_t, janitor_mysql_exec_t, janitor_mysql_t)
 
 role system_r types janitor_mysql_t;
-allow db_password_delegate_t mysql_create_proxy_t:fifo_file rw_fifo_file_perms;
+#allow db_password_delegate_t mysql_create_proxy_t:fifo_file rw_fifo_file_perms;
 allow mysql_create_sudo_t mysql_create_proxy_t:fifo_file rw_fifo_file_perms;
 allow janitor_mysql_t mysql_create_proxy_t:fifo_file rw_fifo_file_perms;
 allow janitor_mysql_t mysql_create_t:fifo_file rw_fifo_file_perms;
@@ -218,14 +217,14 @@ userdom_read_user_home_content_files(janitor_mysql_t)
 puppy_job_sudo_root(mysql_grant)
 
 job_sudo_delegate(mysql_grant)
-job_delegate_trans(mysql_grant, db_password)
-job_delegate_trans(mysql_grant, app_users)
+#job_delegate_trans(mysql_grant, db_password)
+#job_delegate_trans(mysql_grant, app_users)
 
 allow mysql_grant_sudo_t mysql_grant_proxy_t:fifo_file rw_fifo_file_perms;
 allow janitor_mysql_t mysql_grant_t:fifo_file rw_fifo_file_perms;
 allow janitor_mysql_t mysql_grant_proxy_t:fifo_file rw_fifo_file_perms;
-allow app_users_delegate_t mysql_grant_proxy_t:fifo_file rw_fifo_file_perms;
-allow db_password_delegate_t mysql_grant_proxy_t:fifo_file rw_fifo_file_perms;
+#allow app_users_delegate_t mysql_grant_proxy_t:fifo_file rw_fifo_file_perms;
+#allow db_password_delegate_t mysql_grant_proxy_t:fifo_file rw_fifo_file_perms;
 
 domtrans_pattern(mysql_grant_sudo_t, janitor_mysql_exec_t, janitor_mysql_t)
 
@@ -236,11 +235,11 @@ domtrans_pattern(mysql_grant_sudo_t, janitor_mysql_exec_t, janitor_mysql_t)
 puppy_job_as_worker(policy_generate)
 
 job_sudo_delegate(policy_generate)
-job_delegate_trans(policy_generate, policy_users)
+#job_delegate_trans(policy_generate, policy_users)
 
 allow policy_generate_sudo_t worker_t:fifo_file rw_fifo_file_perms;
 
-allow policy_users_delegate_t policy_generate_proxy_t:fifo_file rw_fifo_file_perms;
+#allow policy_users_delegate_t policy_generate_proxy_t:fifo_file rw_fifo_file_perms;
 
 # Pass host name to `user_policy`.
 hostname_exec(policy_generate_t)
@@ -270,7 +269,7 @@ fs_getattr_xattr_fs(policy_generate_t)
 puppy_job_as_root(policy_load)
 
 job_sudo_delegate(policy_load)
-job_delegate_trans(policy_load, policy_users)
+#job_delegate_trans(policy_load, policy_users)
 
 # Execute semanage to assign the protected policy to the user.
 seutil_run_semanage(policy_load_t, worker_r)
@@ -298,11 +297,11 @@ puppy_read_cache_files(policy_load_t)
 puppy_job_as_worker(policy_make)
 
 job_sudo_delegate(policy_make)
-job_delegate_trans(policy_make, policy_users)
+#job_delegate_trans(policy_make, policy_users)
 
 allow policy_make_sudo_t worker_t:fifo_file rw_fifo_file_perms;
 
-allow policy_users_delegate_t policy_make_proxy_t:fifo_file rw_fifo_file_perms;
+#allow policy_users_delegate_t policy_make_proxy_t:fifo_file rw_fifo_file_perms;
 
 # Pass host name to `user_policy`.
 hostname_exec(policy_make_t)
@@ -328,8 +327,8 @@ seutil_search_default_contexts(policy_make_t)
 puppy_job_as_root(user_config)
 
 job_sudo_delegate(user_config)
-job_delegate_trans(user_config, config_app)
-job_delegate_trans(user_config, config_mysql)
+#job_delegate_trans(user_config, config_app)
+#job_delegate_trans(user_config, config_mysql)
 
 # Execute semanage to assign the protected port to the user.
 seutil_run_semanage(user_config_t, worker_r)
@@ -383,7 +382,7 @@ usermanage_domtrans_useradd(user_group_t)
 puppy_job_as_worker(user_invite)
 
 job_sudo_delegate(user_invite)
-job_delegate_trans(user_invite, user_activation)
+#job_delegate_trans(user_invite, user_activation)
 
 puppy_node_exec(user_invite_t)
 
@@ -429,7 +428,7 @@ files_read_etc_files(user_provision_t)
 puppy_job_as_worker(worker_node_ready)
 
 job_sudo_delegate(worker_node_ready)
-job_delegate_trans(worker_node_ready, private_node_ready)
+#job_delegate_trans(worker_node_ready, private_node_ready)
 
 hostname_exec(worker_node_ready_t)
 
@@ -441,8 +440,8 @@ hostname_exec(worker_node_ready_t)
 puppy_job_as_worker(policy_ready)
 
 job_sudo_delegate(policy_ready)
-job_delegate_trans(policy_ready, policy_users)
-job_delegate_trans(policy_ready, user_ready)
+#job_delegate_trans(policy_ready, policy_users)
+#job_delegate_trans(policy_ready, user_ready)
 
 # Execute semanage to assign the protected policy to the user.
 seutil_run_semanage(policy_ready_t, worker_r)
@@ -478,7 +477,7 @@ allow user_skel_t self:capability { dac_read_search dac_override };
 puppy_job_as_root(policy_unload)
 
 job_sudo_delegate(policy_unload)
-job_delegate_trans(policy_unload, policy_users)
+#job_delegate_trans(policy_unload, policy_users)
 
 # Execute semanage to assign the protected policy to the user.
 seutil_run_semanage(policy_unload_t, worker_r)
@@ -512,8 +511,8 @@ type port_labelify_job_exec_t;
 # User policy assignment is performed as root.
 puppy_job_as_root_redux(port_label)
 
-job_sudo_private(port_label)
-job_private_trans(port_label, port_list)
+job_sudo_system(port_label)
+job_system_trans(port_label, port_list)
 
 # Execute semanage to assign the protected policy to the user.
 seutil_run_semanage(port_label_job_t, worker_r)
@@ -556,8 +555,8 @@ allow port_label_job_t port_labelify_job_exec_t:file execute_no_trans;
 # User policy assignment is performed as root.
 puppy_job_as_root_redux(port_unlabel)
 
-job_sudo_private(port_unlabel)
-job_private_trans(port_unlabel, port_list)
+job_sudo_system(port_unlabel)
+job_system_trans(port_unlabel, port_list)
 
 # Execute semanage to assign the protected policy to the user.
 seutil_run_semanage(port_unlabel_job_t, worker_r)
@@ -607,7 +606,7 @@ allow port_unlabel_job_t port_labelify_job_exec_t:file execute_no_trans;
 puppy_job_as_root(user_authorize)
 
 job_sudo_delegate(user_authorize)
-job_delegate_trans(user_authorize, user_keys)
+#job_delegate_trans(user_authorize, user_keys)
 
 # Execute hostname. 
 hostname_exec(user_authorize_t)
@@ -624,7 +623,7 @@ userdom_manage_home_role(system_r, user_authorize_t)
 # List the home directories.
 #userdom_manage_user_home_dirs(user_authorize_t)
 
-domtrans_pattern(user_authorize_t, private_exec_t, delegate_t)
+#domtrans_pattern(user_authorize_t, private_exec_t, delegate_t)
 
 ############################################################################
 ### Policy for `user_chown`.

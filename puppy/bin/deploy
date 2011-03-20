@@ -77,12 +77,9 @@ function copy_files()
 }
 
 # Chose an owner and mode based on the project directory name. Slightly kludgey.
-if [ $basename == "system" ]; then
+if [ $basename == "janitor" ]; then
     user=root
     mode=755
-elif [ $basename == "job" ]; then
-    user=worker
-    mode=500
 else
     user=$basename
     mode=550
@@ -110,7 +107,7 @@ source=$(dirname $project)
 for file in $(ls src/*.coffee | grep '_try.coffee$')
 do
     dest=$(/bin/basename $file | /bin/sed 's/^\(.*\)_try.coffee/\1/')
-    /usr/bin/sudo /bin/cp /puppy/system/bin/launcher /puppy/$basename/bin/$dest
+    /usr/bin/sudo /bin/cp /puppy/janitor/bin/launcher /puppy/$basename/bin/$dest
     /usr/bin/sudo chown $ownership /puppy/$basename/bin/$dest
     /usr/bin/sudo chmod 550 /puppy/$basename/bin/$dest
 done

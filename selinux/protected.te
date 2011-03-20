@@ -25,14 +25,6 @@ allow protected_t protected_exec_t:lnk_file read_lnk_file_perms;
 # The proxy needs to read Puppy executables.
 puppy_read_puppy_bin(protected_t)
 
-############################################################################
-### Policy for `account_apps`.
-############################################################################
-
-puppy_private(account_apps)
-puppy_private_role(protected, account_apps)
-puppy_private_database(account_apps)
-puppy_private_hostname(account_apps)
 
 ############################################################################
 ### Policy for `account_protected`.
