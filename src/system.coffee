@@ -184,7 +184,7 @@ class Database
   err: (message, context) ->
     if context
       json = JSON.stringify(context, null, 2).replace(/^(\s*\S.*)$/mg, "    $1")
-      "#{message}\n\nContext:\n#{json}\n"
+      "#{message}\n\n#{json}\n"
     else
       message
 
