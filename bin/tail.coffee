@@ -90,7 +90,7 @@ fs.open "/var/log/messages", "r", (error, fd) ->
                   json.unshift line
                 json.unshift line
                 json = json.join "\n"
-              if stderr.length >= 4 and stderr[0] is "" and location = /^(.*):(\d+)$/.exec(stderr[1]) and column = /^(\s*)\^$/.exec(stderr[3])
+              if stderr.length >= 4 and stderr[0] is "" and (location = /^(.*):(\d+)$/.exec(stderr[1])) and (column = /^(\s*)\^$/.exec(stderr[3]))
                 snippet =
                   file: location[1]
                   text: stderr[2]
@@ -120,6 +120,11 @@ fs.open "/var/log/messages", "r", (error, fd) ->
               process.stdout.write "#{json}\n\n"
             if record.exception
               process.stdout.write "  Uncaught exception - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n\n"
+              if record.exception.location
+                location = record.exception.location
+                process.stdout.write "  #{location.file}:#{location.line}.\n\n"
+                process.stdout.write "  #{location.text}\n"
+                process.stdout.write "  #{new Array(location.column).join(" ")}^\n"
               process.stdout.write "#{record.exception.message.replace(/^(\s*\S.*)$/mg, "  $1")}\n\n"
               if record.exception.json
                 json = inspect(record.json, 1000).replace(/^(\s*\S.*)$/mg, "    $1")
