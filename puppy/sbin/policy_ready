@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for user in $(/usr/bin/sudo -u private /puppy/private/bin/policy_users $(/bin/hostname))
+for user in $(/usr/bin/sudo -u system /puppy/system/bin/policy_users $(/bin/hostname) || exit 1)
 do
-    /usr/bin/sudo -u private /puppy/private/bin/user_ready $(/bin/hostname) $user
+    /usr/bin/sudo -u system /puppy/system/bin/policy_ready $(/bin/hostname) $user || exit 1
 done
