@@ -3,19 +3,6 @@ Client        = require("mysql").Client
 exec          = require("child_process").exec
 spawn         = require("child_process").spawn
 
-# An Abend exception class thrown by the `abend` method. The `abend` method
-# cannot log a message and exit in the abend method itself, since writing to the
-# log is asynchronous. The abend method throws an Abend exception to interrupt
-# program flow. The exception implements a die method that send the abend
-# message to the syslog. The die method is invoked by a special
-# `uncaughtException` handler.
-# -------------------------------------------------------------------------
-# The Abend exception class contains the syslog, message and context map.
-class Abend
-  constructor: (@syslog, @message, @context) ->
-  die: ->
-    @syslog.send "err", @message, @context, -> process.exit 1
-
 # The system can only be created once in the life of a program.
 systemCreated = false
 
@@ -37,7 +24,9 @@ module.exports.createSystem = (filename, splat...) ->
   callback = splat.shift()
 
   programName = filename.replace(/^.*\/(.*?)(?:_try)?.js$/, "$1")
-  syslog = new (require("common").Syslog)({ tag: programName, pid: true })
+  branchName = filename.replace(/^\/puppy\/([^\/]+).*$/, "$1")
+  tag = if branchName is programName then programName else "#{branchName}_#{programName}"
+  syslog = new (require("common").Syslog)({ tag, pid: true })
 
   shell = new (require("common").Shell)(syslog)
   shell.doas "database", "/puppy/database/bin/database", [], null, (stdout) ->
@@ -52,13 +41,6 @@ module.exports.createSystem = (filename, splat...) ->
       else
         collections[additional[index++]](system, next)
     next(system)
-
-module.exports.createDatabase = (syslog, callback) ->
-  shell = new (require("common/shell").Shell)(syslog)
-  # NO! Do this here and the error message propagates to the user.
-  shell.doas "database", "/puppy/database/bin/database", [], null, (stdout) ->
-    {host, password} = JSON.parse(stdout)
-    callback(new Database(syslog, shell, host, password))
 
 class Database
   constructor: (@syslog, @shell, @host, @password) ->
@@ -182,18 +164,11 @@ class Database
         callback()
 
   err: (message, context) ->
-    if context
-      json = JSON.stringify(context, null, 2).replace(/^(\s*\S.*)$/mg, "    $1")
-      "#{message}\n\n#{json}\n"
-    else
-      message
-
-  abend: (message, context) ->
-    throw new Error @err message, context
+    @shell.err message, context
 
   verify: (condition, message, context) ->
     unless condition
-      throw new Error @err message, context
+      throw new Error @shell.err message, context
 
   # Get the application by application id, verifying that it is associated with
   # the machine user of the sudoer that invoked the current program.

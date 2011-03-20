@@ -2,23 +2,32 @@
 
 class module.exports.Shell
   constructor: (@syslog) ->
+
+  err: (message, context) ->
+    tag = @syslog.tag.replace(/^(.*?)\[.*$/, "$1").replace(/^.*?_(.*)$/, "$1")
+    if context
+      json = JSON.stringify(context, null, 2).replace(/^(\s*\S.*)$/mg, "    $1")
+      "#{tag}[#{process.pid}/#{process.getuid()}]: #{message}\n\n#{json}\n"
+    else
+      "#{tag}[#{process.pid}/#{process.getuid()}]: #{message}"
   doas: (user, command, parameters, input, callback) ->
-    prefix = [ "-u", user, command ]
-    while prefix.length
-      parameters.unshift(prefix.pop())
-    sudo = spawn "/usr/bin/sudo", parameters
-    if input?
-      sudo.stdin.write(input)
-      sudo.stdin.end()
-    stdout = ""
-    stderr = ""
+    params = [ "-u", user, command ]
+    for param in parameters
+      params.push param
+
+    sudo = spawn "/usr/bin/sudo", params
+
+    sudo.stdin.write(input) if input?
+
+    [ stdout, stderr ] = [ "", "" ]
     sudo.stdout.on "data", (data) -> stdout += data.toString()
     sudo.stderr.on "data", (data) -> stderr += data.toString()
+
     sudo.on "exit", (code) =>
       if code
-        @syslog.send "err", "Command #{command} exited with code #{code}.", { code, stdout, stderr }
-        process.exit code
+        throw new Error @err "Command #{command} exited with code #{code}.", { code, stdout, stderr }
       callback(stdout)
+
   stdin: (length, callback) ->
     body = ""
     stdin = process.openStdin()
