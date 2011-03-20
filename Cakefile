@@ -4,14 +4,14 @@ path            = require("path")
 
 compile = (sources, output) ->
   coffee =          spawn "coffee", "-c -o #{output}".split(/\s/).concat(sources)
-  coffee.stderr.on  "data", (buffer) -> puts buffer.toString()
+  coffee.stderr.on  "data", (buffer) -> process.stdout.write buffer.toString()
   coffee.on         "exit", (status) -> process.exit(1) if status != 0
 
 currentBranch = (callback) ->
   branches =        ""
   git =             spawn "git", [ "branch" ]
   git.stdout.on     "data", (buffer) -> branches += buffer.toString()
-  git.stderr.on     "data", (buffer) -> puts buffer.toString()
+  git.stderr.on     "data", (buffer) -> process.stdout.write buffer.toString()
   git.on            "exit", (status) ->
     process.exit(1) if status != 0
     branch = /\*\s+(.*)/.exec(branches)[1]

@@ -1,7 +1,7 @@
-{   "name":             "public"
-,   "version":          "0.0.1"
-,   "author":           "Alan Gutierrez"
-,   "directories":      { "lib" : "./lib" }
-,   "bin":              { "public_receptionist":    "./bin/public_receptionist.js"
-                        }
+{ "name":                   "public"
+, "version":                "0.0.1"
+, "author":                 "Alan Gutierrez"
+, "bin":
+  { "public_receptionist":  "./bin/public_receptionist.js"
+  }
 }
