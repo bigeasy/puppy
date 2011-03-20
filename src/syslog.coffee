@@ -21,15 +21,13 @@ module.exports.Syslog = class Syslog
     @port = options.port or 514
     @host = options.host or "127.0.0.1"
     @maxMessageSize or= 32
+    @socket = dgram.createSocket "unix_dgram"
 
   error: (message, dump) ->
     @send "err", "ERROR: #{message}", dump
 
   actualSend: (buffer, callback) ->
-    client = dgram.createSocket("unix_dgram")
-    client.send buffer, 0, buffer.length, "/dev/log", (err, sent) =>
-      callback() if callback
-      client.close()
+    @socket.send buffer, 0, buffer.length, "/dev/log", -> callback() if callback
 
   send: (level, message, dump, callback) ->
     message += " #{JSON.stringify(dump)}" if dump
