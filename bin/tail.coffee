@@ -69,8 +69,20 @@ readExceptions = (stderr, exceptions) ->
       json = json.join "\n"
       stderr.pop()
 
+    exception = { stack }
+
+    process = null
     # What remains is the exception message. 
     message = stderr.join "\n"
+    if match = /^Error:\s([\w_]+)\[(\d+)\/(\d+)\]:\s(.*)$/.exec(message)
+      [ program, pid, uid, body ] = match.slice(1)
+      message = "Error: #{body}"
+      process =
+        pid: parseInt pid
+        uid: parseInt uid
+        program: program
+    else
+      exception.message = message
 
     # Build the exception record.
     exception = { message, stack }
@@ -81,6 +93,7 @@ readExceptions = (stderr, exceptions) ->
         exception.json = json
         exception.jsonInvalid = true
     exception.location = snippet if snippet
+    exception.process = process if process
 
     exceptions.push exception
     if exception.json and exception.json.stderr
@@ -106,7 +119,7 @@ readBuffer = (buffer, end, contents, output, callback) ->
     date[2..5] = (parseInt(match[i], 10) for i in [2..5])
     date = createDate.apply(null, date)
     [ host, rest ] = match[6..7]
-    if match = /^(worker)\[(\d+)\]:\s+(.*?)(\s+{.*)?$/.exec(rest)
+    if match = /^((?:worker|janitor)[_\w]*)\[(\d+)\]:\s+(.*?)(\s+{.*)?$/.exec(rest)
       [ program, pid, message, json ] = match[1..4]
       record = { date, host, program, pid, message }
       if json
@@ -137,7 +150,14 @@ readLog = (fd, buffer, contents, size, output, callback) ->
 
 writeExceptions = (exceptions, message) ->
   exception = exceptions.shift()
-  process.stdout.write "\n  #{message} #{new Array((78 - message.length) / 2).join(" -")}\n"
+  dashes = new Array((78 - message.length) / 2).join(" -")
+  if exception.process
+    proc = exception.process
+    proc = "#{proc.program}[#{proc.pid}/#{proc.uid}]"
+    length = (dashes.length - proc.length - 1)
+    length-- if length % 2
+    dashes = dashes.substring 0, length
+  process.stdout.write "\n  #{message} #{dashes} #{proc}\n"
   if exception.location
     location = exception.location
     process.stdout.write "  #{location.file}:#{location.line}.\n"
