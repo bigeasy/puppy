@@ -12,5 +12,6 @@
 
 worker                                  try
 port_unlabel                            job
-policy_unload                           job
 policy_generate                         job
+policy_unload                           job
+policy_make                             job

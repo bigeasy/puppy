@@ -293,27 +293,27 @@ puppy_read_cache_files(policy_load_t)
 ### Policy for `policy_make`.
 ############################################################################
 
-puppy_job_as_worker(policy_make)
+puppy_job_as_worker_redux(policy_make)
 
-job_sudo_delegate(policy_make)
-#job_delegate_trans(policy_make, policy_users)
+job_sudo_system(policy_make)
+job_system_trans(policy_make, policy_users)
 
 
 # Pass host name to `user_policy`.
-hostname_exec(policy_make_t)
+hostname_exec(policy_make_job_t)
 
 # Create cache files as puppy_cache_t.
-puppy_manage_cache_files(policy_make_t)
+puppy_manage_cache_files(policy_make_job_t)
 
 # Read the Makefile.
-files_read_usr_files(policy_make_t)
+files_read_usr_files(policy_make_job_t)
 
 # Execute the `/puppy/sbin/user_policy`.
-allow policy_make_t policy_make_exec_t:file execute_no_trans;
+allow policy_make_job_t policy_make_job_exec_t:file execute_no_trans;
 
-selinux_get_enforce_mode(policy_make_t)
-seutil_read_config(policy_make_t)
-seutil_search_default_contexts(policy_make_t)
+selinux_get_enforce_mode(policy_make_job_t)
+seutil_read_config(policy_make_job_t)
+seutil_search_default_contexts(policy_make_job_t)
 
 ############################################################################
 ### Policy for `user_config`.
