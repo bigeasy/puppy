@@ -13,15 +13,9 @@ class Shell
       else
         parameters.push parameter
     command = parameters.shift()
-    sudo = spawn command, parameters
-    sys.pump process.openStdin(), sudo.stdin
-    stderr = ""
-    stdout = ""
-    sudo.stderr.on "data", (data) -> stderr += data.toString()
-    sudo.stdout.on "data", (data) -> stdout += data.toString()
-    sudo.on "exit", (code) ->
-      process.stdout.write JSON.stringify { stdout, stderr }
-      process.exit code
+    sudo = spawn command, parameters,
+      customFds: [ 0, 1, 2 ]
+    sudo.on "exit", (code) -> process.exit code
   doas: (user, command, parameters, input, callback) ->
     prefix = [ "-u", user, command ]
     while prefix.length
@@ -47,15 +41,9 @@ class Shell
           parameters.push param
       else
         parameters.push parameter
-    sudo = spawn "/usr/bin/sudo", parameters
-    sys.pump process.openStdin(), sudo.stdin
-    stderr = ""
-    stdout = ""
-    sudo.stderr.on "data", (data) -> stderr += data.toString()
-    sudo.stdout.on "data", (data) -> stdout += data.toString()
-    sudo.on "exit", (code) ->
-      process.stdout.write JSON.stringify { stdout, stderr }
-      process.exit code
+    sudo = spawn "/usr/bin/sudo", parameters,
+      customFds: [ 0, 1, 2 ]
+    sudo.on "exit", (code) -> process.exit code
   script: (splat...) ->
     callback = splat.pop()
     source = splat.pop()
