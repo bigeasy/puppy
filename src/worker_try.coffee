@@ -4,6 +4,7 @@ require.paths.unshift("/puppy/common/lib/node")
 spawn     = require("child_process").spawn
 
 require("common").createSystem __filename, "hostname", (system, hostname) ->
+  uid = process.getuid()
   syslog = system.syslog
   syslog.send "info", "Initializing."
   poll = ->
@@ -31,11 +32,11 @@ require("common").createSystem __filename, "hostname", (system, hostname) ->
         child.on "exit", (code) ->
           # Record the error if one was reported.
           if code
-            throw new Error system.err "Worker received error exit from [#{program}].", { command, code, stderr, stdout }
+            throw new Error system.err "Worker received error exit from [#{program}].", { uid, command, code, stderr, stdout }
           # Record the stderr messages, which we do not expect from the launch
           # program.
           if stderr
-            throw new Error system.err "Worker received error messages from [#{program}].", { command, code, stderr, stdout }
+            throw new Error system.err "Worker received error messages from [#{program}].", { uid, command, code, stderr, stdout }
 
           # Create a descriptive message for the logs.
           end = new Date()
