@@ -1,6 +1,6 @@
 {spawn} = require "child_process"
 
-class module.exports.t Shell
+class module.exports.Shell
   constructor: (@syslog) ->
   doas: (user, command, parameters, input, callback) ->
     prefix = [ "-u", user, command ]
