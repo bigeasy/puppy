@@ -229,37 +229,46 @@ allow janitor_mysql_t mysql_grant_proxy_t:fifo_file rw_fifo_file_perms;
 domtrans_pattern(mysql_grant_sudo_t, janitor_mysql_exec_t, janitor_mysql_t)
 
 ############################################################################
+### Policy for `user_policy`.
+############################################################################
+#
+type user_policy_job_exec_t;
+
+############################################################################
 ### Policy for `policy_generate`.
 ############################################################################
 
-puppy_job_as_worker(policy_generate)
+puppy_job_as_worker_redux(policy_generate)
 
-job_sudo_delegate(policy_generate)
-#job_delegate_trans(policy_generate, policy_users)
+job_sudo_system(policy_generate)
+job_system_trans(policy_generate, policy_users)
 
-allow policy_generate_sudo_t worker_t:fifo_file rw_fifo_file_perms;
+allow policy_generate_job_sudo_t worker_t:fifo_file rw_fifo_file_perms;
 
-#allow policy_users_delegate_t policy_generate_proxy_t:fifo_file rw_fifo_file_perms;
+# Write error messages to worker.
+allow policy_users_system_t worker_t:fifo_file rw_fifo_file_perms;
 
-# Pass host name to `user_policy`.
-hostname_exec(policy_generate_t)
+# Pass host name to system utilities.
+hostname_exec(policy_generate_job_t)
 
 # Create cache files as puppy_cache_t.
-puppy_manage_cache_files(policy_generate_t)
+puppy_manage_cache_files(policy_generate_job_t)
 
-# Execute the `/puppy/sbin/user_policy`.
-allow policy_generate_t policy_generate_exec_t:file execute_no_trans;
+# Execute the `/puppy/worker/sbin/user_policy` helper program.
+allow policy_generate_job_t policy_generate_job_exec_t:file execute_no_trans;
+application_domain(policy_generate_job_t, user_policy_job_exec_t)
+allow policy_generate_job_t user_policy_job_exec_t:file execute_no_trans;
 
 # Allow script to create a temporary file for here-doc.
-type user_policy_tmp_t;
-files_tmp_file(user_policy_tmp_t)
-manage_files_pattern(policy_generate_t, user_policy_tmp_t, user_policy_tmp_t)
-files_tmp_filetrans(policy_generate_t, user_policy_tmp_t, file)
+type policy_generate_job_tmp_t;
+files_tmp_file(policy_generate_job_tmp_t)
+manage_files_pattern(policy_generate_job_t, policy_generate_job_tmp_t, policy_generate_job_tmp_t)
+files_tmp_filetrans(policy_generate_job_t, policy_generate_job_tmp_t, file)
 
 # This allows the reading of fielsystem extended attributes. It is triggered by
 # the bash here-doc syntax. My guess is that the temp file creation checks for
 # available disk space prior to creating the temp file. 
-fs_getattr_xattr_fs(policy_generate_t)
+fs_getattr_xattr_fs(policy_generate_job_t)
 
 ############################################################################
 ### Policy for `policy_load`.

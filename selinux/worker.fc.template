@@ -3,8 +3,14 @@
 /var/run/puppy/tmp/.*                   gen_context(system_u:object_r:worker_tmp_t, s0)
 
 /puppy/janitor/bin/janitor_mysql        gen_context(system_u:object_r:janitor_mysql_exec_t, s0)
+
+# The port_label and port_unlabel helper.
 /puppy/worker/sbin/port_labelify        gen_context(system_u:object_r:port_labelify_job_exec_t, s0)
+
+# The policy_generate helper.
+/puppy/worker/sbin/user_policy          gen_context(system_u:object_r:user_policy_job_exec_t, s0)
 
 worker                                  try
 port_unlabel                            job
 policy_unload                           job
+policy_generate                         job
