@@ -12,18 +12,21 @@
 /puppy/worker/bin/worker_try@0.0.1 gen_context(system_u:object_r:worker_exec_t, s0)
 /puppy/worker/lib/node/.npm/worker/0.0.1/package/bin/worker_try.js gen_context(system_u:object_r:worker_exec_t, s0)
 
-/puppy/worker/bin/port_unlabel gen_context(system_u:object_r:port_unlabel_job_exec_t, s0)
-/puppy/worker/sbin/port_unlabel gen_context(system_u:object_r:port_unlabel_job_exec_t, s0)
-
 /puppy/worker/bin/policy_generate gen_context(system_u:object_r:policy_generate_job_exec_t, s0)
 /puppy/worker/sbin/policy_generate gen_context(system_u:object_r:policy_generate_job_exec_t, s0)
 
 /puppy/worker/bin/policy_load gen_context(system_u:object_r:policy_load_job_exec_t, s0)
 /puppy/worker/sbin/policy_load gen_context(system_u:object_r:policy_load_job_exec_t, s0)
 
+/puppy/worker/bin/policy_make gen_context(system_u:object_r:policy_make_job_exec_t, s0)
+/puppy/worker/sbin/policy_make gen_context(system_u:object_r:policy_make_job_exec_t, s0)
+
 /puppy/worker/bin/policy_unload gen_context(system_u:object_r:policy_unload_job_exec_t, s0)
 /puppy/worker/sbin/policy_unload gen_context(system_u:object_r:policy_unload_job_exec_t, s0)
 
-/puppy/worker/bin/policy_make gen_context(system_u:object_r:policy_make_job_exec_t, s0)
-/puppy/worker/sbin/policy_make gen_context(system_u:object_r:policy_make_job_exec_t, s0)
+/puppy/worker/bin/port_label gen_context(system_u:object_r:port_label_job_exec_t, s0)
+/puppy/worker/sbin/port_label gen_context(system_u:object_r:port_label_job_exec_t, s0)
+
+/puppy/worker/bin/port_unlabel gen_context(system_u:object_r:port_unlabel_job_exec_t, s0)
+/puppy/worker/sbin/port_unlabel gen_context(system_u:object_r:port_unlabel_job_exec_t, s0)
 

@@ -516,8 +516,8 @@ seutil_run_semanage(port_label_job_t, worker_r)
 allow semanage_t port_label_job_proxy_t:fifo_file rw_fifo_file_perms;
 
 # Get some output.
-allow setfiles_t worker_t:fifo_file rw_fifo_file_perms;
-allow load_policy_t worker_t:fifo_file rw_fifo_file_perms;
+puppy_rw_worker_fifo(setfiles_t, port_label)
+puppy_rw_worker_fifo(load_policy_t, port_label)
 
 # Read and SELinux properties during build.
 selinux_get_enforce_mode(port_label_job_t)
