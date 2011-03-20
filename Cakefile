@@ -24,19 +24,18 @@ task "gitignore", "create a .gitignore for node-ec2 based on git branch", ->
                 .DS_Store
                 _site
                 **/.DS_Store
+                bin
                 
                 '''
 
     if branch is "gh-pages"
       gitignore += '''
-                   bin
                    '''
     else if branch is "private"
       gitignore += '''
                    documentation
                    index.html
                    site/idl.css
-                   bin
                    '''
     fs.writeFile(".gitignore", gitignore)
 
