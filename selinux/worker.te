@@ -190,8 +190,6 @@ job_sudo_delegate(mysql_create)
 domtrans_pattern(mysql_create_sudo_t, janitor_mysql_exec_t, janitor_mysql_t)
 
 role system_r types janitor_mysql_t;
-#allow db_password_delegate_t mysql_create_proxy_t:fifo_file rw_fifo_file_perms;
-allow mysql_create_sudo_t mysql_create_proxy_t:fifo_file rw_fifo_file_perms;
 allow janitor_mysql_t mysql_create_proxy_t:fifo_file rw_fifo_file_perms;
 allow janitor_mysql_t mysql_create_t:fifo_file rw_fifo_file_perms;
 
@@ -220,11 +218,8 @@ job_sudo_delegate(mysql_grant)
 #job_delegate_trans(mysql_grant, db_password)
 #job_delegate_trans(mysql_grant, app_users)
 
-allow mysql_grant_sudo_t mysql_grant_proxy_t:fifo_file rw_fifo_file_perms;
 allow janitor_mysql_t mysql_grant_t:fifo_file rw_fifo_file_perms;
 allow janitor_mysql_t mysql_grant_proxy_t:fifo_file rw_fifo_file_perms;
-#allow app_users_delegate_t mysql_grant_proxy_t:fifo_file rw_fifo_file_perms;
-#allow db_password_delegate_t mysql_grant_proxy_t:fifo_file rw_fifo_file_perms;
 
 domtrans_pattern(mysql_grant_sudo_t, janitor_mysql_exec_t, janitor_mysql_t)
 
@@ -242,11 +237,6 @@ puppy_job_as_worker_redux(policy_generate)
 
 job_sudo_system(policy_generate)
 job_system_trans(policy_generate, policy_users)
-
-allow policy_generate_job_sudo_t worker_t:fifo_file rw_fifo_file_perms;
-
-# Write error messages to worker.
-allow policy_users_system_t worker_t:fifo_file rw_fifo_file_perms;
 
 # Pass host name to system utilities.
 hostname_exec(policy_generate_job_t)
@@ -308,9 +298,6 @@ puppy_job_as_worker(policy_make)
 job_sudo_delegate(policy_make)
 #job_delegate_trans(policy_make, policy_users)
 
-allow policy_make_sudo_t worker_t:fifo_file rw_fifo_file_perms;
-
-#allow policy_users_delegate_t policy_make_proxy_t:fifo_file rw_fifo_file_perms;
 
 # Pass host name to `user_policy`.
 hostname_exec(policy_make_t)

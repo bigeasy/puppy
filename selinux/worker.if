@@ -119,7 +119,7 @@ template(`puppy_job_sudo_root',`
 template(`job_sudo_system',`
     puppy_sudo($1_job)
     role system_r types $1_job_sudo_t;
-    allow $1_job_sudo_t $1_job_proxy_t:fifo_file rw_fifo_file_perms;
+    # Allow sudo to write error messages.
     allow $1_job_sudo_t worker_t:fifo_file rw_fifo_file_perms;
     read_files_pattern($1_job_sudo_t, puppy_lib_t, puppy_lib_t)
 ')
@@ -143,7 +143,8 @@ template(`job_system_trans',`
     ')
     puppy_sudo_system($1_job, $2)
     puppy_system_role(system, $2)
-    allow $2_system_t $1_job_proxy_t:fifo_file rw_fifo_file_perms;
+    # Allow the utility to write error messages.
+    allow policy_users_system_t worker_t:fifo_file rw_fifo_file_perms;
 ')
 ##  Create a set of derived types for Puppy worker jobs.
 template(`puppy_job_execute_redux',`
