@@ -19,19 +19,39 @@ class Abend
 # The system can only be created once in the life of a program.
 systemCreated = false
 
-module.exports.createSystem = (filename, callback) ->
+module.exports.createSystem = (filename, splat...) ->
+  collections =
+    hostname: (system, next) ->
+      system.hostname (hostname) -> next(hostname)
+    account: (system, next) ->
+      system.account (account) -> next(account)
+    uid: (system, next) ->
+      next(system.uid())
+
   # Assert that the system has not already been created.
   if systemCreated
     throw new Error("System has already been created.")
   systemCreated = true
 
-  programName = filename.replace(/^.*\/(.*?)(?:_x)?.js$/, "$1")
+  additional = if splat.length is 2 then splat.shift().split(/,\s*/) else []
+  callback = splat.shift()
+
+  programName = filename.replace(/^.*\/(.*?)(?:_try)?.js$/, "$1")
   syslog = new (require("common").Syslog)({ tag: programName, pid: true })
 
   shell = new (require("common").Shell)(syslog)
   shell.doas "database", "/puppy/database/bin/database", [], null, (stdout) ->
     {host, password} = JSON.parse(stdout)
-    callback(new Database(syslog, shell, host, password))
+    system = new Database(syslog, shell, host, password)
+    index = 0
+    parameters = []
+    next = (parameter) ->
+      parameters.push parameter
+      if index == additional.length
+        callback.apply null, parameters
+      else
+        collections[additional[index++]](system, next)
+    next(system)
 
 module.exports.createDatabase = (syslog, callback) ->
   shell = new (require("common/shell").Shell)(syslog)
@@ -181,33 +201,42 @@ class Database
   # This method is invoked by programs run by an end user via `sudo`.
   application: (applicationId, callback) ->
     @hostname (hostname) =>
-      uid = process.env["SUDO_UID"]
-      @verify uid > 10000, "Inexplicable uid #{uid}."
+      uid = @uid()
       @sql "getApplicationByIdAndLocalUser", [ applicationId, hostname, uid ], "application", (applications) =>
         @verify applications.length, "No such application t#{applicationId} for u#{uid} on #{hostname}."
         callback(applications.shift())
 
   hostname: (callback) ->
-    hostname = spawn "/bin/hostname"
-    stdout = ""
-    stderr = ""
-    hostname.stderr.on "data", (data) -> stderr += data.toString()
-    hostname.stdout.on "data", (data) -> stdout += data.toString()
-    hostname.on "exit", (code) =>
-      if code != 0
-        @abend "Unable to execute hostname.", { code, stderr, stdout }
-      callback(stdout.substring(0, stdout.length - 1))
+    if @_hostname
+      callback(@_hostname)
+    else
+      # FIXME Put this all in shell.
+      hostname = spawn "/bin/hostname"
+      stdout = ""
+      stderr = ""
+      hostname.stderr.on "data", (data) -> stderr += data.toString()
+      hostname.stdout.on "data", (data) -> stdout += data.toString()
+      hostname.on "exit", (code) =>
+        if code != 0
+          @abend "Unable to execute hostname.", { code, stderr, stdout }
+        callback(@_hostname = stdout.substring(0, stdout.length - 1))
 
-  account: (callback) ->
+  uid: ->
     # Check that the uid is sane.
     uid = parseInt process.env["SUDO_UID"], 10
     @verify uid > 10000, "Inexplicable uid #{uid}"
+    uid
 
-    # Get hostname in order to get the account by hostname and local user.
-    @hostname (hostname) =>
-      # Get the account for the local user. The verify will always be true in this
-      # case, but we do it anyway out of habit. If not we'd have to explain here
-      # why we didn't, so it's easy to to just do it.
-      @sql "getAccountByLocalUser", [ hostname, uid ], "account", (accounts) =>
-        @verify accounts.length, "No account for u#{uid} on #{hostname}."
-        callback(accounts.shift(), hostname, uid)
+  account: (callback) ->
+    if @_account
+      callback(@_account)
+    else
+      uid = @uid()
+      # Get hostname in order to get the account by hostname and local user.
+      @hostname (hostname) =>
+        # Get the account for the local user. The verify will always be true in this
+        # case, but we do it anyway out of habit. If not we'd have to explain here
+        # why we didn't, so it's easy to to just do it.
+        @sql "getAccountByLocalUser", [ hostname, uid ], "account", (accounts) =>
+          @verify accounts.length, "No account for u#{uid} on #{hostname}."
+          callback(@_account = accounts.shift())
