@@ -10,7 +10,7 @@ chomp  $hostname;
 my %types = ();
 $types{"udp"} = {};
 $types{"tcp"} = {};
-open(my $ports, "/usr/bin/sudo -u private /puppy/private/bin/port_list $hostname |") || die "Cannot read ports.";
+open(my $ports, "/usr/bin/sudo -u system /puppy/system/bin/port_list $hostname |") || die "Cannot read ports.";
 while (<$ports>) {
     chomp;
     my ($user, $port) = split /\s+/;
