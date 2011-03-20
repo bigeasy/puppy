@@ -137,7 +137,7 @@ readLog = (fd, buffer, contents, size, output, callback) ->
 
 writeExceptions = (exceptions, message) ->
   exception = exceptions.shift()
-  process.stdout.write "  #{message} #{new Array((78 - message.length) / 2).join(" -")}\n"
+  process.stdout.write "\n  #{message} #{new Array((78 - message.length) / 2).join(" -")}\n"
   if exception.location
     location = exception.location
     process.stdout.write "  #{location.file}:#{location.line}.\n"
@@ -150,7 +150,6 @@ writeExceptions = (exceptions, message) ->
     process.stdout.write "#{json}\n"
   for element in exception.stack
     process.stdout.write "    at #{element.method} (#{element.file})\n"
-  process.stdout.write "\n"
   if exceptions.length
     writeExceptions(exceptions, "Nested exception")
               
@@ -167,15 +166,18 @@ fs.open "/var/log/messages", "r", (error, fd) ->
           process.stdout.write JSON.stringify(output, null, 2)
           process.stdout.write "\n"
         else
+          separator = ""
           for record in output
+            process.stdout.write separator
+            separator = "\n"
             header = "#{tz("%Y/%m/%d %H:%M:%S", record.date)} on #{record.host} "
             header += new Array(80 - header.length).join("-")
             process.stdout.write "#{header}\n\n"
-            process.stdout.write "#{record.message}\n\n"
+            process.stdout.write "#{record.message}\n"
             if record.json
               if record.exceptions
                 record.json.stderr = "[Uncaught exception: See below.]"
               json = inspect(record.json, false, 1000).replace(/^(\s*\S.*)$/mg, "  $1")
-              process.stdout.write "#{json}\n\n"
+              process.stdout.write "#{json}\n"
             if record.exceptions
               writeExceptions(record.exceptions, "Uncaught exception")
