@@ -33,7 +33,7 @@ module.exports.Syslog = class Syslog
     message += " #{JSON.stringify(dump)}" if dump
     code = (LEVEL[level] or LEVEL["info"]) + (@facility * 8)
     buffer = new Buffer("<#{code}>#{@tag}#{message}")
-    if buffer.length > @maxMessageSize * 32
+    if buffer.length > @maxMessageSize * 1024
       @send "err", "Log message size #{buffer.length} is greater than default size #{@maxMessageSize}k.", null, =>
         @actualSend(buffer, callback)
     else
