@@ -121,7 +121,7 @@ readBuffer = (buffer, end, contents, output, callback) ->
     date[2..5] = (parseInt(match[i], 10) for i in [2..5])
     date = createDate.apply(null, date)
     [ host, rest ] = match[6..7]
-    if match = /^((?:public|worker|janitor)[_\w]*)\[(\d+)\]:\s+(.*?)(\s+{.*)?$/.exec(rest)
+    if match = /^((?:private|public|worker|janitor)[_\w]*)\[(\d+)\]:\s+(.*?)(\s+{.*)?$/.exec(rest)
       [ program, pid, message, json ] = match[1..4]
       record = { date, host, program, pid, message }
       if json
