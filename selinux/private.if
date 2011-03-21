@@ -49,12 +49,13 @@ template(`puppy_private_role',`
 ')
 template(`puppy_private_role_redux',`
     gen_require(`
-        type private_$2_sudo_t, private_$2_t;
+        type private_$1_sudo_t, private_$1_t, database_t;
     ')
 
     # Allow the role to assume the generated domain types.
-    role $1_r types private_$2_t;
-    role $1_r types private_$2_sudo_t;
+    role $1_r types private_$1_t;
+    role $1_r types private_$1_sudo_t;
+    role $1_r types database_t;
 ')
 # Allow a private program to read the database password.
 template(`puppy_private_database',`
@@ -75,4 +76,46 @@ template(`puppy_private_hostname',`
         type $1_private_t;
     ')
     hostname_exec($1_private_t)
+')
+# Create a definition for a private program.
+#   $1 - the type name prefix used to derive type names, i.e. app_list
+template(`puppy_private_module', `
+    gen_require(`
+        type database_t, database_exec_t;
+    ')
+    # The delegate domain.
+    type private_$1_t;
+    type private_$1_exec_t;
+    
+    # Run Node.js.
+    puppy_node_exec(private_$1_t)
+
+    # Execute the puppy binary files.
+    puppy_exec_puppy_bin(private_$1_t)
+
+    # Allow read and write of stdio.
+    allow private_$1_t self:fifo_file rw_fifo_file_perms;
+
+    # Allow sending of syslog messages.
+    logging_send_syslog_msg(private_$1_t)
+
+    # Allow sudo to database.
+    puppy_sudo(private_$1)
+
+    # Read link files created by NPM to the actual executable.
+    read_lnk_files_pattern(private_$1_t, private_$1_exec_t, private_$1_exec_t)
+
+    # Create the application domain.
+    application_domain(private_$1_t, private_$1_exec_t)
+
+    # Allow the database utility to write to distpatcher stdio.
+    allow database_t private_$1_t:fifo_file rw_fifo_file_perms;
+
+    # Query MySQL.
+    puppy_mysql(private_$1_t)
+
+    # Execute the configuration reader.
+    domtrans_pattern(private_$1_sudo_t, database_exec_t, database_t)
+
+    hostname_exec(private_$1_t)
 ')

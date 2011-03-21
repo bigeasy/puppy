@@ -22,15 +22,18 @@ do
             continue
         fi
         fields=($line)
-        suffix=
-        if [ ! -z "${fields[2]}" ]; then
-            suffix="_${fields[2]}"
+        if [[ "${fields[2]}" == *_* ]]; then
+            context="${fields[2]}"
+        elif [ ! -z "${fields[2]}" ]; then
+            context="${fields[0]}_${fields[2]}"
         elif [ "${fields[1]}" == "job" ]; then
-            suffix=_job
+            context="${fields[0]}_job"
+        else
+            context="${fields[0]}"
         fi
-        gen_context="gen_context(system_u:object_r:${fields[0]}${suffix}_exec_t, s0)"
+        gen_context="gen_context(system_u:object_r:${context}_exec_t, s0)"
         if [ "${fields[1]}" == "try" ]; then
-            gen_catch_context="gen_context(system_u:object_r:${fields[0]}${suffix}_catch_exec_t, s0)"
+            gen_catch_context="gen_context(system_u:object_r:${context}_catch_exec_t, s0)"
             echo "/puppy/$project/bin/${fields[0]} $gen_catch_context"
             echo "/puppy/$project/bin/${fields[0]}_try $gen_context"
             echo "/puppy/$project/bin/${fields[0]}_try@0.0.1 $gen_context"

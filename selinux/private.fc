@@ -1,9 +1,4 @@
-/puppy/private/bin/account_apps gen_context(system_u:object_r:account_apps_private_catch_exec_t, s0)
-/puppy/private/bin/account_apps_try gen_context(system_u:object_r:account_apps_private_exec_t, s0)
-/puppy/private/bin/account_apps_try@0.0.1 gen_context(system_u:object_r:account_apps_private_exec_t, s0)
-/puppy/private/lib/node/.npm/private/0.0.1/package/bin/account_apps_try.js gen_context(system_u:object_r:account_apps_private_exec_t, s0)
-
-/puppy/private/bin/port_list gen_context(system_u:object_r:port_list_private_exec_t, s0)
-/puppy/private/bin/port_list@0.0.1 gen_context(system_u:object_r:port_list_private_exec_t, s0)
-/puppy/private/lib/node/.npm/private/0.0.1/package/bin/port_list.js gen_context(system_u:object_r:port_list_private_exec_t, s0)
+/puppy/private/bin/account_register gen_context(system_u:object_r:private_public_exec_t, s0)
+/puppy/private/bin/account_register@0.0.1 gen_context(system_u:object_r:private_public_exec_t, s0)
+/puppy/private/lib/node/.npm/private/0.0.1/package/bin/account_register.js gen_context(system_u:object_r:private_public_exec_t, s0)
 

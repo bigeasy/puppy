@@ -5,21 +5,17 @@ gen_require(`
     type private_public_exec_t, private_public_t;
 ')
 
-type private_public_t;
-type private_public_exec_t;
-
 type public_receptionist_exec_t;     # The public receptionist executable.
 type public_receptionist_t;          # The public receptionist domain.
 
 puppy_sudo(public_receptionist)      # The public role exists soley to sudo.
-puppy_sudo(private_public)          # The public role exists soley to sudo.
 
 # The public roles.
 role public_r types public_receptionist_t;
 role public_r types public_receptionist_sudo_t;
 
 # The public role 
-puppy_private_role_redux(public_r, public)
+puppy_private_role_redux(public)
 
 # Create a restricted user, this will create basic roll and the public_t. 
 puppy_restricted_user_template(public)

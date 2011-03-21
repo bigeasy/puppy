@@ -37,15 +37,15 @@ mysql_script ddl/0007_account_ready.sql
 
 bin/load_ports | sudo -H -u janitor mysql -u root puppy
 
-/usr/bin/sudo -u private /puppy/private/bin/user_generate 12
+/usr/bin/sudo /puppy/janitor/bin/user_generate 12
 
-/puppy/system/bin/job $(/bin/hostname) port:unlabel
-/puppy/system/bin/job $(/bin/hostname) policy:unload
-/puppy/system/bin/job $(/bin/hostname) policy:generate
-/puppy/system/bin/job $(/bin/hostname) policy:make
-/puppy/system/bin/job $(/bin/hostname) policy:load
-/puppy/system/bin/job $(/bin/hostname) port:label
-/puppy/system/bin/job $(/bin/hostname) policy:ready
+/puppy/janitor/bin/job $(/bin/hostname) port:unlabel
+/puppy/janitor/bin/job $(/bin/hostname) policy:unload
+/puppy/janitor/bin/job $(/bin/hostname) policy:generate
+/puppy/janitor/bin/job $(/bin/hostname) policy:make
+/puppy/janitor/bin/job $(/bin/hostname) policy:load
+/puppy/janitor/bin/job $(/bin/hostname) port:label
+/puppy/janitor/bin/job $(/bin/hostname) policy:ready
 
 /usr/bin/sudo /sbin/initctl start worker
 

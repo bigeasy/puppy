@@ -1,8 +1,8 @@
 #account_activate            try
 #account_home                try
 #account_ready               try
-#account_register            try
-account_apps                try         private
+account_register            direct      private_public
+#account_apps                try         private
 #app_deploy                  try
 #app_fetch                   try
 #app_list                    try
@@ -20,7 +20,7 @@ account_apps                try         private
 #app_users                   try
 #node_ready                  try
 #policy_users                try
-port_list                   direct        private
+#port_list                   direct        private
 #user_activation             try
 #user_keys                   try
 #user_ready                  try
