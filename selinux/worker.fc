@@ -33,3 +33,6 @@
 /puppy/worker/bin/port_unlabel gen_context(system_u:object_r:port_unlabel_job_exec_t, s0)
 /puppy/worker/sbin/port_unlabel gen_context(system_u:object_r:port_unlabel_job_exec_t, s0)
 
+/puppy/worker/bin/user_create gen_context(system_u:object_r:user_create_job_exec_t, s0)
+/puppy/worker/sbin/user_create gen_context(system_u:object_r:user_create_job_exec_t, s0)
+

@@ -18,3 +18,4 @@ policy_ready                            job
 policy_unload                           job
 port_label                              job
 port_unlabel                            job
+user_create                             job
