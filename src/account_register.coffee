@@ -46,7 +46,7 @@ require("common").createSystem __filename, (system) ->
               [ "user:restorecon", [ localUser.id ] ],
               [ "user:group", [ localUser.id, "liminal" ] ],
               [ "user:chown", [ localUser.id ] ],
-              [ "node:ready", [ localUser.id ] ],
+              [ "user:ready", [ localUser.id ] ],
               [ "user:invite", [ email ] ]
             ]
   register()
