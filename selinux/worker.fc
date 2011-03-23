@@ -33,6 +33,33 @@
 /puppy/worker/bin/port_unlabel gen_context(system_u:object_r:port_unlabel_job_exec_t, s0)
 /puppy/worker/sbin/port_unlabel gen_context(system_u:object_r:port_unlabel_job_exec_t, s0)
 
+/puppy/worker/bin/user_authorize gen_context(system_u:object_r:user_authorize_job_exec_t, s0)
+/puppy/worker/sbin/user_authorize gen_context(system_u:object_r:user_authorize_job_exec_t, s0)
+
+/puppy/worker/bin/user_chown gen_context(system_u:object_r:user_chown_job_exec_t, s0)
+/puppy/worker/sbin/user_chown gen_context(system_u:object_r:user_chown_job_exec_t, s0)
+
 /puppy/worker/bin/user_create gen_context(system_u:object_r:user_create_job_exec_t, s0)
 /puppy/worker/sbin/user_create gen_context(system_u:object_r:user_create_job_exec_t, s0)
+
+/puppy/worker/bin/user_decommission gen_context(system_u:object_r:user_decommission_job_exec_t, s0)
+/puppy/worker/sbin/user_decommission gen_context(system_u:object_r:user_decommission_job_exec_t, s0)
+
+/puppy/worker/bin/user_group gen_context(system_u:object_r:user_group_job_exec_t, s0)
+/puppy/worker/sbin/user_group gen_context(system_u:object_r:user_group_job_exec_t, s0)
+
+/puppy/worker/bin/user_invite gen_context(system_u:object_r:user_invite_job_exec_t, s0)
+/puppy/worker/sbin/user_invite gen_context(system_u:object_r:user_invite_job_exec_t, s0)
+
+/puppy/worker/bin/user_provision gen_context(system_u:object_r:user_provision_job_exec_t, s0)
+/puppy/worker/sbin/user_provision gen_context(system_u:object_r:user_provision_job_exec_t, s0)
+
+/puppy/worker/bin/user_ready gen_context(system_u:object_r:user_ready_job_exec_t, s0)
+/puppy/worker/sbin/user_ready gen_context(system_u:object_r:user_ready_job_exec_t, s0)
+
+/puppy/worker/bin/user_restorecon gen_context(system_u:object_r:user_restorecon_job_exec_t, s0)
+/puppy/worker/sbin/user_restorecon gen_context(system_u:object_r:user_restorecon_job_exec_t, s0)
+
+/puppy/worker/bin/user_skel gen_context(system_u:object_r:user_skel_job_exec_t, s0)
+/puppy/worker/sbin/user_skel gen_context(system_u:object_r:user_skel_job_exec_t, s0)
 

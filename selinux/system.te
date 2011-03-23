@@ -5,23 +5,9 @@
 # policy with the exec type.
 policy_module(system,1.0.0)
 
-############################################################################
-### Policy for `policy_ready`.
-############################################################################
-
 puppy_system(policy_ready)
-puppy_system_database(policy_ready)
-
-############################################################################
-### Policy for `policy_users`.
-############################################################################
-
 puppy_system(policy_users)
-puppy_system_database(policy_users)
-
-############################################################################
-### Policy for `port_list`.
-############################################################################
-
 puppy_system(port_list)
-puppy_system_database(port_list)
+puppy_system(user_activation)
+puppy_system(user_keys)
+puppy_system(user_ready)

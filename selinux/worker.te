@@ -362,71 +362,73 @@ allow user_deploy_t self:capability { fowner chown };
 ############################################################################
 
 # User creation is performed as root.
-puppy_job_as_root(user_group)
+puppy_job_as_root_redux(user_group)
 
 # Read /etc/passwd to determine if the user already exists.
-allow user_group_t etc_t:file read_file_perms;
+allow user_group_job_t etc_t:file read_file_perms;
 
 # Transition to the exising user management policy.
-usermanage_domtrans_useradd(user_group_t)
+usermanage_domtrans_useradd(user_group_job_t)
 
 ############################################################################
 ### Policy for `user_invite`.
 ############################################################################
 
 # Invite sending is performed as the worker user.
-puppy_job_as_worker(user_invite)
+puppy_job_as_worker_redux(user_invite)
 
-job_sudo_delegate(user_invite)
-#job_delegate_trans(user_invite, user_activation)
+job_sudo_system(user_invite)
+job_system_trans(user_invite, user_activation)
 
-puppy_node_exec(user_invite_t)
+puppy_node_exec(user_invite_job_t)
 
 # Write to the syslog.
-logging_send_syslog_msg(user_invite_t)
+logging_send_syslog_msg(user_invite_job_t)
 
 # Send email.
-corenet_tcp_connect_smtp_port(user_invite_t)
-sysnet_dns_name_resolve(user_invite_t)
-miscfiles_read_localization(user_invite_t)
-hostname_exec(user_invite_t)
+corenet_tcp_connect_smtp_port(user_invite_job_t)
+sysnet_dns_name_resolve(user_invite_job_t)
+miscfiles_read_localization(user_invite_job_t)
+
+# TODO Try to remove.
+hostname_exec(user_invite_job_t)
 
 ############################################################################
 ### Policy for `user_provision`.
 ############################################################################
 
 # User creation is performed as root.
-puppy_job_as_root(user_provision)
+puppy_job_as_root_redux(user_provision)
 
-allow puppy_t user_provision_t:fifo_file rw_fifo_file_perms;
+# DUBIOUS allow puppy_t user_provision_t:fifo_file rw_fifo_file_perms;
 
-allow user_provision_t { home_root_t user_home_dir_t }:dir list_dir_perms;
-allow user_provision_t user_home_dir_t:dir read_file_perms;
+allow user_provision_job_t { home_root_t user_home_dir_t }:dir list_dir_perms;
+allow user_provision_job_t user_home_dir_t:dir read_file_perms;
 
 # Allow deletion of existing home directory.
-allow user_provision_t user_home_dir_t:dir delete_dir_perms;
+allow user_provision_job_t user_home_dir_t:dir delete_dir_perms;
 
 # Allow chown of home directory and DAC override for root.
-allow user_provision_t self:capability { chown dac_override };
+allow user_provision_job_t self:capability { chown dac_override };
 
 # Obliterate home directory.
-userdom_manage_home_role(system_r, user_provision_t)
-manage_dirs_pattern(user_provision_t, home_root_t, home_root_t)
+userdom_manage_home_role(system_r, user_provision_job_t)
+manage_dirs_pattern(user_provision_job_t, home_root_t, home_root_t)
 
 # Chown needs to read `/etc/passwd`.
-files_read_etc_files(user_provision_t)
+files_read_etc_files(user_provision_job_t)
 
 ############################################################################
-### Policy for `node_ready`.
+### Policy for `user_ready`.
 ############################################################################
 
 # User policy assignment is performed as root.
-puppy_job_as_worker(worker_node_ready)
+puppy_job_as_worker_redux(user_ready)
 
-job_sudo_delegate(worker_node_ready)
-#job_delegate_trans(worker_node_ready, private_node_ready)
+job_sudo_system(user_ready)
+job_system_trans(user_ready, user_ready)
 
-hostname_exec(worker_node_ready_t)
+hostname_exec(user_ready_job_t)
 
 ############################################################################
 ### Policy for `policy_ready`.
@@ -451,19 +453,19 @@ hostname_exec(policy_ready_job_t)
 ############################################################################
 
 # User creation is performed as root.
-puppy_job_as_root(user_skel)
+puppy_job_as_root_redux(user_skel)
 
 # Execute hostname. 
-hostname_exec(user_skel_t)
+hostname_exec(user_skel_job_t)
 
 # Read user home directory files.
-userdom_manage_home_role(system_r, user_skel_t)
+userdom_manage_home_role(system_r, user_skel_job_t)
 
 # Read the `/etc/skel` files.
-files_read_etc_files(user_skel_t)
+files_read_etc_files(user_skel_job_t)
 
 # Write to directories owned by the intended user.
-allow user_skel_t self:capability { dac_read_search dac_override };
+allow user_skel_job_t self:capability { dac_read_search dac_override };
 
 ############################################################################
 ### Policy for `policy_unload`.
@@ -600,22 +602,22 @@ allow port_unlabel_job_t port_labelify_job_exec_t:file execute_no_trans;
 ############################################################################
 
 # User creation is performed as root.
-puppy_job_as_root(user_authorize)
+puppy_job_as_root_redux(user_authorize)
 
-job_sudo_delegate(user_authorize)
-#job_delegate_trans(user_authorize, user_keys)
+job_sudo_system(user_authorize)
+job_system_trans(user_authorize, user_keys)
 
 # Execute hostname. 
-hostname_exec(user_authorize_t)
+hostname_exec(user_authorize_job_t)
 
 # Allow root DAC override.
-allow user_authorize_t self:capability dac_override;
+allow user_authorize_job_t self:capability dac_override;
 
 # List the home directory.
-files_search_home(user_authorize_t)
+files_search_home(user_authorize_job_t)
 
 # Manage home directory, where the ssh files may be mislabeled.
-userdom_manage_home_role(system_r, user_authorize_t)
+userdom_manage_home_role(system_r, user_authorize_job_t)
 
 # List the home directories.
 #userdom_manage_user_home_dirs(user_authorize_t)
@@ -627,19 +629,19 @@ userdom_manage_home_role(system_r, user_authorize_t)
 ############################################################################
 
 # User creation is performed as root.
-puppy_job_as_root(user_chown)
+puppy_job_as_root_redux(user_chown)
 
 # Execute hostname. 
-hostname_exec(user_chown_t)
+hostname_exec(user_chown_job_t)
 
 # Read user home directory files.
-userdom_manage_home_role(system_r, user_chown_t)
-ssh_read_user_home_files(user_chown_t)
+userdom_manage_home_role(system_r, user_chown_job_t)
+ssh_read_user_home_files(user_chown_job_t)
 
-allow user_chown_t self:capability { dac_read_search dac_override chown };
+allow user_chown_job_t self:capability { dac_read_search dac_override chown };
 
 # Chown needs to read `/etc/passwd`.
-files_read_etc_files(user_chown_t)
+files_read_etc_files(user_chown_job_t)
 
 ############################################################################
 ### Policy for `user_create` job.
@@ -659,25 +661,25 @@ usermanage_domtrans_useradd(user_create_job_t)
 ############################################################################
 
 # User creation is performed as root.
-puppy_job_sudo_root(user_decommission)
+puppy_job_as_root_redux(user_decommission)
 
-allow puppy_t user_decommission_t:fifo_file rw_fifo_file_perms;
+# DUBIOUS allow puppy_t user_decommission_t:fifo_file rw_fifo_file_perms;
 
-allow user_decommission_t { home_root_t user_home_dir_t }:dir list_dir_perms;
-allow user_decommission_t user_home_dir_t:dir read_file_perms;
+allow user_decommission_job_t { home_root_t user_home_dir_t }:dir list_dir_perms;
+allow user_decommission_job_t user_home_dir_t:dir read_file_perms;
 
 # Allow deletion of existing home directory.
-allow user_decommission_t user_home_dir_t:dir delete_dir_perms;
+allow user_decommission_job_t user_home_dir_t:dir delete_dir_perms;
 
 # Allow chown of home directory and DAC override for root.
-allow user_decommission_t self:capability { dac_override };
+allow user_decommission_job_t self:capability { dac_override };
 
 # Create cache files as puppy_cache_t.
-puppy_manage_cache_files(user_decommission_t)
+puppy_manage_cache_files(user_decommission_job_t)
 
 # Relocate the home directory.
-allow user_decommission_t user_home_dir_t:dir { write rename reparent };
-manage_dirs_pattern(user_decommission_t, home_root_t, home_root_t)
+allow user_decommission_job_t user_home_dir_t:dir { write rename reparent };
+manage_dirs_pattern(user_decommission_job_t, home_root_t, home_root_t)
 
 ############################################################################
 ### Policy for `user_restorecon`.
@@ -687,9 +689,9 @@ manage_dirs_pattern(user_decommission_t, home_root_t, home_root_t)
 # anything to anything. It exists to apply the correct labels during 
 
 # Run security context restoration as root.
-puppy_job_as_root(user_restorecon)
+puppy_job_as_root_redux(user_restorecon)
 
 # Run restorecon.
-seutil_domtrans_setfiles(user_restorecon_t)
+seutil_domtrans_setfiles(user_restorecon_job_t)
 
-allow setfiles_t user_restorecon_proxy_t:fifo_file rw_fifo_file_perms;
+puppy_rw_worker_fifo(setfiles_t, user_restorecon)

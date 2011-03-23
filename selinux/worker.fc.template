@@ -18,4 +18,13 @@ policy_ready                            job
 policy_unload                           job
 port_label                              job
 port_unlabel                            job
+user_authorize                          job
+user_chown                              job
 user_create                             job
+user_decommission                       job
+user_group                              job
+user_invite                             job
+user_provision                          job
+user_ready                              job
+user_restorecon                         job
+user_skel                               job

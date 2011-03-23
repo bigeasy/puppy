@@ -10,6 +10,10 @@ template(`puppy_sudo_system', `
 # Create a definition for a system program.
 #   $1 - the type name prefix used to derive type names, i.e. app_list
 template(`puppy_system', `
+    gen_require(`
+        type database_t, database_exec_t, $1_system_sudo_t;
+    ')
+
     # The system domain.
     type $1_system_t;
     type $1_system_exec_t;
@@ -34,6 +38,15 @@ template(`puppy_system', `
 
     # Create the application domain.
     application_domain($1_system_t, $1_system_exec_t)
+
+    # Allow the database utility to write to distpatcher stdio.
+    allow database_t $1_system_t:fifo_file rw_fifo_file_perms;
+
+    # Query MySQL.
+    puppy_mysql($1_system_t)
+
+    # Execute the configuration reader.
+    domtrans_pattern($1_system_sudo_t, database_exec_t, database_t)
 ')
 # Allow the system type context to execute in a given role.
 #   $1 - the role, i.e. system
@@ -46,27 +59,4 @@ template(`puppy_system_role',`
     # Allow the role to assume the generated domain types.
     role $1_r types $2_system_t;
     role $1_r types $2_system_sudo_t;
-')
-# Allow a system program to read the database password.
-#   $1 - the system program name, i.e. port_label
-template(`puppy_system_database',`
-    gen_require(`
-        type database_t, database_exec_t, $1_system_sudo_t;
-    ')
-    # Allow the database utility to write to distpatcher stdio.
-    allow database_t $1_system_t:fifo_file rw_fifo_file_perms;
-
-    # Query MySQL.
-    puppy_mysql($1_system_t)
-
-    # Execute the configuration reader.
-    domtrans_pattern($1_system_sudo_t, database_exec_t, database_t)
-')
-# Allow the system to program to read the hostname.
-#   $1 - the system program name, i.e. port_label
-template(`puppy_system_hostname',`
-    gen_require(`
-        type $1_system_t;
-    ')
-    hostname_exec($1_system_t)
 ')
