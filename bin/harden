@@ -3,6 +3,9 @@
 cd $(dirname $0)
 cd ..
 
+echo "Generating file contexts."
+bin/fcgen
+
 echo "Building policy."
 pushd selinux > /dev/null
 output=$(/usr/bin/make -f /usr/share/selinux/devel/Makefile)
