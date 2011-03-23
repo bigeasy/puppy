@@ -1,10 +1,12 @@
-{   "name":             "system"
-,   "version":          "0.0.1"
-,   "author":           "Alan Gutierrez"
+{   "name":                 "system"
+,   "version":              "0.0.1"
+,   "author":               "Alan Gutierrez"
 ,   "bin":             
-    { "policy_ready":   "./bin/policy_ready.js"
-    , "policy_users":   "./bin/policy_users.js"
-    , "port_list":      "./bin/port_list.js"
-    , "user_keys":      "./bin/user_keys.js"
+    { "policy_ready":       "./bin/policy_ready.js"
+    , "policy_users":       "./bin/policy_users.js"
+    , "port_list":          "./bin/port_list.js"
+    , "user_activation":    "./bin/user_activation.js"
+    , "user_keys":          "./bin/user_keys.js"
+    , "user_ready":         "./bin/user_ready.js"
     }
 }
