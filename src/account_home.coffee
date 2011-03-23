@@ -1,11 +1,6 @@
 # Prepend the Puppy node libraries to the library path.
 require.paths.unshift("/puppy/common/lib/node")
 
-# Create syslog and import the database library.
-syslog    = new (require("common/syslog").Syslog)({ tag: "account_register", pid: true })
-db        = require("common/database")
-
-
 # Get the program arguments.
 [ email ] = process.argv.slice(2)
 
@@ -23,9 +18,9 @@ sendEmailOrElse = (results, orElse) ->
 
 # Search for the account first in the registered users, then in the users
 # awaiting activation.
-db.createDatabase syslog, (database) ->
-  database.select "getLocalUserByEmail", [ email ], "localUser", (results) ->
+require("common").createSystem __filename, (system) ->
+  system.sql "getLocalUserByEmail", [ email ], "localUser", (results) ->
     sendEmailOrElse results, ->
-      database.select "getLocalUserByActivationEmail", [ email ], "localUser", (results) ->
+      system.sql "getLocalUserByActivationEmail", [ email ], "localUser", (results) ->
         sendEmailOrElse results, ->
           process.exit 1
