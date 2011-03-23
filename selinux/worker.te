@@ -386,12 +386,7 @@ puppy_node_exec(user_invite_job_t)
 logging_send_syslog_msg(user_invite_job_t)
 
 # Send email.
-corenet_tcp_connect_smtp_port(user_invite_job_t)
-sysnet_dns_name_resolve(user_invite_job_t)
-miscfiles_read_localization(user_invite_job_t)
-
-# TODO Try to remove.
-hostname_exec(user_invite_job_t)
+mta_send_mail(user_invite_job_t)
 
 ############################################################################
 ### Policy for `user_provision`.
