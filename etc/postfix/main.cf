@@ -48,14 +48,5 @@ smtp_tls_CApath = /certs
 smtp_use_tls = yes
 transport_maps = hash:/etc/postfix/transport
 
-# SASL connection from localhost clients.
-smtpd_sasl_security_options = noanonymous
-smtpd_sasl_auth_enable = yes
-smtpd_recipient_restrictions = 
-  permit_mynetworks,
-  permit_sasl_authenticated,
-  reject_unauth_destination
-smtpd_sasl_path = smtp
-debug_peer_list = localhost
-smtpd_sasl_local_domain = runpup.com
-broken_sasl_auth_clients = yes
+# Only allow worker to use postdrop.
+authorized_submit_users = worker
