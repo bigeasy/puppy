@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. /puppy/system/bin/functions
+. /puppy/worker/sbin/functions
 
 [ $# -ne 1 ] && abend "Incorrect count of arguments ($#)."
 
@@ -18,7 +18,7 @@ umask 077
 
 # If we redirect directly to authorized_keys, we'll have to modfiy the SELinux
 # policy to allow the delegate domain to write home directories.
-keys=$(/usr/bin/sudo -u private /puppy/private/bin/user_keys $(/bin/hostname) $uid)
+keys=$(/usr/bin/sudo -u system /puppy/system/bin/user_keys $(/bin/hostname) $uid || exit 1)
 
 # Quoting keys is necessary to keep echo from swallowing the new lines.
 # http://stackoverflow.com/questions/3445628/bash-line-concatenation-during-variable-interpolation

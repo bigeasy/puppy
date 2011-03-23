@@ -2,29 +2,21 @@
 
 require.paths.unshift("/puppy/common/lib/node")
 
-syslog    = new (require("common/syslog").Syslog)({ tag: "user_invite", pid: true })
-shell     = new (require("common/shell").Shell)(syslog)
+syslog    = new (require("common").Syslog)({ tag: "worker_user_invite", pid: true })
+shell     = new (require("common").Shell)(syslog)
 
-mail      = require "mail"
-
-email     = process.argv.slice(2).shift()
+[ email ] = process.argv.slice(2)
 
 sendActivation = (activation) ->
   # Note that, if we don't provide the domain name, then the mail module will
   # execute `/bin/hostname`, which it is not allowed to do, and send will fail.
-  mail = require("mail").Mail(
-    host: "smtp.gmail.com"
-    port: 587
+  client = require("emailjs/email").server.connect({
+    host: "localhost"
     domain: "prettyrobots.com"
     username: "messages@prettyrobots.com"
-    password: "c3b8e5fd1b31cb88f489500897e7380d"
-  )
-  message = mail.message(
-    from: "alan@prettyrobots.com"
-    to: [ activation.email ]
-    subject: "Activate Your Account at Puppy"
-  )
-  message.body """
+    password: "a"
+  })
+  body = """
   Didn't expect this message? Very, very sorry. See below.
   
   Welcome to Puppy, intelligent hosting for your Node.js web
@@ -44,11 +36,14 @@ sendActivation = (activation) ->
   
   We'll put a stop to it.
   """
-  message.send (error) ->
-    if error
-      syslog.send "err", error.message
-      throw error
-    syslog.send "info", "Invitation sent to #{activation.email}."
+  client.send {
+    text: body
+    from:       "Pretty Robots <messages@prettyrobots.com>", 
+    to:         "Alan Gutierrez <alan@prettyrobots.com>",
+    subject: "Activate Your Account at Puppy"
+  }, (error, message) ->
+    throw error if error
+    syslog.send "info", "Invitation sent to #{activation.email}.", { message }
 
-shell.doas "private", "/puppy/private/bin/user_activation", [ email ], null, (stdout) ->
+shell.doas "system", "/puppy/system/bin/user_activation", [ email ], null, (stdout) ->
   sendActivation(JSON.parse(stdout))
