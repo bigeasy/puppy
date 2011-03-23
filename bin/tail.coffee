@@ -189,18 +189,29 @@ writeExceptions = (exceptions, message) ->
     else if exception.json.stderr? and exception.json.stderr.length
       stderr = exception.json.stderr
       exception.json.stderr = "v-V-v See below. v-V-v"
+
+    if exception.json.stdout? and exception.json.stdout.length
+      stdout = exception.json.stdout
+      exception.json.stdout = "v-V-v See below. v-V-v"
+
     json = inspect(exception.json, false, 1000).replace(/^([^\S\n]*\S.*)$/mg, "    $1")
     process.stdout.write "#{json}\n"
+
   for element in exception.stack
     if element.method
       process.stdout.write "    at #{element.method} (#{element.file}:#{element.line}:#{element.column})\n"
     else
       process.stdout.write "    at #{element.file}:#{element.line}:#{element.column}\n"
+
   if exceptions.length
     writeExceptions(exceptions, "Nested exception")
   else if stderr
     process.stdout.write "\n  #{makeDashes("Output from stderr")}\n"
     process.stdout.write stderr.replace(/^([^\S\n]*\S.*)$/mg, "  $1")
+
+  if stdout
+    process.stdout.write "\n  #{makeDashes("Output from stdout")}\n"
+    process.stdout.write stdout.replace(/^([^\S\n]*\S.*)$/mg, "  $1")
 
 # In case you forget, you put this in its own method to get an empty namespace.
 sendOutput = (output) ->
@@ -221,13 +232,18 @@ sendOutput = (output) ->
         process.stdout.write "#{prefix} #{dashes} #{suffix}\n\n"
         process.stdout.write "#{record.message}\n"
 
-        stderr = null
+        [ stderr, stdout ] = [ null, null ]
         if record.json
           if record.exceptions
             record.json.stderr = "v-V-v Uncaught exception: See below. v-V-v"
           else if record.json.stderr? and record.json.stderr.length
             stderr = record.json.stderr
             record.json.stderr = "v-V-v  See below. v-V-v"
+
+          if record.json.stdout? and record.json.stdout.length
+            stdout = record.json.stderr
+            record.json.stdout = "v-V-v  See below. v-V-v"
+
           json = inspect(record.json, false, 1000).replace(/^([^\S\n]*\S.*)$/mg, "  $1")
           process.stdout.write "#{json}\n"
 
@@ -236,6 +252,10 @@ sendOutput = (output) ->
         else if stderr
           process.stdout.write "\n  #{makeDashes("Output from stderr")}\n"
           process.stdout.write stderr.replace(/^([^\S\n]*\S.*)$/mg, "  $1")
+
+        if stdout
+          process.stdout.write "\n  #{makeDashes("Output from stdout")}\n"
+          process.stdout.write stdout.replace(/^([^\S\n]*\S.*)$/mg, "  $1")
 
 fs.open "/var/log/messages", "r", (error, fd) ->
   throw error if error
