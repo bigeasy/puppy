@@ -1,5 +1,4 @@
 #!/opt/bin/coffee
-
 require.paths.unshift("/puppy/common/lib/node")
 
 syslog    = new (require("common").Syslog)({ tag: "worker_user_invite", pid: true })
@@ -32,9 +31,10 @@ sendActivation = (activation) ->
   
   We'll put a stop to it.
   """
+  start = Date.now()
   command = shell.command "/usr/sbin/sendmail", activation.email
   command.assert "Cannot run semdmail.", body, (outcome) ->
-    syslog.send "info", "Invitation sent to #{activation.email}."
+    syslog.send "info", "Invitation sent to #{activation.email}.", { duration: Date.now() -  start }
 
 shell.doas "system", "/puppy/system/bin/user_activation", [ email ], null, (stdout) ->
   sendActivation(JSON.parse(stdout))
