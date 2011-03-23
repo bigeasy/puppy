@@ -8,15 +8,11 @@ shell     = new (require("common").Shell)(syslog)
 [ email ] = process.argv.slice(2)
 
 sendActivation = (activation) ->
-  # Note that, if we don't provide the domain name, then the mail module will
-  # execute `/bin/hostname`, which it is not allowed to do, and send will fail.
-  client = require("emailjs/email").server.connect({
-    host: "localhost"
-    domain: "prettyrobots.com"
-    username: "messages@prettyrobots.com"
-    password: "a"
-  })
   body = """
+  From: Pretty Robots <messages@prettyrobots.com>
+  To: #{activation.email}
+  Subject: Activate Your Account at Puppy
+
   Didn't expect this message? Very, very sorry. See below.
   
   Welcome to Puppy, intelligent hosting for your Node.js web
@@ -36,14 +32,9 @@ sendActivation = (activation) ->
   
   We'll put a stop to it.
   """
-  client.send {
-    text: body
-    from:       "Pretty Robots <messages@prettyrobots.com>", 
-    to:         "Alan Gutierrez <alan@prettyrobots.com>",
-    subject: "Activate Your Account at Puppy"
-  }, (error, message) ->
-    throw error if error
-    syslog.send "info", "Invitation sent to #{activation.email}.", { message }
+  command = shell.command "/usr/sbin/sendmail", activation.email
+  command.assert "Cannot run semdmail.", body, (outcome) ->
+    syslog.send "info", "Invitation sent to #{activation.email}."
 
 shell.doas "system", "/puppy/system/bin/user_activation", [ email ], null, (stdout) ->
   sendActivation(JSON.parse(stdout))
