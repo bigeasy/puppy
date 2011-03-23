@@ -10,7 +10,6 @@ audit
 audit-libs
 audit-libs-python
 authconfig
-avahi
 basesystem
 bash
 bind-libs
