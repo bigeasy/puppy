@@ -69,10 +69,7 @@ fi
 # Install a file if the source is newer than the currently installed file.
 function install_file()
 {
-    source=$1
-    dest=$2
-    owner=$3
-    mode=$4
+    local source=$1; local dest=$2; local owner=$3; local mode=$4
     file=$(basename $source)
     /bin/mkdir -p $dest
     dirty=0
@@ -92,8 +89,7 @@ function install_file()
 # Install all files matching a glob.
 function install_files()
 {
-    ownership=$1
-    mode=$2
+    local ownership=$1; local mode=$2;
     shift; shift;
     for file in $@; do
         /bin/mkdir -m $mode -p $(dirname $file)
@@ -110,18 +106,19 @@ function postmap_files()
 
 # Anyway, we use install to write the files. We write special files that need
 # stricter privileges before the glob of all files in the same directory.
-install_files root 644 var/lib/unbound/etc/unbound/*
-install_files root 644 etc/init/*
-install_files root 644 etc/unbound/*
-install_files root 644 etc/haproxy/*
-install_files root 755 etc/rc.d/init.d/*
-install_files root 755 usr/bin/*
-install_files root 440 etc/sudoers.d/*
-install_files root 644 etc/selinux/targeted/contexts/users/*
-install_files root 600 etc/ssh/sshd_config
 install_files root 640 etc/postfix/sasl_passwd
-install_files root 644 etc/postfix/*
+install_files root 644 var/lib/unbound/etc/unbound/* \
+                       etc/init/* \
+                       etc/unbound/* \
+                       etc/haproxy/* \
+                       etc/selinux/targeted/contexts/users/* \
+                       etc/postfix/*
+install_files root 755 etc/rc.d/init.d/* \
+                       usr/bin/*
+install_files root 440 etc/sudoers.d/*
+install_files root 600 etc/ssh/sshd_config
 
+# Create postfix configuration databases.
 postmap_files /etc/postfix/transport /etc/postfix/sasl_passwd
 
 # Create Puppy application log directory.
@@ -145,9 +142,7 @@ postmap_files /etc/postfix/transport /etc/postfix/sasl_passwd
 
 function copy_public_key()
 {
-    user=$1
-    key=$2
-    command=$3
+    local user=$1; local key=$2; local command=$3
     /usr/bin/sudo -u $user /bin/mkdir -p /home/$user/.ssh
     /bin/touch /home/$user/.ssh/authorized_keys
     /bin/chown $user:$user /home/$user/.ssh/authorized_keys
@@ -176,7 +171,7 @@ done
 
 function on_boot()
 {
-    service=$1
+    local service=$1
     until /sbin/chkconfig | /bin/grep "${service}.*3:on" > /dev/null; do
         /sbin/chkconfig --add $service
         /sbin/chkconfig $service on
