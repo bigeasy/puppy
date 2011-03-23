@@ -165,7 +165,7 @@ writeExceptions = (exceptions, message) ->
 
   # Write the exception divider.
   if exception.process
-    suffix = (-> "#{@program}[#{@pid}/#{@uid}]").apply(exception.process)
+    suffix = (->"#{@program}[#{@pid}/#{@uid}]").apply(exception.process)
     process.stdout.write "\n  #{makeDashes(message, suffix)}\n"
   else
     process.stdout.write "\n  #{makeDashes(message)}\n"
