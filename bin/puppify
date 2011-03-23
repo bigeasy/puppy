@@ -5,20 +5,10 @@ if [ $(whoami) != "root" ]; then
     exit 1
 fi
 
-function make_dir()
-{
-    directory=$1
-    ownership=$2
-    perms=$3
-    if [ ! -e $directory ]
-    then
-        /bin/mkdir -p $directory
-    fi
-    /bin/chown $ownership $directory
-    /bin/chmod $perms $directory
-#    /sbin/restorecon -R $directory
-}
-
+# User and group generation.                                                            
+# -------------------------------------------------------------------------- #
+# User and group generation functions that check to see if the group already
+# exists, followed by the invocation of the functions.
 function make_group()
 {
     group=$1
@@ -29,8 +19,6 @@ function make_group()
     then
         echo "Creating group $group."
         /usr/sbin/groupadd --gid $gid $group
-    else
-        echo "Group $group exists."
     fi
 }
 
@@ -45,119 +33,116 @@ function make_user()
     then
         echo "Creating user $user."
         /usr/sbin/useradd --uid $uid --gid $uid $user
-    else
-        echo "User $user exists."
     fi
 }
 
-# TODO Sort.
+# Users representing Puppy agents.
+make_user   puppy         201
+make_user   janitor       202
+make_user   worker        204
+make_user   database      205
+make_user   system        207
+make_user   vhosts        208
+make_user   public        209
+make_user   private       210
+make_user   liminal       211
+make_user   protected     212
 
-# Create the stunnel daemon user.
-make_user public 209
+# Users for built from source daemons.
+make_user   haproxy       225
+make_user   stunnel       226
+make_user   unbound       228
 
-# Create the stunnel daemon user.
-make_user stunnel 206
+# Configuration installtion
+# -------------------------------------------------------------------------- #
 
-# Create the vhosts daemon user.
-make_user vhosts 208
+# More the printing of the restart ssh message than for the preservation of the
+# distribution's ssh_config.
+if [ ! -e /etc/ssh/sshd_config.org ]; then
+    /bin/mv /etc/ssh/sshd_config /etc/ssh/sshd_config.org
+    echo "You must restart sshd."
+fi
 
-# Create the worker daemon user.
-make_user worker 204
-
-# Create the system delegate user.
-make_user   system  207
-
-make_user private 210
-make_user puppy 201
-make_user janitor 202
-make_user haproxy 203
-
-make_user database 205
-
-make_user liminal 211
-make_user protected 212
-
-make_user unbound 228
-
-# Creates a directory tree by copying a directory tree, selecting the
-# directories with a particular permissions setting.
-function make_directories()
-{
-    path=$1
-    prefix=$2
-    perm=$3
-    ownership=$4
-    for file in $(/bin/find $path -type d -perm $perm | sort)
-    do
-        dest=$prefix$file
-        if [ ! -e $dest ]
-        then
-            echo "Creating directory $dest."
-            /bin/mkdir $dest
-        fi
-        /bin/chmod $perm $dest
-        /bin/chown $ownership $dest
-        /sbin/restorecon $dest
-    done
-}
-
-# git does not perserve file permissions, in case you're wondering.
+# git does not perserve file permissions, in case you forgot.
 #  http://kerneltrap.org/mailarchive/git/2008/12/5/4327894
-/bin/find var etc puppy -type d -exec /bin/chmod 755 {} \;
-/bin/chmod 644 var/lib/unbound/etc/unbound/*
-/bin/chmod 644 etc/init/*
-/bin/chmod 644 etc/unbound/*
-/bin/chmod 644 etc/haproxy/*
-/bin/chmod 755 etc/rc.d/init.d/*
-/bin/chmod 755 usr/bin/*
-/bin/chmod 440 etc/sudoers.d/*
-/bin/chmod 644 etc/selinux/targeted/contexts/users/*
-/bin/chmod 600 etc/ssh/sshd_config
 
-# Copy the etc and puppy directory structures.
-make_directories etc / 755 root:root
-make_directories var / 755 root:root
-
-function copy_file()
+# Install a file if the source is newer than the currently installed file.
+function install_file()
 {
     source=$1
     dest=$2
-    ownership=$3
+    owner=$3
     mode=$4
     file=$(basename $source)
     /bin/mkdir -p $dest
-    install=0
+    dirty=0
     if [ -e $dest/$file ]; then
         if [ $(/usr/bin/stat --format=%Y $source) -gt $(/usr/bin/stat --format=%Y $dest/$file) ]; then
-            install=1
+            dirty=1
         fi 
     else
-        install=1
+        dirty=1
     fi
-    if [ $install -eq 1 ]; then
+    if [ $dirty -eq 1 ]; then
         echo "Installing file $dest/$file."
-        /bin/cp $source $dest/$file
+        install -m $mode -g $owner -o $owner $source $dest/$file
     fi
-    /bin/chmod $mode $dest/$file
-    if [ $(/usr/bin/stat --format=%A $source | /usr/bin/cut -c 4) == "-" ]; then
-        /bin/chmod gou-x $dest/$file
-    fi
-    /bin/chown $ownership $dest/$file
 }
 
-function copy_files()
+# Install all files matching a glob.
+function install_files()
 {
-    dir=$1
-    if [ -e $dir ]; then
-        ownership=$2
-        mode=$3
-        for file in $(/bin/find $dir -type f -perm $mode); do
-            copy_file $file $(dirname /$file)  $ownership $mode
-        done
-    fi
+    ownership=$1
+    mode=$2
+    shift; shift;
+    for file in $@; do
+        /bin/mkdir -m $mode -p $(dirname $file)
+        install_file $file $(dirname /$file)  $ownership $mode
+    done
 }
 
-# Create the authorized_keys file that will launch /puppy/bin/public.
+function postmap_files()
+{
+    for file in $@; do
+        /usr/sbin/postmap $file
+    done
+}
+
+# Anyway, we use install to write the files. We write special files that need
+# stricter privileges before the glob of all files in the same directory.
+install_files root 644 var/lib/unbound/etc/unbound/*
+install_files root 644 etc/init/*
+install_files root 644 etc/unbound/*
+install_files root 644 etc/haproxy/*
+install_files root 755 etc/rc.d/init.d/*
+install_files root 755 usr/bin/*
+install_files root 440 etc/sudoers.d/*
+install_files root 644 etc/selinux/targeted/contexts/users/*
+install_files root 600 etc/ssh/sshd_config
+install_files root 640 etc/postfix/sasl_passwd
+install_files root 644 etc/postfix/*
+
+postmap_files /etc/postfix/transport /etc/postfix/sasl_passwd
+
+# Create Puppy application log directory.
+/bin/mkdir -p /var/log/puppy/apps /var/log/puppy/worker
+
+# Create Puppy user policy generation directory.
+/bin/mkdir -p /var/cache/puppy/policy /var/cache/puppy/transitions /var/cache/puppy/decommissioned
+
+# Allow the worker to generate and compile the per-user SELinux policies.
+/bin/chown worker:worker /var/cache/puppy/policy
+
+# Create the puppy controlled mount points.
+/bin/mkdir -p /puppy /node /opt
+/bin/chown puppy:puppy /puppy /node /opt
+
+# Create the puppy configuration directory.
+/bin/mkdir -p /etc/puppy
+
+# Configure agent home directories.
+# -------------------------------------------------------------------------- #
+
 function copy_public_key()
 {
     user=$1
@@ -176,44 +161,42 @@ function copy_public_key()
 # they live on a server and propagate.
 copy_public_key public home/public/ssh/authorized_keys /puppy/public/bin/public_receptionist
 
-# Copy the etc configuration files.
-copy_files etc root:root 644
-copy_files etc root:root 440
-copy_files etc root:root 755
-copy_files usr root:root 755
-copy_files var root:root 644
-
-if [ ! -e /etc/ssh/sshd_config.org ]; then
-    /bin/mv /etc/ssh/sshd_config /etc/ssh/sshd_config.org
-    echo "You must restart sshd."
-fi
-
-copy_files etc root:root 600
-
-# We do not want the agent accounts to run `/etc/bashrc` at startup, so delete
-# the `~/.bashrc` files for those accounts.
+# We do not want the agent accounts to run `/etc/bashrc` at startup, and we do
+# want them to find the right `node`, so replace the default `.bashrc` with our own.
 for agent in public; do
     echo 'export PATH=$PATH:/opt/bin' > /home/$agent/.bashrc
 done
 
-# Create Puppy application log directory.
-/bin/mkdir -p /var/log/puppy/apps /var/log/puppy/worker
-
-# Create Puppy user policy generation directory.
-/bin/mkdir -p /var/cache/puppy/policy /var/cache/puppy/transitions /var/cache/puppy/decommissioned
-
-/bin/chown worker:worker /var/cache/puppy/policy
-
-/bin/mkdir -p /puppy /node /opt
-/bin/chown puppy:puppy /puppy /node /opt
-
-/bin/chown -R unbound /var/lib/unbound
-
-/sbin/chkconfig --add unbound
-/sbin/chkconfig unbound on
-
+# Add `/opt/bin` to the default secure path so that all sudoing will find
+# the right node.
 /bin/sed -ie 's/^\(Defaults \+secure_path = \).*/\1\/sbin:\/bin:\/usr\/sbin:\/usr\/bin:\/opt\/bin/' /etc/sudoers
 
-/bin/mkdir -p /etc/puppy
+# Configure daemons built from source.
+# -------------------------------------------------------------------------- #
+
+function on_boot()
+{
+    service=$1
+    until /sbin/chkconfig | /bin/grep "${service}.*3:on" > /dev/null; do
+        /sbin/chkconfig --add $service
+        /sbin/chkconfig $service on
+        echo "Enabled service $service to start on boot. You should start it now."
+    done
+}
+
+/bin/chown -R unbound /var/lib/unbound
+on_boot unbound
+
+if [ ! -e /etc/sasldb2 ]; then
+    echo "Generating postfix localhost SMTP password."
+    # Generate a password and assign it to a messages user.
+    /bin/ps ax | /usr/bin/md5sum | /bin/cut -d' ' -f1 | \
+        /usr/sbin/saslpasswd2 -c -u prettyrobots.com messages
+    /bin/chown postfix:worker /etc/sasldb2
+fi
+on_boot postfix
+
+# Set SELinux file contexts.
+# -------------------------------------------------------------------------- #
 
 /sbin/restorecon -R /puppy /etc /home /var/log/puppy /var/cache/puppy /node /opt
