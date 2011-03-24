@@ -1,8 +1,0 @@
-{ "name":                   "private"
-, "version":                "0.0.1"
-, "author":                 "Alan Gutierrez"
-, "bin":             
-  { "account_home":         "./bin/account_home.js"
-  , "account_register":     "./bin/account_register.js"
-  }
-}

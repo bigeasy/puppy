@@ -1,13 +1,12 @@
 require.paths.unshift("/puppy/common/lib/node")
 
-require("common").createSystem __filename, (system) ->
-  [ hostname ] = process.argv.slice 2
+require("common/private").createSystem __filename, "hostname", (system, hostname) ->
   authorize = (hostname, code) ->
     system.sql "getLocalUserByActivationCode", [ code ], "localUser", (results) ->
-      shell.verify(results.length is 1, "Cannot find activation for code #{code}.")
+      system.verify(results.length is 1, "Cannot find activation for code #{code}.")
       localUser = results.shift()
-      shell.verify(localUser.machine.hostname is hostname, "Incorrect hostname #{hostname}.")
-      shell.verify(localUser.id is parseInt(process.env["SUDO_UID"], 10),
+      system.verify(localUser.machine.hostname is hostname, "Incorrect hostname #{hostname}.")
+      system.verify(localUser.id is parseInt(process.env["SUDO_UID"], 10),
         "SUDO_UID #{process.env["SUDO_UID"]} does not match #{localUser.id}.")
       activate(localUser, code)
 
@@ -41,6 +40,6 @@ require("common").createSystem __filename, (system) ->
             ]
             process.stdout.write "Activation successful. Welcome to Puppy.\n"
 
-  shell.stdin 33, (error, stdin) ->
+  system.shell.stdin 33, (error, stdin) ->
     throw error if error
     authorize(hostname, stdin.trim())
