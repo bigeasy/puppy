@@ -1,8 +1,0 @@
-{   "name":             "janitor"
-,   "version":          "0.0.1"
-,   "author":           "Alan Gutierrez"
-,   "bin":             
-    { "job":                "./bin/job.js"
-    , "user_generate":      "./bin/user_generate.js"
-    }
-}

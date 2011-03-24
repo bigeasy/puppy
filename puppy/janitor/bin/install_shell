@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Install a file if the source is newer than the currently installed file.
+function install_file()
+{
+    local source=$1; local dest=$2; local owner=$3; local mode=$4
+
+    /bin/mkdir -m $mode -p $dest
+
+    file=$(basename $source)
+    dirty=0
+    if [ -e $dest/$file ]; then
+        if [ $(/usr/bin/stat --format=%Y $source) -gt $(/usr/bin/stat --format=%Y $dest/$file) ]; then
+            dirty=1
+        fi 
+    else
+        dirty=1
+    fi
+    if [ $dirty -eq 1 ]; then
+        echo "Installing file $dest/$file."
+        /usr/bin/install -m $mode -g $owner -o $owner $source $dest/$file
+    fi
+}
+
+owner=$1; mode=$2;
+shift; shift;
+for argument in $@; do
+    if [ -e $argument ]; then
+        for file in $(/bin/find $argument ! -type d); do
+            install_file $file $(/usr/bin/dirname /$file) $owner $mode
+        done
+    fi
+done

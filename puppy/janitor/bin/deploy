@@ -1,0 +1,108 @@
+#!/bin/bash
+
+# Utilities.
+# -------------------------------------------------------------------------- #
+
+# Emit an error message to stderr and return a non-zero exit code.
+function abend()
+{
+    message=$1
+    echo "ERROR: $message" 1>&1
+    exit 1
+}
+
+deploy=$(readlink -f $0)
+
+# Installation configuration.
+# -------------------------------------------------------------------------- #
+
+# Argument validation.
+[ $# -eq 1 ] && [ -d $1 ] || abend "Must provide a working directory."
+
+# Fetch the directory name to determine the owner of the installed files.
+project=$(readlink -f $1)
+basename=$(basename $project)
+
+# Chose an owner and mode based on the project directory name. Slightly kludgey.
+if [ $basename == "janitor" ]; then
+    user=root
+    mode=755
+else
+    user=$basename
+    mode=550
+fi
+
+# Change directory to the project directory.
+cd $project
+
+# Install shell programs.
+# -------------------------------------------------------------------------- #
+
+# Create the mount point if it doesn't exist already.
+/usr/bin/sudo mkdir -m $mode -p /puppy/$basename
+/usr/bin/sudo chown $user:$user /puppy/$basename
+
+# Install bash programs.
+/usr/bin/sudo "$(dirname $deploy)/install_shell" $user $mode puppy/$basename/bin \
+                                                             puppy/$basename/sbin
+
+# Build Node.js and CoffeeScript programs.
+# -------------------------------------------------------------------------- #
+
+# If we have a Cakefile and a src directory, then run cake and npm.
+if [ -e Cakefile ]; then
+    if [ -d src ]; then
+        /opt/bin/cake compile
+        if [ -d bin ]; then
+            /bin/sed -i '0,/^\((function() {\)/s//#!\/usr\/bin\/env node\n\1/' bin/*.js
+        fi
+    fi
+
+    if [ -e package.json ]; then
+        PATH=/opt/bin:$PATH npm_config_root=/puppy/$basename/lib/node npm_config_binroot=/puppy/$basename/bin \
+            npm_config_manroot=/puppy/$basename/share/man /usr/bin/sudo -E /opt/bin/npm install .
+    fi
+fi
+
+# Install Node.js and CoffeeScript programs.
+# -------------------------------------------------------------------------- #
+
+# Create our own custom installer.
+install="/usr/bin/sudo /usr/bin/install -m $mode -o $user -g $user"
+
+# We don't prattle on about installing node programs since they are installed
+# every time we run the script.
+if [ -d src -a ! -d lib ]; then
+    dest=/puppy/$basename/bin
+    for coffee in $(find src -name \*.coffee | /bin/sort); do
+        program=$(echo $coffee | /bin/sed 's/src\/\(.*\).coffee$/\1/')
+        if [ -e "bin/$program.js" ]; then
+            $install "bin/$program.js" $dest/$program
+        fi
+    done
+fi
+
+# Install launcher scripts for try/catch wrapped programs.
+source=$(dirname $project)
+for file in $(ls src/*.coffee | grep '_try.coffee$')
+do
+    dest=$(/bin/basename $file | /bin/sed 's/^\(.*\)_try.coffee/\1/')
+    $install /puppy/janitor/bin/launcher /puppy/$basename/bin/$dest
+done
+
+# Special case for worker branch, install sudo or medo launchers.
+if [ $basename == "worker" ]; then
+    while read line
+    do
+        fields=($line)
+        if [ "${fields[1]}" == "sudo" ]; then
+            /usr/bin/sudo /bin/cp src/sudo.js "/puppy/worker/bin/${fields[0]}"
+        elif [ "${fields[1]}" == "medo" ]; then
+            /usr/bin/sudo /bin/cp src/medo.js "/puppy/worker/bin/${fields[0]}"
+        fi
+        /usr/bin/sudo chown worker:worker "/puppy/worker/bin/${fields[0]}"
+        /usr/bin/sudo chmod 550 "/puppy/worker/bin/${fields[0]}"
+    done < src/doers.conf
+fi
+
+/usr/bin/sudo /sbin/restorecon -R /puppy
