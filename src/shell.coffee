@@ -1,5 +1,5 @@
-{spawn}               = require "child_process"
-{helpers: {flatten}}  = require "coffee-script"
+{spawn}                     = require "child_process"
+{helpers: {flatten, last}}  = require "coffee-script"
 
 # Encapsulates a command to invoke using `spawn`.
 class Command
@@ -28,10 +28,14 @@ class Command
     if input?
       program.stdin.write input
       program.stdin.end()
-    program.stdout.on "data", (chunk) -> outcome.stdout += chunk.toString()
-    program.stderr.on "data", (chunk) -> outcome.stderr += chunk.toString()
+    if program.stdout?
+      program.stdout.on "data", (chunk) -> outcome.stdout += chunk.toString()
+    if program.stderr?
+      program.stderr.on "data", (chunk) -> outcome.stderr += chunk.toString()
     program.on "exit", (code) ->
       outcome.code = code
+      delete outcome.stdout unless outcome.stdout.length
+      delete outcome.stderr unless outcome.stderr.length
       callback(outcome) if callback?
 
   # Inherit the standard I/O handles of the parent process.
@@ -42,8 +46,8 @@ class Command
         callback(code)
       else
         process.exit code
- 
-class module.exports.Shell
+
+module.exports.Shell = class Shell
   constructor: (@syslog) ->
 
   err: (message, context) ->
@@ -54,9 +58,14 @@ class module.exports.Shell
     else
       "#{tag}[#{process.pid}/#{process.getuid()}]: #{message}"
 
-  command: (command, parameters...) ->
-    options = parameters.pop() if typeof parameters[parameters.length - 1] is "function"
-    new Command(this, command, flatten(parameters), options)
+  run: (command, splat...) ->
+    o = splat[splat.length - 1]
+    if o? and typeof o is "object" and not (o instanceof Array)
+      options = splat.pop()
+    new Command(this, command, flatten(splat), options)
+
+  runAs: (user, command, splat...) ->
+    @run.apply this, flatten([ "/usr/bin/sudo", [ "-u", user, command ], splat ])
 
   doas: (user, command, parameters, input, callback) ->
     params = [ "-u", user, command ]
@@ -78,7 +87,8 @@ class module.exports.Shell
 
   stdin: (length, callback) ->
     body = ""
-    stdin = process.openStdin()
+    stdin = process.stdin
+    stdin.resume()
     stdin.setEncoding('utf8')
     stdin.on "data", (chunk) ->
       body += chunk
@@ -87,3 +97,9 @@ class module.exports.Shell
         callback(new RangeError("ERROR: Standard input longer than #{length} characters. #{dump}"), null)
         stdin.close()
     stdin.on "end", -> callback(null, body) if body.length <= length
+ 
+module.exports.createShell = (filename, callback) ->
+  programName = filename.replace(/^.*\/(.*?)(?:_try)?$/, "$1")
+  branchName = filename.replace(/^\/puppy\/([^\/]+).*$/, "$1")
+  tag = if programName.indexOf(branchName) is 0 then programName else "#{branchName}_#{programName}"
+  callback(new (Shell)(new (require("./syslog").Syslog)({ tag, pid: true })))

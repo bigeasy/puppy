@@ -23,12 +23,12 @@ module.exports.createSystem = (filename, splat...) ->
   additional = if splat.length is 2 then splat.shift().split(/,\s*/) else []
   callback = splat.shift()
 
-  programName = filename.replace(/^.*\/(.*?)(?:_try)?.js$/, "$1")
+  programName = filename.replace(/^.*\/(.*?)(?:_try)?$/, "$1")
   branchName = filename.replace(/^\/puppy\/([^\/]+).*$/, "$1")
   tag = if branchName is programName then programName else "#{branchName}_#{programName}"
-  syslog = new (require("common").Syslog)({ tag, pid: true })
+  syslog = new (require("./syslog").Syslog)({ tag, pid: true })
 
-  shell = new (require("common").Shell)(syslog)
+  shell = new (require("./shell").Shell)(syslog)
   shell.doas "database", "/puppy/database/bin/database", [], null, (stdout) ->
     {host, password} = JSON.parse(stdout)
     system = new Database(syslog, shell, host, password)
