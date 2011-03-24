@@ -1,7 +1,0 @@
-{ "name":                   "public"
-, "version":                "0.0.1"
-, "author":                 "Alan Gutierrez"
-, "bin":
-  { "public_receptionist":  "./bin/public_receptionist.js"
-  }
-}
