@@ -1,5 +1,16 @@
 #!/bin/bash
 
+function is_dirty()
+{
+    local source=$1; local dest=$2;
+    if [ ! -e $dest ] || [ $(/usr/bin/stat --format=%Y $source) -gt $(/usr/bin/stat --format=%Y $dest) ]
+    then
+        return 0
+    else
+        return 1
+    fi
+}
+
 function abend()
 {
     message=$1

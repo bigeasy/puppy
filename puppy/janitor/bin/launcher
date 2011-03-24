@@ -2,7 +2,7 @@
 
 function log (message, code, stderr) {
   require.paths.unshift("/puppy/common/lib/node");
-  var syslog = new (require("common").Syslog)({ tag: __filename.replace(/^.*\/(.*)$/, "$1"), pid: true });
+  var syslog = new (require("common/public").Syslog)({ tag: __filename.replace(/^.*\/(.*)$/, "$1"), pid: true });
   var context = { code: code }
   if (stderr.length > 0) {
     context.stderr = stderr;

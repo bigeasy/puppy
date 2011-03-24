@@ -9,16 +9,10 @@ function install_file()
 
     file=$(basename $source)
     dirty=0
-    if [ -e $dest/$file ]; then
-        if [ $(/usr/bin/stat --format=%Y $source) -gt $(/usr/bin/stat --format=%Y $dest/$file) ]; then
-            dirty=1
-        fi 
-    else
-        dirty=1
-    fi
-    if [ $dirty -eq 1 ]; then
+    if [ ! -e $dest/$file ] || \
+       [ $(/usr/bin/stat --format=%Y $source) -gt $(/usr/bin/stat --format=%Y $dest/$file) ]; then
         echo "Installing file $dest/$file."
-        /usr/bin/install -m $mode -g $owner -o $owner $source $dest/$file
+        /usr/bin/install -m $mode -g $owner -o root $source $dest/$file
     fi
 }
 

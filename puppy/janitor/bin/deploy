@@ -13,6 +13,8 @@ function abend()
 
 deploy=$(readlink -f $0)
 
+. $(/usr/bin/dirname $deploy)/functions
+
 # Installation configuration.
 # -------------------------------------------------------------------------- #
 
@@ -25,6 +27,34 @@ basename=$(basename $project)
 
 user=$basename
 
+# Change directory to the project directory.
+cd $project
+
+# Build Node.js and CoffeeScript programs.
+# -------------------------------------------------------------------------- #
+
+umask 022
+
+for source in $(/bin/find src -mindepth 2 -name \*.coffee)
+do
+    dir=$(/usr/bin/dirname $source | sed 's/src\///')
+    program=$(/bin/basename $source | sed 's/.coffee$//')
+    if [ ! -e $dir/$program ] || \
+       [ $(/usr/bin/stat --format=%Y $source) -gt $(/usr/bin/stat --format=%Y $dir/$program) ]; then
+        echo "Rebuildering $dir/$program.coffee."
+        if [ $(/usr/bin/dirname $dir) == "lib" ]; then
+            /opt/bin/coffee -c -p $source > $dir/$program.js
+        else
+            /bin/mkdir -p $dir
+            echo "#!/usr/bin/env node" > $dir/$program
+            /opt/bin/coffee -c -p $source >> $dir/$program
+        fi
+    fi
+done
+
+# Choose permissions.
+# -------------------------------------------------------------------------- #
+
 # Chose an owner and mode based on the project directory name. Slightly kludgey.
 if [ $basename == "janitor" -o $basename == "common" ]; then
     mode=755
@@ -33,9 +63,6 @@ else
 fi
 
 umask $(/usr/bin/printf "%03o" $(( ~(8#$mode) & 8#777 )))
-
-# Change directory to the project directory.
-cd $project
 
 # Install shell programs.
 # -------------------------------------------------------------------------- #
@@ -48,24 +75,6 @@ cd $project
 /usr/bin/sudo "$(dirname $deploy)/install_shell" $user $mode puppy/$basename/bin \
                                                              puppy/$basename/sbin
 
-# Build Node.js and CoffeeScript programs.
-# -------------------------------------------------------------------------- #
-
-# If we have a Cakefile and a src directory, then run cake and npm.
-if [ -e Cakefile ]; then
-    if [ -d src ]; then
-        /opt/bin/cake compile
-        if [ -d bin ]; then
-            /bin/sed -i '0,/^\((function() {\)/s//#!\/usr\/bin\/env node\n\1/' bin/*.js
-        fi
-    fi
-
-    if [ -e package.json ]; then
-        PATH=/opt/bin:$PATH npm_config_root=/puppy/$basename/lib/node npm_config_binroot=/puppy/$basename/bin \
-            npm_config_manroot=/puppy/$basename/share/man /usr/bin/sudo -E /opt/bin/npm install .
-    fi
-fi
-
 # Install Node.js and CoffeeScript programs.
 # -------------------------------------------------------------------------- #
 
@@ -77,17 +86,18 @@ install="/usr/bin/sudo /usr/bin/install -m $mode -o $user -g $user"
 if [ -d src -a ! -d lib ]; then
     /usr/bin/sudo /bin/mkdir -p /puppy/$basename/bin
     dest=/puppy/$basename/bin
-    for coffee in $(find src -name \*.coffee | /bin/sort); do
-        program=$(echo $coffee | /bin/sed 's/src\/\(.*\).coffee$/\1/')
-        if [ -e "bin/$program.js" ]; then
-            $install "bin/$program.js" $dest/$program
+    for coffee in $(find src/bin -name \*.coffee | /bin/sort); do
+        program=$(echo $coffee | /bin/sed 's/src\/bin\/\(.*\).coffee$/\1/')
+        if [ -e "bin/$program" ] && is_dirty bin/$program $dest/program; then
+            echo "Installing $dest/$program."
+            $install "bin/$program" $dest/$program
         fi
     done
 fi
 
 # Install launcher scripts for try/catch wrapped programs.
 source=$(dirname $project)
-for file in $(ls src/*.coffee | grep '_try.coffee$')
+for file in $(ls src/bin/*.coffee | grep '_try.coffee$')
 do
     dest=$(/bin/basename $file | /bin/sed 's/^\(.*\)_try.coffee/\1/')
     $install /puppy/janitor/bin/launcher /puppy/$basename/bin/$dest
