@@ -11,8 +11,7 @@ fi
 # exists, followed by the invocation of the functions.
 function make_group()
 {
-    group=$1
-    gid=$2
+    local group=$1; local gid=$2
     cut -d: -f1 /etc/group | grep '^'$group'$' > /dev/null
     ret=$?
     if [ $ret != 0 ]
@@ -24,8 +23,7 @@ function make_group()
 
 function make_user()
 {
-    user=$1
-    uid=$2
+    local user=$1; local uid=$2;
     make_group $user $uid
     cut -d: -f1 /etc/passwd | grep '^'$user'$' > /dev/null
     ret=$?
@@ -52,6 +50,7 @@ make_user   protected     212
 # Users for built from source daemons.
 make_user   haproxy       225
 make_user   stunnel       226
+make_group  loggers       227
 make_user   unbound       228
 
 # Make all of the workers member of the common group.
@@ -72,7 +71,10 @@ function group_assign()
 }
 
 group_assign common 201 220
-exit 1 
+group_assign loggers 1  700
+
+/bin/chown root:loggers /dev/log
+/bin/chmod o-rw /dev/log
 
 # Configuration installtion
 # -------------------------------------------------------------------------- #
@@ -140,7 +142,10 @@ install_files root 440 etc/sudoers.d/*
 install_files root 600 etc/ssh/sshd_config
 
 # Create postfix configuration databases.
-postmap_files /etc/postfix/transport /etc/postfix/sasl_passwd
+postmap_files /etc/postfix/transport \
+              /etc/postfix/sasl_passwd \
+              /etc/postfix/authorized_submit_users \
+              /etc/postfix/virtual_maps
 
 # Create Puppy application log directory.
 /bin/mkdir -p /var/log/puppy/apps /var/log/puppy/worker

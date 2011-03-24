@@ -49,4 +49,6 @@ smtp_use_tls = yes
 transport_maps = hash:/etc/postfix/transport
 
 # Only allow worker to use postdrop.
-authorized_submit_users = worker
+authorized_submit_users = hash:/etc/postfix/authorized_submit_users
+
+virtual_maps = hash:/etc/postfix/virtual_maps
