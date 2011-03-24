@@ -1,8 +1,0 @@
-{   "name":             "worker"
-,   "version":          "0.0.1"
-,   "author":           "Alan Gutierrez"
-,   "directories":      { "lib" : "./lib" }
-,   "bin":
-    { "worker_try":         "./bin/worker_try.js"
-    }
-}
