@@ -1,3 +1,7 @@
+/puppy/private/bin/account_activate gen_context(system_u:object_r:private_liminal_exec_t, s0)
+/puppy/private/bin/account_activate@0.0.1 gen_context(system_u:object_r:private_liminal_exec_t, s0)
+/puppy/private/lib/node/.npm/private/0.0.1/package/bin/account_activate.js gen_context(system_u:object_r:private_liminal_exec_t, s0)
+
 /puppy/private/bin/account_home gen_context(system_u:object_r:private_public_exec_t, s0)
 /puppy/private/bin/account_home@0.0.1 gen_context(system_u:object_r:private_public_exec_t, s0)
 /puppy/private/lib/node/.npm/private/0.0.1/package/bin/account_home.js gen_context(system_u:object_r:private_public_exec_t, s0)

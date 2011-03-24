@@ -1,2 +1,4 @@
-/puppy/liminal/bin/liminal_receptionist             gen_context(system_u:object_r:liminal_exec_t, s0)
-/puppy/liminal/bin/liminal_receptionist@.*          gen_context(system_u:object_r:liminal_exec_t, s0)
+/puppy/liminal/bin/liminal_receptionist gen_context(system_u:object_r:liminal_receptionist_exec_t, s0)
+/puppy/liminal/bin/liminal_receptionist@0.0.1 gen_context(system_u:object_r:liminal_receptionist_exec_t, s0)
+/puppy/liminal/lib/node/.npm/liminal/0.0.1/package/bin/liminal_receptionist.js gen_context(system_u:object_r:liminal_receptionist_exec_t, s0)
+

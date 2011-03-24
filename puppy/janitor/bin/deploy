@@ -23,14 +23,16 @@ deploy=$(readlink -f $0)
 project=$(readlink -f $1)
 basename=$(basename $project)
 
+user=$basename
+
 # Chose an owner and mode based on the project directory name. Slightly kludgey.
-if [ $basename == "janitor" ]; then
-    user=root
+if [ $basename == "janitor" -o $basename == "common" ]; then
     mode=755
 else
-    user=$basename
     mode=550
 fi
+
+umask $(/usr/bin/printf "%03o" $(( ~(8#$mode) & 8#777 )))
 
 # Change directory to the project directory.
 cd $project
@@ -73,6 +75,7 @@ install="/usr/bin/sudo /usr/bin/install -m $mode -o $user -g $user"
 # We don't prattle on about installing node programs since they are installed
 # every time we run the script.
 if [ -d src -a ! -d lib ]; then
+    /usr/bin/sudo /bin/mkdir -p /puppy/$basename/bin
     dest=/puppy/$basename/bin
     for coffee in $(find src -name \*.coffee | /bin/sort); do
         program=$(echo $coffee | /bin/sed 's/src\/\(.*\).coffee$/\1/')
@@ -103,6 +106,16 @@ if [ $basename == "worker" ]; then
         /usr/bin/sudo chown worker:worker "/puppy/worker/bin/${fields[0]}"
         /usr/bin/sudo chmod 550 "/puppy/worker/bin/${fields[0]}"
     done < src/doers.conf
+elif [ $basename == "common" ]; then
+    install="/usr/bin/sudo /usr/bin/install -o $user -g $user"
+    /usr/bin/sudo /bin/mkdir -p /puppy/common/lib/node/common/lib
+    /usr/bin/sudo /bin/mkdir -m 550  -p /puppy/common/lib/node/common/queries
+    $install -m 444 public.js /puppy/common/lib/node/common/
+    $install -m 444 lib/shell.js lib/syslog.js /puppy/common/lib/node/common/lib/
+    $install -m 440 private.js /puppy/common/lib/node/common/
+    $install -m 440 queries/* /puppy/common/lib/node/common/queries/
+    $install -m 440 lib/system.js /puppy/common/lib/node/common/lib/
 fi
 
+/usr/bin/sudo chown -R $user:$user /puppy/$basename
 /usr/bin/sudo /sbin/restorecon -R /puppy

@@ -6,4 +6,5 @@
 policy_module(private,1.0.0)
 
 puppy_private_module(public)
+puppy_private_module(liminal)
 puppy_private_module(protected)

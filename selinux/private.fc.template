@@ -1,4 +1,4 @@
-#account_activate            direct      private_public
+account_activate            direct      private_liminal
 account_home                direct      private_public
 #account_ready               try
 account_register            direct      private_public
