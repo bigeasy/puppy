@@ -64,7 +64,7 @@ function group_assign()
             members=$(/bin/grep "^${group}:" /etc/group | /bin/cut -d: -f4)
             if echo $members | /bin/grep -wv ${user[0]} > /dev/null; then
                 echo "Adding ${user[0]} to group $group."
-                /usr/sbin/usermod -G $group ${user[0]}
+                /usr/sbin/usermod -a -G $group ${user[0]} || abend "Cannot add ${user[0]} to $group."
             fi
         fi
     done < /etc/passwd
