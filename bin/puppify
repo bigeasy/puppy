@@ -73,8 +73,17 @@ function group_assign()
 group_assign common 201 220
 group_assign loggers 1  700
 
-/bin/chown root:loggers /dev/log
-/bin/chmod o-rw /dev/log
+# Hide the syslog.
+# -------------------------------------------------------------------------- #
+
+# We configure `rsyslog` to create the `log` socket in `/dev/loggers`, which is
+# only readable by members of the `loggers` group, and then symlink `/dev/log`
+# to our protected socket.
+if [ ! -e /dev/loggers ]; then
+    /bin/mkdir -m 750 /dev/loggers
+    /bin/chown root:loggers /dev/loggers
+    /bin/ln -s /dev/loggers/log /dev/log
+fi
 
 # Configuration installtion
 # -------------------------------------------------------------------------- #
