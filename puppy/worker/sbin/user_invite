@@ -1,25 +1,23 @@
 #!/usr/bin/env node
 (function() {
-  var email, sendActivation, shell, syslog;
   require.paths.unshift("/puppy/common/lib/node");
-  syslog = new (require("common").Syslog)({
-    tag: "worker_user_invite",
-    pid: true
-  });
-  shell = new (require("common").Shell)(syslog);
-  email = process.argv.slice(2)[0];
-  sendActivation = function(activation) {
-    var body, command, start;
-    body = "From: Pretty Robots <messages@prettyrobots.com>\nTo: " + activation.email + "\nSubject: Activate Your Account at Puppy\n\nDidn't expect this message? Very, very sorry. See below.\n\nWelcome to Puppy, intelligent hosting for your Node.js web\napplications, with puppy-like workflow.\n\nActivate Puppy with the following command.\n\n$ puppy account:activate " + activation.code + "\n\nDidn't expect this message?\n\nSomeone might be annoying you with our signup form. Using your\nemail instead of their own. Please let us know that you did\nnot expect this message by clicking this link.\n\nhttps://www.runpup.com/bogus/" + activation.code + "\n\nWe'll put a stop to it.";
-    start = Date.now();
-    command = shell.command("/usr/sbin/sendmail", activation.email);
-    return command.assert("Cannot run semdmail.", body, function(outcome) {
-      return syslog.send("info", "Invitation sent to " + activation.email + ".", {
-        duration: Date.now() - start
+  require("common/public").createShell(__filename, function(shell) {
+    var email, sendActivation, syslog;
+    syslog = shell.syslog;
+    email = process.argv.slice(2)[0];
+    sendActivation = function(activation) {
+      var body, command, start;
+      body = "From: Pretty Robots <messages@prettyrobots.com>\nTo: " + activation.email + "\nSubject: Activate Your Account at Puppy\n\nDidn't expect this message? Very, very sorry. See below.\n\nWelcome to Puppy, intelligent hosting for your Node.js web\napplications, with puppy-like workflow.\n\nActivate Puppy with the following command.\n\n$ puppy account:activate " + activation.code + "\n\nDidn't expect this message?\n\nSomeone might be annoying you with our signup form. Using your\nemail instead of their own. Please let us know that you did\nnot expect this message by clicking this link.\n\nhttps://www.runpup.com/bogus/" + activation.code + "\n\nWe'll put a stop to it.";
+      start = Date.now();
+      command = shell.run("/usr/sbin/sendmail", activation.email);
+      return command.assert("Cannot run semdmail.", body, function(outcome) {
+        return syslog.send("info", "Invitation sent to " + activation.email + ".", {
+          duration: Date.now() - start
+        });
       });
+    };
+    return shell.doas("system", "/puppy/system/bin/user_activation", [email], null, function(stdout) {
+      return sendActivation(JSON.parse(stdout));
     });
-  };
-  shell.doas("system", "/puppy/system/bin/user_activation", [email], null, function(stdout) {
-    return sendActivation(JSON.parse(stdout));
   });
 }).call(this);
