@@ -147,7 +147,8 @@ install_files root 644 var/lib/unbound/etc/unbound/* \
                        etc/postfix/*
 install_files root 755 etc/rc.d/init.d/* \
                        usr/bin/*
-install_files root 440 etc/sudoers.d/*
+install_files root 440 etc/sudoers.d/* \
+                       etc/sudoers*
 install_files root 600 etc/ssh/sshd_config
 
 # Create postfix configuration databases.
@@ -196,10 +197,6 @@ copy_public_key public home/public/ssh/authorized_keys /puppy/public/bin/public_
 for agent in public; do
     echo 'export PATH=$PATH:/opt/bin' > /home/$agent/.bashrc
 done
-
-# Add `/opt/bin` to the default secure path so that all sudoing will find
-# the right node.
-/bin/sed -ie 's/^\(Defaults \+secure_path = \).*/\1\/sbin:\/bin:\/usr\/sbin:\/usr\/bin:\/opt\/bin/' /etc/sudoers
 
 # Configure daemons built from source.
 # -------------------------------------------------------------------------- #

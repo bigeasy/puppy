@@ -1,0 +1,10 @@
+Defaults    requiretty
+Defaults   !visiblepw
+
+Defaults    env_reset
+Defaults   !env_keep
+Defaults    env_file = "/etc/sudoers.env"
+Defaults    always_set_home
+Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/opt/bin
+
+root	    ALL=(ALL) 	ALL
