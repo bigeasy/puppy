@@ -1,1 +1,2 @@
+Defaults:%wheel !always_set_home
 %wheel  ALL=(ALL)   NOPASSWD: ALL
