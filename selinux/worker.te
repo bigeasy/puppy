@@ -87,10 +87,10 @@ logging_send_syslog_msg(worker_t)
 ############################################################################
 
 # Invite sending is performed as the worker user.
-puppy_job_as_worker(worker_account_ready)
+puppy_job_as_worker_redux(account_ready)
 
-job_sudo_delegate(worker_account_ready)
-#job_delegate_trans(worker_account_ready, private_account_ready)
+job_sudo_system(account_ready)
+job_system_trans(account_ready, account_ready)
 
 ############################################################################
 ### Policy for `app_config`.

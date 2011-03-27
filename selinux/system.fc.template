@@ -17,9 +17,10 @@
 #db_password                 try
 #queue_config                try
 #app_users                   try
-user_activation         direct      system
+account_ready           direct      system
 policy_ready            direct      system
 policy_users            direct      system
 port_list               direct      system
+user_activation         direct      system
 user_keys               direct      system
 user_ready              direct      system

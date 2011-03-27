@@ -11,6 +11,7 @@
 /puppy/worker/sbin/user_policy          gen_context(system_u:object_r:user_policy_job_exec_t, s0)
 
 worker                                  try
+account_ready                           job
 policy_generate                         job
 policy_load                             job
 policy_make                             job
