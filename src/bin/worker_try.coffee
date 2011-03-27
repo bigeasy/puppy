@@ -1,5 +1,3 @@
-require.paths.unshift("/puppy/common/lib/node")
-
 # Require Node.js dependencies.
 spawn     = require("child_process").spawn
 
