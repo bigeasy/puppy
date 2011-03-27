@@ -11,7 +11,7 @@ class Command
   assert: (message, splat...) ->
     callback = splat.pop() if typeof splat[splat.length - 1] is "function"
     splat.push (outcome) =>
-      if outcome.code or outcome.stderr.length
+      if outcome.code or outcome.stderr?
         throw new Error @shell.err message, outcome
       callback(outcome) if callback?
     @run.apply this, splat
