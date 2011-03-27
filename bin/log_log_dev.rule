@@ -1,0 +1,1 @@
+sudo auditctl -a exit,always -S 102 -F exit=-13 -k LOG
