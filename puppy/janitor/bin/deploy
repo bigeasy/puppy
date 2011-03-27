@@ -130,5 +130,5 @@ elif [ $basename == "common" ]; then
     $install -m 440 lib/system /puppy/common/lib/node/common/lib/
 fi
 
-/usr/bin/sudo chown -R $user:$user /puppy/$basename
+/usr/bin/sudo chown -R root:$user /puppy/$basename
 /usr/bin/sudo /sbin/restorecon -R /puppy
