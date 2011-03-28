@@ -1,5 +1,12 @@
 #!/bin/bash
 
+count=$1
+
+if [ -z "$count" ]
+then
+    count=12
+fi
+
 user=$(whoami)
 if [ $user != "root" ]
 then
@@ -37,7 +44,7 @@ mysql_script ddl/0007_account_ready.sql
 
 bin/load_ports | sudo -H -u janitor mysql -u root puppy
 
-/usr/bin/sudo /puppy/janitor/bin/user_generate 12
+/usr/bin/sudo /puppy/janitor/bin/user_generate $count
 
 /puppy/janitor/bin/job $(/bin/hostname) port:unlabel
 /puppy/janitor/bin/job $(/bin/hostname) policy:unload
