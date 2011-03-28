@@ -2,6 +2,14 @@
 /puppy/system/bin/account_ready@0.0.1 gen_context(system_u:object_r:account_ready_system_exec_t, s0)
 /puppy/system/lib/node/.npm/system/0.0.1/package/bin/account_ready.js gen_context(system_u:object_r:account_ready_system_exec_t, s0)
 
+/puppy/system/bin/app_config gen_context(system_u:object_r:app_config_system_exec_t, s0)
+/puppy/system/bin/app_config@0.0.1 gen_context(system_u:object_r:app_config_system_exec_t, s0)
+/puppy/system/lib/node/.npm/system/0.0.1/package/bin/app_config.js gen_context(system_u:object_r:app_config_system_exec_t, s0)
+
+/puppy/system/bin/mysql_config gen_context(system_u:object_r:mysql_config_system_exec_t, s0)
+/puppy/system/bin/mysql_config@0.0.1 gen_context(system_u:object_r:mysql_config_system_exec_t, s0)
+/puppy/system/lib/node/.npm/system/0.0.1/package/bin/mysql_config.js gen_context(system_u:object_r:mysql_config_system_exec_t, s0)
+
 /puppy/system/bin/policy_ready gen_context(system_u:object_r:policy_ready_system_exec_t, s0)
 /puppy/system/bin/policy_ready@0.0.1 gen_context(system_u:object_r:policy_ready_system_exec_t, s0)
 /puppy/system/lib/node/.npm/system/0.0.1/package/bin/policy_ready.js gen_context(system_u:object_r:policy_ready_system_exec_t, s0)

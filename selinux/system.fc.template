@@ -18,6 +18,8 @@
 #queue_config                try
 #app_users                   try
 account_ready           direct      system
+app_config              direct      system
+mysql_config            direct      system
 policy_ready            direct      system
 policy_users            direct      system
 port_list               direct      system

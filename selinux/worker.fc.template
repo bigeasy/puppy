@@ -12,6 +12,8 @@
 
 worker                                  try
 account_ready                           job
+init_generate                           job
+init_restorecon                         job
 policy_generate                         job
 policy_load                             job
 policy_make                             job
@@ -21,6 +23,7 @@ port_label                              job
 port_unlabel                            job
 user_authorize                          job
 user_chown                              job
+user_config                             job
 user_create                             job
 user_decommission                       job
 user_group                              job

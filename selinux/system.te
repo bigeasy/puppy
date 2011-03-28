@@ -6,6 +6,8 @@
 policy_module(system,1.0.0)
 
 puppy_system(account_ready)
+puppy_system(app_config)
+puppy_system(mysql_config)
 puppy_system(policy_ready)
 puppy_system(policy_users)
 puppy_system(port_list)
