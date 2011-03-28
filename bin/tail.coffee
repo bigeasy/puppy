@@ -75,7 +75,7 @@ readExceptions = (stderr, exceptions) ->
 
     process = null
     # What remains is the exception message. 
-    message = stderr.join "\n -> "
+    message = stderr.join "\n  "
     if match = /^Error:\s([\w_]+)\[(\d+)\/(\d+)\]:\s(.*)$/.exec(message)
       [ program, pid, uid, body ] = match.slice(1)
       message = "Error: #{body}"
