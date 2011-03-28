@@ -20,11 +20,13 @@ script
 end script
 EOL
 
+# FIXME Very bad. Need to be explicit. User could put any sort of node there.
+# (Oh, right, it doesn't matter.)
 cat <<EOL > /var/cache/puppy/transitions/start_u${uid}
 #!/bin/bash
 
 cd /home/u${uid}/app
-exec /node/v0.2.6/bin/node /home/u${uid}/app/server.js
+exec /home/u${uid}/bin/node /home/u${uid}/app/server.js
 EOL
 
 umask 077 
