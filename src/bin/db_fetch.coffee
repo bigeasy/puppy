@@ -14,7 +14,7 @@ require("common/private").createSystem __filename, (system) ->
           system.enqueue dataStore.dataServer.hostname, [
             [ "mysql:create", [ dataStore.id ] ],
             [ "mysql:grant", [ app, dataStore.id ] ]
-            [ "app:config", [ app ] ]
+            [ "app:reconfig", [ app ] ]
           ], ->
             system.sql "getDataStoresByApplication", [ app ], "dataStore", (results) ->
               dataStores = []
