@@ -148,7 +148,7 @@ template(`job_system_trans',`
     allow $2_system_t worker_t:fifo_file rw_fifo_file_perms;
 ')
 ##  Create a set of derived types for Puppy worker jobs.
-template(`puppy_job_execute_redux',`
+template(`puppy_job_execute',`
     # Domain types for proxy and job.
     type $1_job_proxy_t;
     type $1_job_t;
@@ -191,53 +191,8 @@ template(`puppy_job_execute_redux',`
 
     allow $1_job_t worker_t:fifo_file rw_fifo_file_perms;
 ')
-
-template(`puppy_job_execute',`
-    # Domain types for proxy and job.
-    type $1_proxy_t;
-    type $1_t;
-
-    # Role assignments for proxy and job.
-    role system_r types $1_proxy_t;
-    role system_r types $1_t;
-
-    # The executable type.
-    type $1_exec_t;
-
-    # Application domains for proxy and job.
-    application_domain($1_t, $1_exec_t)
-    application_domain($1_proxy_t, $1_exec_t)
-
-    # The working script will report to the proxy script via stdio.
-    allow $1_t $1_proxy_t:fifo_file rw_fifo_file_perms;
-
-    # The transition program is always a Node.js program.
-    puppy_node_exec($1_proxy_t)
-
-    # The working program is always a shell program.
-    puppy_shell_exec($1_t)
-
-    # Read and write to stdin, stout and stderr.
-    allow $1_t self:fifo_file rw_fifo_file_perms;
-    allow $1_proxy_t self:fifo_file rw_fifo_file_perms;
-
-    # The proxy needs to execute Puppy executables.
-    puppy_exec_puppy_bin($1_proxy_t)
-
-    # The agent needs to execute Puppy system executables.
-    puppy_exec_puppy_sbin($1_t)
-
-    # Allow worker to read the NPM link to the executable.
-    allow worker_t $1_exec_t:lnk_file read;
-
-    # Alllow the proxy to read the NPM link to the executable.
-    allow $1_proxy_t $1_exec_t:lnk_file read;
-
-    allow $1_t worker_t:fifo_file rw_fifo_file_perms;
-')
-
-template(`puppy_job_as_root_redux',`
-    puppy_job_execute_redux($1) 
+template(`puppy_job_as_root',`
+    puppy_job_execute($1) 
 
     # Transition from worker to the proxy domain, from the transition program to
     # the sudo domain, from sudo domain to the job domain.
@@ -252,26 +207,8 @@ template(`puppy_job_as_root_redux',`
 
     allow $1_job_proxy_sudo_t worker_t:fifo_file rw_fifo_file_perms;
 ')
-
-template(`puppy_job_as_root',`
+template(`puppy_job_as_worker',`
     puppy_job_execute($1) 
-
-    # Transition from worker to the proxy domain, from the transition program to
-    # the sudo domain, from sudo domain to the job domain.
-    domtrans_pattern(worker_t, $1_exec_t, $1_proxy_t)
-    sudo_role_template($1_proxy, system_r, $1_proxy_t)
-    domtrans_pattern($1_proxy_sudo_t, $1_exec_t, $1_t)
-
-    allow $1_proxy_t self:fifo_file write;
-
-    # The proxy sudo needs to read Puppy executables.
-    puppy_read_puppy_sbin($1_proxy_sudo_t)
-
-    allow $1_proxy_sudo_t worker_t:fifo_file rw_fifo_file_perms;
-')
-
-template(`puppy_job_as_worker_redux',`
-    puppy_job_execute_redux($1) 
     # Transition from worker to the proxy domain, from the transition program to
     # the sudo domain, from sudo domain to the job domain.
     domtrans_pattern(worker_t, $1_job_exec_t, $1_job_proxy_t)
@@ -286,23 +223,6 @@ template(`puppy_job_as_worker_redux',`
 
     corecmd_exec_shell($1_job_proxy_t)
     corecmd_exec_shell($1_job_t)
-')
-template(`puppy_job_as_worker',`
-    puppy_job_execute($1) 
-    # Transition from worker to the proxy domain, from the transition program to
-    # the sudo domain, from sudo domain to the job domain.
-    domtrans_pattern(worker_t, $1_exec_t, $1_proxy_t)
-    domtrans_pattern($1_proxy_t, $1_exec_t, $1_t)
-    # The proxy needs to read Puppy executables.
-    puppy_read_puppy_sbin($1_proxy_t)
-    # The proxy needs to read Puppy executables.
-    puppy_read_puppy_sbin($1_proxy_t)
-
-    # The agent needs to execute Puppy system executables.
-    puppy_exec_puppy_sbin($1_t)
-
-    corecmd_exec_shell($1_proxy_t)
-    corecmd_exec_shell($1_t)
 ')
 template(`puppy_rw_worker_fifo',`
     allow $1 $2_job_proxy_t:fifo_file rw_fifo_file_perms;

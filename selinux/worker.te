@@ -87,7 +87,7 @@ logging_send_syslog_msg(worker_t)
 ############################################################################
 
 # Invite sending is performed as the worker user.
-puppy_job_as_worker_redux(account_ready)
+puppy_job_as_worker(account_ready)
 
 job_sudo_system(account_ready)
 job_system_trans(account_ready, account_ready)
@@ -97,7 +97,7 @@ job_system_trans(account_ready, account_ready)
 ############################################################################
 
 # Invite sending is performed as the worker user.
-puppy_job_as_worker_redux(app_reconfig)
+puppy_job_as_worker(app_reconfig)
 
 job_sudo_system(app_reconfig)
 job_system_trans(app_reconfig, app_reconfig)
@@ -106,7 +106,7 @@ job_system_trans(app_reconfig, app_reconfig)
 ### Policy for `daemon_start`.
 ############################################################################
 
-puppy_job_as_root_redux(daemon_start)
+puppy_job_as_root(daemon_start)
 
 allow daemon_start_job_t init_t:unix_stream_socket connectto;
 
@@ -114,7 +114,7 @@ allow daemon_start_job_t init_t:unix_stream_socket connectto;
 ### Policy for `daemon_stop`.
 ############################################################################
 
-puppy_job_as_root_redux(daemon_stop)
+puppy_job_as_root(daemon_stop)
 
 allow daemon_stop_job_t init_t:unix_stream_socket connectto;
 files_read_etc_files(daemon_stop_job_t)
@@ -127,7 +127,7 @@ files_read_etc_files(daemon_stop_job_t)
 # anything to anything. It exists to apply the correct labels during 
 
 # Run security context restoration as root.
-puppy_job_as_root_redux(init_generate)
+puppy_job_as_root(init_generate)
 
 # Allow script to create a temporary file for here-doc.
 type init_generate_job_tmp_t;
@@ -166,7 +166,7 @@ allow init_generate_job_t var_log_t:file manage_file_perms;
 # anything to anything. It exists to apply the correct labels during 
 
 # Run security context restoration as root.
-puppy_job_as_root_redux(init_restorecon)
+puppy_job_as_root(init_restorecon)
 
 # Run restorecon.
 seutil_domtrans_setfiles(init_restorecon_job_t)
@@ -182,7 +182,7 @@ allow init_restorecon_job_t file_type:file getattr;
 ### Policy for `mysql_create`.
 ############################################################################
 
-puppy_job_as_root_redux(mysql_create)
+puppy_job_as_root(mysql_create)
 
 job_sudo_system(mysql_create)
 job_system_trans(mysql_create, db_password)
@@ -215,7 +215,7 @@ allow janitor_mysql_t worker_t:fifo_file write;
 ### Policy for `mysql_grant`.
 ############################################################################
 
-puppy_job_as_root_redux(mysql_grant)
+puppy_job_as_root(mysql_grant)
 
 job_sudo_system(mysql_grant)
 job_system_trans(mysql_grant, db_password)
@@ -236,7 +236,7 @@ type user_policy_job_exec_t;
 ### Policy for `policy_generate`.
 ############################################################################
 
-puppy_job_as_worker_redux(policy_generate)
+puppy_job_as_worker(policy_generate)
 
 job_sudo_system(policy_generate)
 job_system_trans(policy_generate, policy_users)
@@ -268,7 +268,7 @@ fs_getattr_xattr_fs(policy_generate_job_t)
 ############################################################################
 
 # User policy assignment is performed as root.
-puppy_job_as_root_redux(policy_load)
+puppy_job_as_root(policy_load)
 
 job_sudo_system(policy_load)
 job_system_trans(policy_load, policy_users)
@@ -296,7 +296,7 @@ puppy_read_cache_files(policy_load_job_t)
 ### Policy for `policy_make`.
 ############################################################################
 
-puppy_job_as_worker_redux(policy_make)
+puppy_job_as_worker(policy_make)
 
 job_sudo_system(policy_make)
 job_system_trans(policy_make, policy_users)
@@ -323,7 +323,7 @@ seutil_search_default_contexts(policy_make_job_t)
 ############################################################################
 
 # User config assignment is performed as root.
-puppy_job_as_root_redux(user_config)
+puppy_job_as_root(user_config)
 
 job_sudo_system(user_config)
 job_system_trans(user_config, app_config)
@@ -348,7 +348,7 @@ hostname_exec(user_config_job_t)
 ############################################################################
 
 # Run security context restoration as root.
-puppy_job_as_root_redux(app_deploy)
+puppy_job_as_root(app_deploy)
 
 allow app_deploy_job_t self:capability { dac_override };
 
@@ -367,7 +367,7 @@ allow app_deploy_job_t self:capability { fowner chown };
 ############################################################################
 
 # User creation is performed as root.
-puppy_job_as_root_redux(user_group)
+puppy_job_as_root(user_group)
 
 # Read /etc/passwd to determine if the user already exists.
 allow user_group_job_t etc_t:file read_file_perms;
@@ -380,7 +380,7 @@ usermanage_domtrans_useradd(user_group_job_t)
 ############################################################################
 
 # Invite sending is performed as the worker user.
-puppy_job_as_worker_redux(user_invite)
+puppy_job_as_worker(user_invite)
 
 job_sudo_system(user_invite)
 job_system_trans(user_invite, user_activation)
@@ -398,7 +398,7 @@ mta_send_mail(user_invite_job_t)
 ############################################################################
 
 # User creation is performed as root.
-puppy_job_as_root_redux(user_provision)
+puppy_job_as_root(user_provision)
 
 # DUBIOUS allow puppy_t user_provision_t:fifo_file rw_fifo_file_perms;
 
@@ -423,7 +423,7 @@ files_read_etc_files(user_provision_job_t)
 ############################################################################
 
 # User policy assignment is performed as root.
-puppy_job_as_worker_redux(user_ready)
+puppy_job_as_worker(user_ready)
 
 job_sudo_system(user_ready)
 job_system_trans(user_ready, user_ready)
@@ -435,7 +435,7 @@ hostname_exec(user_ready_job_t)
 ############################################################################
 
 # User policy assignment is performed as root.
-puppy_job_as_worker_redux(policy_ready)
+puppy_job_as_worker(policy_ready)
 
 job_sudo_system(policy_ready)
 job_system_trans(policy_ready, policy_users)
@@ -453,7 +453,7 @@ hostname_exec(policy_ready_job_t)
 ############################################################################
 
 # User creation is performed as root.
-puppy_job_as_root_redux(user_skel)
+puppy_job_as_root(user_skel)
 
 # Execute hostname. 
 hostname_exec(user_skel_job_t)
@@ -472,7 +472,7 @@ allow user_skel_job_t self:capability { dac_read_search dac_override };
 ############################################################################
 
 # User policy assignment is performed as root.
-puppy_job_as_root_redux(policy_unload)
+puppy_job_as_root(policy_unload)
 
 # List the machine users in the system database.
 job_sudo_system(policy_unload)
@@ -508,7 +508,7 @@ type port_labelify_job_exec_t;
 ############################################################################
 
 # User policy assignment is performed as root.
-puppy_job_as_root_redux(port_label)
+puppy_job_as_root(port_label)
 
 job_sudo_system(port_label)
 job_system_trans(port_label, port_list)
@@ -552,7 +552,7 @@ allow port_label_job_t port_labelify_job_exec_t:file execute_no_trans;
 ############################################################################
 
 # User policy assignment is performed as root.
-puppy_job_as_root_redux(port_unlabel)
+puppy_job_as_root(port_unlabel)
 
 job_sudo_system(port_unlabel)
 job_system_trans(port_unlabel, port_list)
@@ -602,7 +602,7 @@ allow port_unlabel_job_t port_labelify_job_exec_t:file execute_no_trans;
 ############################################################################
 
 # User creation is performed as root.
-puppy_job_as_root_redux(user_authorize)
+puppy_job_as_root(user_authorize)
 
 job_sudo_system(user_authorize)
 job_system_trans(user_authorize, user_keys)
@@ -629,7 +629,7 @@ userdom_manage_home_role(system_r, user_authorize_job_t)
 ############################################################################
 
 # User creation is performed as root.
-puppy_job_as_root_redux(user_chown)
+puppy_job_as_root(user_chown)
 
 # Execute hostname. 
 hostname_exec(user_chown_job_t)
@@ -648,7 +648,7 @@ files_read_etc_files(user_chown_job_t)
 ############################################################################
 
 # User creation is performed as root.
-puppy_job_as_root_redux(user_create)
+puppy_job_as_root(user_create)
 
 # Read /etc/passwd to determine if the user already exists.
 allow user_create_job_t etc_t:file read_file_perms;
@@ -661,7 +661,7 @@ usermanage_domtrans_useradd(user_create_job_t)
 ############################################################################
 
 # User creation is performed as root.
-puppy_job_as_root_redux(user_decommission)
+puppy_job_as_root(user_decommission)
 
 # DUBIOUS allow puppy_t user_decommission_t:fifo_file rw_fifo_file_perms;
 
@@ -689,7 +689,7 @@ manage_dirs_pattern(user_decommission_job_t, home_root_t, home_root_t)
 # anything to anything. It exists to apply the correct labels during 
 
 # Run security context restoration as root.
-puppy_job_as_root_redux(user_restorecon)
+puppy_job_as_root(user_restorecon)
 
 # Run restorecon.
 seutil_domtrans_setfiles(user_restorecon_job_t)
