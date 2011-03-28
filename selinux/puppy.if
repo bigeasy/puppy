@@ -97,7 +97,7 @@ template(`puppy_read_puppy_etc',`
 #   $1 - full type context, i.e. protected_t
 template(`puppy_read_puppy_bin',`
     gen_require(`
-        type puppy_t, puppy_bin_t;
+        type puppy_t, puppy_bin_t, puppy_lib_t;
     ')
     list_dirs_pattern($1, puppy_t, puppy_t)
     list_dirs_pattern($1, puppy_bin_t, puppy_bin_t)
