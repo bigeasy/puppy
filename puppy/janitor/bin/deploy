@@ -48,7 +48,7 @@ do
         then
             /opt/bin/coffee -c -p $source > $dest
         else
-            echo "#!/usr/bin/env node" > $dest
+            echo "#!/opt/bin/node" > $dest
             /opt/bin/coffee -c -p $source >> $dest
         fi
     fi
@@ -58,7 +58,7 @@ done
 # -------------------------------------------------------------------------- #
 
 # Chose an owner and mode based on the project directory name. Slightly kludgey.
-if [ $basename == "janitor" -o $basename == "common" ]; then
+if [ $basename == "janitor" -o $basename == "common" -o $basename == "protected" ]; then
     mode=755
 else
     mode=550
