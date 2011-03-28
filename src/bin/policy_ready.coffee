@@ -1,6 +1,3 @@
-# Prepend the puppy library directory to the path.
-require.paths.unshift("/puppy/common/lib/node")
-
 require("common/private").createSystem __filename, (system) ->
   [ hostname, uid ] = process.argv.slice(2)
   system.sql "getLocalUser", [ hostname, uid ], "localUser", (results) ->

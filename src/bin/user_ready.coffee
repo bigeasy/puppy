@@ -1,5 +1,3 @@
-require.paths.unshift("/puppy/common/lib/node")
-
 require("common/private").createSystem __filename, (system) ->
   [ hostname, uid ] = process.argv.slice 2
   system.sql "setApplicationLocalUserReady", [ hostname, uid ], (results) ->

@@ -1,5 +1,3 @@
-require.paths.unshift("/puppy/common/lib/node")
-
 # Select the machine local users for the local host.
 require("common/private").createSystem __filename, (system) ->
   [ hostname ] = process.argv.slice(2)

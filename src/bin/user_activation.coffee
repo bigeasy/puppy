@@ -1,5 +1,3 @@
-require.paths.unshift("/puppy/common/lib/node")
-
 require("common/private").createSystem __filename, (system) ->
   [ email ] = process.argv.slice 2
   system.sql "getActivationByEmail", [ email ], "activation", (results) ->
