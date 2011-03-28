@@ -193,7 +193,7 @@ class Database
       hostname.stdout.on "data", (data) -> stdout += data.toString()
       hostname.on "exit", (code) =>
         if code != 0
-          @abend "Unable to execute hostname.", { code, stderr, stdout }
+          throw new Error @err "Unable to execute hostname.", { code, stderr, stdout }
         callback(@_hostname = stdout.substring(0, stdout.length - 1))
 
   uid: ->
