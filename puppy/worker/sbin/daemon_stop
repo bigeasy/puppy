@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. /puppy/system/bin/functions
+. /puppy/worker/sbin/functions
 
 uid=$1
 
