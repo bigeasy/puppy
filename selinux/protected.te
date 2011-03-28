@@ -11,7 +11,10 @@ userdom_unpriv_user_template(protected)
 
 application_domain(protected_t, protected_exec_t)
 
+allow protected_t protected_exec_t:file { execute execute_no_trans };
+
 puppy_sudo(protected)
+puppy_exec_puppy_bin(protected_t)
 
 # Used in worker, mentioned in the generated policies, but not really used yet.
 # It will come into play during the development of the grand unified logging
