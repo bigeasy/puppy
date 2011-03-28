@@ -68,6 +68,8 @@ class Configuration
 
   usage: (error, usage) -> @abend "\nerror: #{error}\n\n#{usage}\n\n"
 
+  error: (error) -> @abend "\nerror: #{error}\n"
+
   abend: (message) ->
     process.stdout.write message
     process.exit 1
@@ -107,6 +109,7 @@ class Configuration
         if code is 0
           callback(home.substring(0, home.length - 1))
         else
+          console.log home
           console.log stderr
           throw new Error("Unable to determine home for #{email}")
     else
@@ -157,7 +160,7 @@ class Configuration
         catch error
           if process.binding("net").ENOENT is error.errno
             @fetchApplications (applications) =>
-              fs.writeFileSync "#{home}/.puppy/applications.json", JSON.stringify(applications), "utf8"
+              fs.writeFileSync "#{home}/.puppy/applications.json", JSON.stringify(applications, null, 2), "utf8"
               @applications(callback)
           else
             throw error
@@ -214,6 +217,7 @@ class Configuration
       callback(@hereas "private", command, parameters)
     else
       callback(@thereas @application, "private", command, parameters)
+  reset: ->
 
 module.exports.Configuration = Configuration
 module.exports.format = (rows) ->
