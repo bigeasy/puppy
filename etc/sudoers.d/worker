@@ -24,8 +24,8 @@ worker ALL = (root) NOPASSWD: \
     /puppy/worker/sbin/user_skel
 worker ALL = (system) NOPASSWD: \
     /puppy/system/bin/account_ready, \
+    /puppy/system/bin/app_reconfig, \
     /puppy/system/bin/policy_users, \
-    /puppy/system/bin/queue_config, \
     /puppy/system/bin/user_ready, \
     /puppy/system/bin/policy_ready, \
     /puppy/system/bin/user_activation

@@ -1,6 +1,12 @@
+/puppy/system/bin/app_users gen_context(system_u:object_r:app_users_system_exec_t, s0)
+
+/puppy/system/bin/app_reconfig gen_context(system_u:object_r:app_reconfig_system_exec_t, s0)
+
 /puppy/system/bin/account_ready gen_context(system_u:object_r:account_ready_system_exec_t, s0)
 
 /puppy/system/bin/app_config gen_context(system_u:object_r:app_config_system_exec_t, s0)
+
+/puppy/system/bin/db_password gen_context(system_u:object_r:db_password_system_exec_t, s0)
 
 /puppy/system/bin/mysql_config gen_context(system_u:object_r:mysql_config_system_exec_t, s0)
 

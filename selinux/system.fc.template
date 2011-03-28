@@ -1,24 +1,8 @@
-#account_activate            try
-#account_home                try
-#account_ready               try
-#account_register            try
-#app_deploy                  try
-#app_fetch                   try
-#app_list                    try
-#db_fetch                    try
-#db_list                     try
-#user_status                 try
-#port_labeled                try
-#user_provisioned            try
-#user_policy_version         try
-#policy_version              try
-#config_app                  try
-#config_mysql                try
-#db_password                 try
-#queue_config                try
-#app_users                   try
+app_users               direct      system
+app_reconfig            direct      system
 account_ready           direct      system
 app_config              direct      system
+db_password             direct      system
 mysql_config            direct      system
 policy_ready            direct      system
 policy_users            direct      system

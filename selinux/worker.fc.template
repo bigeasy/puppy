@@ -13,10 +13,13 @@
 worker                                  try
 account_ready                           job
 app_deploy                              job
+app_reconfig                            job
 daemon_stop                             job
 daemon_start                            job
 init_generate                           job
 init_restorecon                         job
+mysql_create                            job
+mysql_grant                             job
 policy_generate                         job
 policy_load                             job
 policy_make                             job

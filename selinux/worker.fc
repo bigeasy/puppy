@@ -16,6 +16,9 @@
 /puppy/worker/bin/app_deploy gen_context(system_u:object_r:app_deploy_job_exec_t, s0)
 /puppy/worker/sbin/app_deploy gen_context(system_u:object_r:app_deploy_job_exec_t, s0)
 
+/puppy/worker/bin/app_reconfig gen_context(system_u:object_r:app_reconfig_job_exec_t, s0)
+/puppy/worker/sbin/app_reconfig gen_context(system_u:object_r:app_reconfig_job_exec_t, s0)
+
 /puppy/worker/bin/daemon_stop gen_context(system_u:object_r:daemon_stop_job_exec_t, s0)
 /puppy/worker/sbin/daemon_stop gen_context(system_u:object_r:daemon_stop_job_exec_t, s0)
 
@@ -27,6 +30,12 @@
 
 /puppy/worker/bin/init_restorecon gen_context(system_u:object_r:init_restorecon_job_exec_t, s0)
 /puppy/worker/sbin/init_restorecon gen_context(system_u:object_r:init_restorecon_job_exec_t, s0)
+
+/puppy/worker/bin/mysql_create gen_context(system_u:object_r:mysql_create_job_exec_t, s0)
+/puppy/worker/sbin/mysql_create gen_context(system_u:object_r:mysql_create_job_exec_t, s0)
+
+/puppy/worker/bin/mysql_grant gen_context(system_u:object_r:mysql_grant_job_exec_t, s0)
+/puppy/worker/sbin/mysql_grant gen_context(system_u:object_r:mysql_grant_job_exec_t, s0)
 
 /puppy/worker/bin/policy_generate gen_context(system_u:object_r:policy_generate_job_exec_t, s0)
 /puppy/worker/sbin/policy_generate gen_context(system_u:object_r:policy_generate_job_exec_t, s0)

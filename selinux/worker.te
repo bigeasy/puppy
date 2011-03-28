@@ -93,14 +93,14 @@ job_sudo_system(account_ready)
 job_system_trans(account_ready, account_ready)
 
 ############################################################################
-### Policy for `app_config`.
+### Policy for `app_reconfig`.
 ############################################################################
 
 # Invite sending is performed as the worker user.
-puppy_job_as_worker(app_config)
+puppy_job_as_worker_redux(app_reconfig)
 
-job_sudo_delegate(app_config)
-#job_delegate_trans(app_config, queue_config)
+job_sudo_system(app_reconfig)
+job_system_trans(app_reconfig, app_reconfig)
 
 ############################################################################
 ### Policy for `daemon_start`.
@@ -182,23 +182,24 @@ allow init_restorecon_job_t file_type:file getattr;
 ### Policy for `mysql_create`.
 ############################################################################
 
-puppy_job_sudo_root(mysql_create)
+puppy_job_as_root_redux(mysql_create)
 
-job_sudo_delegate(mysql_create)
-#job_delegate_trans(mysql_create, db_password)
+job_sudo_system(mysql_create)
+job_system_trans(mysql_create, db_password)
 
-domtrans_pattern(mysql_create_sudo_t, janitor_mysql_exec_t, janitor_mysql_t)
+domtrans_pattern(mysql_create_job_sudo_t, janitor_mysql_exec_t, janitor_mysql_t)
 
+# FIXME Write why you to this, to have a place with minimal MySQL policy.
 role system_r types janitor_mysql_t;
-allow janitor_mysql_t mysql_create_proxy_t:fifo_file rw_fifo_file_perms;
-allow janitor_mysql_t mysql_create_t:fifo_file rw_fifo_file_perms;
+allow janitor_mysql_t mysql_create_job_proxy_t:fifo_file rw_fifo_file_perms;
+allow janitor_mysql_t mysql_create_job_t:fifo_file rw_fifo_file_perms;
 
 puppy_mysql(janitor_mysql_t)
 
 puppy_exec_puppy_sbin(janitor_mysql_t)
 corecmd_exec_bin(janitor_mysql_t)
 
-allow mysql_create_t self:capability { dac_read_search dac_override };
+allow mysql_create_job_t self:capability { dac_read_search dac_override };
 
 files_read_usr_files(janitor_mysql_t)
 files_read_etc_files(janitor_mysql_t)
@@ -208,20 +209,22 @@ mysql_read_config(janitor_mysql_t)
 userdom_list_user_home_dirs(janitor_mysql_t)
 userdom_read_user_home_content_files(janitor_mysql_t)
 
+allow janitor_mysql_t worker_t:fifo_file write;
+
 ############################################################################
 ### Policy for `mysql_grant`.
 ############################################################################
 
-puppy_job_sudo_root(mysql_grant)
+puppy_job_as_root_redux(mysql_grant)
 
-job_sudo_delegate(mysql_grant)
-#job_delegate_trans(mysql_grant, db_password)
-#job_delegate_trans(mysql_grant, app_users)
+job_sudo_system(mysql_grant)
+job_system_trans(mysql_grant, db_password)
+job_system_trans(mysql_grant, app_users)
 
-allow janitor_mysql_t mysql_grant_t:fifo_file rw_fifo_file_perms;
-allow janitor_mysql_t mysql_grant_proxy_t:fifo_file rw_fifo_file_perms;
+allow janitor_mysql_t mysql_grant_job_t:fifo_file rw_fifo_file_perms;
+allow janitor_mysql_t mysql_grant_job_proxy_t:fifo_file rw_fifo_file_perms;
 
-domtrans_pattern(mysql_grant_sudo_t, janitor_mysql_exec_t, janitor_mysql_t)
+domtrans_pattern(mysql_grant_job_sudo_t, janitor_mysql_exec_t, janitor_mysql_t)
 
 ############################################################################
 ### Policy for `user_policy`.
