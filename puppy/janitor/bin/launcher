@@ -4,7 +4,8 @@ function log (message, code, stderr) {
   require.paths.unshift("/puppy/common/lib/node");
   var programName = __filename.replace(/^.*\/(.*)$/, "$1");
   var branchName = __filename.replace(/^\/puppy\/(.*?)\/.*$/, "$1");
-  var syslog = new (require("common/public").Syslog)({ tag: branchName + "_" + programName, pid: true });
+  var tag = branchName == programName ? programName : branchName + "_" + programName;
+  var syslog = new (require("common/public").Syslog)({ tag: tag, pid: true });
   var context = { code: code }
   if (stderr.length > 0) {
     context.stderr = stderr;
