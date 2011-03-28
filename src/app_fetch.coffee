@@ -4,7 +4,7 @@ module.exports.command =
   description: "Create a new application."
   registered: true
   execute: (configuration) ->
-    configuration.private "/puppy/private/bin/app_fetch", [], (command) ->
+    configuration.private "/puppy/private/bin/app_fetch_try", [], (command) ->
       command.assert (stdout) ->
         response = JSON.parse(stdout)
         if response.error
