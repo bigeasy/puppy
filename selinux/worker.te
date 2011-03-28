@@ -106,18 +106,18 @@ job_sudo_delegate(app_config)
 ### Policy for `daemon_start`.
 ############################################################################
 
-puppy_job_sudo_root(daemon_start)
+puppy_job_as_root_redux(daemon_start)
 
-allow daemon_start_t init_t:unix_stream_socket connectto;
+allow daemon_start_job_t init_t:unix_stream_socket connectto;
 
 ############################################################################
 ### Policy for `daemon_stop`.
 ############################################################################
 
-puppy_job_sudo_root(daemon_stop)
+puppy_job_as_root_redux(daemon_stop)
 
-allow daemon_stop_t init_t:unix_stream_socket connectto;
-files_read_etc_files(daemon_stop_t)
+allow daemon_stop_job_t init_t:unix_stream_socket connectto;
+files_read_etc_files(daemon_stop_job_t)
 
 ############################################################################
 ### Policy for `init_generate`.
@@ -341,23 +341,23 @@ allow user_config_job_t self:capability { dac_read_search dac_override };
 hostname_exec(user_config_job_t)
 
 ############################################################################
-### Policy for `user_deploy`.
+### Policy for `app_deploy`.
 ############################################################################
 
 # Run security context restoration as root.
-puppy_job_as_root(user_deploy)
+puppy_job_as_root_redux(app_deploy)
 
-allow user_deploy_t self:capability { dac_override };
+allow app_deploy_job_t self:capability { dac_override };
 
 # Copy the files from staging to application.
-userdom_manage_home_role(system_r, user_deploy_t)
+userdom_manage_home_role(system_r, app_deploy_job_t)
 
 # Run `rsync`.
-rsync_exec(user_deploy_t)
-files_read_etc_files(user_deploy_t)
-allow user_deploy_t self:process signal;
+rsync_exec(app_deploy_job_t)
+files_read_etc_files(app_deploy_job_t)
+allow app_deploy_job_t self:process signal;
 
-allow user_deploy_t self:capability { fowner chown };
+allow app_deploy_job_t self:capability { fowner chown };
 
 ############################################################################
 ### Policy for `user_group` job.

@@ -13,6 +13,15 @@
 /puppy/worker/bin/account_ready gen_context(system_u:object_r:account_ready_job_exec_t, s0)
 /puppy/worker/sbin/account_ready gen_context(system_u:object_r:account_ready_job_exec_t, s0)
 
+/puppy/worker/bin/app_deploy gen_context(system_u:object_r:app_deploy_job_exec_t, s0)
+/puppy/worker/sbin/app_deploy gen_context(system_u:object_r:app_deploy_job_exec_t, s0)
+
+/puppy/worker/bin/daemon_stop gen_context(system_u:object_r:daemon_stop_job_exec_t, s0)
+/puppy/worker/sbin/daemon_stop gen_context(system_u:object_r:daemon_stop_job_exec_t, s0)
+
+/puppy/worker/bin/daemon_start gen_context(system_u:object_r:daemon_start_job_exec_t, s0)
+/puppy/worker/sbin/daemon_start gen_context(system_u:object_r:daemon_start_job_exec_t, s0)
+
 /puppy/worker/bin/init_generate gen_context(system_u:object_r:init_generate_job_exec_t, s0)
 /puppy/worker/sbin/init_generate gen_context(system_u:object_r:init_generate_job_exec_t, s0)
 

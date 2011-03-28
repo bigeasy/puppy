@@ -12,6 +12,9 @@
 
 worker                                  try
 account_ready                           job
+app_deploy                              job
+daemon_stop                             job
+daemon_start                            job
 init_generate                           job
 init_restorecon                         job
 policy_generate                         job
