@@ -2,9 +2,9 @@ account_activate            direct      private_liminal
 account_home                direct      private_public
 #account_ready               try
 account_register            direct      private_public
-#account_apps                try         private
+account_apps                try         private_protected
 #app_deploy                  try
-#app_fetch                   try
+app_fetch                   try         private_protected
 #app_list                    try
 #db_fetch                    try
 #db_list                     try
