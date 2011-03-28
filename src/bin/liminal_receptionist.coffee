@@ -1,5 +1,3 @@
-require.paths.unshift("/puppy/common/lib/node")
-
 require("common/public").createShell __filename, (shell) ->
   if process.env["SSH_ORIGINAL_COMMAND"] != "/puppy/protected/bin/account_activated"
     shell.syslog.send "err", "Invalid command #{process.env["SSH_ORIGINAL_COMMAND"]}.", {}
