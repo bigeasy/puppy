@@ -1,0 +1,9 @@
+#!/bin/bash
+
+. /puppy/worker/sbin/functions
+
+[ $# -ne 1 ] && abend "Incorrect count of arguments ($#)."
+
+aid=$1
+
+/usr/bin/sudo -u system /puppy/system/bin/app_reconfig $aid

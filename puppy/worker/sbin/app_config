@@ -1,9 +1,0 @@
-#!/bin/bash
-
-. /puppy/system/bin/functions
-
-[ $# -ne 1 ] && abend "Incorrect count of arguments ($#)."
-
-aid=$1
-
-/usr/bin/sudo -u private /puppy/private/bin/queue_config $aid
