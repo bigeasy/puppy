@@ -170,7 +170,7 @@ template(`puppy_job_execute_redux',`
     # The transition program is always a Node.js program.
     puppy_node_exec($1_job_proxy_t)
 
-    # The working program is always a shell program.
+    # FIXME: The working program is generally (not always FIXME) shell program.
     puppy_shell_exec($1_job_t)
 
     # Read and write to stdin, stout and stderr.
