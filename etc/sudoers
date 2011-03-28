@@ -8,3 +8,5 @@ Defaults    always_set_home
 Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/opt/bin
 
 root	    ALL=(ALL) 	ALL
+
+#includedir /etc/sudoers.d
