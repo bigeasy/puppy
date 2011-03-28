@@ -42,11 +42,14 @@ module.exports.command =
       if not code
         configuration.usage "Required parameters missing. See usage.", usage
 
+      stderr = ""
       stdout = ""
       ssh = spawn "ssh", [ "-T", home, "/puppy/protected/bin/account_activated" ]
-      ssh.stdin.end(code)
+      ssh.stdin.write(code)
+      ssh.stdin.end()
       ssh.stdout.on "data", (chunk) -> process.stdout.write chunk.toString()
       ssh.stderr.on "data", (chunk) -> process.stdout.write chunk.toString()
       ssh.on "exit", (code) ->
         if code != 0
+          # FIXME: Check for denied and print home.
           configuration.usage "Unable to activate. Most likely an invalid code.", usage
