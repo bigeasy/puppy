@@ -38,7 +38,6 @@ read_lnk_files_pattern(public_receptionist_t, public_receptionist_exec_t, public
 domtrans_pattern(public_receptionist_sudo_t, private_public_exec_t, private_public_t)
 read_lnk_files_pattern(public_receptionist_t, private_public_t, private_public_t)
 allow private_public_t public_receptionist_t:fifo_file rw_fifo_file_perms;
-allow private_public_t public_receptionist_t:fifo_file rw_fifo_file_perms;
 
 # Write to the system log.
 logging_send_syslog_msg(public_receptionist_t)
