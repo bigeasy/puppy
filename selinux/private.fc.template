@@ -1,26 +1,16 @@
 account_activate            direct      private_liminal
 account_home                direct      private_public
-#account_ready               try
 account_register            direct      private_public
 account_apps                try         private_protected
-#app_deploy                  try
+app_deploy                  try         private_protected
 app_fetch                   try         private_protected
-#app_list                    try
-#db_fetch                    try
-#db_list                     try
-#user_status                 try
-#port_labeled                try
+app_list                    try         private_protected
+db_fetch                    try         private_protected
+db_list                     try         private_protected
+user_status                 try         private_protected
 #user_provisioned            try
 #user_policy_version         try
 #policy_version              try
-#config_app                  try
-#config_mysql                try
 #db_password                 try
 #queue_config                try
 #app_users                   try
-#node_ready                  try
-#policy_users                try
-#port_list                   direct        private
-#user_activation             try
-#user_keys                   try
-#user_ready                  try
