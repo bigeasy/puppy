@@ -42,6 +42,8 @@ module.exports.command =
     ssh.stdout.on "data", (chunk) -> process.stdout.write chunk.toString()
     ssh.stderr.on "data", (chunk) -> process.stdout.write chunk.toString()
     ssh.on "exit", (code) ->
+      if code
+        process.stdout.write "We have problems.\n"
       configuration.setGlobal({ email })
       configuration.save()
       process.exit code
