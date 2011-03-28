@@ -3,7 +3,7 @@ module.exports.command =
   description: "List all applications visible to the current account."
   registered: true
   execute: (configuration) ->
-    configuration.private "/puppy/private/bin/app_list", [], (command) ->
+    configuration.private "/puppy/private/bin/app_list_try", [], (command) ->
       command.assert (stdout) ->
         response = JSON.parse(stdout)
         if response.error
