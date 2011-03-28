@@ -54,7 +54,7 @@ files_type(private_functions_t)
 puppy_try_catch(worker)
 
 ## Daemonize.
-init_daemon_domain(worker_catch_t, worker_catch_exec_t)
+init_daemon_domain(worker_try_t, worker_try_exec_t)
 
 # The worker daemon is a Node.js program.
 puppy_node_exec(worker_t)

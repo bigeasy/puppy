@@ -118,33 +118,33 @@ template(`puppy_read_puppy_sbin',`
 # Execute a launcher program that in turn launches the real program.
 #   $1 - the program prefix, i.e. worker
 template(`puppy_try_catch',`
-    type $1_catch_t;
+    type $1_try_t;
 
     # Catch launchers are all copies the same node program.
-    puppy_node_exec($1_catch_t)
+    puppy_node_exec($1_try_t)
 
     # Read puppy executables.
-    puppy_exec_puppy_bin($1_catch_t)
+    puppy_exec_puppy_bin($1_try_t)
 
     # The executable type.
-    type $1_catch_exec_t;
+    type $1_try_exec_t;
 
     # Create the application domains.
-    application_domain($1_catch_t, $1_catch_exec_t)
+    application_domain($1_try_t, $1_try_exec_t)
     application_domain($1_t, $1_exec_t)
 
-    # Transition from catch to the main domain.
-    domtrans_pattern($1_catch_t, $1_exec_t, $1_t)
+    # Transition from try to the main domain.
+    domtrans_pattern($1_try_t, $1_exec_t, $1_t)
 
     # Send the logging message.
-    logging_send_syslog_msg($1_catch_t)
+    logging_send_syslog_msg($1_try_t)
 
-    # Allow the program to read and write to the catch proxy.
-    allow $1_catch_t self:fifo_file write;
-    allow $1_t $1_catch_t:fifo_file rw_fifo_file_perms;
+    # Allow the program to read and write to the try proxy.
+    allow $1_try_t self:fifo_file write;
+    allow $1_t $1_try_t:fifo_file rw_fifo_file_perms;
 
-    # Allow the catch proxy to read the NPM link to the executable.
-    read_lnk_files_pattern($1_catch_t, $1_exec_t, $1_exec_t)
+    # Allow the try proxy to read the NPM link to the executable.
+    read_lnk_files_pattern($1_try_t, $1_exec_t, $1_exec_t)
 ')
 template(`puppy_exec_puppy_bin',`
     gen_require(`

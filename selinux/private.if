@@ -1,9 +1,9 @@
 # 
 template(`puppy_sudo_private', `
     gen_require(`
-        type $2_private_sudo_t, $2_private_t, $2_private_catch_t, $2_private_catch_exec_t;
+        type $2_private_sudo_t, $2_private_t, $2_private_try_t, $2_private_try_exec_t;
     ')
-    domtrans_pattern($1_sudo_t, $2_private_catch_exec_t, $2_private_catch_t)
+    domtrans_pattern($1_sudo_t, $2_private_try_exec_t, $2_private_try_t)
 ')
 # Create a definition for a private program.
 #   $1 - the type name prefix used to derive type names, i.e. app_list

@@ -99,17 +99,19 @@ if [ -d src -a ! -d lib ]; then
 fi
 
 # Install launcher scripts for try/catch wrapped programs.
-source=$(dirname $project)
-for file in $(find . -path "./src/bin/*.coffee" | grep "_try.coffee$")
-do
-    program=$(/bin/basename $file | /bin/sed 's/^\(.*\)_try.coffee/\1/')
-    dest=/puppy/$basename/bin/$program
-    if is_dirty /puppy/janitor/bin/launcher $dest
-    then
-        echo "Installing $dest."
-        $install /puppy/janitor/bin/launcher $dest
-    fi
-done
+if [ -e src/try.conf ]
+then
+    while read file
+    do
+        program=$(echo $file | /bin/sed 's/^\(.*\).coffee/\1/')
+        dest="/puppy/$basename/bin/${program}_try"
+        if is_dirty /puppy/janitor/bin/launcher $dest
+        then
+            echo "Installing $dest."
+            $install /puppy/janitor/bin/launcher $dest
+        fi
+    done < src/try.conf
+fi
 
 # Special case for worker branch, install sudo or medo launchers.
 if [ $basename == "worker" ]; then

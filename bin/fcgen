@@ -33,9 +33,9 @@ do
         fi
         gen_context="gen_context(system_u:object_r:${context}_exec_t, s0)"
         if [ "${fields[1]}" == "try" ]; then
-            gen_catch_context="gen_context(system_u:object_r:${context}_catch_exec_t, s0)"
-            echo "/puppy/$project/bin/${fields[0]} $gen_catch_context"
-            echo "/puppy/$project/bin/${fields[0]}_try $gen_context"
+            gen_try_context="gen_context(system_u:object_r:${context}_try_exec_t, s0)"
+            echo "/puppy/$project/bin/${fields[0]} $gen_context"
+            echo "/puppy/$project/bin/${fields[0]}_try $gen_try_context"
             echo ""
         elif [ "${fields[1]}" == "job" ]; then
             echo "/puppy/$project/bin/${fields[0]} $gen_context"

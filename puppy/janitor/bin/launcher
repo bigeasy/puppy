@@ -4,7 +4,7 @@ function log (message, code, stderr) {
   require.paths.unshift("/puppy/common/lib/node");
   var programName = __filename.replace(/^.*\/(.*)$/, "$1");
   var branchName = __filename.replace(/^\/puppy\/(.*?)\/.*$/, "$1");
-  var tag = branchName == programName ? programName : branchName + "_" + programName;
+  var tag = (branchName + '_try') == programName ? programName : branchName + "_" + programName;
   var syslog = new (require("common/public").Syslog)({ tag: tag, pid: true });
   var context = { code: code }
   if (stderr.length > 0) {
@@ -16,7 +16,7 @@ function log (message, code, stderr) {
 }
 
 var spawn = require("child_process").spawn
-var program = spawn(__filename.replace(/\/([^\/]+)$/, "/$1_try"), process.argv.slice(2), { customFds: [ 0, 1, -1 ] });
+var program = spawn(__filename.replace(/\/([^\/]+)_try$/, "/$1"), process.argv.slice(2), { customFds: [ 0, 1, -1 ] });
 stderr = "";
 program.stderr.on("data", function (chunk) {
   stderr += chunk.toString();

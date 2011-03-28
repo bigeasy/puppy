@@ -21,16 +21,16 @@ attribute puppy_daemon_exec_type;
 
 # The public role 
 puppy_private_role_redux(protected)
-role protected_r types private_protected_catch_t;
+role protected_r types private_protected_try_t;
 puppy_private_module(protected)
 puppy_try_catch(private_protected)
 
-allow private_protected_catch_t protected_t:fifo_file write;
+allow private_protected_try_t protected_t:fifo_file write;
 
 # The proxy needs to read Puppy executables.
 puppy_read_puppy_bin(protected_sudo_t)
 
 # Transition to the private_protected_t type.
-domtrans_pattern(protected_sudo_t, private_protected_catch_exec_t, private_protected_catch_t)
+domtrans_pattern(protected_sudo_t, private_protected_try_exec_t, private_protected_try_t)
 
 gen_user(protected_u,, protected_r, s0, s0)
