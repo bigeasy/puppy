@@ -29,5 +29,5 @@ module.exports.command =
         "./", "u#{localUser.id}@#{localUser.machine.hostname}:/home/u#{localUser.id}/.puppy/stage/"
       ]
       rsync.assert ->
-        deploy = configuration.thereas configuration.application, "private", "/puppy/private/bin/app_deploy", []
+        deploy = configuration.thereas configuration.application, "private", "/puppy/private/bin/app_deploy_try", []
         deploy.assert ->

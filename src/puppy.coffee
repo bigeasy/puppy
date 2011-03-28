@@ -167,7 +167,7 @@ class Configuration
 
   fetchApplications: (callback) ->
     @home false, (user) ->
-      config = spawn "/usr/bin/ssh", [ "-T", user, "/usr/bin/sudo", "-u", "private", "/puppy/private/bin/account_apps" ]
+      config = spawn "/usr/bin/ssh", [ "-T", user, "/usr/bin/sudo", "-u", "private", "/puppy/private/bin/account_apps_try" ]
       stdout = ""
       stderr = ""
       config.stdout.on "data", (chunk) -> stdout += chunk.toString()
