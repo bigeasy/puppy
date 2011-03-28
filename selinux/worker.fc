@@ -9,8 +9,6 @@
 
 /puppy/worker/bin/worker gen_context(system_u:object_r:worker_catch_exec_t, s0)
 /puppy/worker/bin/worker_try gen_context(system_u:object_r:worker_exec_t, s0)
-/puppy/worker/bin/worker_try@0.0.1 gen_context(system_u:object_r:worker_exec_t, s0)
-/puppy/worker/lib/node/.npm/worker/0.0.1/package/bin/worker_try.js gen_context(system_u:object_r:worker_exec_t, s0)
 
 /puppy/worker/bin/account_ready gen_context(system_u:object_r:account_ready_job_exec_t, s0)
 /puppy/worker/sbin/account_ready gen_context(system_u:object_r:account_ready_job_exec_t, s0)

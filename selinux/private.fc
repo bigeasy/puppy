@@ -1,22 +1,12 @@
 /puppy/private/bin/account_activate gen_context(system_u:object_r:private_liminal_exec_t, s0)
-/puppy/private/bin/account_activate@0.0.1 gen_context(system_u:object_r:private_liminal_exec_t, s0)
-/puppy/private/lib/node/.npm/private/0.0.1/package/bin/account_activate.js gen_context(system_u:object_r:private_liminal_exec_t, s0)
 
 /puppy/private/bin/account_home gen_context(system_u:object_r:private_public_exec_t, s0)
-/puppy/private/bin/account_home@0.0.1 gen_context(system_u:object_r:private_public_exec_t, s0)
-/puppy/private/lib/node/.npm/private/0.0.1/package/bin/account_home.js gen_context(system_u:object_r:private_public_exec_t, s0)
 
 /puppy/private/bin/account_register gen_context(system_u:object_r:private_public_exec_t, s0)
-/puppy/private/bin/account_register@0.0.1 gen_context(system_u:object_r:private_public_exec_t, s0)
-/puppy/private/lib/node/.npm/private/0.0.1/package/bin/account_register.js gen_context(system_u:object_r:private_public_exec_t, s0)
 
 /puppy/private/bin/account_apps gen_context(system_u:object_r:private_protected_catch_exec_t, s0)
 /puppy/private/bin/account_apps_try gen_context(system_u:object_r:private_protected_exec_t, s0)
-/puppy/private/bin/account_apps_try@0.0.1 gen_context(system_u:object_r:private_protected_exec_t, s0)
-/puppy/private/lib/node/.npm/private/0.0.1/package/bin/account_apps_try.js gen_context(system_u:object_r:private_protected_exec_t, s0)
 
 /puppy/private/bin/app_fetch gen_context(system_u:object_r:private_protected_catch_exec_t, s0)
 /puppy/private/bin/app_fetch_try gen_context(system_u:object_r:private_protected_exec_t, s0)
-/puppy/private/bin/app_fetch_try@0.0.1 gen_context(system_u:object_r:private_protected_exec_t, s0)
-/puppy/private/lib/node/.npm/private/0.0.1/package/bin/app_fetch_try.js gen_context(system_u:object_r:private_protected_exec_t, s0)
 

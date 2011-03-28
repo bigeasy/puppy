@@ -36,8 +36,6 @@ do
             gen_catch_context="gen_context(system_u:object_r:${context}_catch_exec_t, s0)"
             echo "/puppy/$project/bin/${fields[0]} $gen_catch_context"
             echo "/puppy/$project/bin/${fields[0]}_try $gen_context"
-            echo "/puppy/$project/bin/${fields[0]}_try@0.0.1 $gen_context"
-            echo "/puppy/$project/lib/node/.npm/$project/0.0.1/package/bin/${fields[0]}_try.js $gen_context"
             echo ""
         elif [ "${fields[1]}" == "job" ]; then
             echo "/puppy/$project/bin/${fields[0]} $gen_context"
@@ -45,8 +43,6 @@ do
             echo ""
         elif [ "${fields[1]}" == "direct" ]; then
             echo "/puppy/$project/bin/${fields[0]} $gen_context"
-            echo "/puppy/$project/bin/${fields[0]}@0.0.1 $gen_context"
-            echo "/puppy/$project/lib/node/.npm/$project/0.0.1/package/bin/${fields[0]}.js $gen_context"
             echo ""
         else
             echo $line
