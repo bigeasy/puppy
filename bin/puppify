@@ -230,15 +230,8 @@ function on_boot()
 }
 
 /bin/chown -R unbound /var/lib/unbound
-on_boot unbound
 
-if [ ! -e /etc/sasldb2 ]; then
-    echo "Generating postfix localhost SMTP password."
-    # Generate a password and assign it to a messages user.
-    /bin/ps ax | /usr/bin/md5sum | /bin/cut -d' ' -f1 | \
-        /usr/sbin/saslpasswd2 -c -u prettyrobots.com messages
-    /bin/chown postfix:worker /etc/sasldb2
-fi
+on_boot unbound
 on_boot postfix
 
 # Set SELinux file contexts.
