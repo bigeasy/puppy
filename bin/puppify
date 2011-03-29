@@ -93,9 +93,11 @@ group_assign loggers 1  700
 # only readable by members of the `loggers` group, and then symlink `/dev/log`
 # to our protected socket.
 if [ ! -e /dev/loggers ]; then
+    /sbin/service rsyslog stop
     /bin/mkdir -m 750 /dev/loggers
     /bin/chown root:loggers /dev/loggers
     /bin/ln -s /dev/loggers/log /dev/log
+    /sbin/service rsyslog start
 fi
 
 # Configuration installtion
