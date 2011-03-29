@@ -20,6 +20,8 @@ if [ $hostname != "dvor.prettyrobots.com" ]; then
     exit 1
 fi
 
+NODE_PATH=/opt/bin/node:/puppy/common/lib/node:/puppy/exclusive/lib/node
+
 function mysql_command()
 {
     echo $1 | /usr/bin/sudo -H -u janitor /usr/bin/mysql -u root

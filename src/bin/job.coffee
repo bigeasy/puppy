@@ -1,5 +1,3 @@
-require.paths.unshift("/puppy/common/lib/node")
-
 # Need to set a limit to the size of the incoming buffer. It should never be
 # more than a kilobyte, so at 4K and we need to report an attack.
 #
@@ -14,7 +12,7 @@ require.paths.unshift("/puppy/common/lib/node")
 # to sifting through a morass of log files.
 #
 # The error level should trigger an audit by the system administrator.
-require("common/private").createSystem __filename, (system) ->
+require("exclusive").createSystem __filename, (system) ->
   argv = process.argv.slice(2)
 
   hostname = argv.shift()

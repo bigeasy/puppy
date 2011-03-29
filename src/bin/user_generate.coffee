@@ -1,6 +1,4 @@
-require.paths.unshift("/puppy/common/lib/node")
-
-require("common/private").createSystem __filename, (system) ->
+require("exclusive").createSystem __filename, (system) ->
   [ policies ] = process.argv.slice 2
 
   generate = (system, hostname, machine, localUsers) ->
