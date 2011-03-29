@@ -160,7 +160,8 @@ install_files root 644 var/lib/unbound/etc/unbound/* \
 install_files root 755 etc/rc.d/init.d/* \
                        usr/bin/*
 install_files root 440 etc/sudoers.d/* \
-                       etc/sudoers*
+                       etc/sudoers \
+                       etc/sudoers.env
 install_files root 600 etc/ssh/sshd_config
 
 # Create postfix configuration databases.
