@@ -22,6 +22,7 @@ function copy_files()
 
 if [ $status == "liminal" ]; then
     echo 'export PATH=$PATH:/opt/bin' > /home/u$uid/.bashrc
+    echo 'export NODE_PATH=/opt/lib/node:/puppy/common/lib/node' >> /home/u$uid/.bashrc
 elif [ $status == "protected" ]; then
     copy_files /etc/skel
 else
