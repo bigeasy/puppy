@@ -58,11 +58,7 @@ done
 # -------------------------------------------------------------------------- #
 
 # Chose an owner and mode based on the project directory name. Slightly kludgey.
-if [ $basename == "janitor" -o $basename == "common" -o $basename == "protected" ]; then
-    mode=755
-else
-    mode=550
-fi
+mode=$(/bin/cat mode 2>/dev/null || echo "550")
 
 umask $(/usr/bin/printf "%03o" $(( ~(8#$mode) & 8#777 )))
 
@@ -114,7 +110,8 @@ then
 fi
 
 # Special case for worker branch, install sudo or medo launchers.
-if [ $basename == "worker" ]; then
+if [ $basename == "worker" ]
+then
     while read line
     do
         fields=($line)
@@ -126,15 +123,23 @@ if [ $basename == "worker" ]; then
             $install $source $dest
         fi
     done < src/doers.conf
-elif [ $basename == "common" ]; then
-    install="/usr/bin/sudo /usr/bin/install -o $user -g $user"
-    /usr/bin/sudo /bin/mkdir -p /puppy/common/lib/node/common/lib
-    /usr/bin/sudo /bin/mkdir -m 550  -p /puppy/common/lib/node/common/queries
-    $install -m 444 public.js /puppy/common/lib/node/common/
-    $install -m 444 lib/shell lib/syslog /puppy/common/lib/node/common/lib/
-    $install -m 440 private.js /puppy/common/lib/node/common/
-    $install -m 440 queries/* /puppy/common/lib/node/common/queries/
-    $install -m 440 lib/system /puppy/common/lib/node/common/lib/
+elif [ -e lib ]
+then
+    skip='^(.git|src|mode)'
+    for lib in $(find . ! -type d | sed 's/\.\///')
+    do
+        if [[ $lib =~ $skip ]]
+        then
+            continue
+        fi
+        dest=/puppy/$basename/lib/$basename/$lib
+        if is_dirty $lib $dest
+        then
+            /usr/bin/sudo /bin/mkdir -p $(/usr/bin/dirname $dest)
+            echo "Installing $dest."
+            $install $lib $dest
+        fi
+    done
 fi
 
 /usr/bin/sudo chown -R root:$user /puppy/$basename
