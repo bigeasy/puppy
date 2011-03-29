@@ -7,7 +7,7 @@ module.exports.command =
   execute: (configuration) ->
     params = []
     params.push configuration.application.id unless configuration.application.isHome
-    configuration.private "/puppy/private/bin/db_list", params, (command) ->
+    configuration.private "/puppy/private/bin/db_list_try", params, (command) ->
       command.assert (stdout) ->
         response = JSON.parse(stdout)
         if response.error

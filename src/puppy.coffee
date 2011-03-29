@@ -4,6 +4,16 @@ sys = require "sys"
 path = require "path"
 {spawn,exec} = require("child_process")
 
+parameterize = (params) ->
+  if params instanceof Array
+    params.slice(0)
+  else
+    array = []
+    for k, v of params
+      array.push "--#{k}"
+      array.push v
+    array
+
 # Encapsulates a command to invoke using `spawn`.
 class Command
   # Create a command with the given `command` and command `parameters`.
@@ -68,7 +78,7 @@ class Configuration
 
   usage: (error, usage) -> @abend "\nerror: #{error}\n\n#{usage}\n\n"
 
-  error: (error) -> @abend "\nerror: #{error}\n"
+  error: (error) -> @abend "error: #{error}\n"
 
   abend: (message) ->
     process.stdout.write message
@@ -183,16 +193,16 @@ class Configuration
       params.push param
     @here("/usr/bin/sudo", params)
   here: (command, parameters) ->
-    new Command command, parameters
+    new Command command, parameterize(parameters)
   thereas: (app, user, command, parameters) ->
     params = [  "-H", "-u", user, command ]
-    for param in parameters.slice(0)
+    for param in parameterize(parameters)
       params.push param
     @there(app, "/usr/bin/sudo", params)
   there: (app, command, parameters) ->
     localUser = app.localUsers[0]
     params = [ "-T", "-l", "u#{localUser.id }", localUser.machine.hostname, command ]
-    for param in parameters.slice(0)
+    for param in parameterize(parameters)
       params.push param
     @here "/usr/bin/ssh", params
   app: (id, command, parameters, callback) ->
@@ -200,7 +210,7 @@ class Configuration
       application = (applications.filter (application) -> application.id is id).shift()
       localUser = application.localUsers[0]
       params = [ "-T", "-l", "u#{localUser.id }", localUser.machine.hostname, command ]
-      for param in parameters.slice(0)
+      for param in parameterize(parameters)
         params.push param
       program = spawn "/usr/bin/ssh", params
       stdout = ""
