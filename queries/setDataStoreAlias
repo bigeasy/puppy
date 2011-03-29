@@ -1,9 +1,4 @@
 UPDATE DataStore
    SET alias = ?
- WHERE id = ?
-   AND EXISTS (SELECT *
-                 FROM Application AS app
-                 JOIN Account AS acc ON app.accountId = acc.id
-                WHERE app.id = DataStore.applicationId
-                  AND acc.id = ?)
+ WHERE id = ? AND applicationId = ?
      

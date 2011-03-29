@@ -5,15 +5,15 @@ spawn         = require("child_process").spawn
 # The system can only be created once in the life of a program.
 systemCreated = false
 
-module.exports.createSystem = (filename, splat...) ->
-  collections =
-    hostname: (system, next) ->
-      system.hostname (hostname) -> next(hostname)
-    account: (system, next) ->
-      system.account (account) -> next(account)
-    uid: (system, next) ->
-      next(system.uid())
+collections = {}
+for property in "hostname, account, uid, application".split /,\s/
+  do (property) ->
+    collections[property] = (system, next) ->
+      system[property].apply system, [ ((value) ->
+        next(value)
+      ) ]
 
+module.exports.createSystem = (filename, splat...) ->
   # Assert that the system has not already been created.
   if systemCreated
     throw new Error("System has already been created.")
@@ -25,18 +25,36 @@ module.exports.createSystem = (filename, splat...) ->
   require("common").createShell filename, (shell) ->
     shell.doas "database", "/puppy/database/bin/database", [], null, (stdout) ->
       {host, password} = JSON.parse(stdout)
-      system = new Database(shell.syslog, shell, host, password)
+      system = new System(shell.syslog, shell, host, password)
       index = 0
       parameters = []
+      argv = null
       next = (parameter) ->
         parameters.push parameter
         if index == additional.length
           callback.apply null, parameters
         else
-          collections[additional[index++]](system, next)
+          property = additional[index++]
+          if collections[property]
+            collections[property](system, next)
+          else
+            unless argv?
+              system.argv = {}
+              argv = {}
+              if process.argv.length % 2 is 0
+                i = 2
+                while i < process.argv.length
+                  if /^--/.test(process.argv[i])
+                    argv[process.argv[i]] = process.argv[i + 1]
+                  else
+                    argv = {}
+                    break
+                  i += 2
+            pair = property.split /\s+or\s+/
+            next(system.argv[pair[0]] = argv["--#{pair[0]}"] or (pair[1] and (JSON.parse("[#{pair[1]}]"))[0]))
       next(system)
 
-class Database
+class System
   constructor: (@syslog, @shell, @host, @password) ->
     @queries = {}
     for file in fs.readdirSync __dirname + "/../queries"
@@ -166,12 +184,21 @@ class Database
   # the machine user of the sudoer that invoked the current program.
   #
   # This method is invoked by programs run by an end user via `sudo`.
-  application: (applicationId, callback) ->
+  #
+  # FIXME: This is called by db_list and db_fetch, but we should always only ssh
+  # to an account of the application of interest. Or should we? That would be a
+  # single point of failure.
+  application: (callback) ->
     @hostname (hostname) =>
       uid = @uid()
-      @sql "getApplicationByIdAndLocalUser", [ applicationId, hostname, uid ], "application", (applications) =>
-        @verify applications.length, "No such application t#{applicationId} for u#{uid} on #{hostname}."
-        callback(applications.shift())
+      if @argv?.applicationId?
+        @sql "getApplicationByIdAndLocalUser", [ @argv.applicationId, hostname, uid ], "application", (applications) =>
+          @verify applications.length, "No such application t#{@argv.applicationId} for u#{uid} on #{hostname}."
+          callback(applications.shift())
+      else
+        @sql "getApplicationByLocalUser", [ hostname, uid ], "application", (applications) =>
+          @verify applications.length, "No such application for u#{uid} on #{hostname}."
+          callback(applications.shift())
 
   hostname: (callback) ->
     if @_hostname
@@ -188,10 +215,11 @@ class Database
           throw new Error @err "Unable to execute hostname.", { code, stderr, stdout }
         callback(@_hostname = stdout.substring(0, stdout.length - 1))
 
-  uid: ->
+  uid: (callback) ->
     # Check that the uid is sane.
     uid = parseInt process.env["SUDO_UID"], 10
     @verify uid > 10000, "Inexplicable uid #{uid}"
+    callack(uid) if callback?
     uid
 
   account: (callback) ->
