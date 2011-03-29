@@ -12,6 +12,8 @@ function abend()
     exit 1
 }
 
+sed -i 's/\/opt\/etc/\/etc/' /opt/sbin/ipsec
+
 # User and group generation.                                                            
 # -------------------------------------------------------------------------- #
 # User and group generation functions that check to see if the group already
@@ -156,7 +158,8 @@ install_files root 644 var/lib/unbound/etc/unbound/* \
                        etc/unbound/* \
                        etc/haproxy/* \
                        etc/selinux/targeted/contexts/users/* \
-                       etc/postfix/*
+                       etc/postfix/* \
+                       etc/rsyslog.conf
 install_files root 755 etc/rc.d/init.d/* \
                        usr/bin/*
 install_files root 440 etc/sudoers.d/* \
