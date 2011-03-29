@@ -19,10 +19,6 @@ require {
 }
 
 # When we sudo to other roles.
-role system_r types database_t;
-role system_r types delegate_t;
-puppy_delegate_roles(system_r)
-
 puppy_mysql(worker_t)
 hostname_exec(worker_t)
 

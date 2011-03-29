@@ -11,10 +11,8 @@ puppy_restricted_user_template(liminal)
 type liminal_receptionist_t;    # Invokes the liminal program as the puppy user.
 type liminal_receptionist_exec_t;     # Use for both the proxy and the receptionist program.
 
-# Can sudo to the delegate user into order to register.
 puppy_sudo(liminal_receptionist)
 
-# We will invoke the delegate to create the new user account.
 role liminal_r types liminal_receptionist_t;
 role liminal_r types liminal_receptionist_sudo_t;
 

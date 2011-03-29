@@ -11,6 +11,7 @@ require {
 type database_t;            # The database password domain.
 type database_exec_t;       # The database password program.
 type database_conf_t;       # The database password file type.
+role system_r types database_t;
 
 # Allow the execution of the Node.js database reader program.
 puppy_node_exec(database_t)

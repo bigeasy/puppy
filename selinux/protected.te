@@ -3,7 +3,6 @@ policy_module(protected, 1.0.0)
 
 role protected_r;
 role protected_r types protected_sudo_t;
-puppy_delegate_roles(protected_r)
 
 type protected_exec_t;
 
