@@ -1,7 +1,5 @@
 #!/bin/bash
 
-dir=$(/usr/bin/dirname $(/bin/readlink -f $0))
-
 function maybe_clone()
 {
     branch=$1
@@ -29,6 +27,7 @@ function deploy()
 
 /bin/mkdir -p $HOME/git/ecma/puppy
 
+maybe_clone janitor
 maybe_clone common
 maybe_clone private
 maybe_clone protected
@@ -40,7 +39,6 @@ maybe_clone vhosts
 maybe_clone database
 maybe_clone client
 maybe_clone liminal
-maybe_clone janitor
 maybe_clone exclusive
 
 update_project common
@@ -57,7 +55,7 @@ update_project liminal
 update_project janitor
 update_project exclusive
 
-$dir/../puppy/bin/deploy $dir/..
+$HOME/git/ecma/puppy/janitor/puppy/janitor/bin/deploy $HOME/git/ecma/puppy/janitor
 
 deploy system
 deploy common
