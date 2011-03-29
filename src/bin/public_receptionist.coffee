@@ -1,7 +1,7 @@
 # Import packages.
 {helpers: {flatten}}  = require "coffee-script"
 
-require("common/public").createShell __filename, (shell) ->
+require("common").createShell __filename, (shell) ->
   syslog = shell.syslog
 
   # Command is sent through stdin so arguments do not appear in `ps`.
