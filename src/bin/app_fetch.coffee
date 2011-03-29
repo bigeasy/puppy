@@ -1,4 +1,4 @@
-require("common/private").createSystem __filename, "hostname, account", (system, hostname, account) ->
+require("exclusive").createSystem __filename, "hostname, account", (system, hostname, account) ->
   # Choose a machine based on a weighted random where the weights are the
   # determined by the number of available machine users with policies.
   chooseMachine = (system, callback) ->

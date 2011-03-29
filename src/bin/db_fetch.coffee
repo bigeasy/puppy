@@ -1,7 +1,7 @@
 fs              = require "fs"
 crypto          = require "crypto"
 
-require("common/private").createSystem __filename, (system) ->
+require("exclusive").createSystem __filename, (system) ->
   [ app, engine, alias ] = process.argv.slice 2
   system.application app, (application) ->
     hash = crypto.createHash "md5"

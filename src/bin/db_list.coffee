@@ -1,5 +1,5 @@
 # Connect to the database.
-require("common/private").createSystem __filename, (system) ->
+require("exclusive").createSystem __filename, (system) ->
   [ applicationId ] = process.argv.slice 2
   # If we're given an application id, list the databases for the application,
   # otherwise, list all databases. Delete the database passwords from the

@@ -1,5 +1,5 @@
 # Open the system and get the account for the sudoer.
-require("common/private").createSystem __filename, "account", (system, account) ->
+require("exclusive").createSystem __filename, "account", (system, account) ->
   # Build a list of applications by reading all the local users assigned to
   # the account. The local users will have the applications attached. Each
   # application has at least one local user. This builds the full list of

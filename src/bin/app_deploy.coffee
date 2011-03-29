@@ -1,4 +1,4 @@
-require("common/private").createSystem __filename, "hostname, uid", (system, hostname, uid) ->
+require("exclusive").createSystem __filename, "hostname, uid", (system, hostname, uid) ->
   system.sql "getApplicationByLocalUser", [ hostname, uid ], "application", (applications) ->
     application = applications.shift()
     system.sql "getApplicationLocalUsers", [ application.id ], "localUser", (localUsers) ->

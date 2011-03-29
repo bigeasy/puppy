@@ -1,6 +1,4 @@
-require.paths.unshift("/puppy/common/lib/node")
-
-require("common/private").createSystem __filename, "hostname", (system, hostname) ->
+require("exclusive").createSystem __filename, "hostname", (system, hostname) ->
   authorize = (hostname, code) ->
     system.sql "getLocalUserByActivationCode", [ code ], "localUser", (results) ->
       system.verify(results.length is 1, "Cannot find activation for code #{code}.")

@@ -1,5 +1,5 @@
 # Connect to the database.
-require("common/private").createSystem __filename, "hostname, account", (system, hostname, account) ->
+require("exclusive").createSystem __filename, "hostname, account", (system, hostname, account) ->
   [ alias, dsId ] = process.argv.slice 2
   system.sql "setDataStoreAlias", [ alias, dsId, account.id ], (results) ->
     if results.affectedRows is 0

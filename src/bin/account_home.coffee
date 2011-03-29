@@ -18,7 +18,7 @@ sendEmailOrElse = (results, orElse) ->
 
 # Search for the account first in the registered users, then in the users
 # awaiting activation.
-require("common/private").createSystem __filename, (system) ->
+require("exclusive").createSystem __filename, (system) ->
   system.sql "getLocalUserByEmail", [ email ], "localUser", (results) ->
     sendEmailOrElse results, ->
       system.sql "getLocalUserByActivationEmail", [ email ], "localUser", (results) ->

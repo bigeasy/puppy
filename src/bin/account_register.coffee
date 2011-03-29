@@ -1,8 +1,6 @@
-require.paths.unshift("/puppy/common/lib/node")
-
 crypto    = require "crypto"
 
-require("common/private").createSystem __filename, (system) ->
+require("exclusive").createSystem __filename, (system) ->
   [ email, sshKey ] = process.argv.slice 2
   register = () ->
     hash = crypto.createHash "md5"
