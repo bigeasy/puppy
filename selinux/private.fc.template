@@ -5,6 +5,7 @@ account_apps                try         private_protected
 app_deploy                  try         private_protected
 app_fetch                   try         private_protected
 app_list                    try         private_protected
+db_alias                    try         private_protected
 db_fetch                    try         private_protected
 db_list                     try         private_protected
 user_status                 try         private_protected

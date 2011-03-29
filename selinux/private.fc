@@ -16,6 +16,9 @@
 /puppy/private/bin/app_list gen_context(system_u:object_r:private_protected_exec_t, s0)
 /puppy/private/bin/app_list_try gen_context(system_u:object_r:private_protected_try_exec_t, s0)
 
+/puppy/private/bin/db_alias gen_context(system_u:object_r:private_protected_exec_t, s0)
+/puppy/private/bin/db_alias_try gen_context(system_u:object_r:private_protected_try_exec_t, s0)
+
 /puppy/private/bin/db_fetch gen_context(system_u:object_r:private_protected_exec_t, s0)
 /puppy/private/bin/db_fetch_try gen_context(system_u:object_r:private_protected_try_exec_t, s0)
 
