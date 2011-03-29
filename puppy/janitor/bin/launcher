@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 
 function log (message, code, stderr) {
-  require.paths.unshift("/puppy/common/lib/node");
   var programName = __filename.replace(/^.*\/(.*)$/, "$1");
   var branchName = __filename.replace(/^\/puppy\/(.*?)\/.*$/, "$1");
   var tag = (branchName + '_try') == programName ? programName : branchName + "_" + programName;
-  var syslog = new (require("common/public").Syslog)({ tag: tag, pid: true });
+  var syslog = new (require("common").Syslog)({ tag: tag, pid: true });
   var context = { code: code }
   if (stderr.length > 0) {
     context.stderr = stderr;
