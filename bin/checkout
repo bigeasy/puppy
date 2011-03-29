@@ -67,3 +67,4 @@ deploy vhosts
 deploy database
 deploy liminal
 deploy janitor
+deploy exclusive
