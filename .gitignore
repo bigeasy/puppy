@@ -1,0 +1,7 @@
+.DS_Store
+_site
+**/.DS_Store
+documentation
+index.html
+site/idl.css
+bin/*
