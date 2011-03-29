@@ -5,6 +5,13 @@ if [ $(whoami) != "root" ]; then
     exit 1
 fi
 
+function abend()
+{
+    local message=$1;
+    echo "ERROR: ${message}"
+    exit 1
+}
+
 # User and group generation.                                                            
 # -------------------------------------------------------------------------- #
 # User and group generation functions that check to see if the group already
@@ -12,12 +19,14 @@ fi
 function make_group()
 {
     local group=$1; local gid=$2
-    cut -d: -f1 /etc/group | grep '^'$group'$' > /dev/null
-    ret=$?
-    if [ $ret != 0 ]
+    current=$(/bin/grep "^${group}:" /etc/group | /bin/cut -d: -f3)
+    if [ -z "$current" ]
     then
         echo "Creating group $group."
         /usr/sbin/groupadd --gid $gid $group
+    elif [ "$current" != "$gid" ]
+    then
+        abend "Group $group exists with gid $current instead of $gid."
     fi
 }
 
@@ -25,25 +34,26 @@ function make_user()
 {
     local user=$1; local uid=$2;
     make_group $user $uid
-    cut -d: -f1 /etc/passwd | grep '^'$user'$' > /dev/null
-    ret=$?
-    if [ $ret != 0 ]
+    current=$(/bin/grep "^${user}:" /etc/passwd | /bin/cut -d: -f3)
+    if [ -z "$current" ]
     then
         echo "Creating user $user."
         /usr/sbin/useradd --uid $uid --gid $uid $user
+    elif [ "$current" != "$uid" ]
+    then
+        abend "User $user exists with uid $current instead of $uid."
     fi
 }
 
 # Users representing Puppy agents.
-make_user   common        200
 make_user   puppy         201
 make_user   janitor       202
 make_user   worker        204
 make_user   database      205
 make_user   system        207
 make_user   vhosts        208
-make_user   public        209
-make_user   private       210
+make_user   private       209
+make_user   public        210
 make_user   liminal       211
 make_user   protected     212
 
@@ -52,6 +62,8 @@ make_user   haproxy       225
 make_user   stunnel       226
 make_group  loggers       227
 make_user   unbound       228
+make_user   common        229
+make_user   exclusive     230
 
 # Make all of the workers member of the common group.
 function group_assign()
@@ -70,7 +82,7 @@ function group_assign()
     done < /etc/passwd
 }
 
-group_assign common 201 220
+group_assign exclusive 202 210
 group_assign loggers 1  700
 
 # Hide the syslog.
