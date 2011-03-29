@@ -132,7 +132,7 @@ then
         then
             continue
         fi
-        dest=/puppy/$basename/lib/$basename/$lib
+        dest=/puppy/$basename/lib/node/$basename/$lib
         if is_dirty $lib $dest
         then
             /usr/bin/sudo /bin/mkdir -m $mode -p $(/usr/bin/dirname $dest)
