@@ -14,9 +14,12 @@
 /bin/rm -rf /var/cache/puppy/policy/*
 
 users=$(/usr/bin/sudo -u system /puppy/system/bin/policy_users $(/bin/hostname) || exit 1)
-echo "$users" | while read user
-do
-    if [ $user -lt 20000 ]; then
-        /puppy/worker/sbin/user_policy $user
-    fi
-done
+if [ ! -z "$users" ]
+then
+    echo "$users" | while read user
+    do
+        if [ $user -lt 20000 ]; then
+            /puppy/worker/sbin/user_policy $user
+        fi
+    done
+fi
