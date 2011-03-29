@@ -135,7 +135,7 @@ then
         dest=/puppy/$basename/lib/$basename/$lib
         if is_dirty $lib $dest
         then
-            /usr/bin/sudo /bin/mkdir -p $(/usr/bin/dirname $dest)
+            /usr/bin/sudo /bin/mkdir -m $mode -p $(/usr/bin/dirname $dest)
             echo "Installing $dest."
             $install $lib $dest
         fi
