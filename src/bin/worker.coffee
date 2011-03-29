@@ -1,7 +1,7 @@
 # Require Node.js dependencies.
 spawn     = require("child_process").spawn
 
-require("common/private").createSystem __filename, "hostname", (system, hostname) ->
+require("exclusive").createSystem __filename, "hostname", (system, hostname) ->
   uid = process.getuid()
   syslog = system.syslog
   syslog.send "info", "Initializing."
