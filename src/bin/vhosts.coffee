@@ -2,6 +2,9 @@ http      = require "http"
 url       = require "url"
 
 require("exclusive").createSystem __filename, (system) ->
+  syslog = system.syslog
+  argv = process.argv.slice 2
+
   vhosts = {}
   max = 0
   queryHosts = ->
