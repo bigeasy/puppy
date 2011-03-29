@@ -1,6 +1,5 @@
 fs            = require "fs"
 Client        = require("mysql").Client
-exec          = require("child_process").exec
 spawn         = require("child_process").spawn
 
 # The system can only be created once in the life of a program.
@@ -23,24 +22,19 @@ module.exports.createSystem = (filename, splat...) ->
   additional = if splat.length is 2 then splat.shift().split(/,\s*/) else []
   callback = splat.shift()
 
-  programName = filename.replace(/^.*\/(.*?)(?:_try)?$/, "$1")
-  branchName = filename.replace(/^\/puppy\/([^\/]+).*$/, "$1")
-  tag = if branchName is programName then programName else "#{branchName}_#{programName}"
-  syslog = new (require("./syslog").Syslog)({ tag, pid: true })
-
-  shell = new (require("./shell").Shell)(syslog)
-  shell.doas "database", "/puppy/database/bin/database", [], null, (stdout) ->
-    {host, password} = JSON.parse(stdout)
-    system = new Database(syslog, shell, host, password)
-    index = 0
-    parameters = []
-    next = (parameter) ->
-      parameters.push parameter
-      if index == additional.length
-        callback.apply null, parameters
-      else
-        collections[additional[index++]](system, next)
-    next(system)
+  require("common").createShell filename, (shell) ->
+    shell.doas "database", "/puppy/database/bin/database", [], null, (stdout) ->
+      {host, password} = JSON.parse(stdout)
+      system = new Database(shell.syslog, shell, host, password)
+      index = 0
+      parameters = []
+      next = (parameter) ->
+        parameters.push parameter
+        if index == additional.length
+          callback.apply null, parameters
+        else
+          collections[additional[index++]](system, next)
+      next(system)
 
 class Database
   constructor: (@syslog, @shell, @host, @password) ->
@@ -95,9 +89,7 @@ class Database
     tree[get]
 
   getLocalUserAccount: (localUserId, callback) ->
-    exec "/bin/hostname", (error, stdout) =>
-      throw error if error
-      hostname = stdout.substring(0, stdout.length - 1)
+    @hostname (hostname) =>
       @sql "getLocalUserAccount", [ hostname, localUserId ], "account", (results) ->
         callback(results.shift())
 
