@@ -1,4 +1,4 @@
-require("common/private").createSystem __filename, (system) ->
+require("exclusive").createSystem __filename, (system) ->
   [ hostname, uid, address ] = process.argv.slice 2
   system.sql "getLocalPorts", [ hostname, uid ], "localPort", (results) ->
     ports = results.map (localPort) -> localPort.port

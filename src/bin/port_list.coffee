@@ -1,4 +1,4 @@
-require("common/private").createSystem __filename, (system) ->
+require("exclusive").createSystem __filename, (system) ->
   # Read command line arguments, hostname and port.
   [ hostname ] = process.argv.slice(2)
 

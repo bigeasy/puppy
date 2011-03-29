@@ -1,4 +1,4 @@
-require("common/private").createSystem __filename, (system) ->
+require("exclusive").createSystem __filename, (system) ->
   [ hostname, uid ] = process.argv.slice 2
   system.sql "getAccountByLocalUser", [ hostname, uid ], "account", (results) ->
     if results.length is 0
