@@ -12,7 +12,6 @@ function abend()
     exit 1
 }
 
-sed -i 's/\/opt\/etc/\/etc/' /opt/sbin/ipsec
 
 # User and group generation.                                                            
 # -------------------------------------------------------------------------- #
