@@ -21,17 +21,10 @@ function update_project()
     /usr/bin/git pull
 }
 
-function gitignore()
-{
-    branch=$1
-    cd $HOME/git/ecma/puppy/$branch
-    /opt/bin/cake gitignore
-}
-
 function deploy()
 {
     branch=$1
-    /puppy/system/bin/deploy $HOME/git/ecma/puppy/$branch
+    /puppy/janitor/bin/deploy $HOME/git/ecma/puppy/$branch
 }
 
 /bin/mkdir -p $HOME/git/ecma/puppy
@@ -48,6 +41,7 @@ maybe_clone database
 maybe_clone client
 maybe_clone liminal
 maybe_clone janitor
+maybe_clone exclusive
 
 update_project common
 update_project private
@@ -61,17 +55,7 @@ update_project database
 update_project client
 update_project liminal
 update_project janitor
-
-gitignore common
-gitignore private
-gitignore protected
-gitignore public
-gitignore system
-gitignore worker
-gitignore vhosts
-gitignore database
-gitignore client
-gitignore liminal
+update_project exclusive
 
 $dir/../puppy/bin/deploy $dir/..
 
