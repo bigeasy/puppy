@@ -1,7 +1,6 @@
-#!/usr/bin/env node
+#!/opt/bin/node
 (function() {
-  require.paths.unshift("/puppy/common/lib/node");
-  require("common/public").createShell(__filename, function(shell) {
+  require("common").createShell(__filename, function(shell) {
     var email, sendActivation, syslog;
     syslog = shell.syslog;
     email = process.argv.slice(2)[0];

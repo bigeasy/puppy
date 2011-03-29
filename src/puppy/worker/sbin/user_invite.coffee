@@ -1,7 +1,5 @@
 #!/opt/bin/coffee
-require.paths.unshift("/puppy/common/lib/node")
-
-require("common/public").createShell __filename, (shell) ->
+require("common").createShell __filename, (shell) ->
   syslog = shell.syslog
 
   [ email ] = process.argv.slice(2)
