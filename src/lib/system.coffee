@@ -219,7 +219,7 @@ class System
     # Check that the uid is sane.
     uid = parseInt process.env["SUDO_UID"], 10
     @verify uid > 10000, "Inexplicable uid #{uid}"
-    callack(uid) if callback?
+    callback(uid) if callback?
     uid
 
   account: (callback) ->
