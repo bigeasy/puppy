@@ -48,7 +48,10 @@ do
         then
             /opt/bin/coffee -c -p $source > $dest
         else
-            echo "#!/opt/bin/node" > $dest
+            path="PATH=/opt/bin"
+            echo -e "#!/opt/bin/node\n" > $dest
+            echo -e "require.paths.splice(0, require.paths.length, '/opt/lib/node'," \
+                "'/puppy/common/lib/node', '/puppy/exclusive/lib/node');\n" >> $dest
             /opt/bin/coffee -c -p $source >> $dest
         fi
     fi
