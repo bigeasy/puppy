@@ -5,21 +5,37 @@ require("exclusive").createSystem __filename, (system) ->
   syslog = system.syslog
   argv = process.argv.slice 2
 
+  database = null
   vhosts = {}
   max = 0
   queryHosts = ->
-    system.sql "getVirtualHosts", [ max ], "host", (hosts) ->
-      count = 0
-      for host in hosts
-        vhosts[host.name] = "#{host.ip}:#{host.port}"
-        max = host.id
-        count++
-      if count
-        console.log("LOGGING!")
-        syslog.send("local5", "info", "Added #{count} virtual hosts, max host #{max}.")
+    database.sql "getVirtualHosts", [ max ], "host", (error, hosts) ->
+      if error
+        database = null
+        syslog.send "err", "Unable to query database.", { error }
+      else
+        count = 0
+        for host in hosts
+          vhosts[host.name] = "#{host.ip}:#{host.port}"
+          max = host.id
+          count++
+        if count
+          syslog.send "info", "Added #{count} virtual hosts, max host #{max}."
 
-  queryHosts()
-  setInterval queryHosts, 1000
+  pollForNewHosts = ->
+    if not database?
+      system.database (error, newDatabase) ->
+        if error
+          database = null
+          syslog.send "err", "Unable to connect to database.", { error }
+        else
+          database = newDatabase
+          queryHosts()
+    else
+      queryHosts()
+
+  pollForNewHosts()
+  setInterval pollForNewHosts, 1000
 
   port = parseInt(argv.shift() || "8080", 10)
 
