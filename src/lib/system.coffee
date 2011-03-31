@@ -54,6 +54,40 @@ module.exports.createSystem = (filename, splat...) ->
             next(system.argv[pair[0]] = argv["--#{pair[0]}"] or (pair[1] and (JSON.parse("[#{pair[1]}]"))[0]))
       next(system)
 
+class Database
+  constructor: (@system, @client, @queries) ->
+
+  sql: (query, parameters, get, callback) ->
+    if typeof get is "function"
+      callback = get
+      get = null
+    @client.query @queries[query], parameters, (error, results, fields) =>
+      expanded = results
+      if not error
+        if get
+          expanded = []
+          for result in results
+            expanded.push @treeify result, get
+        else
+          expanded = results
+      callback(error, expanded, fields)
+
+  close: (callback) ->
+    if callback?
+      @client.end callback
+    else
+      @client.end()
+
+  treeify: (record, get) ->
+    tree = {}
+    for key, value of record
+      parts = key.split /__/
+      branch = tree
+      for i in [0...parts.length - 1]
+        branch = branch[parts[i]] = branch[parts[i]] or {}
+      branch[parts[parts.length - 1]] = record[key]
+    tree[get]
+
 class System
   constructor: (@syslog, @shell, @host, @password) ->
     @queries = {}
@@ -69,42 +103,27 @@ class System
 
     client
 
+  database: (callback) ->
+    client = @createClient()
+    client.connect (error) =>
+      if not error
+        database = new Database(this, client, @queries)
+      callback(error, database)
+    
   sql: (query, parameters, get, callback) ->
     if typeof get is "function"
       callback = get
       get = null
-    client = @createClient()
-    client.on "error", -> process.stdout.write "ERROR: MySQL Missing."
-    client.connect (error) =>
-      throw error if error
-      client.on "end", -> client.destroy()
-      client.query @queries[query], parameters, (error, results, fields) =>
-        client.end -> client.destroy()
+    @database (error, database) =>
+      if error
+        throw new Error @err "Unable to connect to MySQL: #{error.message}", { error }
+      database.sql query, parameters, get, (error, results, fields) =>
+        database.close (error) =>
+          if error
+            throw new Error @err "Cannot close MySQL connection.", { error }
         if error
-          if @error
-            @error(error, this)
-            @error = null
-          else
-            throw error
-        else
-          @error = null
-          if get
-            expanded = []
-            for result in results
-              expanded.push @treeify result, get
-          else
-            expanded = results
-          callback expanded, fields
-
-  treeify: (record, get) ->
-    tree = {}
-    for key, value of record
-      parts = key.split /__/
-      branch = tree
-      for i in [0...parts.length - 1]
-        branch = branch[parts[i]] = branch[parts[i]] or {}
-      branch[parts[parts.length - 1]] = record[key]
-    tree[get]
+          throw new Error @err "Unable to perform query: #{error.message}", { error }
+        callback(results, fields)
 
   getLocalUserAccount: (localUserId, callback) ->
     @hostname (hostname) =>
