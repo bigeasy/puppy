@@ -4,6 +4,9 @@
 
 # Start by creating a partition and then running `sudo mkfs.ext4 /dev/sdb1`.
 #
+# Create that partition with `sudo fdisk /dev/sdb` and then create a single
+# primary partition containing the entire disk.
+#
 # Use fdisk and create a single primary partition.
 
 user=$1
