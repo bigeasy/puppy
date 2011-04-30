@@ -57,11 +57,11 @@ then
     /bin/chown $user:$user /home/$user/.ssh/authorized_keys
 fi
 
-if [ ! -e /home/$user/git/ecma/puppy/system ]
+if [ ! -e /home/$user/git/ecma/puppy/janitor ]
 then
     /bin/cp /root/.ssh/known_hosts /home/alan/.ssh/known_hosts
     /usr/bin/sudo -u $user /bin/mkdir -p /home/$user/git/ecma/puppy
-    /usr/bin/ssh -o ForwardAgent=yes -o NoHostAuthenticationForLocalhost=yes -l $user localhost /usr/bin/git clone -b system git@bled.prettyrobots.com:puppy.git /home/$user/git/ecma/puppy/system
+    /usr/bin/ssh -o ForwardAgent=yes -o NoHostAuthenticationForLocalhost=yes -l $user localhost /usr/bin/git clone -b janitor git@bled.prettyrobots.com:puppy.git /home/$user/git/ecma/puppy/janitor
 fi
 
 cat<<EOL > /root/wheel
