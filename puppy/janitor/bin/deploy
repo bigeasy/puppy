@@ -44,14 +44,11 @@ do
     then
         echo "Rebuildering $source."
         /bin/mkdir -p $dir
-        if [ $(/usr/bin/dirname $dir) == "lib" ]
+        if [ $(/bin/basename $dir) == "lib" ]
         then
             /opt/bin/coffee -c -p $source > $dest
         else
-            path="PATH=/opt/bin"
-            echo -e "#!/opt/bin/node\n" > $dest
-            echo -e "require.paths.splice(0, require.paths.length, '/opt/lib/node'," \
-                "'/puppy/common/lib/node', '/puppy/exclusive/lib/node');\n" >> $dest
+            /bin/cat $(/usr/bin/dirname $deploy)/preamble.js > $dest
             /opt/bin/coffee -c -p $source >> $dest
         fi
     fi
