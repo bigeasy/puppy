@@ -6,21 +6,26 @@ require("exclusive").createSystem __filename, (system) ->
     hash = crypto.createHash "md5"
     hash.update(email +  sshKey + (new Date().toString()) + process.pid)
     code = hash.digest "hex"
-    system.error = (error) ->
-      if error.number is 1062
-        if /'PRIMARY'/.test(error.message)
-          register(email, sshKey)
-        else if /'Activation_Email'/.test(error.message)
-          process.stdout.write """
-          The email address #{email} is already registered.\n
-          """
-      else
-        throw error
-    system.sql "insertActivation", [ code, email, sshKey ], (results) ->
-      system.sql "getActivationByEmail", [ email ], "activation", (results) ->
-        activation = results.shift()
-        #public.sendActivation(activation)
-        fetchActivationLocalUser activation.code
+
+    # Create a connection that we can use to handle the error ourselves.
+    system.database (error, database) ->
+      throw error if error
+      database.sql "insertActivation", [ code, email, sshKey ], (error, results) ->
+        database.close()
+        if error
+          if error.number is 1062
+            if /'PRIMARY'/.test(error.message)
+              register(email, sshKey)
+            else if /'Activation_Email'/.test(error.message)
+              process.stdout.write """
+              The email address #{email} is already registered.\n
+              """
+          else
+            throw error
+        else
+          system.sql "getActivationByEmail", [ email ], "activation", (results) ->
+            activation = results.shift()
+            fetchActivationLocalUser activation.code
 
   fetchActivationLocalUser = (code) ->
     system.fetchLocalUser 1, (localUser) ->
