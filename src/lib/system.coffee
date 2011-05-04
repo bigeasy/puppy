@@ -110,6 +110,11 @@ class System
         database = new Database(this, client, @queries)
       callback(error, database)
     
+  # This will create a lot of connections, but not too many, really. Most
+  # scripts run a single query anyway, so saving the connection is not going to
+  # be a huge performance gain. For daemons, yes, manage the connection
+  # directly, but for scripts this is good enough, and we know for sure that
+  # we're not going to hang on an open socket.
   sql: (query, parameters, get, callback) ->
     if typeof get is "function"
       callback = get
