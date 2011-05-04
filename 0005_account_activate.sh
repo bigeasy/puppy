@@ -16,7 +16,7 @@ while [ $ret -ne 0 ]; do
 done
 
 out=$(puppy account:activate $code)
-assert "Activate account." 0 $?
+assert "Activate account with $code." 0 $?
 
 count=0
 ret=1
