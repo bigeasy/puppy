@@ -1,6 +1,6 @@
 .DS_Store
+.AppleDouble
 _site
-**/.DS_Store
 documentation
 index.html
 site/idl.css
