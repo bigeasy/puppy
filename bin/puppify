@@ -65,6 +65,7 @@ make_group  loggers       227
 make_user   unbound       228
 make_user   common        229
 make_user   exclusive     230
+make_user   backup        231
 
 # Make all of the workers member of the common group.
 function group_assign()
@@ -240,6 +241,15 @@ if [ "$(/bin/readlink /etc/localtime)" != "/usr/share/zoneinfo/UTC" ]
 then
     echo "Setting timezone to UTC."
     /usr/bin/sudo /bin/ln -sf /usr/share/zoneinfo/UTC /etc/localtime
+fi
+
+
+if [ ! -e /home/backup/.ssh/authorized_keys ]
+then
+    /usr/bin/sudo /bin/mkdir -p /home/backup/.ssh
+    /usr/bin/sudo /bin/cp $(/usr/bin/dirname $0)/id_backup.pub /home/backup/.ssh/authorized_keys
+    /usr/bin/sudo /bin/chown -R backup:backup /home/backup
+    /usr/bin/sudo /bin/chmod 600 /home/backup/.ssh/authorized_keys
 fi
 
 # Set SELinux file contexts.
