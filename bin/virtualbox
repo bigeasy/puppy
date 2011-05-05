@@ -4,6 +4,9 @@
 
 # Start by creating a partition and then running `sudo mkfs.ext4 /dev/sdb1`.
 #
+# Create that partition with `sudo fdisk /dev/sdb` and then create a single
+# primary partition containing the entire disk.
+#
 # Use fdisk and create a single primary partition.
 
 user=$1
@@ -30,10 +33,11 @@ then
     /bin/mkdir /mnt/chroot
 fi
 
-/bin/mount | cut -d' ' -f1 | grep /dev/sdb1 > /dev/null
+/bin/mount | cut -d' ' -f3 | grep /mnt/chroot > /dev/null
 if [ $? -ne 0 ]
 then
-    /bin/mount /dev/sdb1 /mnt/chroot
+    echo "Please mount a filesystem at /mnt/chroot." 1>&2
+    exit 1
 fi
 
 /bin/mkdir -p /mnt/chroot/dev
@@ -59,13 +63,13 @@ obsoletes=1
 reposdir=/dev/null
 
 [base]
-name=Fedora 13 – i386 – Base
-mirrorlist=http://mirrors.fedoraproject.org/mirrorlist?repo=fedora-13&arch=i386
+name=Fedora 14 – i386 – Base
+mirrorlist=http://mirrors.fedoraproject.org/mirrorlist?repo=fedora-14&arch=i386
 enabled=1
 
 [updates-released]
-name=Fedora 13 – i386 – Released Updates
-mirrorlist=http://mirrors.fedoraproject.org/mirrorlist?repo=updates-released-f13&arch=i386
+name=Fedora 14 – i386 – Released Updates
+mirrorlist=http://mirrors.fedoraproject.org/mirrorlist?repo=updates-released-f14&arch=i386
 enabled=1
 EOL
 
@@ -107,7 +111,7 @@ cat <<EOL > /mnt/chroot/boot/grub/grub.conf
 
 default=0
 timeout=10
-title Fedora 13
+title Fedora 14
         root (hd0,0)
         kernel /boot/vmlinuz ro root=/dev/sda1 rd_NO_PLYMOUTH selinux=0
         initrd /boot/initramfs
@@ -147,7 +151,10 @@ cat <<EOL > /mnt/chroot/boot/grub/device.map
 (hd0)	/dev/sda
 EOL
 
+# The rpms.txt is moot for VirtualBox/EC2, since we've already installed them,
+# but is part of the StackScript process to add missing RPMs.
 /bin/cp -p $dirname/bootstrap /mnt/chroot/root/bootstrap
+/bin/cp -p $dirname/rpms.txt /mnt/chroot/root/rpms.txt
 
 # Not sure who creates this, or why.
 /bin/rm -rf /mnt/chroot/home/alan
