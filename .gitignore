@@ -1,7 +1,5 @@
 .DS_Store
 .AppleDouble
-_site
-documentation
-index.html
-site/idl.css
+selinux/*.pp
+selinux/tmp/*
 bin/*
