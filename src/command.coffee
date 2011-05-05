@@ -1,5 +1,5 @@
 {Configuration} = require "./puppy"
-{OptionParser}  = require "coffee-script/optparse"
+{OptionParser}  = require "coffee-script/lib/optparse"
 fs              = require "fs"
 path            = require "path"
 

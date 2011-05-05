@@ -1,4 +1,4 @@
-{OptionParser}  = require "coffee-script/optparse"
+{OptionParser}  = require "coffee-script/lib/optparse"
 {Configuration,invoke,app} = require "./puppy"
 fs = require "fs"
 

@@ -50,13 +50,13 @@ class Configuration
       fs.statSync "#{home}/.puppy"
       @global = JSON.parse(fs.readFileSync("#{home}/.puppy/configuration.json"))
     catch e
-      throw e if process.binding("net").ENOENT isnt e.errno
+      throw e if constants.binding("constants").ENOENT isnt e.errno
       @global = {}
     try
       fs.statSync "./.puppy"
       @local = JSON.parse(fs.readFileSync("./.puppy/configuration.json"))
     catch e
-      throw e if process.binding("net").ENOENT isnt e.errno
+      throw e if process.binding("constants").ENOENT isnt e.errno
       @local = {}
     @global.server or= "portoroz.prettyrobots.com"
     @dirty = {}
@@ -94,7 +94,7 @@ class Configuration
           @abend "#{process.env["HOME"]}/.puppy is not a directory."
         fs.writeFileSync("#{process.env["HOME"]}/.puppy/configuration.json", pretty, "utf8")
       catch error
-        throw error if process.binding("net").ENOENT isnt error.errno
+        throw error if process.binding("constants").ENOENT isnt error.errno
         fs.mkdirSync "#{process.env["HOME"]}/.puppy", 0755
         @save()
 
@@ -129,7 +129,7 @@ class Configuration
     home = process.env["HOME"]
     fs.stat "#{home}/.puppy", (error, stat) =>
       if error
-        if process.binding("net").ENOENT is error.errno
+        if process.binding("constants").ENOENT is error.errno
           fs.mkdir "#{home}/.puppy", 0755, (error) =>
             throw error if error
             @directory(callback)
@@ -168,7 +168,7 @@ class Configuration
           home = process.env["HOME"]
           callback(JSON.parse(fs.readFileSync("#{home}/.puppy/applications.json", "utf8")))
         catch error
-          if process.binding("net").ENOENT is error.errno
+          if process.binding("constants").EBADF is error.errno
             @fetchApplications (applications) =>
               fs.writeFileSync "#{home}/.puppy/applications.json", JSON.stringify(applications, null, 2), "utf8"
               @applications(callback)
@@ -177,6 +177,7 @@ class Configuration
 
   fetchApplications: (callback) ->
     @home false, (user) ->
+      console.log = [ "/usr/bin/ssh", [ "-T", user, "/usr/bin/sudo", "-u", "private", "/puppy/private/bin/account_apps_try" ]]
       config = spawn "/usr/bin/ssh", [ "-T", user, "/usr/bin/sudo", "-u", "private", "/puppy/private/bin/account_apps_try" ]
       stdout = ""
       stderr = ""
