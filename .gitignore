@@ -1,7 +1,7 @@
 .DS_Store
-selinux/*.pp
-selinux/tmp
+.AppleDouble
 _site
-**/.DS_Store
-bin/job
-bin/user_generate
+documentation
+index.html
+site/idl.css
+bin/*
