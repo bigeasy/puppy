@@ -212,9 +212,13 @@ copy_public_key public home/public/ssh/authorized_keys /puppy/public/bin/public_
 
 # We do not want the agent accounts to run `/etc/bashrc` at startup, and we do
 # want them to find the right `node`, so replace the default `.bashrc` with our own.
+#
+# Note that public won't use the exclusive library, but the path assertion code
+# we insert into every node executable expects it.
 for agent in public; do
     echo 'export PATH=$PATH:/opt/bin' > /home/$agent/.bashrc
-    echo 'export NODE_PATH=/opt/lib/node:/puppy/common/lib/node' >> /home/$agent/.bashrc
+    echo 'export NODE_PATH=/opt/lib/node_modules:/puppy/common/lib/node:/puppy/exclusive/lib/node' \
+        >> /home/$agent/.bashrc
 done
 
 # Configure daemons built from source.
