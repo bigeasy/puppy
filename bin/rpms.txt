@@ -50,7 +50,6 @@ diffutils
 e2fsprogs
 e2fsprogs-libs
 efibootmgr
-eggdbus
 elfutils-libelf
 elfutils-libs
 expat
