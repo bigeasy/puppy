@@ -63,13 +63,13 @@ obsoletes=1
 reposdir=/dev/null
 
 [base]
-name=Fedora 14 – i386 – Base
-mirrorlist=http://mirrors.fedoraproject.org/mirrorlist?repo=fedora-14&arch=i386
+name=Fedora 15 – i386 – Base
+mirrorlist=http://mirrors.fedoraproject.org/mirrorlist?repo=fedora-15&arch=i386
 enabled=1
 
 [updates-released]
-name=Fedora 14 – i386 – Released Updates
-mirrorlist=http://mirrors.fedoraproject.org/mirrorlist?repo=updates-released-f14&arch=i386
+name=Fedora 15 – i386 – Released Updates
+mirrorlist=http://mirrors.fedoraproject.org/mirrorlist?repo=updates-released-f15&arch=i386
 enabled=1
 EOL
 
@@ -111,7 +111,7 @@ cat <<EOL > /mnt/chroot/boot/grub/grub.conf
 
 default=0
 timeout=10
-title Fedora 14
+title Fedora 15
         root (hd0,0)
         kernel /boot/vmlinuz ro root=/dev/sda1 rd_NO_PLYMOUTH selinux=0
         initrd /boot/initramfs
