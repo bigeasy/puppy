@@ -227,9 +227,9 @@ done
 function on_boot()
 {
     local service=$1
-    until /sbin/chkconfig | /bin/grep "${service}.*3:on" > /dev/null; do
-        /sbin/chkconfig --add $service
-        /sbin/chkconfig $service on
+    until /bin/systemctl is-enabled $service.service 2>/dev/null
+    do
+        /bin/systemctl enable $service.service
         echo "Enabled service $service to start on boot. You should start it now."
     done
 }
