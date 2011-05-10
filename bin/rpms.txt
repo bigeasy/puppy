@@ -181,6 +181,7 @@ plymouth-core-libs
 plymouth-scripts
 policycoreutils
 popt
+postfix
 procmail
 procps
 psmisc
