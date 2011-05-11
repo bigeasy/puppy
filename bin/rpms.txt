@@ -154,6 +154,7 @@ nss-softokn
 nss-softokn-freebl
 nss-sysinit
 nss-util
+ntp
 openldap
 openssh
 openssh-clients
