@@ -27,6 +27,7 @@ cryptsetup-luks-libs
 curl
 cyrus-sasl
 cyrus-sasl-lib
+cyrus-sasl-plain
 dash
 db4
 db4-utils
