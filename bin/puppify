@@ -62,7 +62,7 @@ make_user   protected     212
 make_user   haproxy       225
 make_user   stunnel       226
 make_group  loggers       227
-make_user   unbound       228
+#make_user   unbound       228
 make_user   common        229
 make_user   exclusive     230
 make_user   backup        231
@@ -95,10 +95,23 @@ group_assign loggers 1  700
 # to our protected socket.
 if [ ! -e /dev/loggers ]; then
     /sbin/service rsyslog stop
+    /bin/rm -f /dev/log
     /bin/mkdir -m 750 /dev/loggers
     /bin/chown root:loggers /dev/loggers
     /bin/ln -s /dev/loggers/log /dev/log
     /sbin/service rsyslog start
+fi
+
+# Configure unbound.
+# -------------------------------------------------------------------------- #
+
+if [ ! -f /var/lib/unbound/etc/unbound/unbound_control.key ]
+then
+	echo -n $"Generating unbound control key and certificate: "
+    /bin/rm -rf /etc/unbound/*
+	/usr/sbin/unbound-control-setup -d /etc/unbound
+	chgrp unbound /etc/unbound/unbound_*key /etc/unbound/unbound_*pem
+    sudo mv /etc/unbound/unbound_*key /etc/unbound/unbound_*pem /var/lib/unbound/etc/unbound
 fi
 
 # Configuration installtion

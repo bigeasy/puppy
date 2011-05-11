@@ -223,6 +223,7 @@ tar
 tcp_wrappers-libs
 tzdata
 udev
+unbound
 unzip
 ustr
 util-linux
