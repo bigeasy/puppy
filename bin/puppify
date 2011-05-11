@@ -86,6 +86,7 @@ function group_assign()
 
 group_assign exclusive 202 210
 group_assign loggers 1  700
+group_assign wheel 701 701
 
 # Hide the syslog.
 # -------------------------------------------------------------------------- #
@@ -214,14 +215,19 @@ function copy_public_key()
     /bin/touch /home/$user/.ssh/authorized_keys
     /bin/chown $user:$user /home/$user/.ssh/authorized_keys
     /bin/chmod 600 /home/$user/.ssh/authorized_keys
+    if [ ! -z $command ]; then
     echo -n 'command="'$command'",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ' \
         > /home/$user/.ssh/authorized_keys
+    fi
     /bin/cat $key >> /home/$user/.ssh/authorized_keys
 }
 
 # TODO Check the public key into source, but the keys do not live in source,
 # they live on a server and propagate.
 copy_public_key public home/public/ssh/authorized_keys /puppy/public/bin/public_receptionist
+janitor=$(/bin/awk -F : '$3 ~ /^701$/ { print $1 }' /etc/passwd)
+copy_public_key puppy /home/$janitor/.ssh/authorized_keys
+
 
 # We do not want the agent accounts to run `/etc/bashrc` at startup, and we do
 # want them to find the right `node`, so replace the default `.bashrc` with our own.
