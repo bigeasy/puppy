@@ -109,7 +109,6 @@ fi
 if [ ! -f /var/lib/unbound/etc/unbound/unbound_control.key ]
 then
 	echo -n $"Generating unbound control key and certificate: "
-    /bin/rm -rf /etc/unbound/*
 	/usr/sbin/unbound-control-setup -d /etc/unbound
 	chgrp unbound /etc/unbound/unbound_*key /etc/unbound/unbound_*pem
     sudo mv /etc/unbound/unbound_*key /etc/unbound/unbound_*pem /var/lib/unbound/etc/unbound
