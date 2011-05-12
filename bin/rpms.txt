@@ -208,7 +208,6 @@ ruby-libs
 sed
 selinux-policy
 selinux-policy-targeted
-sendmail
 setserial
 setup
 shadow-utils
