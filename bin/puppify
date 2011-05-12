@@ -62,7 +62,6 @@ make_user   protected     212
 make_user   haproxy       225
 make_user   stunnel       226
 make_group  loggers       227
-#make_user   unbound       228
 make_user   common        229
 make_user   exclusive     230
 make_user   backup        231
@@ -101,17 +100,6 @@ if [ ! -e /dev/loggers ]; then
     /bin/chown root:loggers /dev/loggers
     /bin/ln -s /dev/loggers/log /dev/log
     /sbin/service rsyslog start
-fi
-
-# Configure unbound.
-# -------------------------------------------------------------------------- #
-
-if [ ! -f /var/lib/unbound/etc/unbound/unbound_control.key ]
-then
-	echo -n $"Generating unbound control key and certificate: "
-	/usr/sbin/unbound-control-setup -d /etc/unbound
-	chgrp unbound /etc/unbound/unbound_*key /etc/unbound/unbound_*pem
-    sudo mv /etc/unbound/unbound_*key /etc/unbound/unbound_*pem /var/lib/unbound/etc/unbound
 fi
 
 # Configuration installtion
@@ -168,8 +156,7 @@ function postmap_files()
 # Anyway, we use install to write the files. We write special files that need
 # stricter privileges before the glob of all files in the same directory.
 install_files root 640 etc/postfix/sasl_passwd
-install_files root 644 var/lib/unbound/etc/unbound/* \
-                       etc/init/* \
+install_files root 644 etc/init/* \
                        etc/unbound/* \
                        etc/haproxy/* \
                        etc/selinux/targeted/contexts/users/* \
