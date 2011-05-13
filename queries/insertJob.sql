@@ -1,4 +1,4 @@
 INSERT INTO Job (machineId, command)
-SELECT id, ?
+SELECT id, $1
   FROM Machine
- WHERE hostname = ?
+ WHERE hostname = $2

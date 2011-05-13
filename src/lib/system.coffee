@@ -1,5 +1,5 @@
 fs            = require "fs"
-Client        = require("mysql").Client
+pg            = require "pg"
 spawn         = require("child_process").spawn
 
 # The system can only be created once in the life of a program.
@@ -24,8 +24,8 @@ module.exports.createSystem = (filename, splat...) ->
 
   require("common").createShell filename, (shell) ->
     shell.doas "database", "/puppy/database/bin/database", [], null, (stdout) ->
-      {host, password} = JSON.parse(stdout)
-      system = new System(shell.syslog, shell, host, password)
+      databaseUrl = stdout.replace /\n/, ''
+      system = new System(shell.syslog, shell, databaseUrl)
       index = 0
       parameters = []
       argv = null
@@ -61,7 +61,7 @@ class Database
     if typeof get is "function"
       callback = get
       get = null
-    @client.query @queries[query], parameters, (error, results, fields) =>
+    @client.query @queries[query], parameters, (error, results) =>
       expanded = results
       if not error
         if get
@@ -70,13 +70,9 @@ class Database
             expanded.push @treeify result, get
         else
           expanded = results
-      callback(error, expanded, fields)
+      callback(error, expanded)
 
-  close: (callback) ->
-    if callback?
-      @client.end callback
-    else
-      @client.end()
+  close: -> @client.end()
 
   treeify: (record, get) ->
     tree = {}
@@ -89,26 +85,20 @@ class Database
     tree[get]
 
 class System
-  constructor: (@syslog, @shell, @host, @password) ->
+  constructor: (@syslog, @shell, @databaseUrl) ->
     @queries = {}
     for file in fs.readdirSync __dirname + "/../queries"
       @queries[file.replace(/\.sql$/, "")] = fs.readFileSync __dirname + "/../queries/" + file , "utf8"
 
-  createClient: ->
-    client            = new Client()
-    client.host       = @host
-    client.user       = "puppy"
-    client.password   = @password
-    client.database   = "puppy"
-
-    client
-
   database: (callback) ->
-    client = @createClient()
-    client.connect (error) =>
-      if not error
-        database = new Database(this, client, @queries)
-      callback(error, database)
+    console.log @databaseUrl
+    client = new (pg.Client)(@databaseUrl)
+    client.on "connect", =>
+      database = new Database(this, client, @queries)
+      callback(null, database)
+    client.on "error", (error) =>
+      callback(error, null)
+    client.connect()
     
   # This will create a lot of connections, but not too many, really. Most
   # scripts run a single query anyway, so saving the connection is not going to
@@ -122,13 +112,11 @@ class System
     @database (error, database) =>
       if error
         throw new Error @err "Unable to connect to MySQL: #{error.message}", { error }
-      database.sql query, parameters, get, (error, results, fields) =>
-        database.close (error) =>
-          if error
-            throw new Error @err "Cannot close MySQL connection.", { error }
+      database.sql query, parameters, get, (error, results) =>
+        database.close()
         if error
           throw new Error @err "Unable to perform query: #{error.message}", { error }
-        callback(results, fields)
+        callback(results)
 
   getLocalUserAccount: (localUserId, callback) ->
     @hostname (hostname) =>
