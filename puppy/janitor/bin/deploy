@@ -30,6 +30,10 @@ user=$basename
 # Change directory to the project directory.
 cd $project
 
+# Clear out .AppleTalk from the development machines.
+# -------------------------------------------------------------------------- #
+/bin/find . -name .AppleDouble -type d | /usr/bin/xargs /bin/rm -rf
+
 # Build Node.js and CoffeeScript programs.
 # -------------------------------------------------------------------------- #
 
