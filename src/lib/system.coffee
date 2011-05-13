@@ -92,7 +92,7 @@ class System
   constructor: (@syslog, @shell, @host, @password) ->
     @queries = {}
     for file in fs.readdirSync __dirname + "/../queries"
-      @queries[file] = fs.readFileSync __dirname + "/../queries/" + file , "utf8"
+      @queries[file.replace(/\.sql$/, "")] = fs.readFileSync __dirname + "/../queries/" + file , "utf8"
 
   createClient: ->
     client            = new Client()
