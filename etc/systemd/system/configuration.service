@@ -1,0 +1,11 @@
+[Unit]
+Description=Extract configuration from the Puppy configuration server.
+After=unbound.service sshd.service
+
+[Service]
+Type=oneshot
+ExecStart=/root/configure.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
