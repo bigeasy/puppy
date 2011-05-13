@@ -1,4 +1,4 @@
-INSERT INTO Job (machineId, command, created)
-SELECT id, ?, CURRENT_TIMESTAMP()
+INSERT INTO Job (machineId, command)
+SELECT id, ?
   FROM Machine
  WHERE hostname = ?
