@@ -1,9 +1,0 @@
-ALTER TABLE Account
-ADD COLUMN ready INTEGER
-\g
-UPDATE Account
-SET ready = 1
-\g
-ALTER TABLE Account
-CHANGE ready ready INTEGER NOT NULL DEFAULT 0
-\g
