@@ -161,6 +161,7 @@ install_files root 644 etc/init/* \
                        etc/haproxy/* \
                        etc/selinux/targeted/contexts/users/* \
                        etc/postfix/* \
+                       etc/systemd/system/* \
                        etc/rsyslog.conf
 install_files root 755 etc/rc.d/init.d/* \
                        usr/bin/*
@@ -239,11 +240,10 @@ function on_boot()
     done
 }
 
-/bin/chown -R unbound /var/lib/unbound
-
 on_boot unbound
 on_boot postfix
 on_boot ntpd
+on_boot configuration
 on_boot nsd
 
 if [ "$(/bin/readlink /etc/localtime)" != "/usr/share/zoneinfo/UTC" ]
@@ -265,3 +265,5 @@ fi
 # -------------------------------------------------------------------------- #
 
 /sbin/restorecon -R /puppy /etc /home /var/log/puppy /var/cache/puppy /node /opt
+
+/bin/systemctl daemon-reload
