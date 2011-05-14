@@ -1,36 +1,55 @@
 require("exclusive").createSystem __filename, (system) ->
   [ policies ] = process.argv.slice 2
+  system.database (error, database) ->
+    generate = (hostname, machine, localUsers) ->
+      createLocalPort = (localUserId, service) ->
+        database.sql "nextLocalPort", [ machine.id ], (error, results) ->
+          throw error if error
+          nextLocalPort = results[0].nextLocalPort
+          database.sql "insertLocalPort", [ machine.id, nextLocalPort ], (error, results) ->
+            throw error if error
+            fetchLocalPort localUserId, service
 
-  generate = (system, hostname, machine, localUsers) ->
-    createLocalPorts = (localUserId) ->
-      system.sql "getLocalPorts", [ hostname, localUserId ], "localPort", (results) ->
-        if results.length < 7
-          system.fetchLocalPort machine.id, localUserId, 1, (localPort) ->
+      fetchLocalPort = (localUserId, service) ->
+        database.sql "fetchLocalPort", [ localUserId, service, machine.id ], (error, results) ->
+          throw error if error
+          if results.rowCount is 0
+            createLocalPort localUserId, service
+          else
             createLocalPorts(localUserId)
-        else
-          nextLocalUser()
-    createLocalUsers = () ->
-      system.sql "getLocalUserCount", [ machine.id, 10001, 20000 ], (results) ->
-        if results[0].localUserCount < policies
-          system.sql "nextLocalUser", [ machine.id, 20000 ], (results) =>
-            nextLocalUserId = results[0].nextLocalUserId
-            system.error = (error) =>
-              throw error if error.number isnt 1062
-              system.createLocalUser machineId, count, callback
-            system.sql "insertLocalUser", [ machine.id, nextLocalUserId, 1, 0 ], (results) =>
-              createLocalPorts(nextLocalUserId)
-        else
-          process.stdout.write "Done.\n"
-    nextLocalUser = () ->
-      if localUsers.length
-        localUser = localUsers.shift()
-        createLocalPorts(localUser.id)
-      else
-        createLocalUsers()
-    nextLocalUser()
 
-  system.hostname (hostname) ->
-    system.sql "getMachineByHostname", [ hostname ], "machine", (results) ->
-      machine = results.shift()
-      system.sql "getLocalUsers", [ machine.id, 10001, 20000 ], "localUser", (localUsers) ->
-        generate(system, hostname, machine, localUsers)
+      createLocalPorts = (localUserId) ->
+        system.sql "getLocalPorts", [ hostname, localUserId ], "localPort", (results) ->
+          if results.length < 7
+            fetchLocalPort localUserId, 1
+          else
+            nextLocalUser()
+
+      createLocalUsers = () ->
+        database.sql "getLocalUserCount", [ machine.id, 10001, 20000 ], (error, results) ->
+          throw error if error
+          if results[0].localUserCount < policies
+            database.sql "nextLocalUser", [ machine.id, 20000 ], (error, results) ->
+              throw error if error
+              nextLocalUserId = results[0].nextLocalUserId
+              database.sql "insertLocalUser", [ machine.id, nextLocalUserId, true, false ], (error, results) ->
+                throw error if error
+                createLocalPorts(nextLocalUserId)
+          else
+            process.stdout.write "Done.\n"
+            database.close()
+      nextLocalUser = () ->
+        if localUsers.length
+          localUser = localUsers.shift()
+          createLocalPorts(localUser.id)
+        else
+          createLocalUsers()
+      nextLocalUser()
+
+    system.hostname (hostname) ->
+      database.sql "getMachineByHostname", [ hostname ], "machine", (error, results) ->
+        throw error if error
+        machine = results.shift()
+        database.sql "getLocalUsers", [ machine.id, 10001, 20000 ], "localUser", (error, localUsers) ->
+          throw error if error
+          generate(hostname, machine, localUsers)
