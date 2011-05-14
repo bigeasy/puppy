@@ -1,2 +1,2 @@
-INSERT INTO LocalPort(machineId, port, created)
-VALUES (?, ?, CURRENT_TIMESTAMP())
+INSERT INTO LocalPort(machineId, port)
+VALUES ($1, $2)

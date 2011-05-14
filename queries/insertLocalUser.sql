@@ -1,2 +1,2 @@
-INSERT INTO LocalUser(machineId, id, policy, ready, created)
-VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP())
+INSERT INTO LocalUser(machineId, id, policy, ready)
+VALUES ($1, $2, $3, $4)

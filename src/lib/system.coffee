@@ -62,14 +62,14 @@ class Database
       callback = get
       get = null
     @client.query @queries[query], parameters, (error, results) =>
-      expanded = results
       if not error
         if get
           expanded = []
-          for result in results
+          for result in results.rows
             expanded.push @treeify result, get
         else
-          expanded = results
+          expanded = results.rows
+        expanded.rowCount = results.rowCount
       callback(error, expanded)
 
   close: -> @client.end()
@@ -91,7 +91,6 @@ class System
       @queries[file.replace(/\.sql$/, "")] = fs.readFileSync __dirname + "/../queries/" + file , "utf8"
 
   database: (callback) ->
-    console.log @databaseUrl
     client = new (pg.Client)(@databaseUrl)
     client.on "connect", =>
       database = new Database(this, client, @queries)
@@ -122,23 +121,6 @@ class System
     @hostname (hostname) =>
       @sql "getLocalUserAccount", [ hostname, localUserId ], "account", (results) ->
         callback(results.shift())
-
-  fetchLocalPort: (machineId, localUserId, service, callback) ->
-    @sql "fetchLocalPort", [ localUserId, service, machineId ], (results) =>
-      if results.affectedRows is 0
-        @createLocalPort machineId, localUserId, service, callback
-      else
-        @sql "getLocalPortByAssignment", [ results.insertId ], "localPort", (results) ->
-          callback(results.shift())
-
-  createLocalPort: (machineId, localUserId, service, callback) ->
-    @sql "nextLocalPort", [ machineId ], (results) =>
-      nextLocalPort = results[0].nextLocalPort
-      @error = (error) =>
-        throw error if error.number isnt 1062
-        @createLocalPort machineId, localUserId, service, callback
-      @sql "insertLocalPort", [ machineId, nextLocalPort ], (results) =>
-        @fetchLocalPort machineId, localUserId, service, callback
 
   fetchLocalUser: (applicationId, callback) ->
     @sql "getMachines", [], "machine", (results) =>

@@ -3,4 +3,4 @@ SELECT m.id AS machine__id,
        m.modified AS machine__modified,
        m.created AS machine__created
   FROM Machine AS m
- WHERE m.hostname = ?
+ WHERE m.hostname = $1

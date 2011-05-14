@@ -1,4 +1,4 @@
-SELECT COUNT(*) AS localUserCount
+SELECT COUNT(*) AS "localUserCount"
   FROM LocalUser
- WHERE machineId = ?
-   AND id >= ? AND id < ?
+ WHERE machineId = $1
+   AND id >= $2 AND id < $3

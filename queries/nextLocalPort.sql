@@ -1,3 +1,3 @@
-SELECT COALESCE(MAX(port) + 1, 9000) AS nextLocalPort
+SELECT COALESCE(MAX(port) + 1, 9000) AS "nextLocalPort"
   FROM LocalPort
- WHERE machineId = ?
+ WHERE machineId = $1
