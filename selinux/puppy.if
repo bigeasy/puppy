@@ -179,13 +179,16 @@ template(`puppy_exec_puppy_sbin',`
 ## </param>
 ## <rolecap/>
 #
-template(`puppy_mysql',`
+template(`puppy_postgresql',`
     sysnet_dns_name_resolve($1)
     mysql_tcp_connect($1)
     mysql_stream_connect($1)
     mysql_rw_db_sockets($1)
     # Someone, maybe MySQL, maybe DNS, wants to read localization.
     miscfiles_read_localization($1)
+    corenet_tcp_connect_postgresql_port($1)
+    corenet_sendrecv_postgresql_client_packets($1)
+    postgresql_stream_connect($1)
 ')
 
 

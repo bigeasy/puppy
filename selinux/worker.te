@@ -19,7 +19,7 @@ require {
 }
 
 # When we sudo to other roles.
-puppy_mysql(worker_t)
+puppy_postgresql(worker_t)
 hostname_exec(worker_t)
 
 type janitor_mysql_t;
@@ -190,7 +190,7 @@ role system_r types janitor_mysql_t;
 allow janitor_mysql_t mysql_create_job_proxy_t:fifo_file rw_fifo_file_perms;
 allow janitor_mysql_t mysql_create_job_t:fifo_file rw_fifo_file_perms;
 
-puppy_mysql(janitor_mysql_t)
+puppy_postgresql(janitor_mysql_t)
 
 puppy_exec_puppy_sbin(janitor_mysql_t)
 corecmd_exec_bin(janitor_mysql_t)

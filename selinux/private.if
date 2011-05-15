@@ -66,7 +66,7 @@ template(`puppy_private_database',`
     allow database_t $1_private_t:fifo_file rw_fifo_file_perms;
 
     # Query MySQL.
-    puppy_mysql($1_private_t)
+    puppy_postgresql($1_private_t)
 
     # Execute the configuration reader.
     domtrans_pattern($1_private_sudo_t, database_exec_t, database_t)
@@ -112,7 +112,7 @@ template(`puppy_private_module', `
     allow database_t private_$1_t:fifo_file rw_fifo_file_perms;
 
     # Query MySQL.
-    puppy_mysql(private_$1_t)
+    puppy_postgresql(private_$1_t)
 
     # Execute the configuration reader.
     domtrans_pattern(private_$1_sudo_t, database_exec_t, database_t)
