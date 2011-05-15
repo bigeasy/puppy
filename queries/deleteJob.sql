@@ -1,2 +1,2 @@
 DELETE FROM Job
-WHERE id = ?
+WHERE id = $1
