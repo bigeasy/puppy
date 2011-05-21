@@ -86,8 +86,6 @@ iptables-ipv6
 iputils
 kbd
 kbd-misc
-kernel-PAE
-kernel-PAE
 keyutils-libs
 kpartx
 krb5-libs
