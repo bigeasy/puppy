@@ -44,7 +44,7 @@ relayhost = [smtp.gmail.com]:587
 smtp_sasl_auth_enable = yes
 smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
 smtp_sasl_security_options = noanonymous
-smtp_tls_CApath = /certs
+smtp_tls_CAfile=/etc/ssl/certs/ca-bundle.trust.crt
 smtp_use_tls = yes
 transport_maps = hash:/etc/postfix/transport
 
@@ -52,3 +52,5 @@ transport_maps = hash:/etc/postfix/transport
 authorized_submit_users = hash:/etc/postfix/authorized_submit_users
 
 virtual_maps = hash:/etc/postfix/virtual_maps
+
+smtp_tls_security_level = verify

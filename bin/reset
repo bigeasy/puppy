@@ -20,29 +20,24 @@ if [ $hostname != "dvor.prettyrobots.com" ]; then
     exit 1
 fi
 
-function mysql_command()
+function psql_command()
 {
-    echo $1 | /usr/bin/sudo -H -u janitor /usr/bin/mysql -u root
+    echo $1 | /usr/bin/sudo -u postgres /usr/bin/psql > /dev/null
 }
 
-function mysql_script()
+function psql_script()
 {
-    /usr/bin/sudo -H -u janitor /usr/bin/mysql -u root puppy < $1
+    /usr/bin/sudo -u puppy /usr/bin/psql -d puppy < $1 > /dev/null
 }
 
-/usr/bin/sudo /sbin/initctl stop worker
+/usr/bin/sudo /bin/systemctl stop worker.service
 
-mysql_command "drop database puppy"
-mysql_command "create database puppy"
-mysql_script ddl/0001_create_user.sql 
-mysql_script ddl/0002_insert_account.sql 
-mysql_script ddl/0003_property.sql
-mysql_script ddl/0004_set_application_host.sql
-mysql_script ddl/0005_domain.sql
-mysql_script ddl/0006_application_local_user_ready.sql
-mysql_script ddl/0007_account_ready.sql
+psql_command "DROP DATABASE puppy"
+psql_command "CREATE DATABASE puppy"
+psql_script ddl/0001_create_database.sql 
+psql_script ddl/0002_populate.sql 
 
-bin/load_ports | sudo -H -u janitor mysql -u root puppy
+bin/load_ports | /usr/bin/sudo -u puppy /usr/bin/psql puppy 
 
 NODE_PATH=/opt/lib/node_modules:/puppy/common/lib/node:/puppy/exclusive/lib/node
 
@@ -56,9 +51,9 @@ NODE_PATH=/opt/lib/node_modules:/puppy/common/lib/node:/puppy/exclusive/lib/node
 /puppy/janitor/bin/job $(/bin/hostname) port:label
 /puppy/janitor/bin/job $(/bin/hostname) policy:ready
 
-/usr/bin/sudo /sbin/initctl start worker
+/usr/bin/sudo /bin/systemctl start worker.service
 
-for db in $(echo "SHOW DATABASES" | /usr/bin/sudo -u janitor -H /puppy/janitor/bin/janitor_mysql -u root puppy | grep '^d[0-9]\+')
+for db in $(echo "SHOW DATABASES" | /usr/bin/sudo -u postgres /usr/bin/psql | grep '^d[0-9]\+')
 do
-    echo "DROP DATABASE $db" | /usr/bin/sudo -u janitor -H /puppy/janitor/bin/janitor_mysql -u root puppy
+    echo "DROP DATABASE $db" #| /usr/bin/sudo -u janitor -H /puppy/janitor/bin/janitor_mysql -u root puppy
 done

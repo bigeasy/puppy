@@ -62,7 +62,6 @@ make_user   protected     212
 make_user   haproxy       225
 make_user   stunnel       226
 make_group  loggers       227
-make_user   unbound       228
 make_user   common        229
 make_user   exclusive     230
 make_user   backup        231
@@ -86,6 +85,7 @@ function group_assign()
 
 group_assign exclusive 202 210
 group_assign loggers 1  700
+group_assign wheel 701 701
 
 # Hide the syslog.
 # -------------------------------------------------------------------------- #
@@ -95,6 +95,7 @@ group_assign loggers 1  700
 # to our protected socket.
 if [ ! -e /dev/loggers ]; then
     /sbin/service rsyslog stop
+    /bin/rm -f /dev/log
     /bin/mkdir -m 750 /dev/loggers
     /bin/chown root:loggers /dev/loggers
     /bin/ln -s /dev/loggers/log /dev/log
@@ -155,12 +156,12 @@ function postmap_files()
 # Anyway, we use install to write the files. We write special files that need
 # stricter privileges before the glob of all files in the same directory.
 install_files root 640 etc/postfix/sasl_passwd
-install_files root 644 var/lib/unbound/etc/unbound/* \
-                       etc/init/* \
+install_files root 644 etc/init/* \
                        etc/unbound/* \
                        etc/haproxy/* \
                        etc/selinux/targeted/contexts/users/* \
                        etc/postfix/* \
+                       etc/systemd/system/* \
                        etc/rsyslog.conf
 install_files root 755 etc/rc.d/init.d/* \
                        usr/bin/*
@@ -201,14 +202,19 @@ function copy_public_key()
     /bin/touch /home/$user/.ssh/authorized_keys
     /bin/chown $user:$user /home/$user/.ssh/authorized_keys
     /bin/chmod 600 /home/$user/.ssh/authorized_keys
+    if [ ! -z $command ]; then
     echo -n 'command="'$command'",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ' \
         > /home/$user/.ssh/authorized_keys
+    fi
     /bin/cat $key >> /home/$user/.ssh/authorized_keys
 }
 
 # TODO Check the public key into source, but the keys do not live in source,
 # they live on a server and propagate.
 copy_public_key public home/public/ssh/authorized_keys /puppy/public/bin/public_receptionist
+janitor=$(/bin/awk -F : '$3 ~ /^701$/ { print $1 }' /etc/passwd)
+copy_public_key puppy /home/$janitor/.ssh/authorized_keys
+
 
 # We do not want the agent accounts to run `/etc/bashrc` at startup, and we do
 # want them to find the right `node`, so replace the default `.bashrc` with our own.
@@ -227,18 +233,17 @@ done
 function on_boot()
 {
     local service=$1
-    until /sbin/chkconfig | /bin/grep "${service}.*3:on" > /dev/null; do
-        /sbin/chkconfig --add $service
-        /sbin/chkconfig $service on
+    until /bin/systemctl is-enabled $service.service 2>/dev/null
+    do
+        /bin/systemctl enable $service.service
         echo "Enabled service $service to start on boot. You should start it now."
     done
 }
 
-/bin/chown -R unbound /var/lib/unbound
-
 on_boot unbound
 on_boot postfix
 on_boot ntpd
+on_boot configuration
 on_boot nsd
 
 if [ "$(/bin/readlink /etc/localtime)" != "/usr/share/zoneinfo/UTC" ]
@@ -260,3 +265,5 @@ fi
 # -------------------------------------------------------------------------- #
 
 /sbin/restorecon -R /puppy /etc /home /var/log/puppy /var/cache/puppy /node /opt
+
+/bin/systemctl daemon-reload

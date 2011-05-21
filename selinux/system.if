@@ -43,7 +43,7 @@ template(`puppy_system', `
     allow database_t $1_system_t:fifo_file rw_fifo_file_perms;
 
     # Query MySQL.
-    puppy_mysql($1_system_t)
+    puppy_postgresql($1_system_t)
 
     # Execute the configuration reader.
     domtrans_pattern($1_system_sudo_t, database_exec_t, database_t)

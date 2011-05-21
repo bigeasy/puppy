@@ -27,6 +27,7 @@ cryptsetup-luks-libs
 curl
 cyrus-sasl
 cyrus-sasl-lib
+cyrus-sasl-plain
 dash
 db4
 db4-utils
@@ -152,6 +153,7 @@ nss-softokn
 nss-softokn-freebl
 nss-sysinit
 nss-util
+ntp
 openldap
 openssh
 openssh-clients
@@ -179,6 +181,7 @@ plymouth-core-libs
 plymouth-scripts
 policycoreutils
 popt
+postfix
 procmail
 procps
 psmisc
@@ -203,7 +206,6 @@ ruby-libs
 sed
 selinux-policy
 selinux-policy-targeted
-sendmail
 setserial
 setup
 shadow-utils
@@ -219,6 +221,7 @@ tar
 tcp_wrappers-libs
 tzdata
 udev
+unbound
 unzip
 ustr
 util-linux
