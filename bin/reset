@@ -37,7 +37,7 @@ psql_command "CREATE DATABASE puppy"
 psql_script ddl/0001_create_database.sql 
 psql_script ddl/0002_populate.sql 
 
-bin/load_ports | /usr/bin/sudo -u puppy /usr/bin/psql puppy 
+bin/load_ports | /usr/bin/sudo -u puppy /usr/bin/psql puppy > /dev/null
 
 NODE_PATH=/opt/lib/node_modules:/puppy/common/lib/node:/puppy/exclusive/lib/node
 
@@ -53,7 +53,7 @@ NODE_PATH=/opt/lib/node_modules:/puppy/common/lib/node:/puppy/exclusive/lib/node
 
 /usr/bin/sudo /bin/systemctl start worker.service
 
-for db in $(echo "SHOW DATABASES" | /usr/bin/sudo -u postgres /usr/bin/psql | grep '^d[0-9]\+')
+for db in $(echo "select datname from pg_database" | sudo -u postgres psql | grep '^d[0-9]\+')
 do
     echo "DROP DATABASE $db" #| /usr/bin/sudo -u janitor -H /puppy/janitor/bin/janitor_mysql -u root puppy
 done
