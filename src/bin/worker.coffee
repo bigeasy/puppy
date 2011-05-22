@@ -54,7 +54,7 @@ require("exclusive").createSystem __filename, "hostname", (system, hostname) ->
 
           # Execute the next task, if any.
           system.sql "deleteJob", [ job.id ], (results) ->
-            if not results.affectedRows
+            if not results.rowCount
               syslog.send "err", "Unable to delete job.", { results, command, stdout }
               process.exit 1
             poll()
