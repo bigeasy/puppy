@@ -9,9 +9,3 @@ db_alias                    try         private_protected
 db_fetch                    try         private_protected
 db_list                     try         private_protected
 user_status                 try         private_protected
-#user_provisioned            try
-#user_policy_version         try
-#policy_version              try
-#db_password                 try
-#queue_config                try
-#app_users                   try
