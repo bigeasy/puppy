@@ -19,7 +19,6 @@ worker ALL = (root) NOPASSWD: \
     /puppy/worker/sbin/user_login, \
     /puppy/worker/sbin/user_restorecon, \
     /puppy/worker/sbin/user_policy, \
-    /puppy/worker/sbin/user_port, \
     /puppy/worker/sbin/user_provision, \
     /puppy/worker/sbin/user_skel
 worker ALL = (system) NOPASSWD: \
