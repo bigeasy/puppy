@@ -3,6 +3,9 @@
 start=$(/bin/awk '{ print $1 }' /proc/sys/net/ipv4/ip_local_port_range)
 stop=$(($(/bin/awk '{ print $2 }' /proc/sys/net/ipv4/ip_local_port_range) + 1))
 
+echo "BEGIN"
+echo "\\g"
+
 (
     /bin/grep -v '^#' /etc/services | /bin/awk '{ print $2 }' | /bin/grep '[0-9]' | /bin/sed 's/\/.*//' 
     /usr/bin/sudo /usr/sbin/semanage port -l | /bin/sed 1d | puppy/janitor/bin/filter_selinux_ports
@@ -14,3 +17,7 @@ stop=$(($(/bin/awk '{ print $2 }' /proc/sys/net/ipv4/ip_local_port_range) + 1))
     echo "INSERT INTO ReservedPort(port) VALUES($line)"
     echo "\\g"
 done
+
+echo "COMMIT"
+echo "\\g"
+
