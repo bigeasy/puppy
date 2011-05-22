@@ -25,6 +25,3 @@
 /puppy/private/bin/db_list gen_context(system_u:object_r:private_protected_exec_t, s0)
 /puppy/private/bin/db_list_try gen_context(system_u:object_r:private_protected_try_exec_t, s0)
 
-/puppy/private/bin/user_status gen_context(system_u:object_r:private_protected_exec_t, s0)
-/puppy/private/bin/user_status_try gen_context(system_u:object_r:private_protected_try_exec_t, s0)
-
