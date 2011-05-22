@@ -164,6 +164,9 @@ template(`puppy_job_execute',`
     application_domain($1_job_t, $1_job_exec_t)
     application_domain($1_job_proxy_t, $1_job_exec_t)
 
+    # Read localization files.
+    miscfiles_read_localization($1_job_proxy_t)
+
     # The working script will report to the proxy script via stdio.
     allow $1_job_t $1_job_proxy_t:fifo_file rw_fifo_file_perms;
 

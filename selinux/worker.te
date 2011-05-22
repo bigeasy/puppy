@@ -22,6 +22,9 @@ require {
 puppy_postgresql(worker_t)
 hostname_exec(worker_t)
 
+# This was added after the switch to systemd, probably to stream to syslog.
+init_rw_stream_sockets(worker_t)
+
 type janitor_mysql_t;
 type janitor_mysql_exec_t;
 application_domain(janitor_mysql_t, janitor_mysql_exec_t)
@@ -269,6 +272,8 @@ puppy_job_as_root(policy_load)
 job_sudo_system(policy_load)
 job_system_trans(policy_load, policy_users)
 
+miscfiles_read_localization(policy_load_job_t)
+
 # Execute semanage to assign the protected policy to the user.
 seutil_run_semanage(policy_load_job_t, worker_r)
 allow semanage_t policy_load_job_proxy_t:fifo_file rw_fifo_file_perms;
@@ -509,6 +514,10 @@ puppy_job_as_root(port_label)
 job_sudo_system(port_label)
 job_system_trans(port_label, port_list)
 
+# As of Fedora 15, Perl wants to touch `urandom` and read localization files.
+dev_read_urand(port_label_job_t)
+miscfiles_read_localization(port_label_job_t)
+
 # Execute semanage to assign the protected policy to the user.
 seutil_run_semanage(port_label_job_t, worker_r)
 allow semanage_t port_label_job_proxy_t:fifo_file rw_fifo_file_perms;
@@ -555,6 +564,10 @@ job_system_trans(port_unlabel, port_list)
 
 # Execute semanage to assign the protected policy to the user.
 seutil_run_semanage(port_unlabel_job_t, worker_r)
+
+# As of Fedora 15, Perl wants to touch `urandom` and read localization files.
+dev_read_urand(port_unlabel_job_t)
+miscfiles_read_localization(port_unlabel_job_t)
 
 # The semanage may report some errors to our proxy.
 
