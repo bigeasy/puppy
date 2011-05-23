@@ -19,9 +19,9 @@ require("exclusive").createSystem __filename, "hostname", (system, hostname) ->
     system.sql "getActivationByCode", [ code ], "activation", (results) ->
       activation = results.shift()
       system.sql "insertAccount", [ activation.email, activation.sshKey ], (results) ->
-        accountId = results.insertId
-        system.sql "insertApplication", [ accountId, 1 ], (results) ->
-          system.fetchLocalUser results.insertId, (localUser) ->
+        accountId = results[0].id
+        system.sql "insertApplication", [ accountId, true ], (results) ->
+          system.fetchLocalUser results[0].id, (localUser) ->
             system.enqueue localUser.machine.hostname, [
               [ "user:create", [ localUser.id ] ]
               [ "user:restorecon", [ localUser.id ] ]

@@ -13,13 +13,15 @@ require("exclusive").createSystem __filename, (system) ->
       database.sql "insertActivation", [ code, email, sshKey ], (error, results) ->
         database.close()
         if error
-          if error.number is 1062
+          if error.code is '23505'
             if /'PRIMARY'/.test(error.message)
               register(email, sshKey)
-            else if /'Activation_Email'/.test(error.message)
+            else if /^Key \(email\)=/.test(error.detail)
               process.stdout.write """
               The email address #{email} is already registered.\n
               """
+            else
+              throw error
           else
             throw error
         else
@@ -29,12 +31,9 @@ require("exclusive").createSystem __filename, (system) ->
 
   fetchActivationLocalUser = (code) ->
     system.fetchLocalUser 1, (localUser) ->
-      system.error = (error) ->
-        throw error if error.number isnt 1062
-        fetchActivationLocalUser code
       system.sql "fetchActivationLocalUser", [ code ], (results) ->
-        if results.affectedRows is 0
-          fetchActivationLocalUser(code)
+        if results.rowCount is 0
+          fetchActivationLocalUser code
         else
           system.sql "getLocalUserByActivationCode", [ code ], "localUser", (results) =>
             localUser = results.shift()
