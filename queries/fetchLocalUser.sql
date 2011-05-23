@@ -1,13 +1,14 @@
 INSERT INTO ApplicationLocalUser(
-    applicationId, machineId, localUserId, created
+    applicationId, machineId, localUserId
 )
-SELECT ?, machineId, id, CURRENT_TIMESTAMP()
+SELECT $1, machineId, id
   FROM LocalUser as lu
- WHERE lu.ready = 1
-   AND lu.machineId = ?
-   AND lu.policy = ?
+ WHERE lu.ready
+   AND lu.machineId = $2
+   AND lu.policy = $3
    AND NOT EXISTS (SELECT *
                      FROM ApplicationLocalUser
                     WHERE machineId = lu.machineId
                       AND localUserId = lu.id)
  LIMIT 1
+RETURNING id

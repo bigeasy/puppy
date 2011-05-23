@@ -1,2 +1,3 @@
-INSERT INTO Account (email, sshKey, created)
-VALUES (?, ?, CURRENT_TIMESTAMP())
+INSERT INTO Account (email, sshKey)
+VALUES ($1, $2)
+RETURNING id

@@ -1,3 +1,1 @@
-UPDATE Account
-SET ready = 1
-WHERE id = ?
+UPDATE Account SET ready = TRUE WHERE id = $1

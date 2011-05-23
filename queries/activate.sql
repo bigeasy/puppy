@@ -1,1 +1,1 @@
-UPDATE Activation SET activated = 1 WHERE activated = 0 AND code = ?
+UPDATE Activation SET activated = TRUE WHERE NOT activated AND code = $1

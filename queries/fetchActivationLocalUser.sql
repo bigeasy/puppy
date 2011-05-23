@@ -1,11 +1,11 @@
 INSERT INTO ActivationLocalUser(
-    machineId, localUserId, code, created
+    machineId, localUserId, code
 )
-SELECT machineId, id, ?, CURRENT_TIMESTAMP()
+SELECT machineId, id, $1
   FROM LocalUser as lu
  -- Select from the local users associated with the activation application
  -- local user.
- WHERE lu.ready = 1
+ WHERE lu.ready = TRUE
    AND (lu.machineId, lu.id) IN (SELECT machineId, localUserId
                                    FROM ApplicationLocalUser
                                   WHERE applicationId = 1)

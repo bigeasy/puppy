@@ -125,18 +125,15 @@ class System
   fetchLocalUser: (applicationId, callback) ->
     @sql "getMachines", [], "machine", (results) =>
       machine = results[0]
-      @error = (error) =>
-        throw error if error.number isnt 1062
-        @fetchLocalUser applicationId, callback
-      @sql "fetchLocalUser", [ applicationId, machine.id, 0 ], (results) =>
-        if results.affectedRows is 0
+      @sql "fetchLocalUser", [ applicationId, machine.id, false ], (results) =>
+        if results.rowCount is 0
           @createLocalUser applicationId, machine.id, callback
         else
-          @sql "getLocalUserByAssignment", [ results.insertId ], "localUser", (results) ->
+          @sql "getLocalUserByAssignment", [ results[0].id ], "localUser", (results) ->
             callback(results.shift())
 
   createLocalUser: (applicationId, machineId, callback) ->
-    @sql "nextLocalUser", [ machineId, 9999999999 ], (results) =>
+    @sql "nextLocalUser", [ machineId, 999999 ], (results) =>
       nextLocalUserId = results[0].nextLocalUserId
       @error = (error) =>
         throw error if error.number isnt 1062
@@ -163,7 +160,7 @@ class System
   virtualHost: (name, ip, port, callback) ->
     @sql "deleteVirtualHost", [ name ], (results) =>
       @sql "insertVirtualHost", [ name, ip, port ], (results) =>
-        if results.affectedRows is 0
+        if results.rowCount is 0
           throw new Error("Unable to insert virtual host #{name}.")
         callback()
 
