@@ -9,7 +9,7 @@ CREATE TABLE Activation (
     code            VARCHAR(32) NOT NULL,
     email           VARCHAR(255) NOT NULL,
     sshKey          TEXT,
-    activated       INTEGER NOT NULL,
+    activated       BOOLEAN NOT NULL DEFAULT FALSE,
     modified        TIMESTAMP DEFAULT now(),
     created         TIMESTAMP DEFAULT now(),
     PRIMARY KEY (code)
@@ -36,7 +36,7 @@ FOR EACH ROW EXECUTE PROCEDURE update_timestamp()
 CREATE TABLE Application (
     id              SERIAL NOT NULL,
     accountId       INTEGER NOT NULL,
-    isHome          INTEGER NOT NULL,
+    isHome          BOOLEAN NOT NULL,
     modified        TIMESTAMP DEFAULT now(),
     created         TIMESTAMP DEFAULT now(),
     PRIMARY KEY (id)
