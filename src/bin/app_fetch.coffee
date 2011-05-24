@@ -27,8 +27,8 @@ require("exclusive").createSystem __filename, "hostname, account", (system, host
   fetchLocalUser = (system, applicationId, machine) ->
     localUserUnavailable() unless machine
     system.sql "fetchLocalUser", [ applicationId, machine.id, 1 ], (results) =>
-      if results.affectedRows
-        system.sql "getLocalUserByAssignment", [ results.insertId ], "localUser", (results) ->
+      if results.rowCount
+        system.sql "getLocalUserByAssignment", [ results[0].id ], "localUser", (results) ->
           localUser = results.shift()
           system.enqueue localUser.machine.hostname, [
             [ "user:create", [ localUser.id ] ]
@@ -42,7 +42,7 @@ require("exclusive").createSystem __filename, "hostname, account", (system, host
             [ "user:restorecon", [ localUser.id ] ]
             [ "user:group", [ localUser.id, "protected" ] ]
             [ "user:chown", [ localUser.id ] ]
-            [ "init:generate", [ localUser.id ] ]
+            [ "service:generate", [ localUser.id ] ]
             [ "init:restorecon", [ localUser.id ] ]
             [ "user:ready", [ localUser.id ] ]
           ], ->
@@ -72,5 +72,5 @@ require("exclusive").createSystem __filename, "hostname, account", (system, host
   chooseMachine system, (machine) ->
     localUserUnavailable() unless machine
     system.sql "insertApplication", [ account.id, 0 ], (results) ->
-      applicationId = results.insertId
+      applicationId = results[0].id
       fetchLocalUser(system, applicationId, machine)
