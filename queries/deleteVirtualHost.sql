@@ -1,2 +1,2 @@
 DELETE FROM VirtualHost
-WHERE name = ?
+WHERE name = $1

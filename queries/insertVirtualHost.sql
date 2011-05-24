@@ -1,2 +1,2 @@
-INSERT INTO VirtualHost(name, ip, port, created)
-VALUES(?, ?, ?, CURRENT_TIMESTAMP())
+INSERT INTO VirtualHost(name, ip, port)
+VALUES($1, $2, $3)

@@ -4,8 +4,8 @@ SELECT a.id as "application__id",
         (SELECT alu.ready
            FROM ApplicationLocalUser AS alu
           WHERE alu.applicationId = a.id
---          ORDER
---             BY alu.id
+          ORDER
+             BY alu.id
           LIMIT 1), FALSE) AS "application__ready",
        a.created as "application__created",
        a.modified as "application__modified",
