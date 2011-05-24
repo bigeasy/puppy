@@ -6,22 +6,18 @@ uid=$1
 
 assert_valid_user $uid
 
-cat <<EOL > /etc/init/protected_u${uid}.conf
-#!upstart
+cat <<EOL > /etc/systemd/system/protected_u${uid}.service
+[Unit]
+Description=User supplied daemon for Puppy.
+After=worker.service
 
-description "Puppy worker daemon u${uid}."
-author "Alan Gutierrez"
+[Service]
+ExecStart=/usr/bin/sudo -H -u u${uid} /var/cache/puppy/transitions/start_u${uid} 2>/var/log/puppy/apps/app_u${uid}/stderr 1>/var/log/puppy/apps/app_u${uid}/stdout
 
-start on runlevel [2345]
-stop on runlevel [!2345]
-
-script
-    exec sudo -H -u u${uid} /var/cache/puppy/transitions/start_u${uid} 2>/var/log/puppy/apps/app_u${uid}/stderr 1>/var/log/puppy/apps/app_u${uid}/stdout
-end script
+[Install]
+WantedBy=multi-user.target
 EOL
 
-# FIXME Very bad. Need to be explicit. User could put any sort of node there.
-# (Oh, right, it doesn't matter.)
 cat <<EOL > /var/cache/puppy/transitions/start_u${uid}
 #!/bin/bash
 
