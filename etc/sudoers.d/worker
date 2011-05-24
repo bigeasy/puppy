@@ -2,7 +2,6 @@ worker ALL = (root) NOPASSWD: \
     /puppy/worker/sbin/app_deploy, \
     /puppy/worker/sbin/daemon_start, \
     /puppy/worker/sbin/daemon_stop, \
-    /puppy/worker/sbin/init_generate, \
     /puppy/worker/sbin/init_restorecon, \
     /puppy/worker/sbin/mysql_create, \
     /puppy/worker/sbin/mysql_grant, \
@@ -10,6 +9,7 @@ worker ALL = (root) NOPASSWD: \
     /puppy/worker/sbin/policy_unload, \
     /puppy/worker/sbin/port_label, \
     /puppy/worker/sbin/port_unlabel, \
+    /puppy/worker/sbin/service_generate, \
     /puppy/worker/sbin/user_authorize, \
     /puppy/worker/sbin/user_chown, \
     /puppy/worker/sbin/user_config, \

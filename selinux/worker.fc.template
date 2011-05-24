@@ -16,8 +16,6 @@ app_deploy                              job
 app_reconfig                            job
 daemon_stop                             job
 daemon_start                            job
-init_generate                           job
-init_restorecon                         job
 mysql_create                            job
 mysql_grant                             job
 policy_generate                         job
@@ -27,6 +25,8 @@ policy_ready                            job
 policy_unload                           job
 port_label                              job
 port_unlabel                            job
+service_generate                        job
+init_restorecon                         job
 user_authorize                          job
 user_chown                              job
 user_config                             job

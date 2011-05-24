@@ -119,45 +119,6 @@ allow daemon_stop_job_t init_t:unix_stream_socket connectto;
 files_read_etc_files(daemon_stop_job_t)
 
 ############################################################################
-### Policy for `init_generate`.
-############################################################################
-#
-# Note that the `init_generate` command may not be able to relabel from
-# anything to anything. It exists to apply the correct labels during 
-
-# Run security context restoration as root.
-puppy_job_as_root(init_generate)
-
-# Allow script to create a temporary file for here-doc.
-type init_generate_job_tmp_t;
-files_tmp_file(init_generate_job_tmp_t)
-manage_files_pattern(init_generate_job_t, init_generate_job_tmp_t, init_generate_job_tmp_t)
-files_tmp_filetrans(init_generate_job_t, init_generate_job_tmp_t, file)
-
-# This allows the reading of fielsystem extended attributes. It is triggered by
-# the bash here-doc syntax. My guess is that the temp file creation checks for
-# available disk space prior to creating the temp file. 
-fs_getattr_xattr_fs(init_generate_job_t)
-
-allow init_generate_job_t { puppy_daemon_exec_type puppy_daemon_log_type }:file manage_file_perms;
-allow init_generate_job_t { puppy_daemon_log_type }:dir manage_dir_perms;
-
-# Allow chown of home directory and DAC override for root.
-allow init_generate_job_t self:capability { fsetid fowner chown dac_override };
-
-# Write the etc init files.
-allow init_generate_job_t etc_t:file manage_file_perms;
-allow init_generate_job_t etc_t:dir manage_dir_perms;
-
-# Write the transition program.
-allow init_generate_job_t puppy_cache_t:dir manage_dir_perms;
-allow init_generate_job_t puppy_cache_t:file manage_file_perms;
-
-# Create the log directory and files.
-allow init_generate_job_t var_log_t:dir manage_dir_perms;
-allow init_generate_job_t var_log_t:file manage_file_perms;
-
-############################################################################
 ### Policy for `init_restorecon`.
 ############################################################################
 #
@@ -318,6 +279,45 @@ files_read_usr_files(policy_make_job_t)
 selinux_get_enforce_mode(policy_make_job_t)
 seutil_read_config(policy_make_job_t)
 seutil_search_default_contexts(policy_make_job_t)
+
+############################################################################
+### Policy for `service_generate`.
+############################################################################
+#
+# Note that the `service_generate` command may not be able to relabel from
+# anything to anything. It exists to apply the correct labels during 
+
+# Run security context restoration as root.
+puppy_job_as_root(service_generate)
+
+# Allow script to create a temporary file for here-doc.
+type service_generate_job_tmp_t;
+files_tmp_file(service_generate_job_tmp_t)
+manage_files_pattern(service_generate_job_t, service_generate_job_tmp_t, service_generate_job_tmp_t)
+files_tmp_filetrans(service_generate_job_t, service_generate_job_tmp_t, file)
+
+# This allows the reading of fielsystem extended attributes. It is triggered by
+# the bash here-doc syntax. My guess is that the temp file creation checks for
+# available disk space prior to creating the temp file. 
+fs_getattr_xattr_fs(service_generate_job_t)
+
+allow service_generate_job_t { puppy_daemon_exec_type puppy_daemon_log_type }:file manage_file_perms;
+allow service_generate_job_t { puppy_daemon_log_type }:dir manage_dir_perms;
+
+# Allow chown of home directory and DAC override for root.
+allow service_generate_job_t self:capability { fsetid fowner chown dac_override };
+
+# Write the etc init files.
+allow service_generate_job_t etc_t:file manage_file_perms;
+allow service_generate_job_t etc_t:dir manage_dir_perms;
+
+# Write the transition program.
+allow service_generate_job_t puppy_cache_t:dir manage_dir_perms;
+allow service_generate_job_t puppy_cache_t:file manage_file_perms;
+
+# Create the log directory and files.
+allow service_generate_job_t var_log_t:dir manage_dir_perms;
+allow service_generate_job_t var_log_t:file manage_file_perms;
 
 ############################################################################
 ### Policy for `user_config`.

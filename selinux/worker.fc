@@ -25,12 +25,6 @@
 /puppy/worker/bin/daemon_start gen_context(system_u:object_r:daemon_start_job_exec_t, s0)
 /puppy/worker/sbin/daemon_start gen_context(system_u:object_r:daemon_start_job_exec_t, s0)
 
-/puppy/worker/bin/init_generate gen_context(system_u:object_r:init_generate_job_exec_t, s0)
-/puppy/worker/sbin/init_generate gen_context(system_u:object_r:init_generate_job_exec_t, s0)
-
-/puppy/worker/bin/init_restorecon gen_context(system_u:object_r:init_restorecon_job_exec_t, s0)
-/puppy/worker/sbin/init_restorecon gen_context(system_u:object_r:init_restorecon_job_exec_t, s0)
-
 /puppy/worker/bin/mysql_create gen_context(system_u:object_r:mysql_create_job_exec_t, s0)
 /puppy/worker/sbin/mysql_create gen_context(system_u:object_r:mysql_create_job_exec_t, s0)
 
@@ -57,6 +51,12 @@
 
 /puppy/worker/bin/port_unlabel gen_context(system_u:object_r:port_unlabel_job_exec_t, s0)
 /puppy/worker/sbin/port_unlabel gen_context(system_u:object_r:port_unlabel_job_exec_t, s0)
+
+/puppy/worker/bin/service_generate gen_context(system_u:object_r:service_generate_job_exec_t, s0)
+/puppy/worker/sbin/service_generate gen_context(system_u:object_r:service_generate_job_exec_t, s0)
+
+/puppy/worker/bin/init_restorecon gen_context(system_u:object_r:init_restorecon_job_exec_t, s0)
+/puppy/worker/sbin/init_restorecon gen_context(system_u:object_r:init_restorecon_job_exec_t, s0)
 
 /puppy/worker/bin/user_authorize gen_context(system_u:object_r:user_authorize_job_exec_t, s0)
 /puppy/worker/sbin/user_authorize gen_context(system_u:object_r:user_authorize_job_exec_t, s0)
