@@ -3,6 +3,8 @@ Description=Puppy worker daemon.
 After=postgresql.service unbound.service sshd.service
 
 [Service]
+StandardOutput=syslog
+StandardError=syslog
 ExecStart=/usr/bin/sudo -u worker /puppy/worker/bin/worker_try
 
 [Install]
