@@ -6,8 +6,8 @@ uid=$1
 
 assert_valid_user $uid
 
-if [ -e /etc/init/protected_u${uid}.conf ]; then
-    /sbin/initctl stop --quiet protected_u${uid} 2>/dev/null
+if [ -e /etc/systemd/system/protected_u${uid}.esrvice ]; then
+    /bin/systemctl stop protected_u${uid}.service 2>/dev/null
 fi
 
 exit 0
