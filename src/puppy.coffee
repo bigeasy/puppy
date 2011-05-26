@@ -108,7 +108,8 @@ class Configuration
     if force or not home = @get("home")
       if not email = @get("email")
         throw new Error("Email not configured.")
-      public = "#{__dirname}/../etc/public.pub"
+      public = "#{__dirname}/../etc/public.key"
+      fs.chmodSync public, 0600
       ssh = spawn "ssh", [ "-T", "-i", public, "-l", "public", @get("server") ]
       ssh.stdin.end(JSON.stringify([ "/puppy/private/bin/account_home", email ]))
       home = ""
@@ -147,7 +148,7 @@ class Configuration
           appId = if id then parseInt(id[1], 10) else 0
         application = (applications.filter (application) -> application.id is appId).shift()
       else
-        application = (applications.filter (application) -> application.isHome is 1).shift()
+        application = (applications.filter (application) -> application.isHome).shift()
       callback(application)
 
   applications: (callback) ->

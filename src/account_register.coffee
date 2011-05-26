@@ -21,7 +21,9 @@ module.exports.command =
   execute: (configuration) ->
     server = configuration.get("server") or "portoroz.prettyrobots.com"
 
-    public = __dirname + "/../etc/public.pub"
+    public = __dirname + "/../etc/public.key"
+
+    fs.chmodSync public, 0600
 
     [ email, sshKey ] = configuration.options.arguments
     if not email or not sshKey

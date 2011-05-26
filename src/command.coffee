@@ -84,7 +84,7 @@ module.exports.command = (argv) ->
               appId = if id then parseInt(id[1], 10) else 0
             application = (applications.filter (application) -> application.id is appId).shift()
           else
-            application = (applications.filter (application) -> application.isHome is 1).shift()
+            application = (applications.filter (application) -> application.isHome).shift()
           if (not command.account) and (command.application and application.isHome)
             throw new Usage "No application specified."
           configuration.application = application
