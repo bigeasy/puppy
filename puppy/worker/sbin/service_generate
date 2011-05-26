@@ -12,7 +12,7 @@ Description=User supplied daemon for Puppy.
 After=worker.service
 
 [Service]
-ExecStart=/usr/bin/sudo -H -u u${uid} /var/cache/puppy/transitions/start_u${uid} 2>/var/log/puppy/apps/app_u${uid}/stderr 1>/var/log/puppy/apps/app_u${uid}/stdout
+ExecStart=/usr/bin/sudo -H -u u${uid} /var/cache/puppy/transitions/start_u${uid}
 
 [Install]
 WantedBy=multi-user.target
@@ -21,8 +21,10 @@ EOL
 cat <<EOL > /var/cache/puppy/transitions/start_u${uid}
 #!/bin/bash
 
+/bin/mkdir -p /home/u${uid}/log
+
 cd /home/u${uid}/app
-exec /home/u${uid}/bin/node /home/u${uid}/app/server.js
+/home/u${uid}/bin/node /home/u${uid}/app/server.js 2>/home/u${uid}/log/stderr 1>/home/u${uid}/log/stdout
 EOL
 
 umask 077 
