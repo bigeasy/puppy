@@ -42,6 +42,9 @@ function make_user()
 # Update yum, because we may freeze the image and reuse it much later.
 /usr/bin/yum update -y
 
+# Get rid of sendmail, always.
+/bin/rpm -e sendmail 2> /dev/null
+
 # Install rpms the are not already installed.
 dirname=$(dirname $0)
 /bin/cat "$dirname/rpms.txt" | /usr/bin/xargs /usr/bin/sudo /usr/bin/yum -y install 
