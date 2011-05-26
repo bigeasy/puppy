@@ -189,7 +189,7 @@ CREATE TABLE Job (
     FOREIGN KEY (machineId) REFERENCES Machine (id)
 )
 \g
-CREATE TRIGGER update_timestamp BEFORE INSERT OR UPDATE ON DataStore
+CREATE TRIGGER update_timestamp BEFORE INSERT OR UPDATE ON Job
 FOR EACH ROW EXECUTE PROCEDURE update_timestamp()
 \g
 CREATE TABLE VirtualHost (
