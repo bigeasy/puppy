@@ -141,8 +141,7 @@ function postmap_files()
 # Anyway, we use install to write the files. We write special files that need
 # stricter privileges before the glob of all files in the same directory.
 install_files root 640 etc/postfix/sasl_passwd
-install_files root 644 etc/init/* \
-                       etc/unbound/* \
+install_files root 644 etc/unbound/* \
                        etc/haproxy/* \
                        etc/selinux/targeted/contexts/users/* \
                        etc/postfix/* \
@@ -157,6 +156,10 @@ install_files root 600 etc/ssh/sshd_config
 
 # Remove default rsyslog.service.
 /bin/rm -f /lib/systemd/system/rsyslog.service
+
+# Create a chroot directory for HAProxy.
+/bin/mkdir -p /var/lib/haproxy
+/bin/chown haproxy:haproxy /var/lib/haproxy
 
 # Create postfix configuration databases.
 postmap_files /etc/postfix/transport \
