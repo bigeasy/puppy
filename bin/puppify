@@ -87,21 +87,6 @@ group_assign exclusive 202 210
 group_assign loggers 1  700
 group_assign wheel 701 701
 
-# Hide the syslog.
-# -------------------------------------------------------------------------- #
-
-# We configure `rsyslog` to create the `log` socket in `/dev/loggers`, which is
-# only readable by members of the `loggers` group, and then symlink `/dev/log`
-# to our protected socket.
-if [ ! -e /dev/loggers ]; then
-    /sbin/service rsyslog stop
-    /bin/rm -f /dev/log
-    /bin/mkdir -m 750 /dev/loggers
-    /bin/chown root:loggers /dev/loggers
-    /bin/ln -s /dev/loggers/log /dev/log
-    /sbin/service rsyslog start
-fi
-
 # Configuration installtion
 # -------------------------------------------------------------------------- #
 
@@ -162,7 +147,8 @@ install_files root 644 etc/init/* \
                        etc/selinux/targeted/contexts/users/* \
                        etc/postfix/* \
                        etc/systemd/system/* \
-                       etc/rsyslog.conf
+                       etc/rsyslog.conf \
+                       lib/systemd/system/rsyslog.service
 install_files root 755 etc/rc.d/init.d/* \
                        usr/bin/*
 install_files root 440 etc/sudoers.d/* \
