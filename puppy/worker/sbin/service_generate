@@ -37,3 +37,5 @@ umask 077
 
 /bin/chown -R u${uid}:protected /var/log/puppy/apps/app_u${uid}
 /bin/chown u${uid}:protected /var/cache/puppy/transitions/start_u${uid}
+
+/bin/systemctl --system daemon-reload
