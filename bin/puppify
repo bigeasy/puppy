@@ -147,14 +147,16 @@ install_files root 644 etc/init/* \
                        etc/selinux/targeted/contexts/users/* \
                        etc/postfix/* \
                        etc/systemd/system/* \
-                       etc/rsyslog.conf \
-                       lib/systemd/system/rsyslog.service
+                       etc/rsyslog.conf
 install_files root 755 etc/rc.d/init.d/* \
                        usr/bin/*
 install_files root 440 etc/sudoers.d/* \
                        etc/sudoers \
                        etc/sudoers.env
 install_files root 600 etc/ssh/sshd_config
+
+# Remove default rsyslog.service.
+/bin/rm -f /lib/systemd/system/rsyslog.service
 
 # Create postfix configuration databases.
 postmap_files /etc/postfix/transport \
