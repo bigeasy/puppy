@@ -7,11 +7,13 @@ fetchDataStore = (system, applicationId, engine, alias, application) ->
   urandom.on "data", (chunk) -> hash.update chunk
   urandom.on "end", ->
     system.sql "insertDataStore", [ applicationId, alias, hash.digest("hex"), engine ], (results) ->
-      system.sql "getDataStore", [ results.insertId ], "dataStore", (dataStores) ->
+      if results.rowCount is 0
+        throw new Error system.err "Cannot create data store.", { engine, alias }
+      system.sql "getDataStore", [ results[0].id ], "dataStore", (dataStores) ->
         dataStore = dataStores.shift()
         system.enqueue dataStore.dataServer.hostname, [
-          [ "mysql:create", [ dataStore.id ] ],
-          [ "mysql:grant", [ applicationId, dataStore.id ] ]
+          [ "postgresql:create", [ dataStore.id ] ],
+          [ "postgresql:grant", [ applicationId, dataStore.id ] ]
           [ "app:reconfig", [ applicationId ] ]
         ], ->
           system.sql "getDataStoresByApplication", [ applicationId ], "dataStore", (results) ->
