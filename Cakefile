@@ -23,7 +23,7 @@ task "gitignore", "create a .gitignore for node-ec2 based on git branch", ->
                 .gitignore
                 .DS_Store
                 _site
-                **/.DS_Store
+                .AppleDouble
                 
                 '''
 
