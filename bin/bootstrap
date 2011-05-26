@@ -81,8 +81,6 @@ if [ -e /boot/grub/grub.conf ]; then
     /bin/sed -ie "s/ selinux=0//" /boot/grub/grub.conf
 fi
 
-/usr/bin/yum install -y selinux-policy-targeted policycoreutils-python
-
 # Relabel the drive at the next boot.
 touch /.autorelabel 
 
