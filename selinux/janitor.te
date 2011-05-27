@@ -1,15 +1,28 @@
+# Policy module for janitor.
+
 policy_module(janitor,1.0.0)
 
+# The only real SELinux policy is for the psql
+# transition wrapper, used to transition from root to the postgres user, so that
+# the postgres user has a domain limited to running the postgres client.
+
+
+# PostgreSQL domain types.
 type janitor_postgresql_t;
 type janitor_postgresql_exec_t;
 role system_r types janitor_postgresql_t;
-application_domain(janitor_postgresql_t, janitor_postgresql_exec_t)
-puppy_postgresql(janitor_postgresql_t)
 
+# PostgreSQL domain transition.
+application_domain(janitor_postgresql_t, janitor_postgresql_exec_t)
+
+# Read PostgreSQL configuration, read and write PostgreSQL sockets.
+puppy_postgresql(janitor_postgresql_t)
+postgresql_read_config(janitor_postgresql_t)
+
+# Read the transition script.
+puppy_read_puppy_bin(janitor_postgresql_t)
+
+# Execute psql.
 corecmd_exec_bin(janitor_postgresql_t)
 files_read_etc_files(janitor_postgresql_t)
 kernel_read_system_state(janitor_postgresql_t)
-
-puppy_read_puppy_bin(janitor_postgresql_t)
-
-postgresql_read_config(janitor_postgresql_t)
