@@ -1,9 +1,0 @@
-#!/bin/bash
-
-. /puppy/worker/sbin/functions
-
-[ $# -ne 1 ] && abend "Incorrect count of arguments ($#)."
-
-dbid=$1
-
-echo "CREATE DATABASE d$dbid" | /usr/bin/sudo -H -u janitor /puppy/janitor/bin/janitor_mysql -u root
