@@ -21,7 +21,7 @@ config=$(/usr/bin/sudo -u system /puppy/system/bin/app_config $(/bin/hostname) $
 echo "$config" > /home/u$uid/app/configuration.json
 
 # Configure MySQL.
-config=$(/usr/bin/sudo -u system /puppy/system/bin/mysql_config $(/bin/hostname) $uid)
+config=$(/usr/bin/sudo -u system /puppy/system/bin/postgresql_config $(/bin/hostname) $uid)
 [ $? -eq 0 ] || exit 1
 if [ ! -z "$config" ]
 then
