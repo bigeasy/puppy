@@ -13,6 +13,7 @@ address=$(/bin/cat /etc/puppy/address)
 /bin/mkdir -p /home/u$uid/app
 /bin/mkdir -p /home/u$uid/var
 /bin/mkdir -p /home/u$uid/tmp
+/bin/mkdir -p /home/u$uid/.puppy
 
 config=$(/usr/bin/sudo -u system /puppy/system/bin/app_config $(/bin/hostname) $uid $address)
 [ $? -eq 0 ] || exit 1
@@ -22,12 +23,8 @@ echo "$config" > /home/u$uid/app/configuration.json
 # Configure MySQL.
 config=$(/usr/bin/sudo -u system /puppy/system/bin/mysql_config $(/bin/hostname) $uid)
 [ $? -eq 0 ] || exit 1
-umask 077
-echo "$config" | while read line
-do
-    name=${line%% *}
-    password=${line#* }
-    /bin/rm -f /home/u$uid/.my.${name}.cnf
-    echo "[client]" > /home/u${uid}/.my.${name}.cnf 
-    echo "password=${password}" >> /home/u${uid}/.my.${name}.cnf 
-done
+if [ ! -z "$config" ]
+then
+    umask 077
+    echo "$config" > /home/u$uid/.puppy/pgpass
+fi
