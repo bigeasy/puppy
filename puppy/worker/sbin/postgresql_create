@@ -3,7 +3,13 @@
 . /puppy/worker/sbin/functions
 
 [ $# -ne 1 ] && abend "Incorrect count of arguments ($#)."
-
 dbid=$1
 
-echo "CREATE DATABASE d$dbid" | /usr/bin/sudo -H -u postgres /puppy/janitor/bin/janitor_psql
+output=$(/usr/bin/sudo -u system /puppy/system/bin/db_password $dbid)
+[ $? -eq 0 ] || exit 1
+password=$(echo $output | awk '{ print $3 }')
+
+echo -e "CREATE USER d$dbid WITH PASSWORD '$password'" | /usr/bin/sudo -H -u postgres /puppy/janitor/bin/janitor_psql
+echo -e "CREATE DATABASE d$dbid WITH OWNER d$dbid CONNECTION LIMIT 0" | /usr/bin/sudo -H -u postgres /puppy/janitor/bin/janitor_psql
+echo -e "REVOKE CONNECT ON DATABASE d$dbid FROM public" | /usr/bin/sudo -H -u postgres /puppy/janitor/bin/janitor_psql
+echo -e "ALTER DATABASE d$dbid WITH CONNECTION LIMIT -1" | /usr/bin/sudo -H -u postgres /puppy/janitor/bin/janitor_psql
