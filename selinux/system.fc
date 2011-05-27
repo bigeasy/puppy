@@ -8,13 +8,13 @@
 
 /puppy/system/bin/db_password gen_context(system_u:object_r:db_password_system_exec_t, s0)
 
-/puppy/system/bin/mysql_config gen_context(system_u:object_r:mysql_config_system_exec_t, s0)
-
 /puppy/system/bin/policy_ready gen_context(system_u:object_r:policy_ready_system_exec_t, s0)
 
 /puppy/system/bin/policy_users gen_context(system_u:object_r:policy_users_system_exec_t, s0)
 
 /puppy/system/bin/port_list gen_context(system_u:object_r:port_list_system_exec_t, s0)
+
+/puppy/system/bin/postgresql_config gen_context(system_u:object_r:postgresql_config_system_exec_t, s0)
 
 /puppy/system/bin/user_activation gen_context(system_u:object_r:user_activation_system_exec_t, s0)
 

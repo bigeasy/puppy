@@ -28,9 +28,6 @@
 /puppy/worker/bin/postgresql_create gen_context(system_u:object_r:postgresql_create_job_exec_t, s0)
 /puppy/worker/sbin/postgresql_create gen_context(system_u:object_r:postgresql_create_job_exec_t, s0)
 
-/puppy/worker/bin/mysql_grant gen_context(system_u:object_r:mysql_grant_job_exec_t, s0)
-/puppy/worker/sbin/mysql_grant gen_context(system_u:object_r:mysql_grant_job_exec_t, s0)
-
 /puppy/worker/bin/policy_generate gen_context(system_u:object_r:policy_generate_job_exec_t, s0)
 /puppy/worker/sbin/policy_generate gen_context(system_u:object_r:policy_generate_job_exec_t, s0)
 

@@ -156,21 +156,6 @@ allow postgresql_create_job_sudo_t postgresql_tmp_t:sock_file write;
 allow janitor_postgresql_t worker_t:fifo_file rw_fifo_file_perms;
 
 ############################################################################
-### Policy for `mysql_grant`.
-############################################################################
-
-puppy_job_as_root(mysql_grant)
-
-job_sudo_system(mysql_grant)
-job_system_trans(mysql_grant, db_password)
-job_system_trans(mysql_grant, app_users)
-
-allow janitor_postgresql_t mysql_grant_job_t:fifo_file rw_fifo_file_perms;
-allow janitor_postgresql_t mysql_grant_job_proxy_t:fifo_file rw_fifo_file_perms;
-
-domtrans_pattern(mysql_grant_job_sudo_t, janitor_postgresql_exec_t, janitor_postgresql_t)
-
-############################################################################
 ### Policy for `user_policy`.
 ############################################################################
 #
@@ -312,7 +297,7 @@ puppy_job_as_root(user_config)
 
 job_sudo_system(user_config)
 job_system_trans(user_config, app_config)
-job_system_trans(user_config, mysql_config)
+job_system_trans(user_config, postgresql_config)
 
 # Execute semanage to assign the protected port to the user.
 seutil_run_semanage(user_config_job_t, worker_r)
