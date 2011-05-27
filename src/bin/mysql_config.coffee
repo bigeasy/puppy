@@ -3,5 +3,5 @@ require("exclusive").createSystem __filename, (system) ->
   system.sql "getDataStoresByLocalUser", [ hostname, uid ], "dataStore", (results) ->
     databases = {}
     for dataStore in results
-      if dataStore.dataServer.engine is "mysql"
-        process.stdout.write "#{dataStore.alias} #{dataStore.password}\n"
+      if dataStore.dataServer.engine is "PostgreSQL"
+        process.stdout.write "*:*:d#{dataStore.id}:d#{dataStore.id}:#{dataStore.password}\n"
