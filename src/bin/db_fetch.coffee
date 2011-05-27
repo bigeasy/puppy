@@ -13,7 +13,6 @@ fetchDataStore = (system, applicationId, engine, alias, application) ->
         dataStore = dataStores.shift()
         system.enqueue dataStore.dataServer.hostname, [
           [ "postgresql:create", [ dataStore.id ] ],
-          [ "postgresql:grant", [ applicationId, dataStore.id ] ]
           [ "app:reconfig", [ applicationId ] ]
         ], ->
           system.sql "getDataStoresByApplication", [ applicationId ], "dataStore", (results) ->
