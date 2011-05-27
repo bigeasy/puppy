@@ -1,7 +1,7 @@
 /var/run/puppy/tmp gen_context(system_u:object_r:worker_tmp_t, s0)
 /var/run/puppy/tmp/.* gen_context(system_u:object_r:worker_tmp_t, s0)
 
-/puppy/janitor/bin/janitor_mysql gen_context(system_u:object_r:janitor_mysql_exec_t, s0)
+/puppy/janitor/bin/janitor_psql gen_context(system_u:object_r:janitor_postgresql_exec_t, s0)
 
 /puppy/worker/sbin/port_labelify gen_context(system_u:object_r:port_labelify_job_exec_t, s0)
 
@@ -25,8 +25,8 @@
 /puppy/worker/bin/daemon_start gen_context(system_u:object_r:daemon_start_job_exec_t, s0)
 /puppy/worker/sbin/daemon_start gen_context(system_u:object_r:daemon_start_job_exec_t, s0)
 
-/puppy/worker/bin/mysql_create gen_context(system_u:object_r:mysql_create_job_exec_t, s0)
-/puppy/worker/sbin/mysql_create gen_context(system_u:object_r:mysql_create_job_exec_t, s0)
+/puppy/worker/bin/postgresql_create gen_context(system_u:object_r:postgresql_create_job_exec_t, s0)
+/puppy/worker/sbin/postgresql_create gen_context(system_u:object_r:postgresql_create_job_exec_t, s0)
 
 /puppy/worker/bin/mysql_grant gen_context(system_u:object_r:mysql_grant_job_exec_t, s0)
 /puppy/worker/sbin/mysql_grant gen_context(system_u:object_r:mysql_grant_job_exec_t, s0)

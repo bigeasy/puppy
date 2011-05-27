@@ -14,6 +14,8 @@ require {
     type database_t;
     type puppy_t;
     type setfiles_exec_t;
+    type janitor_postgresql_t;
+    type janitor_postgresql_exec_t;
     attribute puppy_daemon_log_type;
     attribute puppy_daemon_exec_type;
 }
@@ -24,10 +26,6 @@ hostname_exec(worker_t)
 
 # This was added after the switch to systemd, probably to stream to syslog.
 init_rw_stream_sockets(worker_t)
-
-type janitor_mysql_t;
-type janitor_mysql_exec_t;
-application_domain(janitor_mysql_t, janitor_mysql_exec_t)
 
 puppy_sudo(worker)
 role system_r types worker_sudo_t;
@@ -139,37 +137,23 @@ allow init_restorecon_job_t file_type:dir getattr;
 allow init_restorecon_job_t file_type:file getattr;
 
 ############################################################################
-### Policy for `mysql_create`.
+### Policy for `postgresql_create`.
 ############################################################################
 
-puppy_job_as_root(mysql_create)
+puppy_job_as_root(postgresql_create)
 
-job_sudo_system(mysql_create)
-job_system_trans(mysql_create, db_password)
+job_sudo_system(postgresql_create)
+job_system_trans(postgresql_create, db_password)
 
-domtrans_pattern(mysql_create_job_sudo_t, janitor_mysql_exec_t, janitor_mysql_t)
+domtrans_pattern(postgresql_create_job_sudo_t, janitor_postgresql_exec_t, janitor_postgresql_t)
 
 # FIXME Write why you to this, to have a place with minimal MySQL policy.
-role system_r types janitor_mysql_t;
-allow janitor_mysql_t mysql_create_job_proxy_t:fifo_file rw_fifo_file_perms;
-allow janitor_mysql_t mysql_create_job_t:fifo_file rw_fifo_file_perms;
+allow janitor_postgresql_t postgresql_create_job_proxy_t:fifo_file rw_fifo_file_perms;
+allow janitor_postgresql_t postgresql_create_job_t:fifo_file rw_fifo_file_perms;
 
-puppy_postgresql(janitor_mysql_t)
+allow postgresql_create_job_sudo_t postgresql_tmp_t:sock_file write;
 
-puppy_exec_puppy_sbin(janitor_mysql_t)
-corecmd_exec_bin(janitor_mysql_t)
-
-allow mysql_create_job_t self:capability { dac_read_search dac_override };
-
-files_read_usr_files(janitor_mysql_t)
-files_read_etc_files(janitor_mysql_t)
-files_search_home(janitor_mysql_t)
-kernel_read_system_state(janitor_mysql_t)
-mysql_read_config(janitor_mysql_t)
-userdom_list_user_home_dirs(janitor_mysql_t)
-userdom_read_user_home_content_files(janitor_mysql_t)
-
-allow janitor_mysql_t worker_t:fifo_file write;
+allow janitor_postgresql_t worker_t:fifo_file rw_fifo_file_perms;
 
 ############################################################################
 ### Policy for `mysql_grant`.
@@ -181,10 +165,10 @@ job_sudo_system(mysql_grant)
 job_system_trans(mysql_grant, db_password)
 job_system_trans(mysql_grant, app_users)
 
-allow janitor_mysql_t mysql_grant_job_t:fifo_file rw_fifo_file_perms;
-allow janitor_mysql_t mysql_grant_job_proxy_t:fifo_file rw_fifo_file_perms;
+allow janitor_postgresql_t mysql_grant_job_t:fifo_file rw_fifo_file_perms;
+allow janitor_postgresql_t mysql_grant_job_proxy_t:fifo_file rw_fifo_file_perms;
 
-domtrans_pattern(mysql_grant_job_sudo_t, janitor_mysql_exec_t, janitor_mysql_t)
+domtrans_pattern(mysql_grant_job_sudo_t, janitor_postgresql_exec_t, janitor_postgresql_t)
 
 ############################################################################
 ### Policy for `user_policy`.

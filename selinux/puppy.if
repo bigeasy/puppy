@@ -27,6 +27,8 @@ template(`puppy_node_exec',`
     allow $1 self:fifo_file read;
     # The Aries DNS library reads /etc/nsswitch.conf.
     files_read_etc_files($1)
+    # Read localization.
+    miscfiles_read_localization($1)
 ')
 
 # Permissions necessary to execute a Puppy shell program.
@@ -38,6 +40,8 @@ template(`puppy_shell_exec',`
     corecmd_exec_bin($1)
     # Read common shell functions.
     allow $1 private_functions_t:file read_file_perms;
+    # Read localization.
+    miscfiles_read_localization($1)
 ')
 
 # Assign the delegate type to a number of roles.

@@ -1,0 +1,15 @@
+policy_module(janitor,1.0.0)
+
+type janitor_postgresql_t;
+type janitor_postgresql_exec_t;
+role system_r types janitor_postgresql_t;
+application_domain(janitor_postgresql_t, janitor_postgresql_exec_t)
+puppy_postgresql(janitor_postgresql_t)
+
+corecmd_exec_bin(janitor_postgresql_t)
+files_read_etc_files(janitor_postgresql_t)
+kernel_read_system_state(janitor_postgresql_t)
+
+puppy_read_puppy_bin(janitor_postgresql_t)
+
+postgresql_read_config(janitor_postgresql_t)

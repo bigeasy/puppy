@@ -2,7 +2,7 @@
 /var/run/puppy/tmp                      gen_context(system_u:object_r:worker_tmp_t, s0)
 /var/run/puppy/tmp/.*                   gen_context(system_u:object_r:worker_tmp_t, s0)
 
-/puppy/janitor/bin/janitor_mysql        gen_context(system_u:object_r:janitor_mysql_exec_t, s0)
+/puppy/janitor/bin/janitor_psql         gen_context(system_u:object_r:janitor_postgresql_exec_t, s0)
 
 # The port_label and port_unlabel helper.
 /puppy/worker/sbin/port_labelify        gen_context(system_u:object_r:port_labelify_job_exec_t, s0)
@@ -16,7 +16,7 @@ app_deploy                              job
 app_reconfig                            job
 daemon_stop                             job
 daemon_start                            job
-mysql_create                            job
+postgresql_create                       job
 mysql_grant                             job
 policy_generate                         job
 policy_load                             job
