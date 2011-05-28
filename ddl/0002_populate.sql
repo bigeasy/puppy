@@ -17,7 +17,7 @@ INSERT INTO ActivationLocalUser(machineId, localUserId, code)
 VALUES(1, 20000, '')
 \g
 INSERT INTO DataServer(engine, hostname, port)
-VALUES('postgresql', 'localhost', 5432)
+VALUES('PostgreSQL', 'localhost', 5432)
 \g
 INSERT INTO Property(name, value) VALUES('applicationHost', 'dvor.prettyrobots.com')
 \g
