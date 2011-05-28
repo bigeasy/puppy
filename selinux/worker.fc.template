@@ -26,7 +26,7 @@ port_label                              job
 port_unlabel                            job
 service_generate                        job
 service_reload                          job
-init_restorecon                         job
+service_restorecon                      job
 user_authorize                          job
 user_chown                              job
 user_config                             job

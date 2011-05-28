@@ -117,26 +117,6 @@ allow daemon_stop_job_t init_t:unix_stream_socket connectto;
 files_read_etc_files(daemon_stop_job_t)
 
 ############################################################################
-### Policy for `init_restorecon`.
-############################################################################
-#
-# Note that the `init_restorecon` command may not be able to relabel from
-# anything to anything. It exists to apply the correct labels during 
-
-# Run security context restoration as root.
-puppy_job_as_root(init_restorecon)
-
-# Run restorecon.
-seutil_domtrans_setfiles(init_restorecon_job_t)
-
-allow setfiles_t init_restorecon_job_proxy_t:fifo_file rw_fifo_file_perms;
-
-allow init_restorecon_job_t puppy_cache_t:dir list_dir_perms;
-allow init_restorecon_job_t var_log_t:dir list_dir_perms;
-allow init_restorecon_job_t file_type:dir getattr;
-allow init_restorecon_job_t file_type:file getattr;
-
-############################################################################
 ### Policy for `postgresql_create`.
 ############################################################################
 
@@ -303,6 +283,26 @@ init_read_state(service_reload_job_t)
 init_search_pid_dirs(service_reload_job_t)
 init_write_pid_socket(service_reload_job_t)
 init_stream_connect(service_reload_job_t)
+
+############################################################################
+### Policy for `service_restorecon`.
+############################################################################
+#
+# Note that the `service_restorecon` command may not be able to relabel from
+# anything to anything. It exists to apply the correct labels during 
+
+# Run security context restoration as root.
+puppy_job_as_root(service_restorecon)
+
+# Run restorecon.
+seutil_domtrans_setfiles(service_restorecon_job_t)
+
+allow setfiles_t service_restorecon_job_proxy_t:fifo_file rw_fifo_file_perms;
+
+allow service_restorecon_job_t puppy_cache_t:dir list_dir_perms;
+allow service_restorecon_job_t var_log_t:dir list_dir_perms;
+allow service_restorecon_job_t file_type:dir getattr;
+allow service_restorecon_job_t file_type:file getattr;
 
 ############################################################################
 ### Policy for `user_config`.
