@@ -289,6 +289,22 @@ allow service_generate_job_t var_log_t:dir manage_dir_perms;
 allow service_generate_job_t var_log_t:file manage_file_perms;
 
 ############################################################################
+### Policy for `service_reload`.
+############################################################################
+
+# Why am I not using Monit? You want the control groups.
+
+# Run systemctl as root.
+puppy_job_as_root(service_reload)
+
+# Restart systemctl.
+systemd_exec_systemctl(service_reload_job_t)
+init_read_state(service_reload_job_t)
+init_search_pid_dirs(service_reload_job_t)
+init_write_pid_socket(service_reload_job_t)
+init_stream_connect(service_reload_job_t)
+
+############################################################################
 ### Policy for `user_config`.
 ############################################################################
 

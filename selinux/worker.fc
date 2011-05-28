@@ -52,6 +52,9 @@
 /puppy/worker/bin/service_generate gen_context(system_u:object_r:service_generate_job_exec_t, s0)
 /puppy/worker/sbin/service_generate gen_context(system_u:object_r:service_generate_job_exec_t, s0)
 
+/puppy/worker/bin/service_reload gen_context(system_u:object_r:service_reload_job_exec_t, s0)
+/puppy/worker/sbin/service_reload gen_context(system_u:object_r:service_reload_job_exec_t, s0)
+
 /puppy/worker/bin/init_restorecon gen_context(system_u:object_r:init_restorecon_job_exec_t, s0)
 /puppy/worker/sbin/init_restorecon gen_context(system_u:object_r:init_restorecon_job_exec_t, s0)
 

@@ -10,6 +10,7 @@ worker ALL = (root) NOPASSWD: \
     /puppy/worker/sbin/port_unlabel, \
     /puppy/worker/sbin/postgresql_create, \
     /puppy/worker/sbin/service_generate, \
+    /puppy/worker/sbin/service_reload, \
     /puppy/worker/sbin/user_authorize, \
     /puppy/worker/sbin/user_chown, \
     /puppy/worker/sbin/user_config, \
