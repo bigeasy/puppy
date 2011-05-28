@@ -44,7 +44,7 @@ require("exclusive").createSystem __filename, "hostname, account", (system, host
             [ "user:chown", [ localUser.id ] ]
             [ "service:generate", [ localUser.id ] ]
             [ "service:reload", [ localUser.id ] ]
-            [ "init:restorecon", [ localUser.id ] ]
+            [ "service:restorecon", [ localUser.id ] ]
             [ "user:ready", [ localUser.id ] ]
           ], ->
             system.sql "getLocalPorts", [ localUser.machine.hostname, localUser.id ], "localPort", (localPorts) ->
