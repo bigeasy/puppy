@@ -43,6 +43,7 @@ require("exclusive").createSystem __filename, "hostname, account", (system, host
             [ "user:group", [ localUser.id, "protected" ] ]
             [ "user:chown", [ localUser.id ] ]
             [ "service:generate", [ localUser.id ] ]
+            [ "service:reload", [ localUser.id ] ]
             [ "init:restorecon", [ localUser.id ] ]
             [ "user:ready", [ localUser.id ] ]
           ], ->
