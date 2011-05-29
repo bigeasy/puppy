@@ -18,6 +18,9 @@ ExecStart=/usr/bin/sudo -H -u u${uid} /var/cache/puppy/transitions/start_u${uid}
 WantedBy=multi-user.target
 EOL
 
+# This script is writable by the user. They are welcome to change it. We'll
+# simply change it back in time. The server.js program can do anything anyway,
+# and has just as much authority as transition script.
 cat <<EOL > /var/cache/puppy/transitions/start_u${uid}
 #!/bin/bash
 
