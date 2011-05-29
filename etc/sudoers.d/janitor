@@ -1,0 +1,2 @@
+worker ALL = (root) NOPASSWD: \
+    /usr/bin/rsync
