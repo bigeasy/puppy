@@ -1,6 +1,6 @@
 #!/bin/bash
 
-dir=$(/bin/readlink -f $(/usr/bin/dirname $0))
+dir=$(/bin/readlink -f "$(/bin/readlink -f $(/usr/bin/dirname $0))/..")
 
 function advance_serial()
 {
@@ -41,4 +41,4 @@ done
 
 cd /
 
-$dir/loopsnap /mnt/dns
+$dir/loopback/snapshot /mnt/dns
