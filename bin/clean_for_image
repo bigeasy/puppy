@@ -10,3 +10,4 @@ done
 /usr/bin/sudo /bin/rm -rf /root/.bash_history /root/setup.sh /etc/nsd /var/lib/nsd
 /bin/rm -f ~/.bash_history
 /usr/bin/yum clean all
+/usr/bin/sudo /usr/sbin/unbound-control -c /etc/unbound/unbound.conf flush_zone .
