@@ -11,3 +11,7 @@ done
 /bin/rm -f ~/.bash_history
 /usr/bin/yum clean all
 /usr/bin/sudo /usr/sbin/unbound-control -c /etc/unbound/unbound.conf flush_zone .
+for log in $(/usr/bin/sudo /bin/find /var/log ! -type d)
+do
+    /usr/bin/sudo /bin/rm $log
+done
