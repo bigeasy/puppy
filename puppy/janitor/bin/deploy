@@ -39,24 +39,27 @@ cd $project
 
 umask 022
 
-for source in $(/bin/find src -mindepth 3 -name \*.coffee)
-do
-    dir=$(/usr/bin/dirname $source | sed 's/src\///')
-    program=$(/bin/basename $source | sed 's/.coffee$//')
-    dest=$dir/$program
-    if is_dirty $source $dest
-    then
-        echo "Rebuildering $source."
-        /bin/mkdir -p $dir
-        if [ $(/bin/basename $dir) == "lib" ]
+if [ -e src ]
+then
+    for source in $(/bin/find src -mindepth 2 -name \*.coffee)
+    do
+        dir=$(/usr/bin/dirname $source | sed 's/src\///')
+        program=$(/bin/basename $source | sed 's/.coffee$//')
+        dest=$dir/$program
+        if is_dirty $source $dest
         then
-            /opt/bin/coffee -c -p $source > $dest
-        else
-            /bin/cat $(/usr/bin/dirname $deploy)/preamble.js > $dest
-            /opt/bin/coffee -c -p $source >> $dest
+            echo "Rebuildering $source."
+            /bin/mkdir -p $dir
+            if [ $(/bin/basename $dir) == "lib" ]
+            then
+                /opt/bin/coffee -c -p $source > $dest
+            else
+                /bin/cat $(/usr/bin/dirname $deploy)/preamble.js > $dest
+                /opt/bin/coffee -c -p $source >> $dest
+            fi
         fi
-    fi
-done
+    done
+fi
 
 # Choose permissions.
 # -------------------------------------------------------------------------- #
