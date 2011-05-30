@@ -102,10 +102,6 @@ client.call "DescribeImages", { "Owner.1": "self" }, (response) ->
         for instance in reservation.instancesSet
           if instance.instanceId is request.instance.instanceId
             return instance.instanceState.name is "running"
-    client.call "AssociateAddress", {
-      PublicIp: request.address
-      InstanceId: request.instance.instanceId
-    }
     client.call "DescribeInstances", { "InstanceId.1": request.instance.instanceId }, (response) ->
       for mapping in response.reservationSet[0].instancesSet[0].blockDeviceMapping
         if mapping.deviceName is "/dev/sda"
@@ -117,7 +113,6 @@ client.call "DescribeImages", { "Owner.1": "self" }, (response) ->
         "Tag.1.Value": options.name
       }
 
-dns.lookup options.name, 4, (error, address) ->
-  throw error if error
-  request.address = address
-  client.execute()
+client.execute()
+
+# vim: ft=coffee:

@@ -1,0 +1,81 @@
+#!/usr/bin/env coffee
+
+ec2 = require "ec2"
+dns = require "dns"
+{OptionParser}  = require "coffee-script/lib/optparse"
+
+parser = new OptionParser [
+  [ "-n", "--name [NAME]", "fully qualified domain name" ]
+  [ "-h", "--help", "display puppy help" ]
+]
+
+usage = (message) ->
+  process.stderr.write "error: #{message}\n"
+  process.stderr.write parser.help()
+  process.stderr.write "\n"
+  process.exit 1
+
+try
+  options         = parser.parse process.argv.slice(2)
+catch e
+  usage "Invalid arguments."
+
+if not options.name
+  usage "Host name is required."
+
+match = ///
+    ^
+    \w+\.
+    (balance|user|data)\.
+    (north|south|east|west)\.
+    (california|ireland|singapore|tokyo|virginia)\.
+    runpup\.com
+    $
+  ///.exec(options.name)
+
+if not match
+  process.stderr.write "Invalid hostname.\n"
+  usage()
+[ type, zone, region ] = match.slice 1
+
+architecture = { balance: "i386", user: "i386", data: "i386" }[type]
+
+zone = { north: "a", south: "b", east: "c", west: "d" }[zone]
+if not zone
+  usage "Unknown zone."
+
+region = { virginia: "us-east-1" }[region]
+if not region
+  usage "Unknown region."
+
+client = ec2.createClient({
+  key: process.env["AWS_ACCESS_KEY_ID"]
+  secret: process.env["AWS_SECRET_ACCESS_KEY"]
+})
+
+request = {}
+client.call "DescribeInstances", {}, (response) ->
+  findInstance = ->
+    for reservation in response.reservationSet
+      for instance in reservation.instancesSet
+        if instance.instanceState.name is "running"
+          for tag in instance.tagSet
+            if tag.key is "Name" and tag.value is options.name
+              return instance
+    false
+  request.instance = findInstance()
+  if not request.instance
+    usage "No such instance is running."
+  client.call "AssociateAddress", {
+    PublicIp: request.address
+    InstanceId: request.instance.instanceId
+  }
+  process.stdout.write JSON.stringify response, null, 2
+  process.stdout.write "\n"
+
+dns.lookup options.name, 4, (error, address) ->
+  throw error if error
+  request.address = address
+  client.execute()
+
+# vim: ft=coffee ts=2 sw=2:
