@@ -1,0 +1,11 @@
+#!/bin/bash
+
+dir=$(/bin/readlink -f $(/usr/bin/dirname $0))
+
+for file in $(/bin/ls /mnt)
+do
+     $dir/loopdel /mnt/$file
+done
+
+/usr/bin/sudo /bin/rm -rf /root/.bash_history /root/setup.sh /etc/nsd /var/lib/nsd
+/bin/rm -f ~/.bash_history
