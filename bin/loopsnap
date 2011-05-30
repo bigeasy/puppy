@@ -21,11 +21,13 @@ image=$(/usr/bin/sudo /sbin/losetup --show $device | /bin/sed 's/.*(\(.*\))/\1/'
 file=$(/bin/basename $image .img)
 
 older=3.img
-for newer in 2.img 1.img img
+for newer in 2.img 1.img
 do
-    /usr/bin/sudo -H /usr/bin/s3cmd cp --acl-private s3://runpup/system/$file.$newer s3://runpup/system/$file.$older
+    /usr/bin/sudo -H /usr/bin/s3cmd cp --acl-private s3://runpup/system/backup/$file.$newer s3://runpup/system/backup/$file.$older
     older=$newer
 done
+
+/usr/bin/sudo -H /usr/bin/s3cmd cp --acl-private s3://runpup/system/$file.img s3://runpup/system/backup/$file.1.img
 
 /usr/bin/sudo -H /usr/bin/s3cmd --acl-private -e put $image s3://runpup/system/
 
