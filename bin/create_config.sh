@@ -5,6 +5,7 @@ if [ $(whoami) != "root" ]; then
     exit 1
 fi
 
+dir=$(/bin/readlink -f $(/usr/bin/dirname $0))
 name=$1
 address=$2
 if [ -z $name ] || [ -z $address ]
@@ -14,10 +15,10 @@ then
 fi
 
 
-/bin/mkdir -p /config/$name.runpup.com/etc/ssh
+/bin/mkdir -p /mnt/config/var/$name.runpup.com/etc/ssh
 
 KEYGEN=/usr/bin/ssh-keygen
-RSA_KEY=/config/$name.runpup.com/etc/ssh/ssh_host_rsa_key
+RSA_KEY=/mnt/config/var/$name.runpup.com/etc/ssh/ssh_host_rsa_key
 if [ ! -s $RSA_KEY ]; then
     rm -f $RSA_KEY
     if test ! -f $RSA_KEY && $KEYGEN -q -t rsa -f $RSA_KEY -C '' -N '' >&/dev/null; then
@@ -36,22 +37,22 @@ fi
 function append_unless()
 {
     local line=$1
-    grep "$line" /home/alan/dns/runpup.com.zone 
+    grep "$line" /mnt/dns/var/runpup.com.zone 
     if [ $? -ne 0 ]
     then
         echo "$line"
-        echo "$line" >> /home/alan/dns/runpup.com.zone
+        echo "$line" >> /mnt/dns/var/runpup.com.zone
     fi
 }
 
-mkdir -p /config/$name.runpup.com/etc/sysconfig
-cat <<HERE > /config/$name.runpup.com/etc/sysconfig/network
+mkdir -p /mnt/config/var/$name.runpup.com/etc/sysconfig
+cat <<HERE > /mnt/config/var/$name.runpup.com/etc/sysconfig/network
 NETWORKING=yes
 NETWORKING_IPV6=no
 HOSTNAME=$name.runpup.com
 HERE
 
 append_unless "$(ssh-keygen -r $name -f $RSA_KEY)"
-append_unless "$name             IN      A       $address"
+append_unless "$name IN A $address"
 
-chown -R janitor:janitor /config
+$dir/dns-publish runpup.com.zone
