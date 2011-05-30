@@ -9,3 +9,4 @@ done
 
 /usr/bin/sudo /bin/rm -rf /root/.bash_history /root/setup.sh /etc/nsd /var/lib/nsd
 /bin/rm -f ~/.bash_history
+/usr/bin/yum clean all
