@@ -10,7 +10,7 @@ if [ -z "$current" ]
 then
     /usr/bin/sudo -H /usr/bin/s3cmd --skip-existing -e get s3://runpup/system/$file.img /root/
 
-    /usr/bin/sudo /sbin/losetup --show $device 2>&1 > /dev/null
+    /usr/bin/sudo /sbin/losetup --show $device 1>/dev/null 2>&1
     if [ $? -ne 0 ]
     then
         /usr/bin/sudo /sbin/losetup $device /root/$file.img
