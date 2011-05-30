@@ -1,0 +1,44 @@
+#!/bin/bash
+
+dir=$(/bin/readlink -f $(/usr/bin/dirname $0))
+
+function advance_serial()
+{
+    local file=$1;
+    if [ ! -e $file ]
+    then
+        "Does not exist: $file."
+    fi
+    today=$(/bin/date +%Y%m%d)
+    current=($(/bin/sed -n 's/.*\([0-9]\{8\}\)\([0-9]\{2\}\).*; Serial.*/\1 \2/p' $file))
+    if [ "${current[0]}" == "$today" ]
+    then
+        next="${today}"$(/usr/bin/printf '%02d\n' $((10#${current[1]} + 1)))
+    else
+        next="${today}01"
+    fi
+    /bin/sed -i 's/\(.*\)[0-9]\{10\}\(.*; Serial.*\)/\1'$next'\2/' $file
+    echo $next
+}
+
+cd /mnt/dns/var
+
+for file in $@
+do
+    advance_serial $file
+done
+
+/usr/bin/ldns-signzone runpup.com.zone Krunpup.com.+007+15669 Krunpup.com.+007+34052
+/usr/bin/ldns-signzone prettyrobots.com.zone Kprettyrobots.com.+007+06060 Kprettyrobots.com.+007+20783
+/usr/bin/sudo /bin/cp runpup.com.zone.signed /var/lib/nsd/chroot/etc/nsd/runpup.com.zone.signed 
+/usr/bin/sudo /bin/cp prettyrobots.com.zone.signed /var/lib/nsd/chroot/etc/nsd/prettyrobots.com.zone.signed 
+/usr/bin/sudo /bin/chown -R nsd:nsd /var/lib/nsd/chroot
+/usr/bin/sudo /bin/chmod -R gou+x /var/lib/nsd/chroot
+/usr/bin/sudo /bin/chmod -R o-rwx /var/lib/nsd/chroot
+/usr/bin/sudo /usr/sbin/nsdc rebuild
+/usr/bin/sudo /usr/sbin/nsdc reload
+/usr/bin/sudo /usr/sbin/nsdc notify
+
+cd /
+
+$dir/loopsnap /mnt/dns
