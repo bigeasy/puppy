@@ -2,11 +2,13 @@ app_users               direct      system
 app_reconfig            direct      system
 account_ready           direct      system
 app_config              direct      system
+job                     direct      system
 db_password             direct      system
 policy_ready            direct      system
 policy_users            direct      system
 port_list               direct      system
 postgresql_config       direct      system
 user_activation         direct      system
+user_generate           direct      system
 user_keys               direct      system
 user_ready              direct      system

@@ -39,7 +39,7 @@ cd $project
 
 umask 022
 
-for source in $(/bin/find src -mindepth 2 -name \*.coffee)
+for source in $(/bin/find src -mindepth 3 -name \*.coffee)
 do
     dir=$(/usr/bin/dirname $source | sed 's/src\///')
     program=$(/bin/basename $source | sed 's/.coffee$//')

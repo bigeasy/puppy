@@ -6,6 +6,8 @@
 
 /puppy/system/bin/app_config gen_context(system_u:object_r:app_config_system_exec_t, s0)
 
+/puppy/system/bin/job gen_context(system_u:object_r:job_system_exec_t, s0)
+
 /puppy/system/bin/db_password gen_context(system_u:object_r:db_password_system_exec_t, s0)
 
 /puppy/system/bin/policy_ready gen_context(system_u:object_r:policy_ready_system_exec_t, s0)
@@ -17,6 +19,8 @@
 /puppy/system/bin/postgresql_config gen_context(system_u:object_r:postgresql_config_system_exec_t, s0)
 
 /puppy/system/bin/user_activation gen_context(system_u:object_r:user_activation_system_exec_t, s0)
+
+/puppy/system/bin/user_generate gen_context(system_u:object_r:user_generate_system_exec_t, s0)
 
 /puppy/system/bin/user_keys gen_context(system_u:object_r:user_keys_system_exec_t, s0)
 

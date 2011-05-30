@@ -11,7 +11,7 @@
 # definitions can be added to a template and they will pass through.
 
 cd $(dirname $0)
-cd ..
+cd ../..
 
 for file in $(ls selinux/*.fc.template)
 do
