@@ -1,0 +1,198 @@
+#!/usr/bin/env coffee
+
+alpha = [
+  "Alabo"
+  "Bouny"
+  "Clio"
+  "Dupre"
+  "Eads"
+  "Foy"
+  "Girod"
+  "Hayne"
+  "Irby"
+  "Jena"
+  "Kepler"
+  "Law"
+  "Miro"
+  "Neron"
+  "Odin"
+  "Praro"
+  "Quince"
+  "Race"
+  "Soniat"
+  "Tonti"
+  "Ulloa"
+  "Verna"
+  "Water"
+  "Zamon"
+]
+
+ec2 = require "ec2"
+dns = require "dns"
+{OptionParser}  = require "coffee-script/lib/optparse"
+
+parser = new OptionParser [
+  [ "-n", "--name [NAME]", "fully qualified domain name" ]
+  [ "-h", "--help", "display puppy help" ]
+]
+
+usage = (message) ->
+  process.stderr.write "error: #{message}\n"
+  process.stderr.write parser.help()
+  process.stderr.write "\n"
+  process.exit 1
+
+try
+  options         = parser.parse process.argv.slice(2)
+catch e
+  usage "Invalid arguments."
+
+if not options.name
+  usage "Host name is required."
+
+match = ///
+    ^
+    \w+\.
+    (balance|user|data)\.
+    (north|south|east|west)\.
+    (california|ireland|singapore|tokyo|virginia)\.
+    runpup\.com
+    $
+  ///.exec(options.name)
+
+if not match
+  process.stderr.write "Invalid hostname.\n"
+  usage()
+[ type, zone, region ] = match.slice 1
+
+switch type
+  when "balance", "user"
+    architecture = "i386"
+  when "data"
+    architecture = "x86_64"
+  else
+    usage "Unknown machine type."
+
+zone = { north: "a", south: "b", east: "c", west: "d" }[zone]
+if not zone
+  usage "Unknown zone."
+
+region = { virginia: "us-east-1" }[region]
+if not region
+  usage "Unknown region."
+
+kernel = { "i386": "aki-407d9529", "x86_64": "aki-427d952b" }[architecture]
+
+client = ec2.createClient({
+  key: process.env["AWS_ACCESS_KEY_ID"]
+  secret: process.env["AWS_SECRET_ACCESS_KEY"]
+})
+
+request = {}
+client.call "DescribeImages", { "Owner.1": "self" }, (response) ->
+  findImage = ->
+    for image in response.imagesSet
+      count = 0
+      for tag in image.tagSet
+        if image.architecture is architecture
+          if tag.key is 'Puppified'
+            count++
+          if tag.key is 'Redux'
+            count++
+      if count is 1
+        request.current = image
+      else if count is 2
+        usage "A redux image for this architecture already exists."
+  request.image = findImage()
+  if request.current
+    for tag in request.current.tagSet
+      if tag.key is "Version"
+        index = alpha.indexOf(tag.value) + 1
+        if index isnt alpha.length
+          request.version = alpha[index]
+  if not request.version
+    request.version = alpha[0]
+client.call "DescribeSnapshots", {}, (response) ->
+  for snapshot in response.snapshotSet
+    tags = {}
+    for tag in snapshot.tagSet or []
+      tags[tag.key] = tag.value or true
+    if tags.Puppified and tags.Architecture is architecture and tags.Redux
+      usage "A redux snapshot for this architecture already exists."
+client.call "DescribeInstances", {}, (response) ->
+  findInstance = ->
+    candidate = null
+    for reservation in response.reservationSet
+      for instance in reservation.instancesSet
+        if instance.instanceState.name isnt "terminated"
+          for tag in instance.tagSet
+            if tag.key is "Name" and tag.value is options.name
+              if candidate
+                usage "More than one instance with the given name."
+              candidate = instance
+    candidate
+  request.instance = findInstance()
+  for mapping in request.instance.blockDeviceMapping
+    if mapping.deviceName is "/dev/sda"
+      request.volumeId = mapping.ebs.volumeId
+      break
+  if not request.instance
+    usage "Cannot find instance."
+
+  if (request.instance.instanceState.name != "stopped")
+    client.call "StopInstances", { "InstanceId.1": request.instance.instanceId }, (response) ->
+
+  client.poll "DescribeInstances", { "InstanceId.1": request.instance.instanceId }, (response) ->
+    return response.reservationSet[0].instancesSet[0].instanceState.name is "stopped"
+
+  client.call "CreateSnapshot", {
+    "VolumeId": request.volumeId
+    "Description": "Puppy #{architecture} #{request.version}"
+  }, (response) ->
+    request.snapshot = response
+    client.poll "DescribeSnapshots", {}, (response) ->
+      for snapshot in response.snapshotSet
+        if snapshot.snapshotId is request.snapshot.snapshotId
+          return snapshot.status is "completed"
+      false
+    client.call "CreateTags", {
+      "ResourceId.1": request.snapshot.snapshotId
+      "Tag.1.Key": "Name"
+      "Tag.1.Value": "Puppy #{architecture} #{request.version}"
+      "Tag.2.Key": "Puppified"
+      "Tag.2.Value": ""
+      "Tag.3.Key": "Redux"
+      "Tag.3.Value": ""
+      "Tag.4.Key": "Version"
+      "Tag.4.Value": request.version
+      "Tag.5.Key": "Architecture"
+      "Tag.5.Value": architecture
+    }
+    client.call "RegisterImage", {
+      Name: "Puppy #{architecture} #{request.version}"
+      Description: "Puppy #{architecture}"
+      Architecture: architecture
+      RootDeviceName: "/dev/sda"
+      KernelId: kernel
+      "BlockDeviceMapping.1.DeviceName": "/dev/sda"
+      "BlockDeviceMapping.1.Ebs.SnapshotId": request.snapshot.snapshotId
+    }, (response) ->
+      request.image = response
+      client.poll "DescribeImages", { "Owner.1": "self" }, (response) ->
+        for image in response.imagesSet
+          if request.image.imageId is image.imageId
+            return true
+        false
+      client.call "CreateTags", {
+        "ResourceId.1": request.image.imageId
+        "Tag.1.Key": "Name"
+        "Tag.1.Value": "Puppy #{architecture} #{request.version}"
+        "Tag.2.Key": "Puppified"
+        "Tag.2.Value": ""
+        "Tag.3.Key": "Redux"
+        "Tag.3.Value": ""
+        "Tag.4.Key": "Version"
+        "Tag.4.Value": request.version
+      }
+
+client.execute()

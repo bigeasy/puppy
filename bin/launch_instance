@@ -1,0 +1,129 @@
+#!/usr/bin/env coffee
+
+ec2 = require "ec2"
+dns = require "dns"
+{OptionParser}  = require "coffee-script/lib/optparse"
+
+parser = new OptionParser [
+  [ "-n", "--name [NAME]", "fully qualified domain name" ]
+  [ "-h", "--help", "display puppy help" ]
+]
+
+usage = (message) ->
+  process.stderr.write "error: #{message}\n"
+  process.stderr.write parser.help()
+  process.stderr.write "\n"
+  process.exit 1
+
+try
+  options         = parser.parse process.argv.slice(2)
+catch e
+  usage "Invalid arguments."
+
+if not options.name
+  usage "Host name is required."
+
+match = ///
+    ^
+    \w+\.
+    (balance|user|data)\.
+    (north|south|east|west)\.
+    (california|ireland|singapore|tokyo|virginia)\.
+    runpup\.com
+    $
+  ///.exec(options.name)
+
+if not match
+  process.stderr.write "Invalid hostname.\n"
+  usage()
+[ type, zone, region ] = match.slice 1
+
+switch type
+  when "balance", "user"
+    architecture = "i386"
+  when "data"
+    architecture = "x86_64"
+  else
+    usage "Unknown machine type."
+
+zone = { north: "a", south: "b", east: "c", west: "d" }[zone]
+if not zone
+  usage "Unknown zone."
+
+region = { virginia: "us-east-1" }[region]
+if not region
+  usage "Unknown region."
+
+client = ec2.createClient({
+  key: process.env["AWS_ACCESS_KEY_ID"]
+  secret: process.env["AWS_SECRET_ACCESS_KEY"]
+})
+
+request = {}
+client.call "DescribeInstances", {}, (response) ->
+  findInstance = ->
+    for reservation in response.reservationSet
+      for instance in reservation.instancesSet
+        if not /^stopped|terminated$/.test instance.instanceState.name
+          for tag in instance.tagSet
+            if tag.key is "Name" and tag.value is options.name
+              return instance
+    false
+  if findInstance()
+    usage "An instance named #{options.name} is already running."
+client.call "DescribeImages", { "Owner.1": "self" }, (response) ->
+  findImage = ->
+    candidate = null
+    for image in response.imagesSet
+      tags = {}
+      for tag in image.tagSet
+        tags[tag.key] = tag.value or true
+      if tags.Puppified and image.architecture is architecture and (not candidate or tags.Redux)
+        candidate = image
+    candidate
+  request.image = findImage()
+  client.call "RunInstances", {
+    ImageId: request.image.imageId
+    MinCount: 1
+    MaxCount: 1
+    KeyName: "secret_key"
+    UserData: new Buffer(options.name).toString("base64")
+    InstanceType: "t1.micro"
+    "Placement.AvailabilityZone": "#{region}#{zone}"
+  }, (response) ->
+    request.instance = response.instancesSet.shift()
+    client.poll "DescribeInstances", {}, (response) ->
+      for reservation in response.reservationSet
+        for instance in reservation.instancesSet
+          if instance.instanceId is request.instance.instanceId
+            return true
+      false
+    client.call "CreateTags", {
+      "ResourceId.1": request.instance.instanceId
+      "Tag.1.Key": "Name"
+      "Tag.1.Value": options.name
+    }
+    client.poll "DescribeInstances", {}, (response) ->
+      for reservation in response.reservationSet
+        for instance in reservation.instancesSet
+          if instance.instanceId is request.instance.instanceId
+            return instance.instanceState.name is "running"
+    client.call "AssociateAddress", {
+      PublicIp: request.address
+      InstanceId: request.instance.instanceId
+    }
+    client.call "DescribeInstances", { "InstanceId.1": request.instance.instanceId }, (response) ->
+      for mapping in response.reservationSet[0].instancesSet[0].blockDeviceMapping
+        if mapping.deviceName is "/dev/sda"
+          request.volumeId = mapping.ebs.volumeId
+          break
+      client.call "CreateTags", {
+        "ResourceId.1": request.volumeId
+        "Tag.1.Key": "Name"
+        "Tag.1.Value": options.name
+      }
+
+dns.lookup options.name, 4, (error, address) ->
+  throw error if error
+  request.address = address
+  client.execute()

@@ -1,0 +1,68 @@
+#!/usr/bin/env coffee
+
+ec2 = require "ec2"
+dns = require "dns"
+{OptionParser}  = require "coffee-script/lib/optparse"
+
+parser = new OptionParser [
+  [ "-n", "--architecture [NAME]", "architecture name" ]
+  [ "-h", "--help", "display puppy help" ]
+]
+
+usage = (message) ->
+  process.stderr.write "error: #{message}\n"
+  process.stderr.write parser.help()
+  process.stderr.write "\n"
+  process.exit 1
+
+try
+  options         = parser.parse process.argv.slice(2)
+catch e
+  usage "Invalid arguments."
+
+if not options.architecture
+  usage "Architecture is required."
+
+client = ec2.createClient({
+  key: process.env["AWS_ACCESS_KEY_ID"]
+  secret: process.env["AWS_SECRET_ACCESS_KEY"]
+})
+
+request = { outgoing: [] }
+client.call "DescribeImages", { "Owner.1": "self" }, (response) ->
+  for image in response.imagesSet
+    count = 0
+    for tag in image.tagSet
+      if image.architecture is options.architecture
+        if tag.key is 'Puppified'
+          count++
+        if tag.key is 'Redux'
+          count++
+    if count is 1
+      request.outgoing = image
+    else if count is 2
+      request.redux = image
+  if not request.outgoing
+    usage "Cannot find an outgoing image."
+  if not request.redux
+    usage "Cannot find a redux image."
+  for instance in [ request.redux, request.outgoing ]
+    for mapping in instance.blockDeviceMapping
+      if mapping.deviceName
+        instance.snapshotId = mapping.ebs.snapshotId
+
+  client.call "DeregisterImage", { ImageId: request.outgoing.imageId }
+  client.poll "DescribeImages", { "Owner.1": "self" }, (response) ->
+    for image in response.imagesSet
+      if image.imageId is request.outgoing.imageId
+        return false
+    true
+  client.call "DeleteSnapshot", { SnapshotId: request.outgoing.snapshotId }
+
+  client.call "DeleteTags", {
+    "ResourceId.1": request.redux.imageId
+    "ResourceId.2": request.redux.snapshotId
+    "Tag.1.Key": "Redux"
+  }
+
+client.execute()
