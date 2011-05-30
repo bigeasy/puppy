@@ -235,7 +235,6 @@ on_boot unbound
 on_boot postfix
 on_boot ntpd
 on_boot configuration
-on_boot nsd
 
 if [ "$(/bin/readlink /etc/localtime)" != "/usr/share/zoneinfo/UTC" ]
 then
@@ -247,7 +246,7 @@ fi
 if [ ! -e /home/backup/.ssh/authorized_keys ]
 then
     /usr/bin/sudo /bin/mkdir -p /home/backup/.ssh
-    /usr/bin/sudo /bin/cp $(/usr/bin/dirname $0)/id_backup.pub /home/backup/.ssh/authorized_keys
+    /usr/bin/sudo /bin/cp $(/usr/bin/dirname $0)/../backup/id_backup.pub /home/backup/.ssh/authorized_keys
     /usr/bin/sudo /bin/chown -R backup:backup /home/backup
     /usr/bin/sudo /bin/chmod 600 /home/backup/.ssh/authorized_keys
 fi
