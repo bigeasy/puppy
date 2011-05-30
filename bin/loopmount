@@ -1,0 +1,20 @@
+#!/bin/bash
+
+device=$1
+path=$2
+
+file=$(/bin/basename $path)
+
+current=$(/bin/mount | awk '$3 == "'$path'" { print $1 }')
+if [ -z "$current" ]
+then
+    /usr/bin/sudo -H /usr/bin/s3cmd --skip-existing -e get s3://runpup/system/$file.img /root/
+
+    /usr/bin/sudo /sbin/losetup --show $device 2>&1 > /dev/null
+    if [ $? -ne 0 ]
+    then
+        /usr/bin/sudo /sbin/losetup $device /root/$file.img
+    fi
+    /usr/bin/sudo /bin/mkdir -p /mnt/$file
+    /usr/bin/sudo /bin/mount $device /mnt/$file
+fi
