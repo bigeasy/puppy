@@ -18,5 +18,5 @@ image=$(/usr/bin/sudo /sbin/losetup --show $device | /bin/sed 's/.*(\(.*\))/\1/'
 
 /usr/bin/sudo /bin/umount $path
 /usr/bin/sudo /sbin/losetup -d $device
-/usr/bin/sudo /bin/srm -f $image
+/usr/bin/sudo /usr/bin/srm -f $image
 /usr/bin/sudo /bin/rmdir $path
