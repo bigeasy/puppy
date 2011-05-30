@@ -1,0 +1,17 @@
+#!/bin/bash
+
+dir=$(/bin/readlink -f $(/usr/bin/dirname $0))
+
+for file in $(/bin/ls /mnt)
+do
+     $dir/loopdel /mnt/$file
+done
+
+/usr/bin/sudo /bin/rm -rf /root/.bash_history /root/setup.sh /etc/nsd /var/lib/nsd
+/bin/rm -f ~/.bash_history
+/usr/bin/yum clean all
+/usr/bin/sudo /usr/sbin/unbound-control -c /etc/unbound/unbound.conf flush_zone .
+for log in $(/usr/bin/sudo /bin/find /var/log ! -type d)
+do
+    /usr/bin/sudo /bin/rm $log
+done

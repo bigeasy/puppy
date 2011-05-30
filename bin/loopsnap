@@ -1,0 +1,32 @@
+#!/bin/bash
+
+function abend()
+{
+    local message=$1
+    echo "error: $message" 1>&2
+    exit 1
+}
+
+mnt=$1
+[ -d $mnt ] || abend "No such directory."
+path=$(/bin/readlink -f $mnt)
+
+device=$(/bin/mount | awk '$3 == "'$path'" { print $1 }')
+[ -z "$device" ] && abend "Not a mounted loopback device."
+
+image=$(/usr/bin/sudo /sbin/losetup --show $device | /bin/sed 's/.*(\(.*\))/\1/')
+
+/usr/bin/sudo /bin/umount $path
+
+file=$(/bin/basename $image .img)
+
+older=3.img
+for newer in 2.img 1.img img
+do
+    /usr/bin/sudo -H /usr/bin/s3cmd cp --acl-private s3://runpup/system/$file.$newer s3://runpup/system/$file.$older
+    older=$newer
+done
+
+/usr/bin/sudo -H /usr/bin/s3cmd --acl-private -e put $image s3://runpup/system/
+
+/usr/bin/sudo /bin/mount $device $path
