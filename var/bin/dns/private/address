@@ -1,6 +1,7 @@
 #!/usr/bin/env coffee
 
 ec2 = require "ec2"
+fs = require "fs"
 {OptionParser}  = require "coffee-script/lib/optparse"
 
 parser = new OptionParser [
@@ -33,10 +34,8 @@ region = { virginia: "us-east-1" }[options.region]
 if not region
   usage "Unknown region."
 
-client = ec2.createClient({
-  key: process.env["AWS_ACCESS_KEY_ID"]
-  secret: process.env["AWS_SECRET_ACCESS_KEY"]
-})
+configuration = JSON.parse fs.readFileSync "#{process.env["HOME"]}/.aws", "utf8"
+client = ec2.createClient configuration
 
 request = {}
 client.call "DescribeInstances", {}, (response) ->

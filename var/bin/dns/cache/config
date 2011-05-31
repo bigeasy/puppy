@@ -1,3 +1,13 @@
+#!/bin/bash
+
+echo HELLO
+dir=$(/bin/readlink -f $(/usr/bin/dirname $0))
+.  $dir/../configuration
+
+cat /mnt/config/var/dns/current/ksk/*.ds > /etc/unbound/runpup.net.key
+cat /mnt/config/var/dns/current/ksk/*.key >> /etc/unbound/runpup.net.key
+
+cat <<EOL > /etc/unbound/unbound.conf
 server:
 	verbosity: 1
 	statistics-interval: 0
@@ -32,6 +42,15 @@ remote-control:
 	control-cert-file: "/etc/unbound/unbound_control.pem"
 stub-zone:
     name: "runpup.net"
-    stub-host: "ns1.runpup.com"
-    stub-host: "ns4.runpup.com"
-    stub-prime: yes
+EOL
+
+$dir/../private/address --region $region --axis $axis | while read line
+do
+    pair=($line)
+    master="^\w+\.balance\.(south|east)"
+    slave="^\w+\.data"
+    if [[ ${pair[0]} =~ $master ]] || [[ ${pair[0]} =~ $slave ]]
+    then
+        echo '    stub-addr: "'${pair[1]}'"' >> /etc/unbound/unbound.conf
+    fi
+done 

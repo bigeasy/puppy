@@ -1,0 +1,85 @@
+#!/bin/bash
+
+dir=$(/bin/readlink -f $(/usr/bin/dirname $0))
+
+conf=($(/bin/hostname | sed 's/.*\.\(.*\)\.\(.*\)\.\(.*\)\.runpup\.com/\1 \2 \3/'))
+region="${conf[2]}"
+
+if [ "${conf[0]}" = "balance" ]
+then
+    type="master"
+else
+    type="slave"
+fi
+
+horizontal="^east|west$"
+if [[ "${conf[1]}" =~ $horizontal ]]
+then
+    axis="horizontal"
+else
+    axis="vertical"
+fi
+
+/bin/mkdir -p /var/lib/nsd/chroot/etc/nsd
+/bin/mkdir -p /var/lib/nsd/chroot/var/run/nsd
+/bin/mkdir -p /var/lib/nsd/chroot/var/lib/nsd
+/bin/chown -R nsd:nsd /var/lib/nsd/chroot
+
+zonefile=/var/lib/nsd/chroot/etc/nsd/runpup.net.zone 
+if [ -e $zonefile ]
+then
+    current=($(/bin/sed -n 's/.*\([0-9]\{8\}\)\([0-9]\{2\}\).*; Serial.*/\1 \2/p' $zonefile))
+else
+    current=(00000000 01)
+fi
+
+today=$(/bin/date +%Y%m%d)
+if [ "${current[0]}" == "$today" ]
+then
+    next="${today}"$(/usr/bin/printf '%02d\n' $((10#${current[1]} + 1)))
+else
+    next="${today}01"
+fi
+
+cat <<EOL > $zonefile
+\$TTL    3h
+\$ORIGIN runpup.net
+@       IN      SOA     ns1.runpup.net. alan.prettyrobots.com. (
+                          ${next}    ; Serial
+                          3h            ; Refresh after 3 hours
+                          1h            ; Retry after 1 hour
+                          1w            ; Expire after 1 week
+                          1h )          ; Negative caching TTL of 1 day
+;
+EOL
+
+$dir/address --region $region --axis $axis | while read line
+do
+    pair=($line)
+    host=$(echo ${pair[0]} | sed 's/\.runpup\.com//')
+    echo "$host IN A ${pair[1]}" >> $zonefile
+    /usr/bin/ssh-keygen -r $host -f /mnt/config/var/${pair[0]}/etc/ssh/ssh_host_rsa_key >> $zonefile
+    if [ ${pair[0]} == $(/bin/hostname) ]
+    then
+        echo "ns1 IN A ${pair[1]}" >> $zonefile
+        echo "@ IN NS ns1.runpup.net." >> $zonefile
+    fi
+done
+
+ksk=$(/bin/basename $(/bin/ls /mnt/config/var/dns/current/ksk/*.key) .key)
+zsk=$(/bin/basename $(/bin/ls /mnt/config/var/dns/current/zsk/*.key) .key)
+/usr/bin/ldns-signzone $zonefile \
+    /mnt/config/var/dns/current/ksk/$ksk \
+    /mnt/config/var/dns/current/zsk/$zsk
+
+/bin/mkdir -p /var/run/nsd
+/bin/chown -R nsd:nsd /var/lib/nsd/chroot
+/bin/chmod -R gou+x /var/lib/nsd/chroot
+/bin/chmod -R o-rwx /var/lib/nsd/chroot
+
+/usr/sbin/nsdc start
+/usr/sbin/nsdc rebuild
+/usr/sbin/nsdc reload
+#/usr/bin/sudo /usr/sbin/nsdc notify
+
+#$dir/loopback/snapshot /mnt/dns

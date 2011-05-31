@@ -1,6 +1,7 @@
 #!/usr/bin/env coffee
 
 ec2 = require "ec2"
+fs = require "fs"
 {OptionParser}  = require "coffee-script/lib/optparse"
 
 parser = new OptionParser [
@@ -33,10 +34,8 @@ region = { virginia: "us-east-1" }[options.region]
 if not region
   usage "Unknown region."
 
-client = ec2.createClient({
-  key: process.env["AWS_ACCESS_KEY_ID"]
-  secret: process.env["AWS_SECRET_ACCESS_KEY"]
-})
+configuration = JSON.parse fs.readFileSync "#{process.env["HOME"]}/.aws", "utf8"
+client = ec2.createClient configuration
 
 request = {}
 describeInstances = (callback) ->
@@ -100,10 +99,10 @@ launchDataServers = ->
   client.execute()
 
 launchPrimaryNameserver = ->
-   run "#{__dirname}/../dns/primary", options.region, options.axis, (code) ->
+   run "/usr/bin/sudo", "-H", "#{__dirname}/../../var/bin/dns/private/config", (code) ->
     if code isnt 0
       throw new Error ("Cannot launch primary private nameserver.")
-    process.stdout.write "Primary private namserver launched.\n"
+    process.stdout.write "Primary private namserver configured.\n"
 
 launchSecondaryNamservers = ->
 

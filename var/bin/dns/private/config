@@ -1,0 +1,46 @@
+#!/bin/bash
+
+function provide_xfr()
+{
+    local address=$1  
+    cat <<EOL >> /etc/nsd/nsd.conf
+    provide-xfr: $address tsig.runpup.com.
+    notify: $address NOKEY
+EOL
+}
+
+dir=$(readlink -f $(/usr/bin/dirname $0))
+$dir/../config runpup.net
+
+conf=($(/bin/hostname | sed 's/.*\.\(.*\)\.\(.*\)\.\(.*\)\.runpup\.com/\1 \2 \3/'))
+region="${conf[2]}"
+
+if [ "${conf[0]}" = "balance" ]
+then
+    type="master"
+else
+    type="slave"
+fi
+
+horizontal="^east|west$"
+if [[ "${conf[1]}" =~ $horizontal ]]
+then
+    axis="horizontal"
+else
+    axis="vertical"
+fi
+
+$dir/address --region $region --axis $axis | while read line
+do
+    pair=($line)
+    if [ $type = "master" ]
+    then
+        slave="^\w+\.data"
+        if [[ ${pair[0]} =~ $slave ]]
+        then
+            provide_xfr ${pair[1]}
+        fi
+    else
+        echo $line
+    fi
+done 
