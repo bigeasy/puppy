@@ -54,5 +54,3 @@ HERE
 
 append_unless "$(ssh-keygen -r $name -f $RSA_KEY)"
 append_unless "$name IN A $address"
-
-$dir/dns-publish runpup.com.zone
