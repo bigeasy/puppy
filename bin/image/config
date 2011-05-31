@@ -8,9 +8,9 @@ fi
 dir=$(/bin/readlink -f $(/usr/bin/dirname $0))
 name=$1
 address=$2
-if [ -z $name ] || [ -z $address ]
+if [ -z $name ]
 then
-    echo "usage: create_host.sh <machine_name> <ip_address>" 1>&2
+    echo "usage: image/config <machine_name> <ip_address>" 1>&2
     exit 1
 fi
 
@@ -52,5 +52,8 @@ NETWORKING_IPV6=no
 HOSTNAME=$name.runpup.com
 HERE
 
-append_unless "$(ssh-keygen -r $name -f $RSA_KEY)"
-append_unless "$name IN A $address"
+if [ ! -z "$address" ]
+then
+    append_unless "$(ssh-keygen -r $name -f $RSA_KEY)"
+    append_unless "$name IN A $address"
+fi
