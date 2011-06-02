@@ -1,7 +1,7 @@
 #!/usr/bin/env coffee
 
 alpha = [
-  "Alabo"
+  "Alvar"
   "Bouny"
   "Clio"
   "Dupre"
@@ -28,6 +28,7 @@ alpha = [
 ]
 
 ec2 = require "ec2"
+fs = require "fs"
 dns = require "dns"
 {OptionParser}  = require "coffee-script/lib/optparse"
 
@@ -77,12 +78,13 @@ zone = { north: "a", south: "b", east: "c", west: "d" }[zone]
 if not zone
   usage "Unknown zone."
 
-region = { virginia: "us-east-1" }[region]
+region = { california: "us-west-1", virginia: "us-east-1" }[region]
 if not region
   usage "Unknown region."
 
 kernel = { "i386": "aki-407d9529", "x86_64": "aki-427d952b" }[architecture]
 
+configuration = JSON.parse fs.readFileSync "#{process.env["HOME"]}/.aws", "utf8"
 client = ec2.createClient({
   key: process.env["AWS_ACCESS_KEY_ID"]
   secret: process.env["AWS_SECRET_ACCESS_KEY"]
@@ -196,3 +198,5 @@ client.call "DescribeInstances", {}, (response) ->
       }
 
 client.execute()
+
+# vim: ft=coffee:

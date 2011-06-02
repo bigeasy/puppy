@@ -1,5 +1,6 @@
 #!/usr/bin/env coffee
 
+fs = require "fs"
 ec2 = require "ec2"
 dns = require "dns"
 {OptionParser}  = require "coffee-script/lib/optparse"
@@ -44,14 +45,13 @@ zone = { north: "a", south: "b", east: "c", west: "d" }[zone]
 if not zone
   usage "Unknown zone."
 
-region = { virginia: "us-east-1" }[region]
-if not region
+endpoint = { california: "us-west-1", virginia: "us-east-1" }[region]
+if not endpoint
   usage "Unknown region."
 
-client = ec2.createClient({
-  key: process.env["AWS_ACCESS_KEY_ID"]
-  secret: process.env["AWS_SECRET_ACCESS_KEY"]
-})
+configuration = JSON.parse fs.readFileSync "#{process.env["HOME"]}/.aws", "utf8"
+configuration.endpoint = endpoint
+client = ec2.createClient configuration
 
 request = {}
 client.call "DescribeInstances", {}, (response) ->
@@ -59,6 +59,7 @@ client.call "DescribeInstances", {}, (response) ->
     for reservation in response.reservationSet
       for instance in reservation.instancesSet
         if not /^stopped|terminated$/.test instance.instanceState.name
+          console.log instance
           for tag in instance.tagSet
             if tag.key is "Name" and tag.value is options.name
               return instance
@@ -83,7 +84,7 @@ client.call "DescribeImages", { "Owner.1": "self" }, (response) ->
     KeyName: "secret_key"
     UserData: new Buffer(options.name).toString("base64")
     InstanceType: "t1.micro"
-    "Placement.AvailabilityZone": "#{region}#{zone}"
+    "Placement.AvailabilityZone": "#{endpoint}#{zone}"
   }, (response) ->
     request.instance = response.instancesSet.shift()
     client.poll "DescribeInstances", {}, (response) ->
