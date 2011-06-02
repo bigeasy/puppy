@@ -78,17 +78,18 @@ zone = { north: "a", south: "b", east: "c", west: "d" }[zone]
 if not zone
   usage "Unknown zone."
 
-region = { california: "us-west-1", virginia: "us-east-1" }[region]
-if not region
+endpoint = { california: "us-west-1", virginia: "us-east-1" }[region]
+if not endpoint
   usage "Unknown region."
 
-kernel = { "i386": "aki-407d9529", "x86_64": "aki-427d952b" }[architecture]
+kernel = {
+    california: { "i386": "aki-99a0f1dc", "x86_64": "aki-9ba0f1de" }
+    virginia: { "i386": "aki-407d9529", "x86_64": "aki-427d952b" }
+}[region][architecture]
 
 configuration = JSON.parse fs.readFileSync "#{process.env["HOME"]}/.aws", "utf8"
-client = ec2.createClient({
-  key: process.env["AWS_ACCESS_KEY_ID"]
-  secret: process.env["AWS_SECRET_ACCESS_KEY"]
-})
+configuration.endpoint = endpoint
+client = ec2.createClient configuration
 
 request = {}
 client.call "DescribeImages", { "Owner.1": "self" }, (response) ->
