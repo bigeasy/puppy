@@ -1,5 +1,6 @@
 #!/usr/bin/env coffee
 
+fs = require "fs"
 ec2 = require "ec2"
 dns = require "dns"
 {OptionParser}  = require "coffee-script/lib/optparse"
@@ -40,18 +41,20 @@ if not match
 
 architecture = { balance: "i386", user: "i386", data: "i386" }[type]
 
-zone = { north: "a", south: "b", east: "c", west: "d" }[zone]
+endpoint = { california: "us-west-1", virginia: "us-east-1" }[region]
+if not endpoint
+  usage "Unknown region."
+
+zone = {
+    virginia: { north: "a", south: "b", east: "c", west: "d" }
+    california: { north: "c", south: "b" }
+}[region][zone]
 if not zone
   usage "Unknown zone."
 
-region = { virginia: "us-east-1" }[region]
-if not region
-  usage "Unknown region."
-
-client = ec2.createClient({
-  key: process.env["AWS_ACCESS_KEY_ID"]
-  secret: process.env["AWS_SECRET_ACCESS_KEY"]
-})
+configuration = JSON.parse fs.readFileSync "#{process.env["HOME"]}/.aws", "utf8"
+configuration.endpoint = endpoint
+client = ec2.createClient configuration
 
 request = {}
 client.call "DescribeInstances", {}, (response) ->

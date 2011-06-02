@@ -37,11 +37,11 @@ fi
 function append_unless()
 {
     local line=$1
-    grep "$line" /mnt/dns/var/runpup.com.zone 
+    grep "$line" /mnt/dns/var/runpup.com/runpup.com.zone 
     if [ $? -ne 0 ]
     then
         echo "$line"
-        echo "$line" >> /mnt/dns/var/runpup.com.zone
+        echo "$line" >> /mnt/dns/var/runpup.com/runpup.com.zone
     fi
 }
 
