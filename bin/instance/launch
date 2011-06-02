@@ -62,6 +62,7 @@ client.call "DescribeInstances", {}, (response) ->
     for reservation in response.reservationSet
       for instance in reservation.instancesSet
         if not /^stopped|terminated$/.test instance.instanceState.name
+          console.log instance
           for tag in instance.tagSet
             if tag.key is "Name" and tag.value is options.name
               return instance
@@ -86,7 +87,7 @@ client.call "DescribeImages", { "Owner.1": "self" }, (response) ->
     KeyName: "secret_key"
     UserData: new Buffer(options.name).toString("base64")
     InstanceType: "t1.micro"
-    "Placement.AvailabilityZone": "#{region}#{zone}"
+    "Placement.AvailabilityZone": "#{endpoint}#{zone}"
   }, (response) ->
     request.instance = response.instancesSet.shift()
     client.poll "DescribeInstances", {}, (response) ->
