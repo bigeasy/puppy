@@ -66,13 +66,9 @@ if not match
   usage()
 [ type, zone, region ] = match.slice 1
 
-switch type
-  when "balance", "user"
-    architecture = "i386"
-  when "data"
-    architecture = "x86_64"
-  else
-    usage "Unknown machine type."
+architecture = { balance: "x86_64", data: "i386", user: "i386" }[type]
+if not architecture
+  usage "Unknown machine type."
 
 zone = { north: "a", south: "b", east: "c", west: "d" }[zone]
 if not zone

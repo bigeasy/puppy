@@ -1,11 +1,13 @@
 #!/usr/bin/env coffee
 
+fs = require "fs"
 ec2 = require "ec2"
 dns = require "dns"
 {OptionParser}  = require "coffee-script/lib/optparse"
 
 parser = new OptionParser [
   [ "-n", "--architecture [NAME]", "architecture name" ]
+  [ "-r", "--region [NAME]", "region" ]
   [ "-h", "--help", "display puppy help" ]
 ]
 
@@ -23,10 +25,13 @@ catch e
 if not options.architecture
   usage "Architecture is required."
 
-client = ec2.createClient({
-  key: process.env["AWS_ACCESS_KEY_ID"]
-  secret: process.env["AWS_SECRET_ACCESS_KEY"]
-})
+endpoint = { california: "us-west-1", virginia: "us-east-1" }[options.region]
+if not endpoint
+  usage "Unknown region."
+
+configuration = JSON.parse fs.readFileSync "#{process.env["HOME"]}/.aws", "utf8"
+configuration.endpoint = endpoint
+client = ec2.createClient configuration
 
 request = { outgoing: [] }
 client.call "DescribeImages", { "Owner.1": "self" }, (response) ->

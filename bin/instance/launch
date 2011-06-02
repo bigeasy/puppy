@@ -39,7 +39,7 @@ if not match
   usage()
 [ type, zone, region ] = match.slice 1
 
-architecture = { balance: "i386", user: "i386", data: "i386" }[type]
+architecture = { balance: "x86_64", user: "i386", data: "i386" }[type]
 
 endpoint = { california: "us-west-1", virginia: "us-east-1" }[region]
 if not endpoint
