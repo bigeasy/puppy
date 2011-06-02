@@ -51,7 +51,6 @@ client = ec2.createClient configuration
 
 request = {}
 client.call "DescribeInstances", {}, (response) ->
-  console.log response
   findInstance = ->
     for reservation in response.reservationSet
       for instance in reservation.instancesSet
