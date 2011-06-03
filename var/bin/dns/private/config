@@ -3,44 +3,97 @@
 function provide_xfr()
 {
     local address=$1  
-    cat <<EOL >> /etc/nsd/nsd.conf
+    cat <<EOL | /usr/bin/sudo /usr/bin/tee -a /etc/nsd/nsd.conf > /dev/null
     provide-xfr: $address tsig.runpup.com.
     notify: $address NOKEY
 EOL
 }
 
-dir=$(readlink -f $(/usr/bin/dirname $0))
-$dir/../config runpup.net
+function request_xfr()
+{
+    local address=$1  
+    cat <<EOL | /usr/bin/sudo /usr/bin/tee -a /etc/nsd/nsd.conf > /dev/null
+    request-xfr: AXFR $address tsig.runpup.com.
+    allow-notify: $address NOKEY
+EOL
+}
 
-conf=($(/bin/hostname | sed 's/.*\.\(.*\)\.\(.*\)\.\(.*\)\.runpup\.com/\1 \2 \3/'))
-region="${conf[2]}"
 
-if [ "${conf[0]}" = "balance" ]
-then
-    type="master"
-else
-    type="slave"
-fi
+dir=$(readlink -f "$(/usr/bin/dirname $0)/../../../..")
 
+conf=($(/bin/hostname | sed 's/.*\..*\.\(.*\)\.\(.*\)\.runpup\.com/\1 \2/'))
+region="${conf[1]}"
 horizontal="^east|west$"
-if [[ "${conf[1]}" =~ $horizontal ]]
+if [[ "${conf[0]}" =~ $horizontal ]]
 then
     axis="horizontal"
 else
     axis="vertical"
 fi
+$dir/var/bin/dns/config $region.runpup.net
 
-$dir/address --region $region --axis $axis | while read line
-do
-    pair=($line)
-    if [ $type = "master" ]
-    then
-        slave="^\w+\.data"
-        if [[ ${pair[0]} =~ $slave ]]
+function get_master()
+{
+    local have_master=0;
+    $dir/var/bin/dns/private/address --region $region --axis $axis | /bin/sort | while read line
+    do
+        local pair=($line)
+        local master="^\w+\.data\.(south|east)"
+        if [[ ${pair[0]} =~ $master ]] && [ $have_master -eq 0 ]
         then
-            provide_xfr ${pair[1]}
+            have_master=1
+            echo ${pair[0]}
         fi
-    else
-        echo $line
-    fi
-done 
+    done
+}
+
+function get_user_dns()
+{
+    local have_user=0;
+    $dir/var/bin/dns/private/address --region $region --axis $axis | /bin/sort | while read line
+    do
+        pair=($line)
+        user="^\w+\.user\.(south|east)"
+        if [[ ${pair[0]} =~ $user ]] && [ $have_user -eq 0 ]
+        then
+            have_user=1
+            echo ${pair[0]}
+        fi
+    done
+}
+
+master=$(get_master)
+user_dns=$(get_user_dns)
+
+slave="^\w+\.data"
+hostname=$(/bin/hostname)
+if [ $master =  $hostname ]
+then
+    type="master"
+elif [ $user_dns == $hostname ] || [[ $hostname =~ $slave ]]
+then
+    type="slave"
+fi
+
+if [ ! -z $type ]
+then
+    $dir/var/bin/dns/private/address --region $region --axis $axis | while read line
+    do
+        pair=($line)
+        if [ $type = "master" ]
+        then
+            if [ ${pair}[0] != $hostname ]
+            then
+                if [ ${pair}[0] == $(get_user_dns) ] || [[ ${pair[0]} =~ $slave ]]
+                then
+                    provide_xfr ${pair[1]}
+                fi
+            fi
+        else
+            if [ ${pair[0]} = $master ]
+            then
+                request_xfr ${pair[1]}
+            fi
+        fi
+    done 
+fi

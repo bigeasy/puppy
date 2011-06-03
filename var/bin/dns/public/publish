@@ -1,0 +1,103 @@
+#!/bin/bash
+
+region=$1
+axis=$2
+
+function advance_serial()
+{
+    local file=$1;
+    if [ ! -e $file ]
+    then
+        "Does not exist: $file."
+    fi
+    today=$(/bin/date +%Y%m%d)
+    current=($(/bin/sed -n 's/.*\([0-9]\{8\}\)\([0-9]\{2\}\).*; Serial.*/\1 \2/p' $file))
+    if [ "${current[0]}" == "$today" ]
+    then
+        next="${today}"$(/usr/bin/printf '%02d\n' $((10#${current[1]} + 1)))
+    else
+        next="${today}01"
+    fi
+    /bin/sed -i 's/\(.*\)[0-9]\{10\}\(.*; Serial.*\)/\1'$next'\2/' $file
+    echo $next
+}
+
+for domain in runpup.com california.runpup.net virginia.runpup.net prettyrobots.com
+do
+    zonefile=/mnt/dns/var/$domain/$domain.zone
+    advance_serial $zonefile.base
+    /bin/cp $zonefile.base $zonefile
+done
+
+
+function generate_user()
+{
+    local region=$1; local axis=$2
+    zonefile=/mnt/dns/var/runpup.com/runpup.com.zone
+    dir=$(/bin/readlink -f $(/usr/bin/dirname $0))
+    $dir/address --region $region --axis $axis | while read line
+    do
+        pair=($line)
+        public="^\w+\.user"
+        if [[ ${pair[0]} =~ $public ]]
+        then
+            host=$(echo ${pair[0]} | sed 's/\.runpup\.com//')
+            /usr/bin/sudo /usr/bin/ssh-keygen -r $host \
+                -f /mnt/config/var/${pair[0]}/etc/ssh/ssh_host_rsa_key >> $zonefile
+            echo "$host IN A ${pair[1]}" >> $zonefile
+        fi
+    done
+}
+
+for region in california virginia
+do
+    generate_user $region horizontal
+    generate_user $region vertical
+done
+
+function generate_stub()
+{
+    local region=$1; local axis=$2; local user_seen=0
+    zonefile=/mnt/dns/var/$region.runpup.net/$region.runpup.net.zone
+    $dir/address --region $region --axis $axis | /bin/sort | while read line
+    do
+        pair=($line)
+        is_user=0
+        public="^\w+\.data"
+        user="^\w+\.user\.(east|south)"
+        if [[ ${pair[0]} =~ $user ]] && [ $user_seen -eq 0 ]
+        then
+            user_seen=1
+            is_user=1
+        fi
+        if [ is_user -eq 1 ] || [[ ${pair[0]} =~ $public ]]
+        then
+            host=$(echo ${pair[0]} | sed 's/\.'$region'\.runpup\.com//')
+            echo "@ IN NS ns.$host" >> $zonefile
+            echo "ns.$host IN A ${pair[1]}" >> $zonefile
+        fi
+    done
+}
+
+for region in california virginia
+do
+    generate_stub $region horizontal
+    generate_stub $region vertical
+done
+
+for domain in runpup.com california.runpup.net virginia.runpup.net prettyrobots.com
+do
+    path=/mnt/dns/var/$domain
+    ksk=$(/bin/basename $(/bin/ls $path/current/ksk/*.key) .key)
+    zsk=$(/bin/basename $(/bin/ls $path/current/zsk/*.key) .key)
+    /usr/bin/ldns-signzone $path/$domain.zone $path/current/ksk/$ksk $path/current/zsk/$zsk
+    /usr/bin/sudo /bin/cp $path/$domain.zone.signed /var/lib/nsd/chroot/etc/nsd/
+done
+
+/usr/bin/sudo /bin/chown -R nsd:nsd /var/lib/nsd/chroot
+/usr/bin/sudo /bin/chmod -R gou+x /var/lib/nsd/chroot
+/usr/bin/sudo /bin/chmod -R o-rwx /var/lib/nsd/chroot
+
+/usr/bin/sudo /usr/sbin/nsdc rebuild
+/usr/bin/sudo /usr/sbin/nsdc reload
+/usr/bin/sudo /usr/sbin/nsdc notify

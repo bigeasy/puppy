@@ -30,12 +30,11 @@ directions = { "vertical": [ "north", "south" ], "horizontal": [ "east", "west" 
 if not directions
   usage "Unknown axis."
 
-endpoint = { california: "us-west-1", virginia: "us-east-1" }[options.region]
-if not endpoint
+region = { california: "us-west-1", virginia: "us-east-1" }[options.region]
+if not region
   usage "Unknown region."
 
 configuration = JSON.parse fs.readFileSync "#{process.env["HOME"]}/.aws", "utf8"
-configuration.endpoint = endpoint
 client = ec2.createClient configuration
 
 request = {}
@@ -63,7 +62,7 @@ client.call "DescribeInstances", {}, (response) ->
       if tag.key is "Name"
         process.stdout.write tag.value
     process.stdout.write " "
-    process.stdout.write instance.privateIpAddress
+    process.stdout.write instance.ipAddress
     process.stdout.write "\n"
 
 client.execute()
