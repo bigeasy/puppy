@@ -70,7 +70,7 @@ function generate_stub()
             user_seen=1
             is_user=1
         fi
-        if [ is_user -eq 1 ] || [[ ${pair[0]} =~ $public ]]
+        if [ $is_user -eq 1 ] || [[ ${pair[0]} =~ $public ]]
         then
             host=$(echo ${pair[0]} | sed 's/\.'$region'\.runpup\.com//')
             echo "@ IN NS ns.$host" >> $zonefile
