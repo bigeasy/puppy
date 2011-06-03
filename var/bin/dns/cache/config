@@ -1,11 +1,13 @@
 #!/bin/bash
 
 echo HELLO
-dir=$(/bin/readlink -f $(/usr/bin/dirname $0))
-.  $dir/../configuration
+dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../../..")
+.  $dir/var/dns/configuration
 
-cat /mnt/config/var/dns/current/ksk/*.ds > /etc/unbound/runpup.net.key
-cat /mnt/config/var/dns/current/ksk/*.key >> /etc/unbound/runpup.net.key
+bin/loopback/mount /dev/loop7 /mnt/dns
+cat /mnt/dns/var/dns/*.runpup.net/current/ksk/*.ds | /usr/bin/sudo /usr/bin/tee /etc/unbound/runpup.net.key > /dev/null
+cat /mnt/dns/var/dns/*.runpup.net/current/ksk/*.key >> /usr/bin/sudo /usr/bin/tee -a /etc/unbound/runpup.net.key > /dev/null
+bin/loopback/delete /mnt/dns
 
 cat <<EOL > /etc/unbound/unbound.conf
 server:
@@ -42,15 +44,24 @@ remote-control:
 	control-cert-file: "/etc/unbound/unbound_control.pem"
 stub-zone:
     name: "runpup.net"
+    stub-prime: yes
 EOL
 
-$dir/../private/address --region $region --axis $axis | while read line
+have_master=0
+$dir/../private/address --region $region --axis $axis | /bin/sort | while read line
 do
     pair=($line)
-    master="^\w+\.balance\.(south|east)"
+    master="^\w+\.data\.(south|east)"
+    user="^\w+\.user\.(south|east)"
     slave="^\w+\.data"
-    if [[ ${pair[0]} =~ $master ]] || [[ ${pair[0]} =~ $slave ]]
+    if [[ ${pair[0]} =~ $master ]] && [[ $have_master -eq 0]]
     then
+        have_master = 1
+        echo '    stub-addr: "'${pair[1]}'"' >> /etc/unbound/unbound.conf
+    elif [[ ${pair[0]} =~ $user ]] && [[ $have_user -eq 0]]
+        have_user = 1
+        echo '    stub-addr: "'${pair[1]}'"' >> /etc/unbound/unbound.conf
+    elif [[ ${pair[0]} =~ $slave ]]
         echo '    stub-addr: "'${pair[1]}'"' >> /etc/unbound/unbound.conf
     fi
 done 

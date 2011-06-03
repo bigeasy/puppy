@@ -3,8 +3,10 @@
 domain=$1
 ip=$(/sbin/ip addr list eth0 | /bin/sed -n 's/^ *inet \([^\/]*\).*$/\1/p')
 
+/usr/bin/sudo /bin/mkdir -p /etc/nsd
+
 umask 227
-cat <<EOL > /etc/nsd/nsd.conf
+cat <<EOL | /usr/bin/sudo /usr/bin/tee /etc/nsd/nsd.conf > /dev/null
 server:
     ip-address: ${ip}
     hide-version: yes
