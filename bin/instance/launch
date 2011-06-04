@@ -46,7 +46,7 @@ if not endpoint
   usage "Unknown region."
 
 zone = {
-    virginia: { north: "a", south: "b", east: "c", west: "d" }
+    virginia: { north: "d", south: "b", east: "c", west: "d" }
     california: { north: "c", south: "b" }
 }[region][zone]
 if not zone
