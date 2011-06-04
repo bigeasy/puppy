@@ -30,12 +30,12 @@ do
 done
 
 
+dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../../../..")
 function generate_user()
 {
     local region=$1; local axis=$2
     zonefile=/mnt/dns/var/runpup.com/runpup.com.zone
-    dir=$(/bin/readlink -f $(/usr/bin/dirname $0))
-    $dir/address --region $region --axis $axis | while read line
+    $dir/var/bin/dns/public/address --region $region --axis $axis | while read line
     do
         pair=($line)
         public="^\w+\.user"
@@ -59,7 +59,7 @@ function generate_stub()
 {
     local region=$1; local axis=$2; local user_seen=0
     zonefile=/mnt/dns/var/$region.runpup.net/$region.runpup.net.zone
-    $dir/address --region $region --axis $axis | /bin/sort | while read line
+    $dir/var/bin/dns/private/address --region $region --axis $axis | /bin/sort | while read line
     do
         pair=($line)
         is_user=0
