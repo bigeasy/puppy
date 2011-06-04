@@ -1,67 +1,49 @@
 #!/bin/bash
 
-echo HELLO
-dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../../..")
-.  $dir/var/dns/configuration
+dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../../../..")
+.  $dir/var/bin/dns/configuration
 
-bin/loopback/mount /dev/loop7 /mnt/dns
-cat /mnt/dns/var/dns/*.runpup.net/current/ksk/*.ds | /usr/bin/sudo /usr/bin/tee /etc/unbound/runpup.net.key > /dev/null
-cat /mnt/dns/var/dns/*.runpup.net/current/ksk/*.key >> /usr/bin/sudo /usr/bin/tee -a /etc/unbound/runpup.net.key > /dev/null
+bin/loopback/mount /dev/loop5 /mnt/dns
+cat /mnt/dns/var/$region.runpup.net/current/ksk/*.ds /mnt/dns/var/$region.runpup.net/current/ksk/*.key | \
+    /usr/bin/sudo /usr/bin/tee /etc/unbound/runpup.net.key > /dev/null
 bin/loopback/delete /mnt/dns
 
-cat <<EOL > /etc/unbound/unbound.conf
+cat <<EOL | /usr/bin/sudo /usr/bin/tee /etc/unbound/unbound.conf > /dev/null
 server:
-	verbosity: 1
-	statistics-interval: 0
-	statistics-cumulative: no
-	extended-statistics: yes
-	num-threads: 2
-	interface-automatic: no
+    verbosity: 1
+    statistics-interval: 0
+    statistics-cumulative: no
+    extended-statistics: yes
+    num-threads: 2
+    interface-automatic: no
     interface: 127.0.0.1
-	chroot: ""
-	username: "unbound"
-	directory: "/etc/unbound"
-	log-time-ascii: yes
-	pidfile: "/var/run/unbound/unbound.pid"
-	harden-glue: yes
-	harden-dnssec-stripped: yes
-	harden-referral-path: yes
-	use-caps-for-id: yes
-	unwanted-reply-threshold: 10000000
-	prefetch: yes
-	prefetch-key: yes
-	dlv-anchor-file: "/etc/unbound/dlv.isc.org.key"
-	trusted-keys-file: /etc/unbound/root.key
-	val-clean-additional: yes
-	val-permissive-mode: no
-	val-log-level: 1
-	trust-anchor-file: "/etc/unbound/runpup.net.key"
+    chroot: ""
+    username: "unbound"
+    directory: "/etc/unbound"
+    log-time-ascii: yes
+    pidfile: "/var/run/unbound/unbound.pid"
+    harden-glue: yes
+    harden-dnssec-stripped: yes
+    harden-referral-path: yes
+    use-caps-for-id: yes
+    unwanted-reply-threshold: 10000000
+    prefetch: yes
+    prefetch-key: yes
+    dlv-anchor-file: "/etc/unbound/dlv.isc.org.key"
+    trusted-keys-file: /etc/unbound/root.key
+    val-clean-additional: yes
+    val-permissive-mode: no
+    val-log-level: 1
+    trust-anchor-file: "/etc/unbound/runpup.net.key"
 remote-control:
-	control-enable: yes
-	server-key-file: "/etc/unbound/unbound_server.key"
-	server-cert-file: "/etc/unbound/unbound_server.pem"
-	control-key-file: "/etc/unbound/unbound_control.key"
-	control-cert-file: "/etc/unbound/unbound_control.pem"
+    control-enable: yes
+    server-key-file: "/etc/unbound/unbound_server.key"
+    server-cert-file: "/etc/unbound/unbound_server.pem"
+    control-key-file: "/etc/unbound/unbound_control.key"
+    control-cert-file: "/etc/unbound/unbound_control.pem"
 stub-zone:
-    name: "runpup.net"
+    name: "$region.runpup.net"
     stub-prime: yes
+    stub-host: "ns1.runpup.com"
+    stub-host: "ns4.runpup.com"
 EOL
-
-have_master=0
-$dir/../private/address --region $region --axis $axis | /bin/sort | while read line
-do
-    pair=($line)
-    master="^\w+\.data\.(south|east)"
-    user="^\w+\.user\.(south|east)"
-    slave="^\w+\.data"
-    if [[ ${pair[0]} =~ $master ]] && [[ $have_master -eq 0]]
-    then
-        have_master = 1
-        echo '    stub-addr: "'${pair[1]}'"' >> /etc/unbound/unbound.conf
-    elif [[ ${pair[0]} =~ $user ]] && [[ $have_user -eq 0]]
-        have_user = 1
-        echo '    stub-addr: "'${pair[1]}'"' >> /etc/unbound/unbound.conf
-    elif [[ ${pair[0]} =~ $slave ]]
-        echo '    stub-addr: "'${pair[1]}'"' >> /etc/unbound/unbound.conf
-    fi
-done 
