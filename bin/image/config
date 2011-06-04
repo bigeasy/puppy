@@ -1,10 +1,5 @@
 #!/bin/bash
 
-if [ $(whoami) != "root" ]; then
-    echo "Must run as root." 1>&2
-    exit 1
-fi
-
 dir=$(/bin/readlink -f $(/usr/bin/dirname $0))
 name=$1
 address=$2
@@ -15,17 +10,17 @@ then
 fi
 
 
-/bin/mkdir -p /mnt/config/var/$name/etc/ssh
+/usr/bin/sudo /bin/mkdir -p /mnt/config/var/$name/etc/ssh
 
 KEYGEN=/usr/bin/ssh-keygen
 RSA_KEY=/mnt/config/var/$name/etc/ssh/ssh_host_rsa_key
 if [ ! -s $RSA_KEY ]; then
     rm -f $RSA_KEY
-    if test ! -f $RSA_KEY && $KEYGEN -q -t rsa -f $RSA_KEY -C '' -N '' >&/dev/null; then
-        chmod 600 $RSA_KEY
-        chmod 644 $RSA_KEY.pub
+    if test ! -f $RSA_KEY && /usr/bin/sudo $KEYGEN -q -t rsa -f $RSA_KEY -C '' -N '' >&/dev/null; then
+        /usr/bin/sudo /bin/chmod 600 $RSA_KEY
+        /usr/bin/sudo /bin/chmod 644 $RSA_KEY.pub
         if [ -x /sbin/restorecon ]; then
-            /sbin/restorecon $RSA_KEY.pub
+            /usr/bin/sudo /sbin/restorecon $RSA_KEY.pub
         fi
         echo
     else
@@ -41,12 +36,12 @@ function append_unless()
     if [ $? -ne 0 ]
     then
         echo "$line"
-        echo "$line" >> /mnt/dns/var/runpup.com/runpup.com.zone
+        echo "$line" | /usr/bin/sudo /usr/bin/tee -a /mnt/dns/var/runpup.com/runpup.com.zone > /dev/null
     fi
 }
 
-mkdir -p /mnt/config/var/$name/etc/sysconfig
-cat <<HERE > /mnt/config/var/$name/etc/sysconfig/network
+/usr/bin/sudo /bin/mkdir -p /mnt/config/var/$name/etc/sysconfig
+cat <<HERE | /usr/bin/sudo /usr/bin/tee /mnt/config/var/$name/etc/sysconfig/network > /dev/null
 NETWORKING=yes
 NETWORKING_IPV6=no
 HOSTNAME=$name
