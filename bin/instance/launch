@@ -7,6 +7,7 @@ dns = require "dns"
 
 parser = new OptionParser [
   [ "-n", "--name [NAME]", "fully qualified domain name" ]
+  [ "-t", "--type [NAME]", "instance type" ]
   [ "-h", "--help", "display puppy help" ]
 ]
 
@@ -20,6 +21,9 @@ try
   options         = parser.parse process.argv.slice(2)
 catch e
   usage "Invalid arguments."
+
+if not options.type
+  options.type = "t1.micro"
 
 if not options.name
   usage "Host name is required."
@@ -85,7 +89,7 @@ client.call "DescribeImages", { "Owner.1": "self" }, (response) ->
     MaxCount: 1
     KeyName: "secret_key"
     UserData: new Buffer(options.name).toString("base64")
-    InstanceType: "t1.micro"
+    InstanceType: options.type
     "Placement.AvailabilityZone": "#{endpoint}#{zone}"
   }, (response) ->
     request.instance = response.instancesSet.shift()
