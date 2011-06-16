@@ -1,7 +1,13 @@
 #!/bin/bash
 
-region=$1
-axis=$2
+conf=($(/bin/hostname | sed 's/.*\..*\.\(.*\)\.\(.*\)\.runpup\.com/\1 \2/'))
+region="${conf[1]}"
+if [[ "${conf[0]}" =~ ^east|west$ ]]
+then
+    axis="horizontal"
+else
+    axis="vertical"
+fi
 
 dir=$(/bin/readlink -f $(/usr/bin/dirname $0))
 $dir/address --region $region --axis $axis | while read line
