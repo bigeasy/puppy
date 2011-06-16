@@ -82,9 +82,9 @@ then
         pair=($line)
         if [ $type = "master" ]
         then
-            if [ ${pair}[0] != $hostname ]
+            if [ ${pair[0]} != $hostname ]
             then
-                if [ ${pair}[0] == $(get_user_dns) ] || [[ ${pair[0]} =~ $slave ]]
+                if [ ${pair[0]} = $(get_user_dns) ] || [[ ${pair[0]} =~ $slave ]]
                 then
                     provide_xfr ${pair[1]}
                 fi
