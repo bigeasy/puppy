@@ -1,5 +1,11 @@
 #!/bin/bash
 
+/bin/rpm -q nsd > /dev/null
+if [ $? -ne 0 ]
+then
+    /usr/bin/sudo /usr/bin/yum install -y nsd
+fi
+
 function provide_xfr()
 {
     local address=$1  
