@@ -13,7 +13,7 @@ file=$2
 declare -A STANDBY
 STANDBY=([north]=south [south]=north [east]=west [west]=east)
 
-if [[ $(/bin/hostname) =~ ^([^.])*\.[^.]*\.([^.]*)\.([^.]*) ]]
+if [[ $(/bin/hostname) =~ ^([^.]*)\.[^.]*\.([^.]*)\.([^.]*) ]]
 then
     alpha=${BASH_REMATCH[1]}
     standby=${STANDBY[${BASH_REMATCH[2]}]}
@@ -22,6 +22,6 @@ else
     abend "hostname invalid"
 fi
 
-key=/var/lib/data/
+key=/var/lib/pgsql/.ssh/identity
 host="$alpha.balance.$standby.$region.runpup.net"
-/usr/bin/rsync -i $key -av -e 'ssh -o VerifyHostKeyDNS=yes' $path  janitor@$host:/mnt/wal/$file
+/usr/bin/rsync -aAH -e "ssh -i $key -o VerifyHostKeyDNS=yes" $path  postgres@$host:/mnt/wal/var/$file
