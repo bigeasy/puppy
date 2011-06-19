@@ -4,6 +4,10 @@ policy_module(janitor,1.0.0)
 
 require {
     type postgresql_t;
+    type semanage_t;
+    type setfiles_t;
+    type load_policy_t;
+	class tcp_socket { getopt getattr shutdown };
 }
 
 
@@ -33,17 +37,56 @@ corecmd_exec_bin(janitor_postgresql_t)
 files_read_etc_files(janitor_postgresql_t)
 kernel_read_system_state(janitor_postgresql_t)
 
-# PostgreSQL WAL archiving scripts.
+##############################################################################
+### PostgreSQL WAL archiving scripts.
+##############################################################################
+
 type postgresql_archive_exec_t;
 type postgresql_archive_t;
 
 role system_r types postgresql_archive_t;
 
+# Read archive program.
 puppy_read_puppy_bin(postgresql_t)
+
+# Transition into postgresql_archive_t domain.
 application_domain(postgresql_archive_t, postgresql_archive_exec_t)
 domtrans_pattern(postgresql_t, postgresql_archive_exec_t, postgresql_archive_t)
+
+# Read archive program.
+puppy_read_puppy_bin(postgresql_archive_t)
+
+# Necessary executables.
 corecmd_exec_bin(postgresql_archive_t)
 rsync_exec(postgresql_archive_t)
 hostname_exec(postgresql_archive_t)
+ssh_exec(postgresql_archive_t)
+
 # Read the system page size from /proc/meminfo.
 kernel_read_system_state(postgresql_archive_t)
+
+# Resource files.
+sysnet_read_config(postgresql_archive_t)
+files_read_etc_files(postgresql_archive_t)
+files_read_var_lib_files(postgresql_archive_t)
+miscfiles_read_localization(postgresql_archive_t)
+
+# IPC.
+allow postgresql_archive_t self:fifo_file rw_fifo_file_perms;
+allow postgresql_archive_t self:process signal;
+allow postgresql_archive_t self:netlink_route_socket { create rw_netlink_socket_perms nlmsg_read };
+allow postgresql_archive_t self:udp_socket { connect create write read ioctl };
+allow postgresql_archive_t self:tcp_socket { create connect read write setopt getopt getattr shutdown };
+
+# PostgreSQL communication.
+allow postgresql_archive_t postgresql_t:udp_socket rw_socket_perms;
+miscfiles_read_generic_certs(postgresql_archive_t)
+
+# SSH needs random numbers.
+dev_read_rand(postgresql_archive_t)
+dev_read_urand(postgresql_archive_t)
+corenet_tcp_connect_ssh_port(postgresql_archive_t)
+ssh_read_user_home_files(postgresql_archive_t)
+
+# Read the database directory.
+postgresql_manage_db(postgresql_archive_t)
