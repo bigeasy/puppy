@@ -19,10 +19,10 @@ for file in $(/bin/ls /mnt)
 do
     point="/mnt/$file"
     pattern="(/[^ ]+) on $point"; 
-    if [[ $point =~ $pattern ]]
+    if [[ $(/bin/mount) =~ $pattern ]]
     then
         device=${BASH_REMATCH[1]}
-        if [ $device == /dev/loop* ]
+        if [[ $device == /dev/loop* ]]
         then
             $dir/bin/loopback/delete $point
         else
