@@ -45,7 +45,7 @@ do
     fi
 done)
 
-cat <<EOL >> /var/lib/pgsql/data/recovery.conf
+cat <<EOL > /var/lib/pgsql/data/recovery.conf
 standby_mode = 'on'
 primary_conninfo = 'host=$ip port=5432 user=postgres'
 trigger_file = '/var/lib/pgsql/.failover'

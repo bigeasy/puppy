@@ -21,4 +21,4 @@ fi
 
 key=/var/lib/pgsql/.ssh/identity
 host="$alpha.balance.$direction.$region.runpup.net"
-/usr/bin/rsync -aAH -e "ssh -i $key -o VerifyHostKeyDNS=yes" postgres@$host:/mnt/wal/var/$file $path
+/usr/bin/rsync -a -e "ssh -i $key -o VerifyHostKeyDNS=yes" postgres@$host:/mnt/wal/var/$file $path 2>/dev/null
