@@ -14,5 +14,5 @@ wal_level = hot_standby
 max_wal_senders = 1
 wal_keep_segments = 32
 archive_mode    = on
-archive_command = '/usr/bin/postgresql_archive %p %f'
+archive_command = '/puppy/janitor/bin/postgresql_archive %p %f'
 EOL

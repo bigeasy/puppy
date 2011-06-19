@@ -10,5 +10,3 @@
 /puppy/[^/]+/lib                                    -d gen_context(system_u:object_r:puppy_lib_t, s0)
 /puppy/[^/]+/lib/.*                                    gen_context(system_u:object_r:puppy_lib_t, s0)
 /var/cache/puppy.*                                     gen_context(system_u:object_r:puppy_cache_t, s0)
-
-/var/lib/pgsql/\.ssh(/.*)?                                           gen_context(system_u:object_r:ssh_home_t,s0)
