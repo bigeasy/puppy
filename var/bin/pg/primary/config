@@ -30,7 +30,7 @@ do
 done)
 
 cat <<EOL >> /var/lib/pgsql/data/pg_hba.conf
-host  replication  postgres  $ip trust
+host  replication  postgres  $ip/24 trust
 EOL
 
 cat <<EOL >> /var/lib/pgsql/data/postgresql.conf

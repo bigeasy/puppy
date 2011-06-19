@@ -1,10 +1,28 @@
 #!/bin/bash
 
+dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../../..")
+
 cat <<EOL >/var/lib/pgsql/data/pg_hba.conf
 local   all             all                                     ident
 EOL
 
+hostname=$(/bin/hostname)
+[[ $hostname =~ ^[^.]*\.[^.]*\.([^.]*)\.([^.]*)\..*$ ]]
+direction=${BASH_REMATCH[1]}; region=${BASH_REMATCH[2]}
+
+declare -A AXES
+AXES=([north]=vertical [south]=vertical [east]=horizontal [west]=horizontal)
+ip=$($dir/var/bin/dns/private/address --region $region --axis ${AXES[$direction]} | while read line
+do
+    pair=($line)
+    if [ ${pair[0]} == $hostname ]
+    then
+        echo ${pair[1]}
+    fi
+done)
+
 cat <<EOL >/var/lib/pgsql/data/postgresql.conf
+listen_addresses='$ip'
 max_connections = 100
 shared_buffers = 28MB
 logging_collector = on
