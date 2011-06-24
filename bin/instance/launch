@@ -8,7 +8,7 @@ dns = require "dns"
 parser = new OptionParser [
   [ "-n", "--name [NAME]", "fully qualified domain name" ]
   [ "-a", "--architecture [NAME]", "architecture" ]
-  [ "-t", "--type [NAME]", "instance type" ]
+  [ "-s", "--size [NAME]", "instance size" ]
   [ "-h", "--help", "display puppy help" ]
 ]
 
@@ -23,8 +23,8 @@ try
 catch e
   usage "Invalid arguments."
 
-if not options.type
-  options.type = "t1.micro"
+if not options.size
+  options.size = "t1.micro"
 
 if not options.name
   usage "Host name is required."
@@ -90,7 +90,7 @@ client.call "DescribeImages", { "Owner.1": "self" }, (response) ->
     MaxCount: 1
     KeyName: "secret_key"
     UserData: new Buffer(options.name).toString("base64")
-    InstanceType: options.type
+    InstanceType: options.size
     "Placement.AvailabilityZone": "#{endpoint}#{zone}"
   }, (response) ->
     request.instance = response.instancesSet.shift()

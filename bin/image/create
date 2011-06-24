@@ -141,52 +141,24 @@ client.call "DescribeInstances", {}, (response) ->
       if tags.Puppified and tags.Architecture is architecture and tags.Redux
         usage "A redux snapshot for this architecture already exists."
 
-  if (request.instance.instanceState.name != "stopped")
-    client.call "StopInstances", { "InstanceId.1": request.instance.instanceId }, (response) ->
+    if (request.instance.instanceState.name != "stopped")
+      client.call "StopInstances", { "InstanceId.1": request.instance.instanceId }, (response) ->
 
-  client.poll "DescribeInstances", { "InstanceId.1": request.instance.instanceId }, (response) ->
-    return response.reservationSet[0].instancesSet[0].instanceState.name is "stopped"
+    client.poll "DescribeInstances", { "InstanceId.1": request.instance.instanceId }, (response) ->
+      return response.reservationSet[0].instancesSet[0].instanceState.name is "stopped"
 
-  client.call "CreateSnapshot", {
-    "VolumeId": request.volumeId
-    "Description": "Puppy #{architecture} #{request.version}"
-  }, (response) ->
-    request.snapshot = response
-    client.poll "DescribeSnapshots", {}, (response) ->
-      for snapshot in response.snapshotSet
-        if snapshot.snapshotId is request.snapshot.snapshotId
-          return snapshot.status is "completed"
-      false
-    client.call "CreateTags", {
-      "ResourceId.1": request.snapshot.snapshotId
-      "Tag.1.Key": "Name"
-      "Tag.1.Value": "Puppy #{architecture} #{request.version}"
-      "Tag.2.Key": "Puppified"
-      "Tag.2.Value": ""
-      "Tag.3.Key": "Redux"
-      "Tag.3.Value": ""
-      "Tag.4.Key": "Version"
-      "Tag.4.Value": request.version
-      "Tag.5.Key": "Architecture"
-      "Tag.5.Value": architecture
-    }
-    client.call "RegisterImage", {
-      Name: "Puppy #{architecture} #{request.version}"
-      Description: "Puppy #{architecture}"
-      Architecture: architecture
-      RootDeviceName: "/dev/sda"
-      KernelId: kernel
-      "BlockDeviceMapping.1.DeviceName": "/dev/sda"
-      "BlockDeviceMapping.1.Ebs.SnapshotId": request.snapshot.snapshotId
+    client.call "CreateSnapshot", {
+      "VolumeId": request.volumeId
+      "Description": "Puppy #{architecture} #{request.version}"
     }, (response) ->
-      request.image = response
-      client.poll "DescribeImages", { "Owner.1": "self" }, (response) ->
-        for image in response.imagesSet
-          if request.image.imageId is image.imageId
-            return true
+      request.snapshot = response
+      client.poll "DescribeSnapshots", {}, (response) ->
+        for snapshot in response.snapshotSet
+          if snapshot.snapshotId is request.snapshot.snapshotId
+            return snapshot.status is "completed"
         false
       client.call "CreateTags", {
-        "ResourceId.1": request.image.imageId
+        "ResourceId.1": request.snapshot.snapshotId
         "Tag.1.Key": "Name"
         "Tag.1.Value": "Puppy #{architecture} #{request.version}"
         "Tag.2.Key": "Puppified"
@@ -195,7 +167,35 @@ client.call "DescribeInstances", {}, (response) ->
         "Tag.3.Value": ""
         "Tag.4.Key": "Version"
         "Tag.4.Value": request.version
+        "Tag.5.Key": "Architecture"
+        "Tag.5.Value": architecture
       }
+      client.call "RegisterImage", {
+        Name: "Puppy #{architecture} #{request.version}"
+        Description: "Puppy #{architecture}"
+        Architecture: architecture
+        RootDeviceName: "/dev/sda"
+        KernelId: kernel
+        "BlockDeviceMapping.1.DeviceName": "/dev/sda"
+        "BlockDeviceMapping.1.Ebs.SnapshotId": request.snapshot.snapshotId
+      }, (response) ->
+        request.image = response
+        client.poll "DescribeImages", { "Owner.1": "self" }, (response) ->
+          for image in response.imagesSet
+            if request.image.imageId is image.imageId
+              return true
+          false
+        client.call "CreateTags", {
+          "ResourceId.1": request.image.imageId
+          "Tag.1.Key": "Name"
+          "Tag.1.Value": "Puppy #{architecture} #{request.version}"
+          "Tag.2.Key": "Puppified"
+          "Tag.2.Value": ""
+          "Tag.3.Key": "Redux"
+          "Tag.3.Value": ""
+          "Tag.4.Key": "Version"
+          "Tag.4.Value": request.version
+        }
 
 client.execute()
 
