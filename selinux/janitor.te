@@ -2,6 +2,15 @@
 
 policy_module(janitor,1.0.0)
 
+require {
+    type postgresql_t;
+    type semanage_t;
+    type setfiles_t;
+    type load_policy_t;
+	class tcp_socket { getopt getattr shutdown };
+}
+
+
 # The only real SELinux policy is for the psql
 # transition wrapper, used to transition from root to the postgres user, so that
 # the postgres user has a domain limited to running the postgres client.
@@ -10,6 +19,7 @@ policy_module(janitor,1.0.0)
 # PostgreSQL domain types.
 type janitor_postgresql_t;
 type janitor_postgresql_exec_t;
+
 role system_r types janitor_postgresql_t;
 
 # PostgreSQL domain transition.
@@ -26,3 +36,168 @@ puppy_read_puppy_bin(janitor_postgresql_t)
 corecmd_exec_bin(janitor_postgresql_t)
 files_read_etc_files(janitor_postgresql_t)
 kernel_read_system_state(janitor_postgresql_t)
+
+##############################################################################
+### PostgreSQL WAL archiving.
+##############################################################################
+
+type postgresql_archive_exec_t;
+type postgresql_archive_t;
+
+role system_r types postgresql_archive_t;
+
+# Read archive program.
+puppy_read_puppy_bin(postgresql_t)
+
+# Transition into postgresql_archive_t domain.
+application_domain(postgresql_archive_t, postgresql_archive_exec_t)
+domtrans_pattern(postgresql_t, postgresql_archive_exec_t, postgresql_archive_t)
+
+# Read archive program.
+puppy_read_puppy_bin(postgresql_archive_t)
+
+# Necessary executables.
+corecmd_exec_bin(postgresql_archive_t)
+rsync_exec(postgresql_archive_t)
+hostname_exec(postgresql_archive_t)
+ssh_exec(postgresql_archive_t)
+
+# Read the system page size from /proc/meminfo.
+kernel_read_system_state(postgresql_archive_t)
+
+# Resource files.
+sysnet_read_config(postgresql_archive_t)
+files_read_etc_files(postgresql_archive_t)
+files_read_var_lib_files(postgresql_archive_t)
+miscfiles_read_localization(postgresql_archive_t)
+
+# IPC.
+allow postgresql_archive_t self:fifo_file rw_fifo_file_perms;
+allow postgresql_archive_t self:process signal;
+allow postgresql_archive_t self:netlink_route_socket { create rw_netlink_socket_perms nlmsg_read };
+allow postgresql_archive_t self:udp_socket { connect create write read ioctl };
+allow postgresql_archive_t self:tcp_socket { create connect read write setopt getopt getattr shutdown };
+
+# PostgreSQL communication.
+allow postgresql_archive_t postgresql_t:udp_socket rw_socket_perms;
+miscfiles_read_generic_certs(postgresql_archive_t)
+
+# SSH needs random numbers.
+dev_read_rand(postgresql_archive_t)
+dev_read_urand(postgresql_archive_t)
+corenet_tcp_connect_ssh_port(postgresql_archive_t)
+ssh_read_user_home_files(postgresql_archive_t)
+
+# Read the database directory.
+postgresql_manage_db(postgresql_archive_t)
+
+##############################################################################
+### PostgreSQL WAL restoration.
+##############################################################################
+
+type postgresql_restore_exec_t;
+type postgresql_restore_t;
+
+role system_r types postgresql_restore_t;
+
+# Read restore program.
+puppy_read_puppy_bin(postgresql_t)
+
+# Transition into postgresql_restore_t domain.
+application_domain(postgresql_restore_t, postgresql_restore_exec_t)
+domtrans_pattern(postgresql_t, postgresql_restore_exec_t, postgresql_restore_t)
+
+# Read restore program.
+puppy_read_puppy_bin(postgresql_restore_t)
+
+# Necessary executables.
+corecmd_exec_bin(postgresql_restore_t)
+rsync_exec(postgresql_restore_t)
+hostname_exec(postgresql_restore_t)
+ssh_exec(postgresql_restore_t)
+
+# Executable basics.
+kernel_read_system_state(postgresql_restore_t)
+miscfiles_read_localization(postgresql_restore_t)
+allow postgresql_restore_t self:process signal;
+allow postgresql_restore_t self:fifo_file { read write getattr };
+
+# Files and directories.
+files_search_var_lib(postgresql_restore_t)
+files_read_var_lib_files(postgresql_restore_t)
+files_read_etc_files(postgresql_restore_t)
+
+
+# SSH.
+dev_read_rand(postgresql_restore_t)
+dev_read_urand(postgresql_restore_t)
+miscfiles_read_generic_certs(postgresql_restore_t)
+sysnet_read_config(postgresql_restore_t)
+corenet_tcp_connect_ssh_port(postgresql_restore_t)
+ssh_read_user_home_files(postgresql_restore_t)
+
+# Sockets.
+allow postgresql_restore_t self:udp_socket { create connect read write ioctl };
+allow postgresql_restore_t self:netlink_route_socket { create bind read write getattr nlmsg_read };
+allow postgresql_restore_t self:tcp_socket { connect create read write setopt getopt getattr shutdown };
+
+# PostgreSQL.
+allow postgresql_restore_t postgresql_t:udp_socket { read write };
+postgresql_search_db(postgresql_restore_t)
+postgresql_manage_db(postgresql_restore_t)
+allow postgresql_t postgresql_restore_t:process signal;
+allow postgresql_restore_t postgresql_db_t:file { rename create unlink setattr };
+
+
+##############################################################################
+### PostgreSQL WAL cleanup.
+##############################################################################
+
+type postgresql_cleanup_exec_t;
+type postgresql_cleanup_t;
+
+role system_r types postgresql_cleanup_t;
+
+# Read cleanup program.
+puppy_read_puppy_bin(postgresql_t)
+
+# Transition into postgresql_cleanup_t domain.
+application_domain(postgresql_cleanup_t, postgresql_cleanup_exec_t)
+domtrans_pattern(postgresql_t, postgresql_cleanup_exec_t, postgresql_cleanup_t)
+
+# Read cleanup program.
+puppy_read_puppy_bin(postgresql_cleanup_t)
+
+# Necessary executables.
+corecmd_exec_bin(postgresql_cleanup_t)
+hostname_exec(postgresql_cleanup_t)
+ssh_exec(postgresql_cleanup_t)
+kernel_read_system_state(postgresql_cleanup_t)
+
+# Executable basics.
+miscfiles_read_localization(postgresql_cleanup_t)
+allow postgresql_cleanup_t self:fifo_file { read write getattr };
+allow postgresql_cleanup_t self:process signal;
+
+# PostgreSQL.
+allow postgresql_cleanup_t postgresql_t:udp_socket { read write };
+postgresql_search_db(postgresql_cleanup_t)
+
+# SSH.
+miscfiles_read_generic_certs(postgresql_cleanup_t)
+sysnet_read_config(postgresql_cleanup_t)
+dev_read_rand(postgresql_cleanup_t)
+dev_read_urand(postgresql_cleanup_t)
+corenet_tcp_connect_ssh_port(postgresql_cleanup_t)
+
+# Files and directories.
+files_read_etc_files(postgresql_cleanup_t)
+
+# SSH key.
+files_search_var_lib(postgresql_cleanup_t)
+ssh_read_user_home_files(postgresql_cleanup_t)
+
+# Sockets.
+allow postgresql_cleanup_t self:netlink_route_socket { create getattr bind write read nlmsg_read };
+allow postgresql_cleanup_t self:udp_socket { create connect read write ioctl };
+allow postgresql_cleanup_t self:tcp_socket { create connect read write setopt getopt getattr shutdown };

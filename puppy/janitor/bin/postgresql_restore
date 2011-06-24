@@ -10,18 +10,15 @@ function abend()
 path=$1
 file=$2
 
-declare -A STANDBY
-STANDBY=([north]=south [south]=north [east]=west [west]=east)
-
 if [[ $(/bin/hostname) =~ ^([^.]*)\.[^.]*\.([^.]*)\.([^.]*) ]]
 then
     alpha=${BASH_REMATCH[1]}
-    standby=${STANDBY[${BASH_REMATCH[2]}]}
+    direction=${BASH_REMATCH[2]}
     region=${BASH_REMATCH[3]}
 else
     abend "hostname invalid"
 fi
 
 key=/var/lib/pgsql/.ssh/identity
-host="$alpha.balance.$standby.$region.runpup.net"
-/usr/bin/rsync -aAH -e "ssh -i $key -o VerifyHostKeyDNS=yes" $path  postgres@$host:/mnt/wal/var/$file
+host="$alpha.balance.$direction.$region.runpup.net"
+/usr/bin/rsync -a -e "ssh -i $key -o VerifyHostKeyDNS=yes" postgres@$host:/mnt/wal/var/$file $path 2>/dev/null

@@ -1,17 +1,44 @@
 #!/bin/bash
 
+if [ $(/usr/bin/id -u) -ne 0 ]
+then
+    echo "Must run as root." 1>&2
+    exit 1
+fi
+
+function abend()
+{
+    local message=$1
+    echo "error: $message" 2>&1
+    exit 1
+}
+
 dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../..")
 
 for file in $(/bin/ls /mnt)
 do
-     $dir/bin/loopback/delete /mnt/$file
+    point="/mnt/$file"
+    pattern="(/[^ ]+) on $point"; 
+    if [[ $(/bin/mount) =~ $pattern ]]
+    then
+        device=${BASH_REMATCH[1]}
+        if [[ $device == /dev/loop* ]]
+        then
+            $dir/bin/loopback/delete $point
+        else
+            /bin/umount $point
+            /bin/rmdir $point || abend "cannot delete $point"
+        fi
+    else
+        abend "unexpected mount output"
+    fi
 done
 
-/usr/bin/sudo /bin/rm -rf /root/.bash_history /root/setup.sh /etc/nsd /var/lib/nsd
+/bin/rm -rf /root/.bash_history /root/setup.sh /etc/nsd /var/lib/nsd
 /bin/rm -f ~/.bash_history ~/.aws
-/usr/bin/sudo /usr/bin/yum clean all
-/usr/bin/sudo /usr/sbin/unbound-control -c /etc/unbound/unbound.conf flush_zone .
+/usr/bin/yum clean all
+/usr/sbin/unbound-control -c /etc/unbound/unbound.conf flush_zone .
 for log in $(/usr/bin/sudo /bin/find /var/log ! -type d)
 do
-    /usr/bin/sudo /bin/rm $log
+    /bin/rm $log
 done

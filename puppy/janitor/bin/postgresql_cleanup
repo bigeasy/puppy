@@ -1,0 +1,8 @@
+#!/bin/bash
+
+[[ $(/bin/hostname) =~ ^([^.]*)\.[^.]*\.(.*)\.com$ ]]
+alpha=${BASH_REMATCH[1]}; domain=${BASH_REMATCH[2]};
+
+key=/var/lib/pgsql/.ssh/identity
+host="$alpha.balance.$domain.net"
+/usr/bin/ssh -o VerifyHostKeyDNS=yes -i $key -l postgres $host /usr/bin/pg_archivecleanup /mnt/wal/var $1

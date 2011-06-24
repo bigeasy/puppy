@@ -5,6 +5,7 @@ policy_module(puppy, 1.0.0)
 require {
     type ssh_exec_t;
     type ssh_home_t;
+    type postgresql_t;
     class netlink_route_socket bind;
     class udp_socket connect;
 }
