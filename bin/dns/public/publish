@@ -30,7 +30,7 @@ do
 done
 
 
-dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../../../..")
+dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../../..")
 function generate_user()
 {
     local region=$1; local axis=$2

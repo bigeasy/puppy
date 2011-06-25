@@ -6,7 +6,7 @@ then
     exit 1
 fi
 
-dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../../../..")
+dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../../..")
 
 hostname=$(/bin/hostname)
 [[ $hostname =~ ^([^.]*)\.[^.]*\.([^.]*)\.([^.]*)\..*$ ]] || abend "bad hostname"

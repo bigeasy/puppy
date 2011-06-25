@@ -1,6 +1,6 @@
 #!/bin/bash
 
-dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../../../..") 
+dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../../..") 
 
 $dir/var/bin/dns/private/config
 $dir/var/bin/dns/private/publish

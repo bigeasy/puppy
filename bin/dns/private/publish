@@ -1,6 +1,6 @@
 #!/bin/bash
 
-dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../../../..")
+dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../../..")
 
 conf=($(/bin/hostname | sed 's/.*\..*\.\(.*\)\.\(.*\)\.runpup\.com/\1 \2/'))
 region="${conf[1]}"
@@ -46,7 +46,7 @@ cat <<EOL | /usr/bin/sudo /usr/bin/tee $zonefile > /dev/null
 EOL
 
 user_seen=0
-master=$($dir/var/bin/dns/private/address --region $region --axis $axis | while read line
+master=$($dir/bin/dns/private/address --region $region --axis $axis | while read line
 do
     pair=($line)
     host=$(echo ${pair[0]} | sed 's/\.'$region'\.runpup\.com//')
@@ -80,8 +80,8 @@ ksk=$(/bin/basename $(/bin/ls /mnt/dns/var/$region.runpup.net/current/ksk/*.key)
 zsk=$(/bin/basename $(/bin/ls /mnt/dns/var/$region.runpup.net/current/zsk/*.key) .key)
 /usr/bin/sudo /usr/bin/ldns-signzone $zonefile \
     /mnt/dns/var/$region.runpup.net/current/ksk/$ksk \
-    /mnt/dns/var/$region.runpup.net/current/zsk/$zsk
-$dir/bin/loopback/delete /mnt/dns
+    /mnt/dns/var/$region.runpup.net/current/zsk/$zsk || exit 1
+$dir/bin/loopback/delete /mnt/dns || exit 1
 
 /usr/bin/sudo /bin/mkdir -p /var/run/nsd
 /usr/bin/sudo /bin/chown -R nsd:nsd /var/lib/nsd/chroot

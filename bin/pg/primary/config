@@ -6,7 +6,7 @@ then
     exit 1
 fi
 
-dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../../../..")
+dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../../..")
 $dir/var/bin/pg/config
 
 [[ $(/bin/hostname) =~ ^([^.]*)\.[^.]*\.([^.]*)\.([^.]*)\.(.*)$ ]] || abend "bad hostname"
