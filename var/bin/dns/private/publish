@@ -90,6 +90,7 @@ $dir/bin/loopback/delete /mnt/dns
 /usr/bin/sudo /bin/chmod -R gou+x /var/lib/nsd/chroot
 /usr/bin/sudo /bin/chmod -R o-rwx /var/lib/nsd/chroot
 
+/usr/bin/sudo /bin/systemctl restart nsd.service
 /usr/bin/sudo /usr/sbin/nsdc rebuild
 /usr/bin/sudo /usr/sbin/nsdc reload
 if [ $master = $(/bin/hostname) ]
