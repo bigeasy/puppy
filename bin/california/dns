@@ -1,0 +1,29 @@
+#!/bin/bash
+
+JANITOR=/home/alan/git/ecma/puppy/janitor
+
+function gateway() {
+    /usr/bin/ssh -A alvar.user.south.california.runpup.com $@
+}
+
+function sshdo() {
+    local machine=$1
+    shift
+    gateway /usr/bin/ssh -A $machine.california.runpup.net $@
+}
+
+function pull() {
+    local machine=$1
+    /usr/bin/ssh -A alvar.user.south.california.runpup.com \
+        /usr/bin/ssh -A $machine.california.runpup.net \
+        "\"(cd $JANITOR && /usr/bin/git pull)\""
+}
+
+/usr/bin/sudo /usr/sbin/unbound-control -c /etc/unbound/unbound.conf flush_zone .
+gateway bash -c "'(cd $JANITOR && /usr/bin/git pull)'"
+gateway $JANITOR/var/bin/dns/private/bootstrap
+gateway /usr/bin/sudo /usr/sbin/unbound-control -c /etc/unbound/unbound.conf flush_zone .
+pull alvar.data.north
+sshdo alvar.data.north $JANITOR/var/bin/dns/private/bootstrap
+pull alvar.data.south
+sshdo alvar.data.south $JANITOR/var/bin/dns/private/bootstrap
