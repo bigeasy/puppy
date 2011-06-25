@@ -12,7 +12,7 @@ direction=${BASH_REMATCH[1]}; region=${BASH_REMATCH[2]}
 
 declare -A AXES
 AXES=([north]=vertical [south]=vertical [east]=horizontal [west]=horizontal)
-ip=$($dir/var/bin/dns/private/address --region $region --axis ${AXES[$direction]} | while read line
+ip=$($dir/bin/dns/private/address --region $region --axis ${AXES[$direction]} | while read line
 do
     pair=($line)
     if [ ${pair[0]} == $hostname ]
