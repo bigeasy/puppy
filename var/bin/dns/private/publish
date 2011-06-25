@@ -33,7 +33,6 @@ else
     next="${today}01"
 fi
 
-echo $next
 cat <<EOL | /usr/bin/sudo /usr/bin/tee $zonefile > /dev/null
 \$TTL    3h
 \$ORIGIN $region.runpup.net
@@ -75,7 +74,6 @@ do
         echo "ns.$host IN A ${pair[1]}" | /usr/bin/sudo /usr/bin/tee -a $zonefile > /dev/null
     fi
 done)
-echo $master
 
 $dir/bin/loopback/mount /dev/loop5 /mnt/dns
 ksk=$(/bin/basename $(/bin/ls /mnt/dns/var/$region.runpup.net/current/ksk/*.key) .key)
@@ -91,11 +89,11 @@ $dir/bin/loopback/delete /mnt/dns
 /usr/bin/sudo /bin/chmod -R o-rwx /var/lib/nsd/chroot
 
 /usr/bin/sudo /bin/systemctl restart nsd.service
-/usr/bin/sudo /usr/sbin/nsdc rebuild
-/usr/bin/sudo /usr/sbin/nsdc reload
+/usr/bin/sudo /usr/sbin/nsdc rebuild > /dev/null
+/usr/bin/sudo /usr/sbin/nsdc reload > /dev/null
 if [ "$master" = $(/bin/hostname) ]
 then
-    /usr/bin/sudo /usr/sbin/nsdc notify
+    /usr/bin/sudo /usr/sbin/nsdc notify > /dev/null
 fi
 
 #$dir/loopback/snapshot /mnt/dns

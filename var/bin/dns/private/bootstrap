@@ -5,5 +5,4 @@ dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../../../..")
 $dir/var/bin/dns/private/config
 $dir/var/bin/dns/private/publish
 /usr/bin/sudo /bin/systemctl start nsd.service
-/usr/bin/sudo /bin/systemctl status nsd.service
 $dir/var/bin/dns/cache/config
