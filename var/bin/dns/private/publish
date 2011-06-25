@@ -92,7 +92,7 @@ $dir/bin/loopback/delete /mnt/dns
 /usr/bin/sudo /bin/systemctl restart nsd.service
 /usr/bin/sudo /usr/sbin/nsdc rebuild
 /usr/bin/sudo /usr/sbin/nsdc reload
-if [ $master = $(/bin/hostname) ]
+if [ "$master" = $(/bin/hostname) ]
 then
     /usr/bin/sudo /usr/sbin/nsdc notify
 fi
