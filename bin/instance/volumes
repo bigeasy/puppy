@@ -1,6 +1,7 @@
 #!/usr/bin/env coffee
 
 ec2 = require "ec2"
+fs = require "fs"
 {OptionParser}  = require "coffee-script/lib/optparse"
 
 parser = new OptionParser [
@@ -49,14 +50,13 @@ zone = { north: "a", south: "b", east: "c", west: "d" }[zone]
 if not zone
   usage "Unknown zone."
 
-region = { virginia: "us-east-1" }[region]
-if not region
+endpoint = { virginia: "us-east-1", california: "us-west-1" }[region]
+if not endpoint
   usage "Unknown region."
 
-client = ec2.createClient({
-  key: process.env["AWS_ACCESS_KEY_ID"]
-  secret: process.env["AWS_SECRET_ACCESS_KEY"]
-})
+configuration = JSON.parse fs.readFileSync "#{process.env["HOME"]}/.aws", "utf8"
+configuration.endpoint = endpoint
+client = ec2.createClient configuration
 
 request = {}
 client.call "DescribeInstances", {}, (response) ->
@@ -96,8 +96,6 @@ client.call "DescribeVolumes", {}, (response) ->
     client.poll "DescribeVolumes", {
       "VolumeId.1": volume.volumeId
     }, (response) ->
-      process.stdout.write JSON.stringify response, null, 2
-      process.stdout.write "\n"
       response.volumeSet[0].attachmentSet[0].status is "attached"
 
 client.execute()
