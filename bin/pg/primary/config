@@ -7,7 +7,7 @@ then
 fi
 
 dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../../..")
-$dir/var/bin/pg/config
+$dir/bin/pg/config
 
 [[ $(/bin/hostname) =~ ^([^.]*)\.[^.]*\.([^.]*)\.([^.]*)\.(.*)$ ]] || abend "bad hostname"
 
@@ -20,7 +20,7 @@ primary="$alpha.data.${STANDBY[$direction]}.$region.$domain"
 
 declare -A AXES
 AXES=([north]=vertical [south]=vertical [east]=horizontal [west]=horizontal)
-ip=$($dir/var/bin/dns/private/address --region $region --axis ${AXES[$direction]} | while read line
+ip=$($dir/bin/dns/private/address --region $region --axis ${AXES[$direction]} | while read line
 do
     pair=($line)
     if [ ${pair[0]} == $primary ]
