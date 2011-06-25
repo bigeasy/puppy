@@ -12,6 +12,39 @@ else
     axis="vertical"
 fi
 
+/usr/bin/sudo /bin/mkdir -p /var/lib/nsd/chroot/var/run/nsd
+/usr/bin/sudo /bin/mkdir -p /var/lib/nsd/chroot/var/lib/nsd
+/usr/bin/sudo /bin/chown -R nsd:nsd /var/lib/nsd/chroot
+
+zonefile=/var/lib/nsd/chroot/etc/nsd/$region.runpup.net.zone 
+if /usr/bin/sudo [ -e $zonefile ] && [[ $(/bin/hostname) =~ [[:alpha:]]\.data\.(east|south) ]]
+then
+    current=($(/usr/bin/sudo /bin/sed -n 's/.*\([0-9]\{8\}\)\([0-9]\{2\}\).*; Serial.*/\1 \2/p' $zonefile))
+else
+    current=(00000000 01)
+fi
+
+today=$(/bin/date +%Y%m%d)
+if [ "${current[0]}" == "$today" ]
+then
+    next="${today}"$(/usr/bin/printf '%02d\n' $((10#${current[1]} + 1)))
+else
+    next="${today}01"
+fi
+
+echo $next
+cat <<EOL | /usr/bin/sudo /usr/bin/tee $zonefile > /dev/null
+\$TTL    3h
+\$ORIGIN $region.runpup.net
+@       IN      SOA     ns1.runpup.net. alan.prettyrobots.com. (
+                          ${next}    ; Serial
+                          3h            ; Refresh after 3 hours
+                          1h            ; Retry after 1 hour
+                          1w            ; Expire after 1 week
+                          1h )          ; Negative caching TTL of 1 day
+;
+EOL
+
 user_seen=0
 master=$($dir/var/bin/dns/private/address --region $region --axis $axis | while read line
 do
@@ -41,41 +74,6 @@ do
         echo "ns.$host IN A ${pair[1]}" | /usr/bin/sudo /usr/bin/tee -a $zonefile > /dev/null
     fi
 done)
-
-/usr/bin/sudo /bin/mkdir -p /var/lib/nsd/chroot/etc/nsd
-/usr/bin/sudo /bin/mkdir -p /var/lib/nsd/chroot/var/run/nsd
-/usr/bin/sudo /bin/mkdir -p /var/lib/nsd/chroot/var/lib/nsd
-/usr/bin/sudo /bin/chown -R nsd:nsd /var/lib/nsd/chroot
-
-zonefile=/var/lib/nsd/chroot/etc/nsd/$region.runpup.net.zone 
-if /usr/bin/sudo [ -e $zonefile ] && [ $(/bin/hostname) = $master ]
-then
-    current=($(/usr/bin/sudo /bin/sed -n 's/.*\([0-9]\{8\}\)\([0-9]\{2\}\).*; Serial.*/\1 \2/p' $zonefile))
-else
-    current=(00000000 01)
-fi
-
-today=$(/bin/date +%Y%m%d)
-if [ "${current[0]}" == "$today" ]
-then
-    next="${today}"$(/usr/bin/printf '%02d\n' $((10#${current[1]} + 1)))
-else
-    next="${today}01"
-fi
-
-echo $next
-cat <<EOL | /usr/bin/sudo /usr/bin/tee $zonefile > /dev/null
-\$TTL    3h
-\$ORIGIN $region.runpup.net
-@       IN      SOA     ns1.runpup.net. alan.prettyrobots.com. (
-                          ${next}    ; Serial
-                          3h            ; Refresh after 3 hours
-                          1h            ; Retry after 1 hour
-                          1w            ; Expire after 1 week
-                          1h )          ; Negative caching TTL of 1 day
-;
-EOL
-
 echo $master
 
 $dir/bin/loopback/mount /dev/loop4 /mnt/dns
