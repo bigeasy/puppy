@@ -14,6 +14,7 @@ fi
 
 /usr/bin/sudo /bin/mkdir -p /var/lib/nsd/chroot/var/run/nsd
 /usr/bin/sudo /bin/mkdir -p /var/lib/nsd/chroot/var/lib/nsd
+/usr/bin/sudo /bin/mkdir -p /var/lib/nsd/chroot/etc/nsd
 /usr/bin/sudo /bin/chown -R nsd:nsd /var/lib/nsd/chroot
 
 zonefile=/var/lib/nsd/chroot/etc/nsd/$region.runpup.net.zone 
