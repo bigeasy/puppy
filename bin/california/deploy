@@ -64,3 +64,5 @@ step "Configure private DNS cache on alvar.data.south: " sshdo alvar.data.south 
 step "Update Puppy from git on alvar.balance.north: " $california/git_pull_there alvar.data.south
 step "yum update of alvar.balance.north: " sshdo alvar.data.south /usr/bin/sudo /usr/bin/yum update -y
 step "Mount WAL volume on alvar.balance.north: " sshdo alvar.balance.north /usr/bin/sudo $JANITOR/bin/pg/wal/mount
+
+step "Install PostgreSQL on alvar.balance.south: " sshdo /usr/bin/sudo /usr/bin/yum install -y  postgresql-server
