@@ -45,19 +45,22 @@ california=$dir/bin/california
 
 step "Flush unbound on $(/bin/hostname): " $california/flush_zone
 step "Update Puppy from git on $(/bin/hostname): " $california/git_pull
-step "Boostrap private DNS on $(/bin/hostname): " $JANITOR/var/bin/dns/private/bootstrap
-step "Boostrap private DNS on alvar.data.north: " $california/git_pull_there alvar.data.north
-step "yum update of alvar.data.south: " sshdo alvar.data.south /usr/bin/sudo /usr/bin/yum update -y
-step "Boostrap private DNS on alvar.data.south: " $california/git_pull_there alvar.data.north
+step "Configure private DNS on $(/bin/hostname): " $JANITOR/var/bin/dns/private/config
+step "Publish private DNS on $(/bin/hostname): " $JANITOR/var/bin/dns/private/publish
+step "Configure private DNS cache on $(/bin/hostname): " $JANITOR/var/bin/dns/cache/config
+
+step "Update Puppy from git on alvar.data.north: " $california/git_pull_there alvar.data.north
 step "yum update of alvar.data.north: " sshdo alvar.data.north /usr/bin/sudo /usr/bin/yum update -y
-step "Bootstrap private DNS on alvar.data.north" sshdo alvar.data.north $JANITOR/var/bin/dns/private/bootstrap
-pull alvar.data.south
-sshdo alvar.data.north /usr/bin/sudo /usr/bin/yum update -y
-sshdo alvar.data.south $JANITOR/var/bin/dns/private/bootstrap
-sshdo alvar.balance.north /usr/bin/sudo /usr/bin/yum update -y
-pull alvar.balance.south
-sshdo alvar.balance.north /usr/bin/sudo /usr/bin/yum update -y
-pull alvar.balance.north
-sshdo alvar.user.north /usr/bin/sudo /usr/bin/yum update -y
-pull alvar.user.north
-sshdo alvar.balance.north /usr/bin/sudo $JANITOR/var/bin/pg/wal/mount
+step "Configure private DNS on alvar.data.north: " sshdo alvar.data.north $JANITOR/var/bin/dns/private/config
+step "Publish private DNS on alvar.data.north: " sshdo alvar.data.north $JANITOR/var/bin/dns/private/publish
+step "Configure private DNS cache on alvar.data.north: " sshdo alvar.data.north $JANITOR/var/bin/dns/cache/config
+
+step "Update Puppy from git on alvar.data.south: " $california/git_pull_there alvar.data.south
+step "yum update of alvar.data.south: " sshdo alvar.data.south /usr/bin/sudo /usr/bin/yum update -y
+step "Configure private DNS on alvar.data.south: " sshdo alvar.data.south $JANITOR/var/bin/dns/private/config
+step "Publish private DNS on alvar.data.south: " sshdo alvar.data.south $JANITOR/var/bin/dns/private/publish
+step "Configure private DNS cache on alvar.data.south: " sshdo alvar.data.south $JANITOR/var/bin/dns/cache/config
+
+step "Update Puppy from git on alvar.balance.north: " $california/git_pull_there alvar.data.south
+step "yum update of alvar.balance.north: " sshdo alvar.data.south /usr/bin/sudo /usr/bin/yum update -y
+step "Mount WAL volume on alvar.balance.north: " sshdo alvar.balance.north /usr/bin/sudo $JANITOR/var/bin/pg/wal/mount
