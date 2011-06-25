@@ -77,7 +77,7 @@ do
 done)
 echo $master
 
-$dir/bin/loopback/mount /dev/loop4 /mnt/dns
+$dir/bin/loopback/mount /dev/loop5 /mnt/dns
 ksk=$(/bin/basename $(/bin/ls /mnt/dns/var/$region.runpup.net/current/ksk/*.key) .key)
 zsk=$(/bin/basename $(/bin/ls /mnt/dns/var/$region.runpup.net/current/zsk/*.key) .key)
 /usr/bin/sudo /usr/bin/ldns-signzone $zonefile \
