@@ -3,10 +3,10 @@
 dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../../../..")
 .  $dir/var/bin/dns/configuration
 
-bin/loopback/mount /dev/loop5 /mnt/dns
+$dir/bin/loopback/mount /dev/loop5 /mnt/dns
 cat /mnt/dns/var/$region.runpup.net/current/ksk/*.ds /mnt/dns/var/$region.runpup.net/current/ksk/*.key | \
     /usr/bin/sudo /usr/bin/tee /etc/unbound/runpup.net.key > /dev/null
-bin/loopback/delete /mnt/dns
+$dir/bin/loopback/delete /mnt/dns
 
 cat <<EOL | /usr/bin/sudo /usr/bin/tee /etc/unbound/unbound.conf > /dev/null
 server:
