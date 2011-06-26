@@ -4,7 +4,7 @@ repository=$1
 cd $repository
 
 dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../..")
-. $dir/bin/california/functions
+. $dir/bin/functions
 
 UPSTREAM=ssh://alan@alvar.user.south.california.runpup.net/home/alan/git/ecma/puppy/janitor/.git
 

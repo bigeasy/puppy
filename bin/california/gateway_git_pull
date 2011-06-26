@@ -4,7 +4,7 @@ dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../..")
 cd "$dir"
 branches=$(/usr/bin/git branch)
 
-. $dir/bin/california/functions
+. $dir/bin/functions
 
 puppy=$(/bin/readlink -f "$dir/..")
 
@@ -25,5 +25,5 @@ do
     branch=${path##*/}
     cd $path
     step "Fetch changes from git cache into $branch." /usr/bin/git fetch local -v
-    step "Merge changes from git cache into $branch." /usr/bin/git merge "remotes/local/janitor"
+    step "Merge changes from git cache into $branch." /usr/bin/git merge "remotes/local/$branch"
 done

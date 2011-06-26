@@ -1,12 +1,5 @@
 #!/bin/bash
 
-/bin/rpm -q nsd > /dev/null
-if [ $? -ne 0 ]
-then
-    /usr/bin/sudo /usr/bin/yum install -y nsd
-    /usr/bin/sudo /bin/systemctl stop nsd.service
-fi
-
 function provide_xfr()
 {
     local address=$1  
