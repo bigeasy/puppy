@@ -5,6 +5,4 @@ puppy=$(/bin/readlink -f "$dir/..")
 for branch in $(find $puppy -maxdepth 1 -mindepth 1 ! -name janitor)
 do
     $dir/bin/california/git_remote_add_local $branch
-    cd $branch
-    /usr/bin/git pull local HEAD
 done

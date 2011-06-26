@@ -1,0 +1,7 @@
+#!/bin/bash
+
+dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../..")
+. $dir/bin/california/functions
+step "Configure private DNS:"  $dir/bin/dns/private/config
+step "Publish private DNS:"  $dir/bin/dns/private/publish
+step "Configure private DNS cache:"  $dir/bin/dns/cache/config
