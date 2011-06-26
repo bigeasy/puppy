@@ -42,18 +42,16 @@ function get_pull() {
 
 dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../..")
 california=$dir/bin/california
-step "Update Puppy from git on alvar.data.south: " $california/git_pull_there alvar.data.south
-step "Install PostgreSQL on alvar.data.south: " sshdo alvar.data.south /usr/bin/sudo /usr/bin/yum install -y  postgresql-server
-step "Configure primary PostgreSQL on alvar.data.south: " sshdo alvar.data.south /usr/bin/sudo $JANITOR/bin/pg/primary/config 
-exit
 
 step "Flush unbound on $(/bin/hostname): " $california/flush_zone
 step "Update Puppy from git on $(/bin/hostname): " $california/git_pull
+step "Install Puppy on $(/bin/hostname): " $JANITOR/bin/puppy/checkout
 step "Configure private DNS on $(/bin/hostname): " $JANITOR/bin/dns/private/config
 step "Publish private DNS on $(/bin/hostname): " $JANITOR/bin/dns/private/publish
 step "Configure private DNS cache on $(/bin/hostname): " $JANITOR/bin/dns/cache/config
 
 step "Update Puppy from git on alvar.data.north: " $california/git_pull_there alvar.data.north
+step "Checkout of Puppy on alvar.data.north: " sshdo alvar.data.north $JANITOR/bin/puppy/checkout
 step "yum update of alvar.data.north: " sshdo alvar.data.north /usr/bin/sudo /usr/bin/yum update -y
 step "Configure private DNS on alvar.data.north: " sshdo alvar.data.north $JANITOR/bin/dns/private/config
 step "Publish private DNS on alvar.data.north: " sshdo alvar.data.north $JANITOR/bin/dns/private/publish
@@ -68,3 +66,6 @@ step "Configure private DNS cache on alvar.data.south: " sshdo alvar.data.south 
 step "Update Puppy from git on alvar.balance.north: " $california/git_pull_there alvar.balance.north
 step "yum update of alvar.balance.north: " sshdo alvar.data.south /usr/bin/sudo /usr/bin/yum update -y
 step "Mount WAL volume on alvar.balance.north: " sshdo alvar.balance.north /usr/bin/sudo $JANITOR/bin/pg/wal/mount
+
+step "Install PostgreSQL on alvar.data.south: " sshdo alvar.data.south /usr/bin/sudo $JANITOR/bin/pg/install
+step "Configure primary PostgreSQL on alvar.data.south: " sshdo alvar.data.south /usr/bin/sudo $JANITOR/bin/pg/primary/config 
