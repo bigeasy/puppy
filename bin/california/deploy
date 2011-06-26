@@ -11,15 +11,15 @@ function sshdo() {
 
 dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../..")
 . $dir/bin/functions
+ 
+$dir/bin/california/gateway_dns || abend "Cannot configure gateway private DNS."
+$dir/bin/california/gateway_git_pull || abend "Cannot update gateway git repository."
+$dir/bin/california/yum_update || abend "Cannot update Fedora on gateway."
 
-$dir/bin/california/gateway_dns
-$dir/bin/california/gateway_git_pull
-$dir/bin/california/yum_update
+sshdo alvar.data.north $JANITOR/bin/california/yum_update || abend "Cannot update Fedora on alvar.data.north."
+sshdo alvar.data.north $JANITOR/bin/california/internal_dns || abend "Cannot configure private DNS."
+sshdo alvar.data.north $JANITOR/bin/california/internal_git_pull || abend "Cannot update git repository."
 
-sshdo alvar.data.north $JANITOR/bin/california/yum_update
-sshdo alvar.data.north $JANITOR/bin/california/internal_dns
-sshdo alvar.data.north $JANITOR/bin/california/internal_git_pull
-
-sshdo alvar.data.south $JANITOR/bin/california/yum_update
-sshdo alvar.data.south $JANITOR/bin/california/internal_dns
-sshdo alvar.data.south $JANITOR/bin/california/internal_git_pull
+sshdo alvar.data.south $JANITOR/bin/california/yum_update || abend "Cannot update Fedora on alvar.data.south."
+sshdo alvar.data.south $JANITOR/bin/california/internal_dns || abend "Cannot configure private DNS on alvar.data.south."
+sshdo alvar.data.south $JANITOR/bin/california/internal_git_pull || abend "Cannot update git repository on alvar.data.south."
