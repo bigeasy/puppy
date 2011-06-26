@@ -2,70 +2,24 @@
 
 JANITOR=/home/alan/git/ecma/puppy/janitor
 
-function gateway() {
-    /usr/bin/ssh -A alvar.user.south.california.runpup.com $@
-}
-
 function sshdo() {
     local machine=$1
     shift
-    gateway /usr/bin/ssh -A $machine.california.runpup.net $@ > /dev/null
+    /usr/bin/ssh -A $machine.california.runpup.net $@
     return $?
 }
 
-function pull() {
-    local machine=$1
-    /usr/bin/ssh -A $machine.california.runpup.net bash -c "\"(cd $JANITOR && /usr/bin/git pull)\""
-}
-
-function step() {
-    local message=$1
-    shift
-    echo -n "$message"
-    $@
-    if [ $? -eq 0 ]
-    then
-        echo " [OK]"
-    else
-        echo " [FAILED]"
-        exit 1
-    fi
-}
-
-function flush_zone() {
-    /usr/bin/sudo /usr/sbin/unbound-control -c /etc/unbound/unbound.conf flush_zone . > /dev/null
-}
-
-function get_pull() {
-    /bin/bash -c "'(cd $JANITOR && /usr/bin/git pull > /dev/null)'"
-}
-
 dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../..")
-california=$dir/bin/california
+. $dir/bin/functions
 
-step "Flush unbound on $(/bin/hostname): " $california/flush_zone
-step "Update Puppy from git on $(/bin/hostname): " $california/git_pull
-step "Install Puppy on $(/bin/hostname): " $JANITOR/bin/puppy/checkout
-step "Configure private DNS on $(/bin/hostname): " $JANITOR/bin/dns/private/config
-step "Publish private DNS on $(/bin/hostname): " $JANITOR/bin/dns/private/publish
-step "Configure private DNS cache on $(/bin/hostname): " $JANITOR/bin/dns/cache/config
+$dir/bin/california/gateway_dns
+$dir/bin/california/gateway_git_pull
+$dir/bin/california/yum_update
 
-step "Update Puppy from git on alvar.data.north: " $california/git_pull_there alvar.data.north
-step "Checkout of Puppy on alvar.data.north: " sshdo alvar.data.north $JANITOR/bin/puppy/checkout
-step "yum update of alvar.data.north: " sshdo alvar.data.north /usr/bin/sudo /usr/bin/yum update -y
-step "Configure private DNS on alvar.data.north: " sshdo alvar.data.north $JANITOR/bin/dns/private/config
-step "Publish private DNS on alvar.data.north: " sshdo alvar.data.north $JANITOR/bin/dns/private/publish
-step "Configure private DNS cache on alvar.data.north: " sshdo alvar.data.north $JANITOR/bin/dns/cache/config
+sshdo alvar.data.north $JANITOR/bin/california/yum_update
+sshdo alvar.data.north $JANITOR/bin/california/internal_dns
+sshdo alvar.data.north $JANITOR/bin/california/internal_git_pull
 
-step "Update Puppy from git on alvar.data.south: " $california/git_pull_there alvar.data.south
-step "yum update of alvar.data.south: " sshdo alvar.data.south /usr/bin/sudo /usr/bin/yum update -y
-step "Configure private DNS on alvar.data.south: " sshdo alvar.data.south $JANITOR/bin/dns/private/config
-step "Publish private DNS on alvar.data.south: " sshdo alvar.data.south $JANITOR/bin/dns/private/publish
-step "Configure private DNS cache on alvar.data.south: " sshdo alvar.data.south $JANITOR/bin/dns/cache/config
-
-step "Update Puppy from git on alvar.balance.north: " $california/git_pull_there alvar.balance.north
-step "yum update of alvar.balance.north: " sshdo alvar.data.south /usr/bin/sudo /usr/bin/yum update -y
-step "Mount WAL volume on alvar.balance.north: " sshdo alvar.balance.north /usr/bin/sudo $JANITOR/bin/pg/wal/mount
-
-step "Install PostgreSQL on alvar.data.south: " sshdo alvar.data.south /usr/bin/sudo $JANITOR/bin/pg/install
-step "Configure primary PostgreSQL on alvar.data.south: " sshdo alvar.data.south /usr/bin/sudo $JANITOR/bin/pg/primary/config 
+sshdo alvar.data.south $JANITOR/bin/california/yum_update
+sshdo alvar.data.south $JANITOR/bin/california/internal_dns
+sshdo alvar.data.south $JANITOR/bin/california/internal_git_pull
