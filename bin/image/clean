@@ -35,7 +35,7 @@ do
 done
 
 /bin/rm -rf /root/.bash_history /root/setup.sh /etc/nsd /var/lib/nsd
-/bin/rm -f ~/.bash_history ~/.aws
+/bin/rm -f /home/alan/.bash_history /home/alan/.aws
 /usr/bin/yum clean all
 /usr/sbin/unbound-control -c /etc/unbound/unbound.conf flush_zone .
 for log in $(/usr/bin/sudo /bin/find /var/log ! -type d)
