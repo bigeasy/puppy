@@ -1,0 +1,17 @@
+#!/bin/bash
+
+dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../..")
+. $dir/bin/functions
+
+declare -A IS_PRIMARY
+IS_PRIMARY=([south]=1 [north]=0 [west]=1)
+
+[[ $(/bin/hostname) =~ ^[^.]*\.([^.]*)\.([^.]*)\.(.*)$ ]] || abend "Bad hostname $(/bin/hostname)."
+type=${BASH_REMATCH[1]}; direction=${BASH_REMATCH[2]}
+if [ ${IS_PRIMARY[$direction]} -eq 1 -a $type = "user" ] || [ $type = "data" ]
+then
+    step "Install NSD:"  $dir/bin/dns/install
+    step "Configure private DNS:"  $dir/bin/dns/private/config
+    step "Publish private DNS:"  $dir/bin/dns/private/publish
+fi
+step "Configure private DNS cache:"  $dir/bin/dns/cache/config

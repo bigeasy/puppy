@@ -10,7 +10,7 @@ function step() {
     else
         logger -t $(/bin/basename $0) "Action failed: $message"
         echo " [FAILED]"
-        echo $outcome 1>&2
+        echo "$outcome" 1>&2
         exit 1
     fi
 }
