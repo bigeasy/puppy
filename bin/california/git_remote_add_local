@@ -3,10 +3,14 @@
 repository=$1
 cd $repository
 
+dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../..")
+. $dir/bin/california/functions
+
 UPSTREAM=ssh://alan@alvar.user.south.california.runpup.net/home/alan/git/ecma/puppy/janitor/.git
 
 /usr/bin/git remote show | /bin/grep '^local$' > /dev/null
 if [ $? -ne 0 ]
 then
-    /usr/bin/git remote add local $UPSTREAM
+    step "Adding cached repository to $(/bin/basename $repository)." \
+        /usr/bin/git remote add local $UPSTREAM
 fi

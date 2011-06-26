@@ -2,12 +2,21 @@ function step() {
     local message=$1
     shift
     echo -n "$message"
-    $@ 2&>1 1>/dev/null
+    outcome=$($@ 2>&1)
     if [ $? -eq 0 ]
     then
+        logger -t "$(/bin/basename $0)[$$]" "$message"
         echo " [OK]"
     else
+        logger -t $(/bin/basename $0) "Action failed: $message"
         echo " [FAILED]"
+        echo $outcome 1>&2
         exit 1
     fi
+}
+
+function abend() {
+    local message=$1
+    echo "$message" 1>&2
+    exit 1
 }

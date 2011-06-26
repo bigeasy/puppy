@@ -1,8 +1,29 @@
 #!/bin/bash
 
 dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../..")
+cd "$dir"
+branches=$(/usr/bin/git branch)
+
+. $dir/bin/california/functions
+
 puppy=$(/bin/readlink -f "$dir/..")
-for branch in $(find $puppy -maxdepth 1 -mindepth 1 ! -name janitor)
+
+for path in $(find "$puppy" -maxdepth 1 -mindepth 1 ! -name janitor)
 do
-    $dir/bin/california/git_remote_add_local $branch
+    branch=${path##*/}
+    echo "$branches" | grep "^[[:space:]]*$branch$" > /dev/null
+    if [ $? -ne 0 ]
+    then
+        step "Assiging cached git repository to branch $branch." \
+            /usr/bin/git branch --track "$branch" "remotes/origin/$branch"
+    fi
+done
+step "Fetch changes from git remote." /usr/bin/git pull origin -v 
+for path in $(find "$puppy" -maxdepth 1 -mindepth 1 ! -name janitor)
+do
+    $dir/bin/california/git_remote_add_local "$path"
+    branch=${path##*/}
+    cd $path
+    step "Fetch changes from git cache into $branch." /usr/bin/git fetch local -v
+    step "Merge changes from git cache into $branch." /usr/bin/git merge "remotes/local/janitor"
 done
