@@ -6,6 +6,6 @@ dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../..")
 /bin/rpm -q nsd > /dev/null
 if [ $? -ne 0 ]
 then
-    /usr/bin/sudo /usr/bin/yum install -y nsd || abend "Cannot install NSD."
+    /usr/bin/yum install -y nsd || abend "Cannot install NSD."
     /bin/systemctl stop nsd.service
 fi
