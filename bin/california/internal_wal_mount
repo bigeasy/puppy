@@ -3,4 +3,4 @@
 dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../..")
 . $dir/bin/functions
 
-step "Mount WAL volume:"  $dir/bin/pg/wal/mount
+step "Mount WAL volume:"  /usr/bin/sudo $dir/bin/pg/wal/mount
