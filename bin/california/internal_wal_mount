@@ -1,0 +1,6 @@
+#!/bin/bash
+
+dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../..")
+. $dir/bin/functions
+
+step "Mount WAL volume:"  $dir/bin/pg/wal/mount

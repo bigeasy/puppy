@@ -23,3 +23,9 @@ sshdo alvar.data.north $JANITOR/bin/california/internal_git_pull || abend "Canno
 sshdo alvar.data.south $JANITOR/bin/california/yum_update || abend "Cannot update Fedora on alvar.data.south."
 sshdo alvar.data.south $JANITOR/bin/california/internal_dns || abend "Cannot configure private DNS on alvar.data.south."
 sshdo alvar.data.south $JANITOR/bin/california/internal_git_pull || abend "Cannot update git repository on alvar.data.south."
+
+sshdo alvar.balance.north $JANITOR/bin/california/yum_update || abend "Cannot update Fedora on alvar.balance.north."
+sshdo alvar.balance.north $JANITOR/bin/california/internal_dns || abend "Cannot configure private DNS on alvar.balance.north."
+sshdo alvar.balance.north $JANITOR/bin/california/internal_git_pull || abend "Cannot update git repository on alvar.balance.north."
+
+sshdo alvar.balance.north $JANITOR/bin/california/internal_wal_mount || abend "Cannot mount WAL volume on alvar.balance.north."
