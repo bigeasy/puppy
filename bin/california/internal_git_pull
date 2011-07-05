@@ -9,8 +9,12 @@ branches=$(/usr/bin/git branch)
 puppy=$(/bin/readlink -f "$dir/..")
 for path in $(find "$puppy" -maxdepth 1 -mindepth 1)
 do
-    $dir/bin/california/git_remote_add_local "$path"
     branch=${path##*/}
+    if [ ! -e $path/.git ] || [[ $branch =~ ^\. ]]
+    then
+        continue
+    fi
+    $dir/bin/california/git_remote_add_local "$path"
     cd $path
     step "Fetch changes from git cache into $branch." /usr/bin/git fetch local -v
     step "Merge changes from git cache into $branch." /usr/bin/git merge "remotes/local/$branch"
