@@ -1,0 +1,42 @@
+#!/bin/bash
+
+if [ $(/usr/bin/id -u) -ne 0 ]
+then
+    echo "Must run as root." 1>&2
+    exit 1
+fi
+
+dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../../..")
+$dir/bin/pg/config
+
+[[ $(/bin/hostname) =~ ^([^.]*)\.[^.]*\.([^.]*)\.([^.]*)\.(.*)$ ]] || abend "bad hostname"
+
+alpha=${BASH_REMATCH[1]};   direction=${BASH_REMATCH[2]}
+region=${BASH_REMATCH[3]};  domain=${BASH_REMATCH[4]}
+
+declare -A STANDBY
+STANDBY=([north]=south [south]=north [east]=west [west]=east)
+primary="$alpha.data.${STANDBY[$direction]}.$region.$domain"
+
+declare -A AXES
+AXES=([north]=vertical [south]=vertical [east]=horizontal [west]=horizontal)
+ip=$($dir/bin/dns/private/address --region $region --axis ${AXES[$direction]} | while read line
+do
+    pair=($line)
+    if [ ${pair[0]} == $primary ]
+    then
+        echo ${pair[1]}
+    fi
+done)
+
+cat <<EOL >> /var/lib/pgsql/data/pg_hba.conf
+host  replication  postgres  $ip/24 trust
+EOL
+
+cat <<EOL >> /var/lib/pgsql/data/postgresql.conf
+wal_level = hot_standby
+max_wal_senders = 1
+wal_keep_segments = 32
+archive_mode    = on
+archive_command = '/puppy/janitor/bin/postgresql_archive %p %f'
+EOL

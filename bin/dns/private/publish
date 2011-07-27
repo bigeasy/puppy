@@ -1,6 +1,6 @@
 #!/bin/bash
 
-dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../../../..")
+dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../../..")
 
 conf=($(/bin/hostname | sed 's/.*\..*\.\(.*\)\.\(.*\)\.runpup\.com/\1 \2/'))
 region="${conf[1]}"
@@ -12,15 +12,15 @@ else
     axis="vertical"
 fi
 
-/usr/bin/sudo /bin/mkdir -p /var/lib/nsd/chroot/etc/nsd
 /usr/bin/sudo /bin/mkdir -p /var/lib/nsd/chroot/var/run/nsd
 /usr/bin/sudo /bin/mkdir -p /var/lib/nsd/chroot/var/lib/nsd
+/usr/bin/sudo /bin/mkdir -p /var/lib/nsd/chroot/etc/nsd
 /usr/bin/sudo /bin/chown -R nsd:nsd /var/lib/nsd/chroot
 
 zonefile=/var/lib/nsd/chroot/etc/nsd/$region.runpup.net.zone 
-if [ -e $zonefile ]
+if /usr/bin/sudo [ -e $zonefile ] && [[ $(/bin/hostname) =~ [[:alpha:]]\.data\.(east|south) ]]
 then
-    current=($(/bin/sed -n 's/.*\([0-9]\{8\}\)\([0-9]\{2\}\).*; Serial.*/\1 \2/p' $zonefile))
+    current=($(/usr/bin/sudo /bin/sed -n 's/.*\([0-9]\{8\}\)\([0-9]\{2\}\).*; Serial.*/\1 \2/p' $zonefile))
 else
     current=(00000000 01)
 fi
@@ -46,7 +46,7 @@ cat <<EOL | /usr/bin/sudo /usr/bin/tee $zonefile > /dev/null
 EOL
 
 user_seen=0
-master=$($dir/var/bin/dns/private/address --region $region --axis $axis | while read line
+master=$($dir/bin/dns/private/address --region $region --axis $axis | while read line
 do
     pair=($line)
     host=$(echo ${pair[0]} | sed 's/\.'$region'\.runpup\.com//')
@@ -75,26 +75,25 @@ do
     fi
 done)
 
-echo $master
-
-$dir/bin/loopback/mount /dev/loop4 /mnt/dns
+$dir/bin/loopback/mount /dev/loop5 /mnt/dns
 ksk=$(/bin/basename $(/bin/ls /mnt/dns/var/$region.runpup.net/current/ksk/*.key) .key)
 zsk=$(/bin/basename $(/bin/ls /mnt/dns/var/$region.runpup.net/current/zsk/*.key) .key)
 /usr/bin/sudo /usr/bin/ldns-signzone $zonefile \
     /mnt/dns/var/$region.runpup.net/current/ksk/$ksk \
-    /mnt/dns/var/$region.runpup.net/current/zsk/$zsk
-$dir/bin/loopback/delete /mnt/dns
+    /mnt/dns/var/$region.runpup.net/current/zsk/$zsk || exit 1
+$dir/bin/loopback/delete /mnt/dns || exit 1
 
 /usr/bin/sudo /bin/mkdir -p /var/run/nsd
 /usr/bin/sudo /bin/chown -R nsd:nsd /var/lib/nsd/chroot
 /usr/bin/sudo /bin/chmod -R gou+x /var/lib/nsd/chroot
 /usr/bin/sudo /bin/chmod -R o-rwx /var/lib/nsd/chroot
 
-/usr/bin/sudo /usr/sbin/nsdc rebuild
-/usr/bin/sudo /usr/sbin/nsdc reload
-if [ $master = $(/bin/hostname) ]
+/usr/bin/sudo /bin/systemctl restart nsd.service
+/usr/bin/sudo /usr/sbin/nsdc rebuild > /dev/null
+/usr/bin/sudo /usr/sbin/nsdc reload > /dev/null
+if [ "$master" = $(/bin/hostname) ]
 then
-    /usr/bin/sudo /usr/sbin/nsdc notify
+    /usr/bin/sudo /usr/sbin/nsdc notify > /dev/null
 fi
 
 #$dir/loopback/snapshot /mnt/dns

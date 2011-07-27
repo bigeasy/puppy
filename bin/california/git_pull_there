@@ -1,0 +1,5 @@
+#!/bin/bash
+
+/usr/bin/ssh -A $1.california.runpup.net \
+    /bin/bash -c "'(cd /home/alan/git/ecma/puppy/janitor && /usr/bin/git pull)'" > /dev/null || exit 1 
+        

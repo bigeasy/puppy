@@ -7,7 +7,8 @@ dns = require "dns"
 
 parser = new OptionParser [
   [ "-n", "--name [NAME]", "fully qualified domain name" ]
-  [ "-t", "--type [NAME]", "instance type" ]
+  [ "-a", "--architecture [NAME]", "architecture" ]
+  [ "-s", "--size [NAME]", "instance size" ]
   [ "-h", "--help", "display puppy help" ]
 ]
 
@@ -22,8 +23,8 @@ try
 catch e
   usage "Invalid arguments."
 
-if not options.type
-  options.type = "t1.micro"
+if not options.size
+  options.size = "t1.micro"
 
 if not options.name
   usage "Host name is required."
@@ -31,7 +32,7 @@ if not options.name
 match = ///
     ^
     \w+\.
-    (balance|user|data)\.
+    (balance|user|data|image)\.
     (north|south|east|west)\.
     (california|ireland|singapore|tokyo|virginia)\.
     runpup\.com
@@ -43,7 +44,7 @@ if not match
   usage()
 [ type, zone, region ] = match.slice 1
 
-architecture = { balance: "x86_64", user: "i386", data: "i386" }[type]
+architecture = options.architecture || { balance: "x86_64", user: "i386", data: "i386" }[type] || "i386"
 
 endpoint = { california: "us-west-1", virginia: "us-east-1" }[region]
 if not endpoint
@@ -89,7 +90,7 @@ client.call "DescribeImages", { "Owner.1": "self" }, (response) ->
     MaxCount: 1
     KeyName: "secret_key"
     UserData: new Buffer(options.name).toString("base64")
-    InstanceType: options.type
+    InstanceType: options.size
     "Placement.AvailabilityZone": "#{endpoint}#{zone}"
   }, (response) ->
     request.instance = response.instancesSet.shift()

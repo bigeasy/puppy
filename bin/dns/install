@@ -1,0 +1,11 @@
+#!/bin/bash
+
+dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../..")
+. $dir/bin/functions
+
+/bin/rpm -q nsd > /dev/null
+if [ $? -ne 0 ]
+then
+    /usr/bin/yum install -y nsd || abend "Cannot install NSD."
+    /bin/systemctl stop nsd.service
+fi

@@ -1,4 +1,0 @@
-#!/bin/bash
-
-/usr/bin/sudo yum install -y postgresql-server
-/usr/bin/sudo /etc/init.d/postgresql initdb

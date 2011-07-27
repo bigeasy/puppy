@@ -1,13 +1,15 @@
 #!/bin/bash
 
+dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../../..")
+
 function maybe_clone()
 {
     branch=$1
-    if [ ! -e $HOME/git/ecma/puppy/$branch ]
+    if [ ! -e $dir/$branch ]
     then
-        cd $HOME/git/ecma/puppy
+        cd $dir
         /usr/bin/git clone git@bled.prettyrobots.com:puppy.git $branch
-        cd $HOME/git/ecma/puppy/$branch
+        cd $dir/$branch
         /usr/bin/git checkout -t remotes/origin/$branch
     fi
 }
@@ -15,17 +17,15 @@ function maybe_clone()
 function update_project()
 {
     branch=$1
-    cd $HOME/git/ecma/puppy/$branch
+    cd $dir/$branch
     /usr/bin/git pull
 }
 
 function deploy()
 {
     branch=$1
-    /puppy/janitor/bin/deploy $HOME/git/ecma/puppy/$branch
+    /puppy/janitor/bin/deploy $dir/$branch
 }
-
-/bin/mkdir -p $HOME/git/ecma/puppy
 
 maybe_clone janitor
 maybe_clone common
@@ -55,7 +55,7 @@ update_project liminal
 update_project janitor
 update_project exclusive
 
-$HOME/git/ecma/puppy/janitor/puppy/janitor/bin/deploy $HOME/git/ecma/puppy/janitor
+$dir/janitor/puppy/janitor/bin/deploy $dir/janitor
 
 deploy system
 deploy common
