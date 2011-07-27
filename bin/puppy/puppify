@@ -86,6 +86,7 @@ function group_assign()
 group_assign exclusive 202 210
 group_assign loggers 1  700
 group_assign wheel 701 701
+group_assign wheel 202 202
 
 # Configuration installtion
 # -------------------------------------------------------------------------- #
