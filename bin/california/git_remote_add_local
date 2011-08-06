@@ -6,7 +6,8 @@ cd $repository
 dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../..")
 . $dir/bin/functions
 
-UPSTREAM=ssh://$USER@alvar.user.south.california.runpup.net$dir/.git
+region=$(echo $HOSTNAME | sed 's/.*\.\([^.]\+\.runpup.com\)/\1/')
+UPSTREAM=ssh://$USER@alvar.user.south.$region$dir/.git
 
 /usr/bin/git remote show | /bin/grep '^local$' > /dev/null
 if [ $? -ne 0 ]
