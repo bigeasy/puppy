@@ -1,0 +1,14 @@
+#!/bin/bash
+
+cd ~/.vim/bundle/vim-coffee-script
+git pull
+
+cd ~/.usr
+git pull
+
+cd ~/janitor
+bin/puppy/checkcout
+
+sudo su janitor /home/janitor/janitor/bin/puppy/checkout
+
+sudo yum update -y
