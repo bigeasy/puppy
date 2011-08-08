@@ -1,5 +1,17 @@
 #!/bin/bash
 
+update=0
+while getopts ":u" opt; do
+  case $opt in
+    u)
+      update=1
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      ;;
+  esac
+done
+
 function sshdo() {
     local machine=$1
     shift
@@ -12,17 +24,25 @@ dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../..")
  
 $dir/bin/california/gateway_dns || abend "Cannot configure gateway private DNS."
 $dir/bin/california/gateway_git_pull || abend "Cannot update gateway git repository."
-$dir/bin/california/yum_update || abend "Cannot update Fedora on gateway."
+if [ $update -eq 1 ]; then
+  $dir/bin/california/yum_update || abend "Cannot update Fedora on gateway."
+fi
 
-sshdo alvar.data.north $dir/bin/california/yum_update || abend "Cannot update Fedora on alvar.data.north."
+if [ $update -eq 1 ]; then
+  sshdo alvar.data.north $dir/bin/california/yum_update || abend "Cannot update Fedora on alvar.data.north."
+fi
 sshdo alvar.data.north $dir/bin/california/internal_dns || abend "Cannot configure private DNS."
 sshdo alvar.data.north $dir/bin/california/internal_git_pull || abend "Cannot update git repository."
 
-sshdo alvar.data.south $dir/bin/california/yum_update || abend "Cannot update Fedora on alvar.data.south."
+if [ $update -eq 1 ]; then
+  sshdo alvar.data.south $dir/bin/california/yum_update || abend "Cannot update Fedora on alvar.data.south."
+fi
 sshdo alvar.data.south $dir/bin/california/internal_dns || abend "Cannot configure private DNS on alvar.data.south."
 sshdo alvar.data.south $dir/bin/california/internal_git_pull || abend "Cannot update git repository on alvar.data.south."
 
-sshdo alvar.balance.north $dir/bin/california/yum_update || abend "Cannot update Fedora on alvar.balance.north."
+if [ $update -eq 1 ]; then
+  sshdo alvar.balance.north $dir/bin/california/yum_update || abend "Cannot update Fedora on alvar.balance.north."
+fi
 sshdo alvar.balance.north $dir/bin/california/internal_dns || abend "Cannot configure private DNS on alvar.balance.north."
 sshdo alvar.balance.north $dir/bin/california/internal_git_pull || abend "Cannot update git repository on alvar.balance.north."
 
