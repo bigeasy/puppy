@@ -12,14 +12,16 @@ direction=${BASH_REMATCH[1]}; region=${BASH_REMATCH[2]}
 
 declare -A AXES
 AXES=([north]=vertical [south]=vertical [east]=horizontal [west]=horizontal)
-ip=$($dir/bin/dns/private/address --region $region --axis ${AXES[$direction]} | while read line
-do
+while read; do
     pair=($line)
     if [ ${pair[0]} == $hostname ]
     then
-        echo ${pair[1]}
+        ip=${pair[1]}
+        break
     fi
-done)
+done < <($dir/bin/dns/private/address --region $region --axis ${AXES[$direction]})
+
+echo $ip
 
 cat <<EOL >/var/lib/pgsql/data/postgresql.conf
 listen_addresses='$ip'
