@@ -10,18 +10,21 @@ hostname=$(/bin/hostname)
 [[ $hostname =~ ^[^.]*\.[^.]*\.([^.]*)\.([^.]*)\..*$ ]]
 direction=${BASH_REMATCH[1]}; region=${BASH_REMATCH[2]}
 
+# Note that, if you break from the loop when you match the IP address, the
+# stdout fd in the CoffeeScript address program gets closed. The address program
+# will not catch an EPIPE and stop writing output, but before it was crashing.
 declare -A AXES
 AXES=([north]=vertical [south]=vertical [east]=horizontal [west]=horizontal)
-while read; do
-    pair=($line)
-    if [ ${pair[0]} == $hostname ]
-    then
-        ip=${pair[1]}
-        break
-    fi
-done < <($dir/bin/dns/private/address --region $region --axis ${AXES[$direction]})
-
-echo $ip
+while read line; do
+  pair=($line)
+  if [ ${pair[0]} == $hostname ]
+  then
+   ip=${pair[1]}
+   break
+  fi
+done < <(
+  $dir/bin/dns/private/address --region $region --axis ${AXES[$direction]}
+)
 
 cat <<EOL >/var/lib/pgsql/data/postgresql.conf
 listen_addresses='$ip'

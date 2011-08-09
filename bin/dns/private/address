@@ -38,6 +38,9 @@ configuration = JSON.parse fs.readFileSync "#{process.env["HOME"]}/.aws", "utf8"
 configuration.endpoint = endpoint
 client = ec2.createClient configuration
 
+process.stdout.on "error", (exception) ->
+  throw exception unless exception.code is "EPIPE"
+
 request = {}
 client.call "DescribeInstances", {}, (response) ->
   request.instances = []
@@ -58,13 +61,15 @@ client.call "DescribeInstances", {}, (response) ->
               [ direction, region ] = match.slice 1
               if region is options.region and directions.indexOf(direction) isnt -1
                 request.instances.push instance
+  # We check each write to stdout to ensure that stdout is still open, because
+  # the bash programs that used this script will sometimes break from the loops
+  # they use to process the output, which causes bash to close the pipe.
   for instance in request.instances
     for tag in instance.tagSet
       if tag.key is "Name"
-        process.stdout.write tag.value
-    process.stdout.write " "
-    process.stdout.write instance.privateIpAddress
-    process.stdout.write "\n"
+        name = tag.value
+    if not process.stdout.write "#{name} #{instance.privateIpAddress}\n"
+      break
 
 client.execute()
 # vim: ft=coffee ts=2 sw=2:
