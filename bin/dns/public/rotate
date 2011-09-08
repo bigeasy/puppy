@@ -1,33 +1,59 @@
 #!/bin/bash
 
 if [ -z "$1" ]; then
-    echo "usage: $0 domain" 2>&1
+    echo "usage: $0 domain" 1>&2
     exit 1
 fi
 domain=$1
 zonedir=/mnt/dns/var/$domain
 zonefile=$zonedir/$domain.zone
 
+function ksk_rotate_message()
+{
+cat <<EOL | /usr/sbin/sendmail -t
+Subject: Rotate KSK
+To: alan@prettyrobots.com
+
+It is time to rotate your key signing keys for $domain.
+EOL
+}
+
 function generate_ksk()
 {
-    [ -d $zonedir/incoming/ksk ] && exit
-    echo "New KSK"
+    [ -d $zonedir/incoming/ksk ] && return 0
+    ksk_rotate_message
     /bin/mkdir -p $zonedir/incoming/ksk
     cd $zonedir/incoming/ksk
-    touch gerg
     /usr/bin/ldns-keygen -a RSASHA1_NSEC3 -b 2048 -k $domain
 }
 
 function generate_zsk()
 {
     [ -d $zonedir/incoming/zsk ] && return 0
-    echo "New ZSK"
     /bin/mkdir -p $zonedir/incoming/zsk
     cd $zonedir/incoming/zsk
     /usr/bin/ldns-keygen -a RSASHA1_NSEC3 -b 1024 $domain
 }
 
-if [ $(/bin/date '+%w') -eq 4 ]; then
+sunday=0
+if [ $(/bin/date '+%w') -eq $sunday ]; then
+    touch "$zonedir/incoming/$(/bin/date '+timestamp-%Y-%m-%d')"
     [ $(( $(/bin/date '+%U') % 3 )) -eq 0 ] && generate_ksk
     generate_zsk
+elif [ $(/bin/date '+%w') -eq $(( $sunday + 1 )) ]; then
+    if [ -e $zonedir/incoming ]; then
+        incoming=$(date -d '-1 day' '+timestamp-%Y-%m-%d') 
+        if [ ! -e $zonedir/incoming/$incoming ]; then
+            echo "Incoming keys not as expected." 1>&2
+            exit 1
+        fi
+        /bin/mv $zonedir/current    $zonedir/outgoing
+        /bin/mv $zonedir/incoming   $zonedir/current
+    fi
+elif [ $(/bin/date '+%w') -eq $(( $sunday + 2 )) ]; then
+    if [ -e $zonedir/outgoing ]; then
+        timestamp=$(/bin/ls $zonedir/outgoing/timestamp-* | sed 's/.*\/timestamp-//')
+        mkdir -p $zonedir/history
+        /bin/mv $zonedir/outgoing    $zonedir/history/$timestamp
+    fi
 fi
