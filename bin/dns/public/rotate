@@ -1,0 +1,33 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+    echo "usage: $0 domain" 2>&1
+    exit 1
+fi
+domain=$1
+zonedir=/mnt/dns/var/$domain
+zonefile=$zonedir/$domain.zone
+
+function generate_ksk()
+{
+    [ -d $zonedir/incoming/ksk ] && exit
+    echo "New KSK"
+    /bin/mkdir -p $zonedir/incoming/ksk
+    cd $zonedir/incoming/ksk
+    touch gerg
+    /usr/bin/ldns-keygen -a RSASHA1_NSEC3 -b 2048 -k $domain
+}
+
+function generate_zsk()
+{
+    [ -d $zonedir/incoming/zsk ] && return 0
+    echo "New ZSK"
+    /bin/mkdir -p $zonedir/incoming/zsk
+    cd $zonedir/incoming/zsk
+    /usr/bin/ldns-keygen -a RSASHA1_NSEC3 -b 1024 $domain
+}
+
+if [ $(/bin/date '+%w') -eq 4 ]; then
+    [ $(( $(/bin/date '+%U') % 3 )) -eq 0 ] && generate_ksk
+    generate_zsk
+fi

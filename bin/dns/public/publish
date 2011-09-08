@@ -85,12 +85,32 @@ do
     generate_stub $region vertical
 done
 
+function key_basename()
+{
+    local stage=$2; local kind=$3; local domain=$1
+    local path=/mnt/dns/var/$domain
+    basename=$(/bin/basename $(/bin/ls $path/$stage/$kind/*.key) .key)
+    echo $path/$stage/$kind/$basename
+}
+
 for domain in runpup.com california.runpup.net virginia.runpup.net prettyrobots.com
 do
     path=/mnt/dns/var/$domain
-    ksk=$(/bin/basename $(/bin/ls $path/current/ksk/*.key) .key)
-    zsk=$(/bin/basename $(/bin/ls $path/current/zsk/*.key) .key)
-    /usr/bin/ldns-signzone $path/$domain.zone $path/current/ksk/$ksk $path/current/zsk/$zsk
+    for stage in incoming outgoing
+    do
+        if [ -e $path/$stage/zsk ]
+        then
+            zsk=$(key_basename $domain $stage zsk)
+            /bin/cat $zsk.key >> $path/$domain.zone
+        fi
+    done
+    ksks=($(key_basename $domain current ksk))
+    if [ -e $path/incoming/ksk ]
+    then
+        ksks+=($(key_basename $domain incoming ksk))
+    fi
+    zsk=$(key_basename $domain current zsk)
+    /usr/bin/ldns-signzone $path/$domain.zone ${ksks[@]} $zsk
     /usr/bin/sudo /bin/cp $path/$domain.zone.signed /var/lib/nsd/chroot/etc/nsd/
 done
 
