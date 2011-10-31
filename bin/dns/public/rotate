@@ -8,6 +8,13 @@ domain=$1
 zonedir=/mnt/dns/var/$domain
 zonefile=$zonedir/$domain.zone
 
+CentOSISO=http://mirror.facebook.net/centos/6.0/isos/i386/CentOS-6.0-i386-bin-DVD.iso
+
+zoneday=1
+keyinterval=2
+
+# This reminder is sent when zone keys are ready to rotate, with detailed
+# intructions for forgetful old system adminsitrators like myself.
 function ksk_rotate_message()
 {
 cat <<EOL | /usr/sbin/sendmail -t
@@ -15,32 +22,77 @@ Subject: Rotate KSK
 To: alan@prettyrobots.com
 
 It is time to rotate your key signing keys for $domain.
+
+You need to log into https://dlv.isc.org using your user name and password.
+
+Copy the value in any of the *.key files into new records at ISC.
+
+You will have to publish the DNS records. You will want to take a snapshot of
+the configuration as well.
+
+You can delete the old key from the DLV registry the day after tomorrow. You
+will get another reminder email asking you to do so.
 EOL
 }
 
+function ksk_delete_message()
+{
+cat <<EOL | /usr/sbin/sendmail -t
+Subject: Delete Outgoing KSK
+To: alan@prettyrobots.com
+
+You can now delete the outgoing KSK for $domain.
+EOL
+}
+
+# Generate a key signing key. You're going to need to download something big in
+# order to get enough entropy to generate the key. Here we launch curl in the
+# background to pull down a CentOS ISO from a mirror. We kill the download when
+# we exit the function.
 function generate_ksk()
 {
+    /usr/bin/curl -s "$CentOSISO" > /dev/null 2>&1 & 
+    curl_pid=$!
     [ -d $zonedir/incoming/ksk ] && return 0
     ksk_rotate_message
     /bin/mkdir -p $zonedir/incoming/ksk
     cd $zonedir/incoming/ksk
     /usr/bin/ldns-keygen -a RSASHA1_NSEC3 -b 2048 -k $domain
+    kill $curl_pid
+    wait $curl_pid 2> /dev/null
 }
 
+# Generate a zone signing key. These a smaller and generate quickly, so we don't
+# bother with a large download to generate entropy.
 function generate_zsk()
 {
+    /usr/bin/curl -s "$CentOSISO" > /dev/null 2>&1 & 
+    curl_pid=$!
     [ -d $zonedir/incoming/zsk ] && return 0
     /bin/mkdir -p $zonedir/incoming/zsk
     cd $zonedir/incoming/zsk
     /usr/bin/ldns-keygen -a RSASHA1_NSEC3 -b 1024 $domain
+    kill $curl_pid
+    wait $curl_pid 2> /dev/null
 }
 
-sunday=0
-if [ $(/bin/date '+%w') -eq $sunday ]; then
+# In order for all that below to work correctly, we need to publish keys as
+# well as generate them. Ideally, key publishing would be triggered when keys
+# are updated here. I'll have to develop confidence that this works correclty
+# attended, before I'm willing to trust it unattended. (But, at this point it is
+# failing because it is ignored and the keys are expiring outright.)
+
+# Happy zone day! Time to generate some new zone files. If we are at our key
+# signing key rotation interval, then we'll rotate keys as well.
+if [ $(/bin/date '+%w') -eq $zoneday ]; then
+    /bin/mkdir -p $zonedir/incoming
     touch "$zonedir/incoming/$(/bin/date '+timestamp-%Y-%m-%d')"
-    [ $(( $(/bin/date '+%U') % 3 )) -eq 0 ] && generate_ksk
+    [ $(( $(/bin/date '+%U') % $keyinterval )) -eq 0 ] && generate_ksk
     generate_zsk
-elif [ $(/bin/date '+%w') -eq $(( $sunday + 1 )) ]; then
+
+# Zone say plus one. We move directories around. In order for this to work
+# correctly, we need to publish keys
+elif [ $(/bin/date '+%w') -eq $(( ( $zoneday + 1 ) % 7 )) ]; then
     if [ -e $zonedir/incoming ]; then
         incoming=$(date -d '-1 day' '+timestamp-%Y-%m-%d') 
         if [ ! -e $zonedir/incoming/$incoming ]; then
@@ -50,10 +102,13 @@ elif [ $(/bin/date '+%w') -eq $(( $sunday + 1 )) ]; then
         /bin/mv $zonedir/current    $zonedir/outgoing
         /bin/mv $zonedir/incoming   $zonedir/current
     fi
-elif [ $(/bin/date '+%w') -eq $(( $sunday + 2 )) ]; then
+elif [ $(/bin/date '+%w') -eq $(( ( $zoneday + 2 ) % 7 )) ]; then
     if [ -e $zonedir/outgoing ]; then
         timestamp=$(/bin/ls $zonedir/outgoing/timestamp-* | sed 's/.*\/timestamp-//')
         mkdir -p $zonedir/history
         /bin/mv $zonedir/outgoing    $zonedir/history/$timestamp
+        if [ $(( $(/bin/date -d '-2 days' '+%U') % $keyinterval )) -eq 0 ]; then 
+            ksk_delete_message
+        fi
     fi
 fi
