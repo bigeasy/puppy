@@ -8,6 +8,31 @@ then
     exit 1
 fi
 
+if [ -z "$SSH_AUTH_SOCK" ]
+then
+    echo "No SSH agent available." 1>&2
+    exit 1
+fi
+
+if [ -z "$SUDO_USER" ]
+then
+    sudoer=root
+else
+    sudoer=$SUDO_USER
+fi
+sudoer_home=$(/bin/grep "^$sudoer" /etc/passwd | /bin/cut -d: -f6)
+
+cat <<EOF > $sudoer_home/rpms.txt
+cyrus-sasl-plain
+git
+gnupg
+make
+policycoreutils-python
+postfix
+s3cmd
+vim
+EOF
+
 function make_group()
 {
     group=$1
@@ -56,15 +81,16 @@ make_user $user 701 701
 if [ ! -e /home/$user/.ssh/authorized_keys ]
 then
     /usr/bin/sudo -u $user /bin/mkdir -m 755 -p /home/$user/.ssh
-    /bin/cp -p /root/.ssh/authorized_keys /home/$user/.ssh/
+    /bin/cp -p $sudoer_home/.ssh/authorized_keys /home/$user/.ssh/
     /bin/chown $user:$user /home/$user/.ssh/authorized_keys
 fi
 
 if [ ! -e /home/$user/git/ecma/puppy/janitor ]
 then
-    /bin/cp /root/.ssh/known_hosts /home/alan/.ssh/known_hosts
+    /bin/cp $sudoer_home/.ssh/known_hosts /home/$user/.ssh/known_hosts
+    /bin/chown $user:$user /home/$user/.ssh/known_hosts
     /usr/bin/sudo -u $user /bin/mkdir -p /home/$user/git/ecma/puppy
-    /usr/bin/ssh -o ForwardAgent=yes -o NoHostAuthenticationForLocalhost=yes -l $user localhost /usr/bin/git clone -b janitor git@bled.prettyrobots.com:puppy.git /home/$user/git/ecma/puppy/janitor
+    /usr/bin/ssh -o ForwardAgent=yes -o NoHostAuthenticationForLocalhost=yes -l $user localhost /usr/bin/git clone -b janitor git@bled.prettyrobots.com:puppy.git /home/$user/janitor
 fi
 
 cat<<EOL > /root/wheel

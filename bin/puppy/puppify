@@ -154,6 +154,10 @@ install_files root 440 etc/sudoers.d/* \
                        etc/sudoers \
                        etc/sudoers.env
 install_files root 600 etc/ssh/sshd_config
+install_files root 700 root/configure.sh
+
+# Make sure there is a place for unbound pid file.
+/bin/mkdir -p /var/run/unbound
 
 # Remove default rsyslog.service.
 /bin/rm -f /lib/systemd/system/rsyslog.service
