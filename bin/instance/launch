@@ -34,7 +34,7 @@ match = ///
     \w+\.
     (balance|user|data|image)\.
     (north|south|east|west)\.
-    (california|ireland|singapore|tokyo|virginia)\.
+    (california|oregon|ireland|singapore|tokyo|virginia)\.
     runpup\.com
     $
   ///.exec(options.name)
@@ -46,7 +46,7 @@ if not match
 
 architecture = options.architecture || { balance: "x86_64", user: "i386", data: "i386" }[type] || "i386"
 
-endpoint = { california: "us-west-1", virginia: "us-east-1" }[region]
+endpoint = { california: "us-west-1", oregon: "us-west-2", virginia: "us-east-1" }[region]
 if not endpoint
   usage "Unknown region."
 
@@ -78,7 +78,7 @@ client.call "DescribeImages", { "Owner.1": "self" }, (response) ->
     candidate = null
     for image in response.imagesSet
       tags = {}
-      for tag in image.tagSet
+      for tag in image.tagSet or []
         tags[tag.key] = tag.value or true
       if tags.Puppified and image.architecture is architecture and (not candidate or tags.Redux)
         candidate = image
