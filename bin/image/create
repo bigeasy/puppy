@@ -98,7 +98,7 @@ client.call "DescribeInstances", {}, (response) ->
     candidate
   request.instance = findInstance()
   for mapping in request.instance.blockDeviceMapping
-    if mapping.deviceName is "/dev/sda"
+    if mapping.deviceName is "/dev/sda1"
       request.volumeId = mapping.ebs.volumeId
       break
   if not request.instance
@@ -108,6 +108,7 @@ client.call "DescribeInstances", {}, (response) ->
   kernel = {
       california: { "i386": "aki-99a0f1dc", "x86_64": "aki-9ba0f1de" }
       virginia: { "i386": "aki-407d9529", "x86_64": "aki-427d952b" }
+      oregon: { "i386": "aki-c2e26ff2", "x86_64": "aki-427d952b" }
   }[region][architecture]
 
   client.call "DescribeImages", { "Owner.1": "self" }, (response) ->
@@ -149,7 +150,7 @@ client.call "DescribeInstances", {}, (response) ->
 
     client.call "CreateSnapshot", {
       "VolumeId": request.volumeId
-      "Description": "Puppy #{architecture} #{request.version}"
+      "Description": "Puppy 16 #{architecture} #{request.version}"
     }, (response) ->
       request.snapshot = response
       client.poll "DescribeSnapshots", {}, (response) ->
@@ -160,7 +161,7 @@ client.call "DescribeInstances", {}, (response) ->
       client.call "CreateTags", {
         "ResourceId.1": request.snapshot.snapshotId
         "Tag.1.Key": "Name"
-        "Tag.1.Value": "Puppy #{architecture} #{request.version}"
+        "Tag.1.Value": "Puppy 16 #{architecture} #{request.version}"
         "Tag.2.Key": "Puppified"
         "Tag.2.Value": ""
         "Tag.3.Key": "Redux"
@@ -171,12 +172,12 @@ client.call "DescribeInstances", {}, (response) ->
         "Tag.5.Value": architecture
       }
       client.call "RegisterImage", {
-        Name: "Puppy #{architecture} #{request.version}"
-        Description: "Puppy #{architecture}"
+        Name: "Puppy 16 #{architecture} #{request.version}"
+        Description: "Puppy 16 #{architecture}"
         Architecture: architecture
-        RootDeviceName: "/dev/sda"
+        RootDeviceName: "/dev/sda1"
         KernelId: kernel
-        "BlockDeviceMapping.1.DeviceName": "/dev/sda"
+        "BlockDeviceMapping.1.DeviceName": "/dev/sda1"
         "BlockDeviceMapping.1.Ebs.SnapshotId": request.snapshot.snapshotId
       }, (response) ->
         request.image = response
@@ -188,7 +189,7 @@ client.call "DescribeInstances", {}, (response) ->
         client.call "CreateTags", {
           "ResourceId.1": request.image.imageId
           "Tag.1.Key": "Name"
-          "Tag.1.Value": "Puppy #{architecture} #{request.version}"
+          "Tag.1.Value": "Puppy 16 #{architecture} #{request.version}"
           "Tag.2.Key": "Puppified"
           "Tag.2.Value": ""
           "Tag.3.Key": "Redux"
