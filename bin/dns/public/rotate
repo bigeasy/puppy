@@ -8,9 +8,9 @@ domain=$1
 zonedir=/mnt/dns/var/$domain
 zonefile=$zonedir/$domain.zone
 
-CentOSISO=http://mirror.facebook.net/centos/6.0/isos/i386/CentOS-6.0-i386-bin-DVD.iso
+BIG_DOWNLOAD=http://mirror.facebook.net/centos/6.2/isos/i386/CentOS-6.2-i386-bin-DVD1.iso
 
-zoneday=1
+zoneday=3
 keyinterval=2
 
 # This reminder is sent when zone keys are ready to rotate, with detailed
@@ -51,7 +51,7 @@ EOL
 # we exit the function.
 function generate_ksk()
 {
-    /usr/bin/curl -s "$CentOSISO" > /dev/null 2>&1 & 
+    /usr/bin/curl -s "$BIG_DOWNLOAD" > /dev/null 2>&1 & 
     curl_pid=$!
     [ -d $zonedir/incoming/ksk ] && return 0
     ksk_rotate_message
@@ -66,7 +66,7 @@ function generate_ksk()
 # bother with a large download to generate entropy.
 function generate_zsk()
 {
-    /usr/bin/curl -s "$CentOSISO" > /dev/null 2>&1 & 
+    /usr/bin/curl -s "$BIG_DOWNLOAD" > /dev/null 2>&1 & 
     curl_pid=$!
     [ -d $zonedir/incoming/zsk ] && return 0
     /bin/mkdir -p $zonedir/incoming/zsk
