@@ -1,8 +1,6 @@
 request = require("request")
 qs = require("querystring")
 
-[ domain ] = process.argv.slice 2
-
 input = (callback) ->
   data = []
   process.stdin.resume()
@@ -18,6 +16,7 @@ checkError = (response, message) ->
 
 dlv = (_) ->
   [ password, key ] = input(_).split /\n/
+  domain = /^(.*?)\.\s/.exec(key)[1]
   response = request "https://dlv.isc.org/session/new", _
   match = /window._auth_token = "([^"]+)"/.exec response.body
   if not match
