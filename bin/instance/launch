@@ -1,9 +1,15 @@
-#!/usr/bin/env coffee
+#!/usr/bin/env _coffee
 
-fs = require "fs"
-ec2 = require "ec2"
-dns = require "dns"
-{OptionParser}  = require "coffee-script/lib/optparse"
+# Used for debugging.
+die = (splat...) ->
+  console.log.apply null, splat if splat.length
+  process.exit 1
+say = (splat...) -> console.log.apply null, splat
+
+fs = require("fs")
+ec2 = require("ec2")
+OptionParser = require("coffee-script/lib/coffee-script/optparse").OptionParser
+dns = require("dns")
 
 parser = new OptionParser [
   [ "-n", "--name [NAME]", "fully qualified domain name" ]
@@ -19,7 +25,7 @@ usage = (message) ->
   process.exit 1
 
 try
-  options         = parser.parse process.argv.slice(2)
+  options = parser.parse process.argv.slice(2)
 catch e
   usage "Invalid arguments."
 
@@ -58,24 +64,26 @@ zone = {
 if not zone
   usage "Unknown zone."
 
-configuration = JSON.parse fs.readFileSync "#{process.env["HOME"]}/.aws", "utf8"
-configuration.endpoint = endpoint
-client = ec2.createClient configuration
+run = (_) ->
+  configuration = JSON.parse fs.readFile "#{process.env["HOME"]}/.aws", "utf8", _
+  configuration.endpoint = endpoint
+  ec2 = ec2 configuration
 
-request = {}
-client.call "DescribeInstances", {}, (response) ->
-  findInstance = ->
+  request = {}
+  response = ec2 "DescribeInstances", {}, _
+  instance = do ->
     for reservation in response.reservationSet
       for instance in reservation.instancesSet
         if not /^stopped|terminated$/.test instance.instanceState.name
           for tag in instance.tagSet
             if tag.key is "Name" and tag.value is options.name
               return instance
-    false
-  if findInstance()
+
+  if instance
     usage "An instance named #{options.name} is already running."
-client.call "DescribeImages", { "Owner.1": "self" }, (response) ->
-  findImage = ->
+
+  response = ec2 "DescribeImages", { "Owner.1": "self" }, _
+  request.image = do ->
     candidate = null
     for image in response.imagesSet
       tags = {}
@@ -84,8 +92,8 @@ client.call "DescribeImages", { "Owner.1": "self" }, (response) ->
       if tags.Puppified and image.architecture is architecture and (not candidate or tags.Redux)
         candidate = image
     candidate
-  request.image = findImage()
-  client.call "RunInstances", {
+
+  response = ec2 "RunInstances", {
     ImageId: request.image.imageId
     MinCount: 1
     MaxCount: 1
@@ -93,35 +101,43 @@ client.call "DescribeImages", { "Owner.1": "self" }, (response) ->
     UserData: new Buffer(options.name).toString("base64")
     InstanceType: options.size
     "Placement.AvailabilityZone": "#{endpoint}#{zone}"
-  }, (response) ->
-    request.instance = response.instancesSet.shift()
-    client.poll "DescribeInstances", {}, (response) ->
-      for reservation in response.reservationSet
-        for instance in reservation.instancesSet
-          if instance.instanceId is request.instance.instanceId
-            return true
-      false
-    client.call "CreateTags", {
-      "ResourceId.1": request.instance.instanceId
-      "Tag.1.Key": "Name"
-      "Tag.1.Value": options.name
-    }
-    client.poll "DescribeInstances", {}, (response) ->
-      for reservation in response.reservationSet
-        for instance in reservation.instancesSet
-          if instance.instanceId is request.instance.instanceId
-            return instance.instanceState.name is "running"
-    client.call "DescribeInstances", { "InstanceId.1": request.instance.instanceId }, (response) ->
-      for mapping in response.reservationSet[0].instancesSet[0].blockDeviceMapping
-        if mapping.deviceName is "/dev/sda"
-          request.volumeId = mapping.ebs.volumeId
-          break
-      client.call "CreateTags", {
-        "ResourceId.1": request.volumeId
-        "Tag.1.Key": "Name"
-        "Tag.1.Value": options.name
-      }
+  }, _
 
-client.execute()
+  request.instance = response.instancesSet.shift()
+  loop
+    response = ec2 "DescribeInstances", {}, _
+    done = false
+    for reservation in response.reservationSet
+      for instance in reservation.instancesSet
+        done = instance.instanceId is request.instance.instanceId
+    break if done
+    setTimeout _, 500
 
+  ec2 "CreateTags", {
+    "ResourceId.1": request.instance.instanceId
+    "Tag.1.Key": "Name"
+    "Tag.1.Value": options.name
+  }, _
+
+  loop
+    response = ec2 "DescribeInstances", {}, _
+    for reservation in response.reservationSet
+      for instance in reservation.instancesSet
+        if instance.instanceId is request.instance.instanceId
+          done = instance.instanceState.name is "running"
+    break if done
+    setTimeout _, 500
+
+  response = ec2 "DescribeInstances", { "InstanceId.1": request.instance.instanceId }, _
+  for mapping in response.reservationSet[0].instancesSet[0].blockDeviceMapping
+    if mapping.deviceName is "/dev/sda1"
+      request.volumeId = mapping.ebs.volumeId
+      break
+  ec2 "CreateTags", {
+    "ResourceId.1": request.volumeId
+    "Tag.1.Key": "Name"
+    "Tag.1.Value": options.name
+  }, _
+
+run (error) -> throw error if error
 # vim: ft=coffee:
