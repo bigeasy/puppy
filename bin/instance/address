@@ -1,9 +1,9 @@
-#!/usr/bin/env coffee
+#!/usr/bin/env _coffee
 
 fs = require "fs"
 ec2 = require "ec2"
 dns = require "dns"
-{OptionParser}  = require "coffee-script/lib/optparse"
+OptionParser = require("coffee-script/lib/coffee-script/optparse").OptionParser
 
 parser = new OptionParser [
   [ "-n", "--name [NAME]", "fully qualified domain name" ]
@@ -17,7 +17,7 @@ usage = (message) ->
   process.exit 1
 
 try
-  options         = parser.parse process.argv.slice(2)
+  options = parser.parse process.argv.slice(2)
 catch e
   usage "Invalid arguments."
 
@@ -29,7 +29,7 @@ match = ///
     \w+\.
     (balance|user|data)\.
     (north|south|east|west)\.
-    (california|ireland|singapore|tokyo|virginia)\.
+    (california|oregon|ireland|singapore|tokyo|virginia)\.
     runpup\.com
     $
   ///.exec(options.name)
@@ -41,35 +41,33 @@ if not match
 
 architecture = { balance: "i386", user: "i386", data: "i386" }[type]
 
-endpoint = { california: "us-west-1", virginia: "us-east-1" }[region]
+endpoint = { california: "us-west-1", oregon: "us-west-2", virginia: "us-east-1" }[region]
 if not endpoint
   usage "Unknown region."
 
-configuration = JSON.parse fs.readFileSync "#{process.env["HOME"]}/.aws"
-configuration.endpoint = endpoint
-client = ec2.createClient configuration
+run = (_) ->
+  configuration = JSON.parse fs.readFile "#{process.env["HOME"]}/.aws", _
+  configuration.endpoint = endpoint
+  ec2 = ec2 configuration
 
-request = {}
-client.call "DescribeInstances", {}, (response) ->
-  findInstance = ->
+  address = dns.lookup options.name, 4, _
+
+  response = ec2 "DescribeInstances", {}, _
+  instance = do ->
     for reservation in response.reservationSet
       for instance in reservation.instancesSet
         if instance.instanceState.name is "running"
           for tag in instance.tagSet
             if tag.key is "Name" and tag.value is options.name
               return instance
-    false
-  request.instance = findInstance()
-  if not request.instance
+
+  if not instance
     usage "No such instance is running."
-  client.call "AssociateAddress", {
-    PublicIp: request.address
-    InstanceId: request.instance.instanceId
-  }
 
-dns.lookup options.name, 4, (error, address) ->
-  throw error if error
-  request.address = address
-  client.execute()
+  ec2 "AssociateAddress", {
+    PublicIp: address
+    InstanceId: instance.instanceId
+  }, _
 
+run (error) -> throw error if error
 # vim: ft=coffee ts=2 sw=2:
