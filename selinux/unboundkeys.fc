@@ -1,0 +1,2 @@
+/var/lib/unbound.*              gen_context(system_u:object_r:unbound_lib_t, s0)
+/var/lib/unbound/root.key       gen_context(system_u:object_r:unbound_key_t, s0)

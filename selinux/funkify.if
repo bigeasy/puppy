@@ -1,0 +1,9 @@
+## <summary></summary>
+template(`funkify_shell_exec',`
+    # Read system page size from /proc/meminfo. 
+    kernel_read_system_state($1)
+    # Shell programs use utility programs.
+    corecmd_exec_bin($1)
+    # Read localization.
+    miscfiles_read_localization($1)
+')

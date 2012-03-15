@@ -12,7 +12,7 @@ output=$(/usr/bin/make -f /usr/share/selinux/devel/Makefile)
 if [ $? -eq 0 ]
 then
     echo "Reloading policy."
-    /usr/bin/sudo /usr/sbin/semodule -i *.pp 
+#    /usr/bin/sudo /usr/sbin/semodule -i *.pp 
 else
     echo $output
     exit 1

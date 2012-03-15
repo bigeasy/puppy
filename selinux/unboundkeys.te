@@ -1,0 +1,15 @@
+# SELinux policy module for writing out unbound key file.
+policy_module(database, 1.0.0)
+
+require {
+    type named_t;
+}
+
+type unbound_key_t;
+type unbound_lib_t;
+
+manage_files_pattern(named_t, unbound_key_t, unbound_key_t)
+
+files_type(unbound_lib_t)
+files_type(unbound_key_t)
+list_dirs_pattern(named_t, unbound_lib_t, unbound_lib_t)

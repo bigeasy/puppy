@@ -34,6 +34,9 @@ template(`puppy_node_exec',`
 # Permissions necessary to execute a Puppy shell program.
 #   $1 - full context type, i.e. worker_t
 template(`puppy_shell_exec',`
+    gen_require(`
+        type private_functions_t;
+    ')
     # Read system page size from /proc/meminfo. 
     kernel_read_system_state($1)
     # Shell programs use utility programs.

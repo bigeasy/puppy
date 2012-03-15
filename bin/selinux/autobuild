@@ -1,0 +1,44 @@
+#!/bin/bash
+
+if [ $(whoami) != "root" ]; then
+    echo "Must run as root." 1>&2
+    exit 1
+fi
+
+while getopts ":p::t:" opt; do
+    case $opt in
+        p)
+            policy=$OPTARG
+            ;;
+        \?)
+            echo "Invalid option: -$OPTARG" >&2
+            ;;
+    esac
+done
+
+command=("$@")
+command=("${command[*]:$(( $OPTIND - 1 ))}")
+count=0
+while true
+do
+    let count=count+1
+    lines=$(/usr/bin/wc -l /var/log/audit/audit.log | /bin/cut -d' ' -f1)
+    $command
+    rules=$(/usr/bin/tail -n +$lines /var/log/audit/audit.log | /usr/bin/audit2allow -R)
+    if [ -z "$rules" ]; then
+        break
+    fi
+    echo "##### ITERATION ${count} #####"
+    echo "$rules"
+    echo "##### ITERATION ${count} #####" >> selinux/$policy.te
+    echo "$rules" >> selinux/$policy.te
+    pushd selinux > /dev/null
+    output=$(/usr/bin/make -f /usr/share/selinux/devel/Makefile)
+    if [ $? -ne 0 ]; then
+        echo $output 1>&2
+        exit 1
+    fi
+    popd > /dev/null
+    /usr/sbin/semodule -i selinux/$policy.pp 
+done
+

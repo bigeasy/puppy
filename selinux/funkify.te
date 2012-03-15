@@ -1,0 +1,114 @@
+# Make a very funky module.
+
+policy_module(funkify,1.0.0)
+
+attribute super_funky;
+
+type unfunky_exec_t;        # Unfunky executable.
+type unfunky_t;
+
+type funky_t, super_funky;        # Funky domain.
+type funky_exec_t;          # Funky executable.
+
+role system_r types funky_t;
+role system_r types unfunky_t;
+
+application_domain(funky_t, funky_exec_t)
+application_domain(unfunky_t, unfunky_exec_t)
+
+domtrans_pattern(super_funky, unfunky_exec_t, unfunky_t)
+
+funkify_shell_exec(funky_t)
+funkify_shell_exec(unfunky_t)
+##### ITERATION 1 #####
+
+require {
+	type unconfined_t;
+	type funky_t;
+	type setroubleshootd_t;
+	type system_dbusd_t;
+	class process { siginh transition noatsecure rlimitinh };
+}
+
+#============= system_dbusd_t ==============
+allow system_dbusd_t setroubleshootd_t:process { siginh rlimitinh noatsecure };
+
+#============= unconfined_t ==============
+allow unconfined_t funky_t:process transition;
+##### ITERATION 2 #####
+
+require {
+	type funky_t;
+	type shell_exec_t;
+	class file entrypoint;
+}
+
+#============= funky_t ==============
+allow funky_t shell_exec_t:file entrypoint;
+##### ITERATION 3 #####
+
+require {
+	type funky_t;
+}
+
+#============= funky_t ==============
+corecmd_exec_shell(funky_t)
+userdom_use_inherited_user_ptys(funky_t)
+##### ITERATION 4 #####
+
+require {
+	type funky_t;
+}
+
+#============= funky_t ==============
+files_search_home(funky_t)
+##### ITERATION 5 #####
+
+require {
+	type funky_t;
+}
+
+#============= funky_t ==============
+userdom_list_user_home_dirs(funky_t)
+##### ITERATION 6 #####
+
+require {
+	type funky_exec_t;
+	type funky_t;
+	class file execute_no_trans;
+}
+
+#============= funky_t ==============
+allow funky_t funky_exec_t:file execute_no_trans;
+##### ITERATION 7 #####
+
+require {
+	type unfunky_t;
+	type funky_t;
+	class process { siginh noatsecure rlimitinh };
+}
+
+#============= funky_t ==============
+allow funky_t unfunky_t:process { siginh rlimitinh noatsecure };
+
+#============= unfunky_t ==============
+files_search_home(unfunky_t)
+userdom_use_inherited_user_ptys(unfunky_t)
+##### ITERATION 8 #####
+
+require {
+	type unfunky_t;
+}
+
+#============= unfunky_t ==============
+userdom_list_user_home_dirs(unfunky_t)
+##### ITERATION 9 #####
+
+require {
+	type unfunky_t;
+}
+
+#============= unfunky_t ==============
+files_read_etc_files(unfunky_t)
+selinux_get_enforce_mode(unfunky_t)
+userdom_read_user_home_content_files(unfunky_t)
