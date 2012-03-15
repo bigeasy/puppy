@@ -1,8 +1,8 @@
-#!/usr/bin/env coffee
+#!/usr/bin/env _coffee
 
 ec2 = require "ec2"
 fs = require "fs"
-{OptionParser}  = require "coffee-script/lib/optparse"
+{OptionParser}  = require "coffee-script/lib/coffee-script/optparse"
 
 parser = new OptionParser [
   [ "-r", "--region [NAME]", "region" ]
@@ -17,7 +17,7 @@ usage = (message) ->
   process.exit 1
 
 try
-  options         = parser.parse process.argv.slice(2)
+  options = parser.parse process.argv.slice(2)
 catch e
   usage "Invalid arguments."
 
@@ -30,17 +30,18 @@ directions = { "vertical": [ "north", "south" ], "horizontal": [ "east", "west" 
 if not directions
   usage "Unknown axis."
 
-endpoint = { california: "us-west-1", virginia: "us-east-1" }[options.region]
+endpoint = { california: "us-west-1", oregon: "us-west-2", virginia: "us-east-1" }[options.region]
 if not endpoint
   usage "Unknown region."
 
-configuration = JSON.parse fs.readFileSync "#{process.env["HOME"]}/.aws", "utf8"
-configuration.endpoint = endpoint
-client = ec2.createClient configuration
 
-request = {}
-client.call "DescribeInstances", {}, (response) ->
-  request.instances = []
+run = (_) ->
+  configuration = JSON.parse fs.readFile "#{process.env["HOME"]}/.aws", "utf8", _
+  configuration.endpoint = endpoint
+  ec2 = ec2 configuration
+
+  response = ec2 "DescribeInstances", {}, _
+  instances = []
   for reservation in response.reservationSet
     for instance in reservation.instancesSet
       if instance.instanceState.name is "running"
@@ -50,15 +51,15 @@ client.call "DescribeInstances", {}, (response) ->
               ^
               \w+\.\w+\.
               (north|south|east|west)\.
-              (california|ireland|singapore|tokyo|virginia)\.
+              (california|ireland|oregon|singapore|tokyo|virginia)\.
               runpup\.com
               $
             ///.exec tag.value
             if match
               [ direction, region ] = match.slice 1
               if region is options.region and directions.indexOf(direction) isnt -1
-                request.instances.push instance
-  for instance in request.instances
+                instances.push instance
+  for instance in instances
     for tag in instance.tagSet
       if tag.key is "Name"
         process.stdout.write tag.value
@@ -66,5 +67,5 @@ client.call "DescribeInstances", {}, (response) ->
     process.stdout.write instance.ipAddress
     process.stdout.write "\n"
 
-client.execute()
+run (error) -> throw error if error
 # vim: ft=coffee ts=2 sw=2:

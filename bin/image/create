@@ -1,4 +1,4 @@
-#!/usr/bin/env coffee
+#!/usr/bin/env _coffee
 
 alpha = [
   "Alvar"
@@ -18,7 +18,7 @@ alpha = [
   "Odin"
   "Praro"
   "Quince"
-  "Race"
+  "Reynes"
   "Soniat"
   "Tonti"
   "Ulloa"
@@ -30,7 +30,7 @@ alpha = [
 ec2 = require "ec2"
 fs = require "fs"
 dns = require "dns"
-{OptionParser}  = require "coffee-script/lib/optparse"
+OptionParser = require("coffee-script/lib/coffee-script/optparse").OptionParser
 
 parser = new OptionParser [
   [ "-n", "--name [NAME]", "fully qualified domain name" ]
@@ -44,7 +44,7 @@ usage = (message) ->
   process.exit 1
 
 try
-  options         = parser.parse process.argv.slice(2)
+  options = parser.parse process.argv.slice(2)
 catch e
   usage "Invalid arguments."
 
@@ -55,8 +55,8 @@ match = ///
     ^
     \w+\.
     (balance|user|data|image)\.
-    (north|south|east|west)\.
-    (california|ireland|singapore|tokyo|virginia)\.
+    (?:north|south|east|west)\.
+    (california|ireland|oregon|singapore|tokyo|virginia)\.
     runpup\.com
     $
   ///.exec(options.name)
@@ -64,140 +64,136 @@ match = ///
 if not match
   process.stderr.write "Invalid hostname.\n"
   usage()
-[ type, zone, region ] = match.slice 1
+[ type, region ] = match.slice 1
 
-#architecture = { balance: "x86_64", data: "i386", user: "i386" }[type]
-#if not architecture
-#  usage "Unknown machine type."
-
-zone = { north: "a", south: "b", east: "c", west: "d" }[zone]
-if not zone
-  usage "Unknown zone."
-
-endpoint = { california: "us-west-1", virginia: "us-east-1" }[region]
+endpoint = { california: "us-west-1", oregon: "us-west-2", virginia: "us-east-1" }[region]
 if not endpoint
   usage "Unknown region."
 
+run = (_) ->
+  configuration = JSON.parse fs.readFile "#{process.env["HOME"]}/.aws", "utf8", _
+  configuration.endpoint = endpoint
+  ec2 = ec2 configuration
 
-configuration = JSON.parse fs.readFileSync "#{process.env["HOME"]}/.aws", "utf8"
-configuration.endpoint = endpoint
-client = ec2.createClient configuration
-
-request = {}
-client.call "DescribeInstances", {}, (response) ->
-  findInstance = ->
-    candidate = null
+  request = {}
+  response = ec2 "DescribeInstances", {}, _
+  instance = do ->
     for reservation in response.reservationSet
       for instance in reservation.instancesSet
         if instance.instanceState.name isnt "terminated"
           for tag in instance.tagSet
             if tag.key is "Name" and tag.value is options.name
-              if candidate
-                usage "More than one instance with the given name."
-              candidate = instance
-    candidate
-  request.instance = findInstance()
-  for mapping in request.instance.blockDeviceMapping
+              return instance
+
+  for mapping in instance.blockDeviceMapping
     if mapping.deviceName is "/dev/sda1"
-      request.volumeId = mapping.ebs.volumeId
+      volumeId = mapping.ebs.volumeId
       break
-  if not request.instance
+
+  if not instance
     usage "Cannot find instance."
 
-  architecture = request.instance.architecture
+  architecture = instance.architecture
   kernel = {
       california: { "i386": "aki-99a0f1dc", "x86_64": "aki-9ba0f1de" }
       virginia: { "i386": "aki-407d9529", "x86_64": "aki-427d952b" }
-      oregon: { "i386": "aki-c2e26ff2", "x86_64": "aki-427d952b" }
+      oregon: { "i386": "aki-c2e26ff2", "x86_64": "aki-98e26fa8"}
   }[region][architecture]
 
-  client.call "DescribeImages", { "Owner.1": "self" }, (response) ->
-    findImage = ->
-      for image in response.imagesSet
-        count = 0
-        for tag in image.tagSet
-          if image.architecture is architecture
-            if tag.key is 'Puppified'
-              count++
-            if tag.key is 'Redux'
-              count++
-        if count is 1
-          request.current = image
-        else if count is 2
-          usage "A redux image for this architecture already exists."
-    request.image = findImage()
-    if request.current
-      for tag in request.current.tagSet
-        if tag.key is "Version"
-          index = alpha.indexOf(tag.value) + 1
-          if index isnt alpha.length
-            request.version = alpha[index]
-    if not request.version
-      request.version = alpha[0]
-  client.call "DescribeSnapshots", {}, (response) ->
-    for snapshot in response.snapshotSet
-      tags = {}
-      for tag in snapshot.tagSet or []
-        tags[tag.key] = tag.value or true
-      if tags.Puppified and tags.Architecture is architecture and tags.Redux
-        usage "A redux snapshot for this architecture already exists."
+  response = ec2 "DescribeImages", { "Owner.1": "self" }, _
+  current = do ->
+    for image in response.imagesSet
+      count = 0
+      for tag in image.tagSet
+        if image.architecture is architecture
+          if tag.key is 'Puppified'
+            count++
+          if tag.key is 'Redux'
+            count++
+      if count is 1
+        base = image
+      else if count is 2
+        usage "A redux image for this architecture already exists."
+    base
 
-    if (request.instance.instanceState.name != "stopped")
-      client.call "StopInstances", { "InstanceId.1": request.instance.instanceId }, (response) ->
+  if current
+    for tag in current.tagSet
+      if tag.key is "Version"
+        index = alpha.indexOf(tag.value) + 1
+        if index isnt alpha.length
+          version = alpha[index]
+          break
+  if not version
+    version = alpha[0]
+  response = ec2 "DescribeSnapshots", {}, _
+  for snapshot in response.snapshotSet
+    tags = {}
+    for tag in snapshot.tagSet or []
+      tags[tag.key] = tag.value or true
+    if tags.Puppified and tags.Architecture is architecture and tags.Redux
+      usage "A redux snapshot for this architecture already exists."
 
-    client.poll "DescribeInstances", { "InstanceId.1": request.instance.instanceId }, (response) ->
-      return response.reservationSet[0].instancesSet[0].instanceState.name is "stopped"
+  if instance.instanceState.name != "stopped"
+    ec2 "StopInstances", { "InstanceId.1": instance.instanceId }, _
 
-    client.call "CreateSnapshot", {
-      "VolumeId": request.volumeId
-      "Description": "Puppy 16 #{architecture} #{request.version}"
-    }, (response) ->
-      request.snapshot = response
-      client.poll "DescribeSnapshots", {}, (response) ->
-        for snapshot in response.snapshotSet
-          if snapshot.snapshotId is request.snapshot.snapshotId
-            return snapshot.status is "completed"
-        false
-      client.call "CreateTags", {
-        "ResourceId.1": request.snapshot.snapshotId
-        "Tag.1.Key": "Name"
-        "Tag.1.Value": "Puppy 16 #{architecture} #{request.version}"
-        "Tag.2.Key": "Puppified"
-        "Tag.2.Value": ""
-        "Tag.3.Key": "Redux"
-        "Tag.3.Value": ""
-        "Tag.4.Key": "Version"
-        "Tag.4.Value": request.version
-        "Tag.5.Key": "Architecture"
-        "Tag.5.Value": architecture
-      }
-      client.call "RegisterImage", {
-        Name: "Puppy 16 #{architecture} #{request.version}"
-        Description: "Puppy 16 #{architecture}"
-        Architecture: architecture
-        RootDeviceName: "/dev/sda1"
-        KernelId: kernel
-        "BlockDeviceMapping.1.DeviceName": "/dev/sda1"
-        "BlockDeviceMapping.1.Ebs.SnapshotId": request.snapshot.snapshotId
-      }, (response) ->
-        request.image = response
-        client.poll "DescribeImages", { "Owner.1": "self" }, (response) ->
-          for image in response.imagesSet
-            if request.image.imageId is image.imageId
-              return true
-          false
-        client.call "CreateTags", {
-          "ResourceId.1": request.image.imageId
-          "Tag.1.Key": "Name"
-          "Tag.1.Value": "Puppy 16 #{architecture} #{request.version}"
-          "Tag.2.Key": "Puppified"
-          "Tag.2.Value": ""
-          "Tag.3.Key": "Redux"
-          "Tag.3.Value": ""
-          "Tag.4.Key": "Version"
-          "Tag.4.Value": request.version
-        }
+  loop
+    response = ec2 "DescribeInstances", { "InstanceId.1": instance.instanceId }, _
+    break if response.reservationSet[0].instancesSet[0].instanceState.name is "stopped"
 
-client.execute()
 
+  snapshot = ec2 "CreateSnapshot", {
+    "VolumeId": volumeId
+    "Description": "Puppy 16 #{architecture} #{version}"
+  }, _
+  loop
+    response = ec2 "DescribeSnapshots", {}, _
+    done = do ->
+      for candidate in response.snapshotSet
+        if candidate.snapshotId is snapshot.snapshotId
+          return candidate.status is "completed"
+    break if done
+
+  ec2 "CreateTags", {
+    "ResourceId.1": snapshot.snapshotId
+    "Tag.1.Key": "Name"
+    "Tag.1.Value": "Puppy 16 #{architecture} #{version}"
+    "Tag.2.Key": "Puppified"
+    "Tag.2.Value": ""
+    "Tag.3.Key": "Redux"
+    "Tag.3.Value": ""
+    "Tag.4.Key": "Version"
+    "Tag.4.Value": version
+    "Tag.5.Key": "Architecture"
+    "Tag.5.Value": architecture
+  }, _
+
+  image = ec2 "RegisterImage", {
+    Name: "Puppy 16 #{architecture} #{version}"
+    Description: "Puppy 16 #{architecture}"
+    Architecture: architecture
+    RootDeviceName: "/dev/sda1"
+    KernelId: kernel
+    "BlockDeviceMapping.1.DeviceName": "/dev/sda1"
+    "BlockDeviceMapping.1.Ebs.SnapshotId": snapshot.snapshotId
+  }, _
+  loop
+    response = ec2 "DescribeImages", { "Owner.1": "self" }, _
+    done = do ->
+      for candidate in response.imagesSet
+        if candidate.imageId is image.imageId
+          return true
+    break if done
+  ec2 "CreateTags", {
+    "ResourceId.1": image.imageId
+    "Tag.1.Key": "Name"
+    "Tag.1.Value": "Puppy 16 #{architecture} #{version}"
+    "Tag.2.Key": "Puppified"
+    "Tag.2.Value": ""
+    "Tag.3.Key": "Redux"
+    "Tag.3.Value": ""
+    "Tag.4.Key": "Version"
+    "Tag.4.Value": version
+  }, _
+
+run (error) -> throw error if error
 # vim: ft=coffee:

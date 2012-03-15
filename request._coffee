@@ -1,3 +1,5 @@
+#!/usr/bin/env _coffee
+
 request = require("request")
 qs = require("querystring")
 

@@ -1,9 +1,9 @@
-#!/usr/bin/env coffee
+#!/usr/bin/env _coffee
 
 fs = require "fs"
 ec2 = require "ec2"
 dns = require "dns"
-{OptionParser}  = require "coffee-script/lib/optparse"
+{OptionParser}  = require "coffee-script/lib/coffee-script/optparse"
 
 parser = new OptionParser [
   [ "-n", "--architecture [NAME]", "architecture name" ]
@@ -25,17 +25,16 @@ catch e
 if not options.architecture
   usage "Architecture is required."
 
-endpoint = { california: "us-west-1", virginia: "us-east-1" }[options.region]
+endpoint = { california: "us-west-1", oregon: "us-west-2", virginia: "us-east-1" }[options.region]
 if not endpoint
   usage "Unknown region."
 
-configuration = JSON.parse fs.readFileSync "#{process.env["HOME"]}/.aws", "utf8"
-configuration.endpoint = endpoint
-client = ec2.createClient configuration
+run = (_) ->
+  configuration = JSON.parse fs.readFile "#{process.env["HOME"]}/.aws", "utf8", _
+  configuration.endpoint = endpoint
+  ec2 = ec2 configuration
 
-request = { outgoing: [] }
-client.call "DescribeImages", { "Owner.1": "self" }, (response) ->
-  for image in response.imagesSet
+  for image in ec2("DescribeImages", { "Owner.1": "self" }, _).imagesSet
     count = 0
     for tag in image.tagSet
       if image.architecture is options.architecture
@@ -44,30 +43,34 @@ client.call "DescribeImages", { "Owner.1": "self" }, (response) ->
         if tag.key is 'Redux'
           count++
     if count is 1
-      request.outgoing = image
+      outgoing = image
     else if count is 2
-      request.redux = image
-  if not request.outgoing
-    usage "Cannot find an outgoing image."
-  if not request.redux
+      redux = image
+
+  if not redux
     usage "Cannot find a redux image."
-  for instance in [ request.redux, request.outgoing ]
+
+  snapshotId = (instance) ->
     for mapping in instance.blockDeviceMapping
       if mapping.deviceName
-        instance.snapshotId = mapping.ebs.snapshotId
+        return mapping.ebs.snapshotId
 
-  client.call "DeregisterImage", { ImageId: request.outgoing.imageId }
-  client.poll "DescribeImages", { "Owner.1": "self" }, (response) ->
-    for image in response.imagesSet
-      if image.imageId is request.outgoing.imageId
-        return false
-    true
-  client.call "DeleteSnapshot", { SnapshotId: request.outgoing.snapshotId }
+  if outgoing
+    ec2 "DeregisterImage", { ImageId: outgoing.imageId }, _
+    loop
+      response = ec2 "DescribeImages", { "Owner.1": "self" }, _
+      exists = do ->
+        for image in response.imagesSet
+          if image.imageId is outgoing.imageId
+            return true
+      break if not exists
+    ec2 "DeleteSnapshot", { SnapshotId: snapshotId(outgoing) }, _
 
-  client.call "DeleteTags", {
-    "ResourceId.1": request.redux.imageId
-    "ResourceId.2": request.redux.snapshotId
+  ec2 "DeleteTags", {
+    "ResourceId.1": redux.imageId
+    "ResourceId.2": snapshotId(redux)
     "Tag.1.Key": "Redux"
-  }
+  }, _
 
-client.execute()
+run (error) -> throw error if error
+# vim: ft=coffee ts=2 sw=2:

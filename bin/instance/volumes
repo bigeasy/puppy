@@ -1,8 +1,8 @@
-#!/usr/bin/env coffee
+#!/usr/bin/env _coffee
 
 ec2 = require "ec2"
 fs = require "fs"
-{OptionParser}  = require "coffee-script/lib/optparse"
+{OptionParser}  = require "coffee-script/lib/coffee-script/optparse"
 
 parser = new OptionParser [
   [ "-n", "--name [NAME]", "fully qualified domain name" ]
@@ -28,7 +28,7 @@ match = ///
     \w+\.
     (balance|user|data)\.
     (north|south|east|west)\.
-    (california|ireland|singapore|tokyo|virginia)\.
+    (california|ireland|oregon|singapore|tokyo|virginia)\.
     runpup\.com
     $
   ///.exec(options.name)
@@ -50,52 +50,44 @@ zone = { north: "a", south: "b", east: "c", west: "d" }[zone]
 if not zone
   usage "Unknown zone."
 
-endpoint = { virginia: "us-east-1", california: "us-west-1" }[region]
+endpoint = { virginia: "us-east-1", oregon: "us-west-2", california: "us-west-1" }[region]
 if not endpoint
   usage "Unknown region."
 
-configuration = JSON.parse fs.readFileSync "#{process.env["HOME"]}/.aws", "utf8"
-configuration.endpoint = endpoint
-client = ec2.createClient configuration
+do (_ = (error) -> throw error if error) ->
+  configuration = JSON.parse fs.readFile "#{process.env["HOME"]}/.aws", "utf8", _
+  configuration.endpoint = endpoint
+  ec2 = ec2 configuration
 
-request = {}
-client.call "DescribeInstances", {}, (response) ->
-  findInstance = ->
+  response = ec2 "DescribeInstances", {}, _
+  instance = do ->
     for reservation in response.reservationSet
       for instance in reservation.instancesSet
         if instance.instanceState.name is "running"
           for tag in instance.tagSet
             if tag.key is "Name" and tag.value is options.name
               return instance
-    false
-  request.instance = findInstance()
-client.call "DescribeVolumes", {}, (response) ->
-  request.volumes = []
+  response = ec2 "DescribeVolumes", {}, _
+  volumes = []
   for volume in response.volumeSet
     tags = {}
     for tag in volume.tagSet or []
       tags[tag.key] =  tag.value or true
-    if tags.Puppified and tags.Host is options.name
-      request.volumes.push volume
     volume.tags = tags
-  volumes = []
-  for volume in request.volumes
-    if volume.status isnt "available"
-      attachment = volume.attachmentSet[0]
-      if attachment.instanceId is request.instance.instanceId
-        continue
-      usage "The volume #{volume.tags.Name} is not available."
-    volumes.push volume
-  request.volumes = volumes
-  for volume in request.volumes
-    client.call "AttachVolume", {
-      InstanceId: request.instance.instanceId
+    if tags.Puppified and tags.Host is options.name
+      if volume.status isnt "available"
+        attachment = volume.attachmentSet[0]
+        if attachment.instanceId is request.instance.instanceId
+          continue
+        usage "The volume #{volume.tags.Name} is not available."
+      volumes.push volume
+  for volume in volumes
+    ec2 "AttachVolume", {
+      InstanceId: instance.instanceId
       VolumeId: volume.volumeId
       Device: volume.tags.Device
     }
-    client.poll "DescribeVolumes", {
-      "VolumeId.1": volume.volumeId
-    }, (response) ->
-      response.volumeSet[0].attachmentSet[0].status is "attached"
-
-client.execute()
+    loop
+      repsonse = ec2 "DescribeVolumes", { "VolumeId.1": volume.volumeId }, _
+      break if response.volumeSet[0].attachmentSet[0].status is "attached"
+# vim: ft=coffee ts=2 sw=2:

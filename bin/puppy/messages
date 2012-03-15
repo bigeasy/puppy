@@ -1,5 +1,5 @@
 #!/usr/bin/env coffee
-{OptionParser}  = require "coffee-script/lib/optparse"
+OptionParser = require("coffee-script/lib/coffee-script/optparse").OptionParser
 {tz} = require "timezone"
 {inspect} = require "util"
 {merge} = require("coffee-script").helpers
@@ -225,7 +225,7 @@ sendOutput = (output) ->
         process.stdout.write separator
         separator = "\n"
 
-        prefix = "#{tz("%Y/%m/%d %H:%M:%S", record.date)} on #{record.host}"
+        prefix = "#{tz(record.date, "%Y/%m/%d %H:%M:%S")} on #{record.host}"
         suffix = "#{record.program}[#{record.pid}]"
         dashes = new Array(80 - (prefix.length + suffix.length + 1)).join("-")
 
