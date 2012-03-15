@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION update_timestamp() RETURNS trigger AS $update_timestamp$
+CREATE OR REPLACE FUNCTION update_timestamp() RETURNS TRIGGER AS $update_timestamp$
     BEGIN
         NEW.modified := current_timestamp;
         RETURN NEW;
