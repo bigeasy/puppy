@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ $(whoami) = "root" ]; then
+    echo "Must NOT run as root." 1>&2
+    exit 1
+fi
+
 cd ~/.vim/bundle/vim-coffee-script
 git pull
 
@@ -7,8 +12,8 @@ cd ~/.usr
 git pull
 
 cd ~/janitor
-bin/puppy/checkcout
+bin/puppy/checkout
 
-sudo su janitor /home/janitor/janitor/bin/puppy/checkout
+#sudo su janitor /home/janitor/janitor/bin/puppy/checkout
 
 sudo yum update -y

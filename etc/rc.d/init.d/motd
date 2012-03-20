@@ -16,8 +16,8 @@
 HOSTNAME=`/bin/uname -a | awk '{print $2}'`
 IP_ADDRESS=`ip addr list eth0 | grep "inet " | cut -d' ' -f6 | cut -d/ -f1`
 VERSION=`rpm -q --queryformat '%{VERSION}\n' fedora-release`
-ARCHITECTUE=`uname -m`
+ARCHITECTURE=`uname -m`
 
-echo -e "\nAppliance:\tPuppy $VERSION x86_64\nHostname:\t$HOSTNAME\nIP Address:\t$IP_ADDRESS\n" > /etc/motd
+echo -e "\nx Appliance:\tPuppy $VERSION $ARCHITECTURE\nHostname:\t$HOSTNAME\nIP Address:\t$IP_ADDRESS\n" > /etc/motd
 
 exit 0
