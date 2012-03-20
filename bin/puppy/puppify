@@ -229,7 +229,7 @@ done
 function on_boot()
 {
     local service=$1
-    until /bin/systemctl is-enabled $service.service 2>/dev/null
+    until /bin/systemctl is-enabled $service.service 1>/dev/null 2>&1
     do
         /bin/systemctl enable $service.service
         echo "Enabled service $service to start on boot. You should start it now."
@@ -261,4 +261,20 @@ fi
 
 /sbin/restorecon -R /puppy /etc /home /var/log/puppy /var/cache/puppy /node /opt
 
-/bin/systemctl daemon-reload
+
+# Start unbound after restarting systemd, so that the unbound log files go in
+# their log file. Toggle the other services we've touched so far.
+# -------------------------------------------------------------------------- #
+/bin/systemctl restart rsyslog.service
+/bin/systemctl start unbound.service
+/bin/systemctl restart unbound.service
+/bin/systemctl restart ntpd.service
+/bin/systemctl restart postfix.service
+
+/bin/systemctl --system daemon-reload
+
+# Setup networking to use unbound DNS cache.
+# -------------------------------------------------------------------------- #
+/bin/sed -i '/^PEERDNS=/d' /etc/sysconfig/network-scripts/ifcfg-eth0 
+echo "PEERDNS=no" >> /etc/sysconfig/network-scripts/ifcfg-eth0
+echo "nameserver 127.0.0.1" > /etc/resolv.conf

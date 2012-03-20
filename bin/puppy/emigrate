@@ -7,5 +7,5 @@ shift
 for file in $@
 do
     copy=$HOME/$file
-    /usr/bin/rsync -avz -e /usr/bin/ssh $host:$copy $copy
+    /usr/bin/rsync -avz -e "/usr/bin/ssh -o VerifyHostKeyDNS=yes" $host:$copy $copy
 done

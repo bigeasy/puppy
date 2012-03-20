@@ -1,5 +1,7 @@
 #!/bin/bash
 
+trap "exit" SIGINT SIGTERM SIGHUP
+
 user=$1
 
 if [ -z $user ]
@@ -22,9 +24,12 @@ else
 fi
 sudoer_home=$(/bin/grep "^$sudoer" /etc/passwd | /bin/cut -d: -f6)
 
+/usr/bin/yum remove -y cloud-init
+
 cat <<EOF > $sudoer_home/rpms.txt
 cyrus-sasl-plain
 git
+ntp
 gnupg
 make
 policycoreutils-python
@@ -85,12 +90,11 @@ then
     /bin/chown $user:$user /home/$user/.ssh/authorized_keys
 fi
 
-if [ ! -e /home/$user/git/ecma/puppy/janitor ]
+if [ ! -e /home/$user/github ]
 then
     /bin/cp $sudoer_home/.ssh/known_hosts /home/$user/.ssh/known_hosts
     /bin/chown $user:$user /home/$user/.ssh/known_hosts
-    /usr/bin/sudo -u $user /bin/mkdir -p /home/$user/git/ecma/puppy
-    /usr/bin/ssh -o ForwardAgent=yes -o NoHostAuthenticationForLocalhost=yes -l $user localhost /usr/bin/git clone -b janitor git@bled.prettyrobots.com:puppy.git /home/$user/janitor
+    /usr/bin/ssh -o ForwardAgent=yes -o NoHostAuthenticationForLocalhost=yes -l $user localhost /usr/bin/git clone -b janitor git@github.com:bigeasy/puppify.git /home/$user/github
 fi
 
 cat<<EOL > /root/wheel
@@ -109,7 +113,6 @@ fi
 
 # Relabel the drive at the next boot.
 touch /.autorelabel 
-
 
 # Rebuild the policy.
 /usr/sbin/semodule -B

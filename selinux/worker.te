@@ -20,6 +20,8 @@ require {
     attribute puppy_daemon_exec_type;
 }
 
+role worker_r;
+
 # When we sudo to other roles.
 puppy_postgresql(worker_t)
 hostname_exec(worker_t)

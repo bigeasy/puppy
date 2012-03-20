@@ -1,6 +1,8 @@
 # Policy module for the public interface.
 policy_module(public, 1.1.2)
 
+role public_r;
+
 gen_require(`
     type private_public_exec_t, private_public_t;
 ')
