@@ -4,3 +4,4 @@ bin/job
 bin/user_generate
 selinux/*.pp
 selinux/tmp/*
+make/*/target
