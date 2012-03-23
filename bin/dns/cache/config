@@ -1,12 +1,16 @@
 #!/bin/bash
 
+if [ ! -d /mnt/dns/var ]
+then
+    echo "/mnt/dns is not mounted." 1>&2
+    exit 1
+fi
+
 dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../../..")
 .  $dir/bin/dns/configuration
 
-$dir/bin/loopback/mount /dev/loop5 /mnt/dns
 cat /mnt/dns/var/$region.runpup.net/current/ksk/*.ds /mnt/dns/var/$region.runpup.net/current/ksk/*.key | \
     /usr/bin/sudo /usr/bin/tee /etc/unbound/runpup.net.key > /dev/null
-$dir/bin/loopback/delete /mnt/dns
 
 cat <<EOL | /usr/bin/sudo /usr/bin/tee /etc/unbound/unbound.conf > /dev/null
 server:

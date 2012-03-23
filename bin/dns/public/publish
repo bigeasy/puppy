@@ -3,6 +3,8 @@
 region=$1
 axis=$2
 
+trap 'exit' "SIGINT"
+
 function advance_serial()
 {
     local file=$1;
@@ -22,13 +24,12 @@ function advance_serial()
     echo $next
 }
 
-for domain in runpup.com california.runpup.net virginia.runpup.net prettyrobots.com
+for domain in runpup.com oregon.runpup.net california.runpup.net virginia.runpup.net prettyrobots.com
 do
     zonefile=/mnt/dns/var/$domain/$domain.zone
     advance_serial $zonefile.base
     /bin/cp $zonefile.base $zonefile
 done
-
 
 dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../../..")
 function generate_user()
@@ -49,7 +50,7 @@ function generate_user()
     done
 }
 
-for region in california virginia
+for region in california virginia oregon
 do
     generate_user $region horizontal
     generate_user $region vertical
@@ -79,7 +80,7 @@ function generate_stub()
     done
 }
 
-for region in california virginia
+for region in california virginia oregon
 do
     generate_stub $region horizontal
     generate_stub $region vertical
@@ -93,7 +94,7 @@ function key_basename()
     echo $path/$stage/$kind/$basename
 }
 
-for domain in runpup.com california.runpup.net virginia.runpup.net prettyrobots.com
+for domain in runpup.com oregon.runpup.net california.runpup.net virginia.runpup.net prettyrobots.com
 do
     path=/mnt/dns/var/$domain
     for stage in incoming outgoing

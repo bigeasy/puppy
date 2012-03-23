@@ -1,5 +1,17 @@
 #!/bin/bash
 
+if [ ! -d /mnt/dns/var ]
+then
+    echo "/mnt/dns is not mounted." 1>&2
+    exit 1
+fi
+
+if [ ! -d /mnt/config/var ]
+then
+    echo "/mnt/config is not mounted." 1>&2
+    exit 1
+fi
+
 dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../../..")
 
 conf=($(/bin/hostname | sed 's/.*\..*\.\(.*\)\.\(.*\)\.runpup\.com/\1 \2/'))
@@ -75,13 +87,11 @@ do
     fi
 done)
 
-$dir/bin/loopback/mount /dev/loop5 /mnt/dns
 ksk=$(/bin/basename $(/bin/ls /mnt/dns/var/$region.runpup.net/current/ksk/*.key) .key)
 zsk=$(/bin/basename $(/bin/ls /mnt/dns/var/$region.runpup.net/current/zsk/*.key) .key)
 /usr/bin/sudo /usr/bin/ldns-signzone $zonefile \
     /mnt/dns/var/$region.runpup.net/current/ksk/$ksk \
     /mnt/dns/var/$region.runpup.net/current/zsk/$zsk || exit 1
-$dir/bin/loopback/delete /mnt/dns || exit 1
 
 /usr/bin/sudo /bin/mkdir -p /var/run/nsd
 /usr/bin/sudo /bin/chown -R nsd:nsd /var/lib/nsd/chroot

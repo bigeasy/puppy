@@ -12,6 +12,17 @@ function abend()
     exit 1
 }
 
+# Strip default Fedora cloud initialization scripts.
+# -------------------------------------------------------------------------- #
+# I used to spend some time pairing down images, but the Fedora cloud images are
+# already spare. The only thing that must be removed is their `cloud-init`
+# package. It has some dependencies that hare not needed, but we can learn live
+# with those for now.
+
+if /bin/rpm -qa | /bin/grep '^cloud-init'
+then
+    /usr/bin/yum erase -y cloud-init 
+fi
 
 # User and group generation.                                                            
 # -------------------------------------------------------------------------- #

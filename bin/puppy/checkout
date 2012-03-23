@@ -2,8 +2,6 @@
 
 dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../../..")
 
-cd $dir/github
-
 function abend()
 {
     local message=$1
@@ -12,7 +10,7 @@ function abend()
 }
 
 branches=(janitor common private protected public system worker appliances \
-    vhosts database client liminal exclusive job)
+    vhosts database client liminal exclusive job $@)
 
 if [ ! -e $dir/github ]
 then
