@@ -23,12 +23,12 @@ file=$(/bin/basename $image .img)
 older=3.img
 for newer in 2.img 1.img
 do
-    /usr/bin/sudo -H /usr/bin/s3cmd cp --acl-private s3://runpup/system/backup/$file.$newer s3://runpup/system/backup/$file.$older
+    /usr/bin/sudo -H /usr/bin/s3cmd cp --acl-private s3://puppy.io/system/backup/$file.$newer s3://puppy.io/system/backup/$file.$older
     older=$newer
 done
 
-/usr/bin/sudo -H /usr/bin/s3cmd cp --acl-private s3://runpup/system/$file.img s3://runpup/system/backup/$file.1.img
+/usr/bin/sudo -H /usr/bin/s3cmd cp --acl-private s3://puppy.io/system/$file.img s3://puppy.io/system/backup/$file.1.img
 
-/usr/bin/sudo -H /usr/bin/s3cmd --acl-private -e put $image s3://runpup/system/
+/usr/bin/sudo -H /usr/bin/s3cmd --acl-private -e put $image s3://puppy.io/system/
 
 /usr/bin/sudo /bin/mount $device $path

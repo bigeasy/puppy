@@ -8,7 +8,7 @@ file=$(/bin/basename $path)
 current=$(/bin/mount | awk '$3 == "'$path'" { print $1 }')
 if [ -z "$current" ]
 then
-    /usr/bin/sudo -H /usr/bin/s3cmd --skip-existing get s3://runpup/system/$file.img /root/ > /dev/null
+    /usr/bin/sudo -H /usr/bin/s3cmd --skip-existing get s3://puppy.io/system/$file.img /root/ > /dev/null
 
     /usr/bin/sudo /sbin/losetup --show $device 1>/dev/null 2>&1
     if [ $? -ne 0 ]

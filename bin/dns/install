@@ -18,3 +18,7 @@ fi
 /bin/sed -i 's/PIDFile.*/PIDFile=\/var\/lib\/nsd\/chroot\/var\/run\/nsd\/nsd.pid/' \
     /lib/systemd/system/nsd.service 
 
+
+/bin/mkdir -p /var/lib/nsd/chroot/etc/nsd
+/bin/mkdir -p /var/lib/nsd/chroot/var/lib/nsd
+/bin/mkdir -p /var/lib/nsd/chroot/var/run/nsd

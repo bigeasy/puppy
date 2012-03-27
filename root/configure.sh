@@ -3,7 +3,7 @@
 hostname=$(curl -s http://169.254.169.254/latest/user-data)
 [ -z $hostname ] && exit 1
 
-/usr/bin/s3cmd -c /root/.s3cfg --skip-existing get s3://runpup/system/config.img /root/
+/usr/bin/s3cmd -c /root/.s3cfg --skip-existing get s3://puppy.io/system/config.img /root/
 
 device=$(/bin/mount | awk '$3 == "/mnt/config" { print $1 }')
 if [ -z "$device" ]
