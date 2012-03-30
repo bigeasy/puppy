@@ -27,4 +27,12 @@ type=$(echo $hostname | /bin/sed 's/[^.]\+\.\([^.]\+\).*/\1/')
 /bin/hostname $hostname
 /etc/init.d/motd start
 
+for name in common $(/bin/uname -m) $type instance
+do
+  if [ -x "/root/bootstrap/$name" ]
+  then
+    "/root/bootstrap/$name"
+  fi
+done
+
 service sshd restart > /dev/null
