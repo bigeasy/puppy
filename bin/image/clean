@@ -34,7 +34,7 @@ do
     fi
 done
 
-/bin/rm -rf /root/.bash_history /root/setup.sh /etc/nsd /var/lib/nsd
+/bin/rm -rf /root/.bash_history /root/setup.sh /etc/nsd /var/lib/nsd /root/bootstrap
 /bin/rm -f /home/alan/.bash_history /home/alan/.aws
 /bin/rm -f /home/janitor/.bash_history /home/janitor/.aws /home/janitor/.ssh/* /home/janitor/.gitconfig
 /usr/bin/yum clean all
