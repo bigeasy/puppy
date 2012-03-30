@@ -20,6 +20,7 @@ fi
 type=$(echo $hostname | /bin/sed 's/[^.]\+\.\([^.]\+\).*/\1/')
 
 /usr/bin/rsync -av "/mnt/config/var/common/" "/"
+/usr/bin/rsync -av "/mnt/config/var/$(/bin/uname -m)/" "/"
 /usr/bin/rsync -av "/mnt/config/var/$type/" "/"
 /usr/bin/rsync -av "/mnt/config/var/$hostname/" "/"
 
