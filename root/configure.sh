@@ -17,7 +17,10 @@ then
     /bin/mount /dev/loop7 /mnt/config
 fi
 
+type=$(echo $hostname | /bin/sed 's/[^.]\+\.\([^.]\+\).*/\1/')
+
 /usr/bin/rsync -av "/mnt/config/var/common/" "/"
+/usr/bin/rsync -av "/mnt/config/var/$type/" "/"
 /usr/bin/rsync -av "/mnt/config/var/$hostname/" "/"
 
 /bin/hostname $hostname
