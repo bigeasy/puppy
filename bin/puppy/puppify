@@ -253,7 +253,8 @@ non_boot iptables
 function on_boot()
 {
     local service=$1
-    until /bin/systemctl is-enabled ---quiet $service.service
+    # Need to redirect stderr because postfix redirects to chkconfig loudly.
+    until /bin/systemctl is-enabled --quiet $service.service 2>/dev/null
     do
         /bin/systemctl enable $service.service
         echo "Enabled service $service to start on boot. You should start it now."
