@@ -104,7 +104,7 @@ run = (_) ->
   current = do ->
     for image in response.imagesSet
       count = 0
-      for tag in image.tagSet
+      for tag in image.tagSet or []
         if image.architecture is architecture
           if tag.key is 'Puppified'
             count++

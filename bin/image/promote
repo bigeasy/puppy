@@ -36,7 +36,7 @@ run = (_) ->
 
   for image in ec2("DescribeImages", { "Owner.1": "self" }, _).imagesSet
     count = 0
-    for tag in image.tagSet
+    for tag in image.tagSet or []
       if image.architecture is options.architecture
         if tag.key is 'Puppified'
           count++

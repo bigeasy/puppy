@@ -98,6 +98,7 @@ run = (_) ->
     MinCount: 1
     MaxCount: 1
     KeyName: "secret_key"
+    "SecurityGroup.1": type
     UserData: new Buffer(options.name).toString("base64")
     InstanceType: options.size
     "Placement.AvailabilityZone": "#{endpoint}#{zone}"
