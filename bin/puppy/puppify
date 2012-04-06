@@ -159,7 +159,8 @@ install_files root 644 etc/unbound/* \
                        etc/selinux/targeted/contexts/users/* \
                        etc/postfix/* \
                        etc/systemd/system/* \
-                       etc/rsyslog.conf
+                       etc/rsyslog.conf \
+                       etc/resolv.conf
 install_files root 755 etc/rc.d/init.d/* \
                        usr/bin/*
 install_files root 440 etc/sudoers.d/* \
@@ -287,6 +288,11 @@ fi
 
 /sbin/restorecon -R /puppy /etc /home /var/log/puppy /var/cache/puppy /node /opt
 
+
+# Enable shorewall
+# -------------------------------------------------------------------------- #
+
+/bin/sed -i 's/STARTUP_ENABLED=No/STARTUP_ENABLED=Yes/' /etc/shorewall/shorewall.conf
 
 # Start unbound after restarting systemd, so that the unbound log files go in
 # their log file. Toggle the other services we've touched so far.
