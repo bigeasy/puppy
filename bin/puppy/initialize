@@ -1,0 +1,111 @@
+#!/bin/bash
+
+host=$1
+
+usage() {
+  local code=$1
+  cat <<-help | sed 's/^    //'
+    usage: bin/puppy/initialize --host [aws host] --key [aws key]
+
+    options:
+      -h,   --host [fqdn]       fully qualified domain of AWS host
+      -k,   --key [fqdn]        temporary AWS private key
+
+help
+  exit $code
+}
+
+lax_scp() {
+  local source=$1; local destination=$2
+  /usr/bin/scp -i "$AWS_KEY" -q -o StrictHostKeyChecking=no "$source" "ec2-user@$AWS_HOST:$destination"
+}
+
+lax_ssh() {
+  /usr/bin/ssh -o StrictHostKeyChecking=no -i "$AWS_KEY" "ec2-user@$AWS_HOST" $@
+}
+
+get_private_public_key() {
+  local private=$1
+  /usr/bin/ssh-keygen -y -f "$private" | /usr/bin/cut -d' ' -f2
+}
+
+get_public_key() {
+  local public=$1
+  /usr/bin/cut -d' ' -f2 "$public"
+}
+
+has_remote_key() {
+  local sought=$1; local key; local public
+  for key in `(lax_ssh cat .ssh/authorized_keys) | /usr/bin/cut -d' ' -f2`
+  do
+    if [ "$key" == "$sought" ]
+    then
+      return 0
+    fi
+  done
+  return 1
+}
+
+panic() {
+  cat <<-argle-blargle
+
+    @@@@@@@@@@@@@@@@@@@@ SECURITY BREACH @@@@@@@@@@@@@@@@@@@@
+    @@                                                     @@
+    @@              Temporary key NOT found                @@
+    @@             in remote authorized keys.              @@
+    @@                                                     @@
+    @@@@@@@@@@@@@@@@@@@@ SECURITY BREACH @@@@@@@@@@@@@@@@@@@@
+
+argle-blargle
+  exit 1
+}
+
+main() {
+  local remote;
+  chmod 600 $AWS_KEY
+
+  # Assert that our temporary key is one of the authorized keys, otherwise freak
+  # out, because there's a main the the middle.
+  has_remote_key $(get_private_public_key $AWS_KEY) || panic
+
+  # Add our identity to authorized_keys.
+  while read line; do
+    local record=($line)
+    has_remote_key "${record[1]}" || \
+      echo "$line" | (lax_ssh "cat >> .ssh/authorized_keys")
+  done < ~/.ssh/authorized_keys
+
+  # Add github.com to the known hosts.
+  (/usr/bin/grep '^github.com,' ~/.ssh/known_hosts) | (lax_ssh "cat > .ssh/known_hosts")
+
+}
+
+abend() {
+  local message=$1
+  echo "error: $message"
+  usage 1
+}
+
+[ $# -eq 0 ] && usage 0
+while test $# -ne 0
+do
+  case "$1" in
+    --key|-k)
+      [ $# -eq 1 ] && abend "--key requires an argument"
+      AWS_KEY=$2
+      [ -e $key ] || abend "--key does not exist"
+      shift
+      ;;
+    --host|-h)
+      [ $# -eq 1 ] && abend "--host requires an argument"
+      AWS_HOST=$2
+      shift
+      ;;
+  esac
+  shift
+done
+
+[ -z "$AWS_KEY" ] && abend "--key is a required argument"
+[ -z "$AWS_HOST" ] && abend "--host is a required argument"
+
+main
