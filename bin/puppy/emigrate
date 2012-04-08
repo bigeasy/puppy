@@ -2,6 +2,8 @@
 
 host=$1
 
+trap "exit" SIGINT SIGTERM
+
 shift
 
 for file in $@
