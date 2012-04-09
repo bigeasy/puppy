@@ -1,0 +1,12 @@
+#!/bin/bash
+
+. $PUPPIFY_PATH/service/functions
+
+install_package unbound
+
+install_files root 644 etc/unbound/* 
+
+# Make sure there is a place for unbound pid file.
+/bin/mkdir -p /var/run/unbound
+
+on_boot unbound

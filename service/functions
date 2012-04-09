@@ -1,0 +1,60 @@
+#!/bin/bash
+
+function abend() {
+  local message=$1
+  echo "error: $message"
+  exit 1
+}
+
+function install_service() {
+  local package="$1"
+  if ! /bin/rpm -q "$package" > /dev/null
+  then
+      /usr/bin/sudo /usr/bin/yum install -y "$package" || abend "Cannot install $package."
+  fi
+}
+
+function service_dir() {
+  /usr/bin/dirname $(/bin/readlink -f $0)
+}
+
+# Install a file if the source is newer than the currently installed file.
+function install_file() {
+  local source=$1; local dest=$2; local owner=$3; local mode=$4
+  file=$(basename $source)
+  /bin/mkdir -p $dest
+  dir=$(service_dir)
+  if /usr/bin/sudo [ \( ! -e $dest/$file \) -o  "$dir/$source" -nt $dest/$file ]; then
+    echo "Installing file $dest/$file."
+    /usr/bin/sudo install -m $mode -g $owner -o $owner "$dir/$source" $dest/$file
+  fi
+}
+
+# Install all files matching a glob.
+function install_files() {
+  local ownership=$1; local mode=$2;
+  shift; shift;
+  for path in $@; do
+    /bin/mkdir -m $mode -p $(dirname "$path")
+    for file in $(cd $(service_dir) && find $path)
+    do
+      install_file $file $(dirname "/$file")  $ownership $mode
+    done
+  done
+}
+
+# Configure daemons built from source.
+# -------------------------------------------------------------------------- #
+
+function on_boot() {
+    local service=$1
+    until /bin/systemctl is-enabled $service.service 1>/dev/null 2>&1
+    do
+        /bin/systemctl enable $service.service
+        echo "Enabled service $service to start on boot. You should start it now."
+    done
+    if /bin/systemctl show $service.service | grep 'MainPID=0'
+    then
+      /bin/systemctl start $service.service
+    fi
+}

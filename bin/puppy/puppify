@@ -119,14 +119,7 @@ function install_file()
     file=$(basename $source)
     /bin/mkdir -p $dest
     dirty=0
-    if [ -e $dest/$file ]; then
-        if [ $(/usr/bin/stat --format=%Y $source) -gt $(/usr/bin/stat --format=%Y $dest/$file) ]; then
-            dirty=1
-        fi 
-    else
-        dirty=1
-    fi
-    if [ $dirty -eq 1 ]; then
+    if /usr/bin/sudo [ ! -e $dest/$file -o  $source -nt $dest/$file ]; then
         echo "Installing file $dest/$file."
         install -m $mode -g $owner -o $owner $source $dest/$file
     fi

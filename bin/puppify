@@ -1,0 +1,23 @@
+#!/bin/bash
+
+function usage() {
+  local code=$1
+  cat <<-help | /bin/sed 's/^    //'
+    usage: puppy [command] [options]
+
+    commands:
+      install     install a package according to puppy
+
+help
+  exit $code
+}
+
+[ $# -eq 0 ] && usage
+
+export PUPPIFY_PATH=$(/usr/bin/dirname $(/usr/bin/dirname $(/bin/readlink -e $0)))
+
+action="$PUPPIFY_PATH/bin/puppify-$1"
+[ -e "$action"  ] || usage
+shift
+
+"$action" $@

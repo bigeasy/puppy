@@ -1,0 +1,21 @@
+#!/bin/bash
+
+. "$PUPPIFY_PATH/bin/functions"
+
+function usage() {
+  cat <<-help | sed 's/^    //'
+    usage: puppify install [options] [package, package...]
+
+    options:
+      
+help
+}
+
+[ $# -eq 0 ] && usage
+
+for package in $@
+do
+  installer="$PUPPIFY_PATH/service/postfix/installer"
+  [ -x "$installer" ] || abend "no such service"
+  "$installer"
+done
