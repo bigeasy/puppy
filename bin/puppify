@@ -14,9 +14,11 @@ help
 
 [ $# -eq 0 ] && usage
 
+export CWD=$PWD
 export PUPPIFY_PATH=$(/usr/bin/dirname $(/usr/bin/dirname $(/bin/readlink -e $0)))
+cd $PUPPIFY_PATH
 
-action="$PUPPIFY_PATH/bin/puppify-$1"
+action="bin/$1"
 [ -e "$action"  ] || usage
 shift
 

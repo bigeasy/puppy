@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. "$PUPPIFY_PATH/bin/functions"
+. ./bin/functions
 
 function usage() {
   cat <<-help | sed 's/^    //'
@@ -15,7 +15,7 @@ help
 
 for package in $@
 do
-  installer="$PUPPIFY_PATH/service/postfix/installer"
+  installer="service/postfix/installer"
   [ -x "$installer" ] || abend "no such service"
   "$installer"
 done

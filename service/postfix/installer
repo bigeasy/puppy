@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. $PUPPIFY_PATH/service/functions
+. ./service/functions
 
 install_service postfix
 
