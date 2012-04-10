@@ -1,0 +1,17 @@
+#!/bin/bash
+
+trap 'exit' SIGINT
+
+host=$1.oregon.runpup.net
+
+/usr/bin/ssh -A $host /usr/bin/sudo /usr/bin/yum install -y nsd
+/usr/bin/ssh -A $host /usr/bin/sudo /bin/systemctl stop iptables.service
+/usr/bin/ssh -A $host /usr/bin/sudo janitor/bin/dns/install
+/usr/bin/ssh -A $host janitor/bin/loopback/mount /dev/loop5 /mnt/dns
+/usr/bin/ssh -A $host janitor/bin/dns/private/config
+/usr/bin/ssh -A $host janitor/bin/dns/private/publish
+/usr/bin/ssh -A $host janitor/bin/dns/cache/config
+/usr/bin/ssh -A $host /usr/bin/sudo /bin/systemctl --system daemon-reload
+/usr/bin/ssh -A $host /usr/bin/sudo /bin/systemctl start nsd.service
+/usr/bin/ssh -A $host /usr/bin/sudo /bin/systemctl restart nsd.service
+/usr/bin/ssh -A $host /usr/bin/sudo /bin/systemctl restart unbound.service

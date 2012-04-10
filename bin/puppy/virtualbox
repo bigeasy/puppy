@@ -1,0 +1,55 @@
+#!/bin/bash
+
+usage() {
+  local code=$1
+  cat <<-help | sed 's/^    //'
+    usage: bin/puppy/virtualbox --address [ip] --key [aws key]
+
+    options:
+      -a,   --address [ip]      ip address of virtualbox machine
+
+help
+  exit $code
+}
+
+function root_ssh() {
+  /usr/bin/ssh -T -t root@"$VBOX_HOST" $@
+}
+
+abend() {
+  local message=$1
+  echo "error: $message"
+  usage 1
+}
+
+function main() {
+  command="            cat > authorized_keys"
+  command=$command" && chmod 600 authorized_keys"
+  command=$command" && mkdir -p .ssh"
+  command=$command" && chmod 700 .ssh"
+  command=$command" && mv authorized_keys .ssh/"
+  command=$command" && /sbin/restorecon -R /root"
+  cat ~/.ssh/identity.pub | root_ssh $command
+  (/usr/bin/grep '^github.com,' ~/.ssh/known_hosts) | (root_ssh "cat > .ssh/known_hosts")
+  command="            cat > bootstrap"
+  command=$command" && chmod 755 bootstrap"
+  cat bin/puppy/bootstrap | root_ssh $command
+  /usr/bin/ssh -A root@"$VBOX_HOST"
+}
+
+[ $# -eq 0 ] && usage 0
+while test $# -ne 0
+do
+  case "$1" in
+    --host|-h)
+      [ $# -eq 1 ] && abend "--host requires an argument"
+      VBOX_HOST=$2
+      shift
+      ;;
+  esac
+  shift
+done
+
+[ -z "$VBOX_HOST" ] && abend "--host is a required argument"
+
+main
