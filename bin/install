@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. ./bin/functions
+. $PUPPY_LIBRARY
 
 function usage() {
   cat <<-help | sed 's/^    //'
@@ -17,5 +17,5 @@ for package in $@
 do
   installer="service/postfix/installer"
   [ -x "$installer" ] || abend "no such service"
-  "$installer"
+  puppy_exec "$installer"
 done

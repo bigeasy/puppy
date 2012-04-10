@@ -18,9 +18,10 @@ function install_service() {
   fi
 }
 
-for package in $@
-do
-  installer="$PUPPIFY_PATH/service/postfix/installer"
-  [ -x "$installer" ] || abend "no such service"
-  "$installer"
-done
+# With this, I can move to a different form of layout in the future, one that
+# will work correctly with,  
+function puppy_exec() {
+  local executable=$1
+  shift 
+  $executable $@
+}

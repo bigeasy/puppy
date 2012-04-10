@@ -18,6 +18,10 @@ export CWD=$PWD
 export PUPPIFY_PATH=$(/usr/bin/dirname $(/usr/bin/dirname $(/bin/readlink -e $0)))
 cd $PUPPIFY_PATH
 
+# Well, we could do something like this...
+
+export PUPPY_LIBRARY=$PUPPIFY_PATH/bin/functions
+
 action="bin/$1"
 [ -e "$action"  ] || usage
 shift
