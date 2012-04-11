@@ -1,29 +1,87 @@
-#!/bin/bash
+#!/bin/bash -e
 
-function usage() {
-  local code=$1
-  cat <<-help | /bin/sed 's/^    //'
-    usage: puppy [command] [options]
+if [ "$1" == "module" ]; then
+  echo "Please do not execute these programs directly. Use puppify."
+  exit 1
+fi
 
-    commands:
-      install     install a package according to puppy
+# Use read to slurp. Both the field and line separator are set to ASCII NUL, so
+# that there is no chopping of the data. `read` will read until EOF is reached,
+# so we need to swallow the error value and return true, so that we don't exit
+# when `set -e` is in effect.
 
-help
-  exit $code
+#
+function puppy_usage() {
+  return 0
 }
 
 [ $# -eq 0 ] && usage
 
-export CWD=$PWD
 export PUPPIFY_PATH=$(/usr/bin/dirname $(/usr/bin/dirname $(/bin/readlink -e $0)))
-cd $PUPPIFY_PATH
 
 # Well, we could do something like this...
 
 export PUPPY_LIBRARY=$PUPPIFY_PATH/bin/functions
 
-action="bin/$1"
-[ -e "$action"  ] || usage
-shift
+# Create the functions we know that all our library exectuables will need.
 
-"$action" $@
+# Dedent the usage message so that it is flush left on the console.
+function dedent() {
+  return 0
+}
+
+function usage() {
+  local code=$1
+  echo "$USAGE"
+  exit $code
+}
+
+function abend() {
+  local message=$1
+  echo "error: $message"
+  exit 1
+}
+
+# At the top of every module. This will gather a usage message to share with the
+# user if we abend.
+function puppify() {
+  [ "$1" == "module" ] || fail "invalid argument to puppify"
+  local message; local spaces;
+  IFS="\000" read -r -d'\000' message && true
+  spaces=$(
+    echo "$message" | sed -e '/^$/d' -e 's/^\( *\).*/\1/' | \
+      sed -e '1h;H;g;s/[^\n]/#/g;s/\(#*\)\n\1/\n/;G;/^\n/s/\n.*\n\(.*\)\n.*/\1/;s/.*\n//;h;$!d'
+  )
+  USAGE="$(echo "$message" | sed -e "s/^$spaces//")"
+}
+
+function puppy_import() {
+  local library
+  for library in $@; do
+    . "$PUPPIFY_PATH/lib/puppy/lib/$1"
+  done
+  return 0
+}
+
+function fail() {
+  message=$1;
+  echo "$message" 1>&2
+  exit 1
+}
+
+function puppy_exec() {
+  local command=$1
+  local action="$PUPPIFY_PATH/lib/puppy/bin/$1"
+
+  if ! [ -e "$action"  ]; then
+    abend "invalid action: puppify $(echo $command | /bin/sed 's/-/ /g')"
+  fi
+
+  shift
+
+  export -f usage fail abend puppy_exec puppy_import puppify
+
+  "$action" $@ 
+}
+
+puppy_exec $@

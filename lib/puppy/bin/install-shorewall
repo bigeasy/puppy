@@ -1,0 +1,10 @@
+# Configure daemons built from source.
+# -------------------------------------------------------------------------- #
+
+on_boot shorewall
+non_boot iptables
+install_files root 644 etc/shorewall/*
+# Enable shorewall
+# -------------------------------------------------------------------------- #
+
+/bin/sed -i 's/STARTUP_ENABLED=No/STARTUP_ENABLED=Yes/' /etc/shorewall/shorewall.conf

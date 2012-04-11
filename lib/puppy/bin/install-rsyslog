@@ -1,0 +1,5 @@
+
+install_files root 644 etc/rsyslog.conf \
+                       etc/systemd/system/*
+# Remove default rsyslog.service.
+/bin/rm -f /lib/systemd/system/rsyslog.service

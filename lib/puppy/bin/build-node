@@ -1,0 +1,66 @@
+#!/bin/bash -e
+
+puppify module <<-usage
+  usage: puppify install node --version [version]
+usage
+
+function build_node() {
+  [ ! -e /src ] && /usr/bin/sudo /bin/mkdir -m 0755 /src
+  [ $(/usr/bin/stat -c "%u" /src) -eq $UID ] || /usr/bin/sudo /bin/chown -R $UID /src
+  latest=$(
+    /usr/bin/curl -s http://nodejs.org/dist/latest/ | \
+    /bin/grep 'node-v.*.tar.gz' | \
+    /bin/sed 's/.*node-\(.*\).tar.gz.*/\1/'
+  )
+  [ -z "$latest" ] && fail "cannot determine lastest node"
+
+  #node_make $latest /src /opt
+  node_make $latest /node/src /node/$latest
+}
+
+function node_make() {
+  local latest=$1; local src=$2; local prefix=$3
+  source="$src/node-$latest"
+  tarball="$source.tar.gz"
+  /bin/rm -rf "$source" "$tarball"
+  /usr/bin/sudo /bin/mkdir -p $src
+  /usr/bin/sudo /bin/chown -R $UID $src
+  /usr/bin/curl http://nodejs.org/dist/$latest/node-$latest.tar.gz > "$tarball"
+  cd "$src"
+  /bin/tar zxf  "$tarball"
+  cd "$source"
+  ./configure --prefix=$prefix
+  make
+  /usr/bin/sudo /bin/rm -rf "$prefix/bin" "$prefix/include" "$prefix/lib" "$prefix/share"
+  /usr/bin/sudo /bin/mkdir -p "$prefix"
+  /usr/bin/sudo make install
+}
+
+function npm_uninstall() {
+  local module=$1; local version=$2
+  installed=$(/opt/bin/npm -g list | /bin/grep "$module@" | /bin/sed 's/^.*@\([^ ]*\).*$/\1/' | head -n 1)
+  if [ ! -z "$installed" ] && [ "$installed" != "$version" ]; then
+    echo "Uninstalling $module"
+    /usr/bin/sudo /opt/bin/npm -g uninstall "$module"
+    npm_uninstall $module $version
+  fi
+}
+
+function npm_install() {
+  local module=$1; local version=$2
+  npm_uninstall $module $version
+  installed=$(/opt/bin/npm -g list | /bin/grep "$module@" | head -n 1)
+  [ -z "$installed" ] && /usr/bin/sudo /opt/bin/npm -g install "$module@$version"
+  true
+}
+
+puppy_import installer
+
+install_service gcc-c++
+install_service openssl-devel
+
+[ -e /opt/bin/node ] || build_node
+
+npm_install coffee-script 1.2.0
+npm_install streamliner_ 0.0.1
+npm_install streamline 0.2.4

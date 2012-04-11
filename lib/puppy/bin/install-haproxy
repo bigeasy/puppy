@@ -1,0 +1,9 @@
+
+make_user   haproxy       225
+install_files root 644 etc/haproxy/*  \
+                       etc/systemd/system/*
+install_files root 755 etc/rc.d/init.d/*
+# Create a chroot directory for HAProxy.
+/bin/mkdir -p /var/lib/haproxy
+/bin/chown haproxy:haproxy /var/lib/haproxy
+

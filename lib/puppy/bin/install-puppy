@@ -1,0 +1,92 @@
+#!/bin/bash -e
+
+# Strip default Fedora cloud initialization scripts.
+# -------------------------------------------------------------------------- #
+# I used to spend some time pairing down images, but the Fedora cloud images are
+# already spare. The only thing that must be removed is their `cloud-init`
+# package. It has some dependencies that hare not needed, but we can learn live
+# with those for now.
+
+if /bin/rpm -qa | /bin/grep '^cloud-init'
+then
+    /usr/bin/yum erase -y cloud-init 
+fi
+
+# Users representing Puppy agents.
+make_user   puppy         201
+make_user   janitor       202
+make_user   worker        204
+make_user   database      205
+make_user   system        207
+make_user   vhosts        208
+make_user   private       209
+make_user   public        210
+make_user   liminal       211
+make_user   protected     212
+
+make_group  loggers       227
+make_user   common        229
+make_user   exclusive     230
+make_user   backup        231
+
+group_assign exclusive 202 210
+group_assign loggers 1  700
+group_assign wheel 701 701
+group_assign wheel 202 202
+
+install_files root 644 etc/systemd/system/*
+# Create Puppy application log directory.
+/bin/mkdir -p /var/log/puppy/apps /var/log/puppy/worker
+
+# Create Puppy user policy generation directory.
+/bin/mkdir -p /var/cache/puppy/policy /var/cache/puppy/transitions /var/cache/puppy/decommissioned
+
+# Allow the worker to generate and compile the per-user SELinux policies.
+/bin/chown worker:worker /var/cache/puppy/policy
+
+# Create the puppy controlled mount points.
+/bin/mkdir -p /puppy /node /opt
+/bin/chown puppy:puppy /puppy /node /opt
+
+# Create the puppy configuration directory.
+/bin/mkdir -p /etc/puppy
+
+# Configure agent home directories.
+# -------------------------------------------------------------------------- #
+
+function copy_public_key()
+{
+    local user=$1; local key=$2; local command=$3
+    /usr/bin/sudo -u $user /bin/mkdir -p /home/$user/.ssh
+    /bin/touch /home/$user/.ssh/authorized_keys
+    /bin/chown $user:$user /home/$user/.ssh/authorized_keys
+    /bin/chmod 600 /home/$user/.ssh/authorized_keys
+    if [ ! -z $command ]; then
+    echo -n 'command="'$command'",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ' \
+        > /home/$user/.ssh/authorized_keys
+    fi
+    /bin/cat $key >> /home/$user/.ssh/authorized_keys
+}
+
+# TODO Check the public key into source, but the keys do not live in source,
+# they live on a server and propagate.
+copy_public_key public home/public/ssh/authorized_keys /puppy/public/bin/public_receptionist
+janitor=$(/bin/awk -F : '$3 ~ /^701$/ { print $1 }' /etc/passwd)
+copy_public_key puppy /home/$janitor/.ssh/authorized_keys
+
+
+# We do not want the agent accounts to run `/etc/bashrc` at startup, and we do
+# want them to find the right `node`, so replace the default `.bashrc` with our own.
+#
+# Note that public won't use the exclusive library, but the path assertion code
+# we insert into every node executable expects it.
+for agent in public; do
+    echo 'export PATH=$PATH:/opt/bin' > /home/$agent/.bashrc
+    echo 'export NODE_PATH=/opt/lib/node_modules:/puppy/common/lib/node:/puppy/exclusive/lib/node' \
+        >> /home/$agent/.bashrc
+done
+
+# Set SELinux file contexts.
+# -------------------------------------------------------------------------- #
+
+/sbin/restorecon -R /puppy /etc /home /var/log/puppy /var/cache/puppy /node /opt

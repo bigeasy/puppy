@@ -1,0 +1,20 @@
+#!/bin/bash -e
+
+puppify module <<-help
+  usage: puppify build [package] [package-options]
+
+    For package options execute build with the package name and help switch.
+
+      puppify build [package] --help
+
+  packages:
+    node          build Node.js
+    haproxy       build haproxy
+help
+
+[ $# -eq 0 ] && usage 0
+
+for package in $@
+do
+  puppy_exec "build-$package"
+done

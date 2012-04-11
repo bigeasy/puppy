@@ -1,0 +1,4 @@
+
+on_boot configuration
+install_files root 700 root/configure.sh
+install_files root 755 etc/rc.d/init.d/*

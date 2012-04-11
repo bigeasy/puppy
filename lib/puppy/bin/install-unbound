@@ -1,0 +1,12 @@
+
+# Make sure there is a place for unbound pid file.
+/bin/mkdir -p /var/run/unbound
+install_files root 644 etc/unbound/* \
+                       etc/resolv.conf
+on_boot unbound
+
+# Setup networking to use unbound DNS cache.
+# -------------------------------------------------------------------------- #
+/bin/sed -i '/^PEERDNS=/d' /etc/sysconfig/network-scripts/ifcfg-eth0 
+echo "PEERDNS=no" >> /etc/sysconfig/network-scripts/ifcfg-eth0
+echo "nameserver 127.0.0.1" > /etc/resolv.conf

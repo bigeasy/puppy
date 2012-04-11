@@ -1,0 +1,4 @@
+
+install_files root 440 etc/sudoers.d/* \
+                       etc/sudoers \
+                       etc/sudoers.env
