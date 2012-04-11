@@ -12,8 +12,10 @@ help
   exit $code
 }
 
+KNOWN_HOSTS="/tmp/virtualbox-known-hosts-$$"
+
 function root_ssh() {
-  /usr/bin/ssh -T -t root@"$VBOX_HOST" $@
+  /usr/bin/ssh -o StrictHostKeyChecking=no -T root@"$VBOX_HOST" $@
 }
 
 abend() {
@@ -29,12 +31,15 @@ function main() {
   command=$command" && chmod 700 .ssh"
   command=$command" && mv authorized_keys .ssh/"
   command=$command" && /sbin/restorecon -R /root"
+  echo "$command"
   cat ~/.ssh/identity.pub | root_ssh $command
+  echo "HERE"
   (/usr/bin/grep '^github.com,' ~/.ssh/known_hosts) | (root_ssh "cat > .ssh/known_hosts")
   command="            cat > bootstrap"
   command=$command" && chmod 755 bootstrap"
   cat bin/puppy/bootstrap | root_ssh $command
   /usr/bin/ssh -A root@"$VBOX_HOST"
+  /bin/sed -i 's/^'$VBOX_HOST'//' ~/.ssh/known_hosts
 }
 
 [ $# -eq 0 ] && usage 0
