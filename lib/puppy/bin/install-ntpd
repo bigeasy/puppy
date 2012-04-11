@@ -1,7 +1,0 @@
-
-on_boot ntpd
-if [ "$(/bin/readlink /etc/localtime)" != "/usr/share/zoneinfo/UTC" ]
-then
-    echo "Setting timezone to UTC."
-    /usr/bin/sudo /bin/ln -sf /usr/share/zoneinfo/UTC /etc/localtime
-fi

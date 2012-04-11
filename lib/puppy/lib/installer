@@ -11,7 +11,7 @@ function install_service() {
 
 function service_dir() {
   local package=$(/bin/basename $0 | /bin/sed 's/^.*-\(.*\)$/\1/')
-  echo "$PUPPIFY_PATH/share/service/postfix"
+  echo "$PUPPIFY_PATH/share/service/$package"
 }
 # git does not perserve file permissions, in case you forgot.
 #  http://kerneltrap.org/mailarchive/git/2008/12/5/4327894
@@ -20,7 +20,9 @@ function service_dir() {
 function install_file() {
   local source=$1; local dest=$2; local owner=$3; local mode=$4
   file=$(basename $source)
-  /bin/mkdir -p $dest
+  if sudo [ ! -e "$dest" ]; then
+    sudo mkdir -m $mode -p "$dest"
+  fi
   dir=$(service_dir)
   if /usr/bin/sudo [ \( ! -e $dest/$file \) -o  "$dir/$source" -nt $dest/$file ]; then
     echo "Installing file $dest/$file."
@@ -33,8 +35,7 @@ function install_files() {
   local ownership=$1; local mode=$2;
   shift; shift;
   for path in $@; do
-    /bin/mkdir -m $mode -p $(dirname "$path")
-    for file in $(cd $(service_dir) && find $path)
+    for file in $(cd $(service_dir) && find "$path" ! -type d)
     do
       install_file $file $(dirname "/$file")  $ownership $mode
     done
@@ -46,23 +47,22 @@ function install_files() {
 
 function on_boot() {
     local service=$1
-    until /bin/systemctl is-enabled $service.service 1>/dev/null 2>&1
+    until systemctl is-enabled $service.service 1>/dev/null 2>&1
     do
-        /bin/systemctl enable $service.service
+        sudo systemctl enable $service.service
         echo "Enabled service $service to start on boot. You should start it now."
     done
-    if /bin/systemctl show $service.service | grep 'MainPID=0'
+    if systemctl show $service.service | grep 'MainPID=0' > /dev/null
     then
-      /bin/systemctl start $service.service
+      sudo systemctl start $service.service
     fi
 }
 
-function non_boot()
-{
+function non_boot() {
     local service=$1
-    if /bin/systemctl is-enabled --quiet $service.service
+    if sudo systemctl is-enabled --quiet $service.service
     then
-        /bin/systemctl disable $service.service
+        sudo systemctl disable $service.service
         echo "Disable and stopped service $service."
     fi
 }
@@ -71,29 +71,27 @@ function non_boot()
 # -------------------------------------------------------------------------- #
 # User and group generation functions that check to see if the group already
 # exists, followed by the invocation of the functions.
-function make_group()
-{
+function make_group() {
     local group=$1; local gid=$2
     current=$(/bin/grep "^${group}:" /etc/group | /bin/cut -d: -f3)
     if [ -z "$current" ]
     then
         echo "Creating group $group."
-        /usr/sbin/groupadd --gid $gid $group
+        sudo /usr/sbin/groupadd --gid $gid $group
     elif [ "$current" != "$gid" ]
     then
         abend "Group $group exists with gid $current instead of $gid."
     fi
 }
 
-function make_user()
-{
+function make_user() {
     local user=$1; local uid=$2;
     make_group $user $uid
     current=$(/bin/grep "^${user}:" /etc/passwd | /bin/cut -d: -f3)
     if [ -z "$current" ]
     then
         echo "Creating user $user."
-        /usr/sbin/useradd --uid $uid --gid $uid $user
+        sudo /usr/sbin/useradd --uid $uid --gid $uid $user
     elif [ "$current" != "$uid" ]
     then
         abend "User $user exists with uid $current instead of $uid."
@@ -101,8 +99,7 @@ function make_user()
 }
 
 # Make all of the workers member of the common group.
-function group_assign()
-{
+function group_assign() {
     local group=$1; min=$2; local max=$3;
     while read line
     do
@@ -111,7 +108,7 @@ function group_assign()
             members=$(/bin/grep "^${group}:" /etc/group | /bin/cut -d: -f4)
             if echo $members | /bin/grep -wv ${user[0]} > /dev/null; then
                 echo "Adding ${user[0]} to group $group."
-                /usr/sbin/usermod -a -G $group ${user[0]} || abend "Cannot add ${user[0]} to $group."
+                sudo /usr/sbin/usermod -a -G $group ${user[0]} || abend "Cannot add ${user[0]} to $group."
             fi
         fi
     done < /etc/passwd

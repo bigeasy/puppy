@@ -34,6 +34,7 @@ group_assign loggers 1  700
 group_assign wheel 701 701
 group_assign wheel 202 202
 
+install_files root 644 etc/selinux/targeted/contexts/users/* 
 install_files root 644 etc/systemd/system/*
 # Create Puppy application log directory.
 /bin/mkdir -p /var/log/puppy/apps /var/log/puppy/worker
@@ -85,6 +86,7 @@ for agent in public; do
     echo 'export NODE_PATH=/opt/lib/node_modules:/puppy/common/lib/node:/puppy/exclusive/lib/node' \
         >> /home/$agent/.bashrc
 done
+
 
 # Set SELinux file contexts.
 # -------------------------------------------------------------------------- #

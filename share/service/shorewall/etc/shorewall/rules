@@ -1,0 +1,4 @@
+SECTION NEW
+Ping(DROP)      net   $FW
+SSH/ACCEPT      net   $FW
+ACCEPT $FW net icmp

@@ -1,5 +1,17 @@
+#!/bin/bash -e
 
-install_files root 644 etc/rsyslog.conf \
-                       etc/systemd/system/*
+puppify module <<-usage
+  usage: puppify install rsyslog
+usage
+
+puppy_import installer
+
+# Create a loggers group and add user in our service user range.
+make_group loggers 227
+group_assign loggers 1 700
+
 # Remove default rsyslog.service.
-/bin/rm -f /lib/systemd/system/rsyslog.service
+sudo rm -f /lib/systemd/system/rsyslog.service
+
+# Install our rsyslog.service and rsyslog configuration.
+install_files root 644 etc

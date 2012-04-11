@@ -1,2 +1,10 @@
+#!/bin/bash -e
 
-make_user   stunnel       226
+puppify module <<-usage
+  usage: puppify install stunnel
+usage
+
+puppy_import installer
+
+make_user stunnel 226
+group_assign loggers 1 700

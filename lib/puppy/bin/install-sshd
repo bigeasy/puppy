@@ -1,11 +1,19 @@
+#!/bin/bash -e
+
+puppify module <<-usage
+  usage: puppify install sshd
+usage
+
+puppy_import installer
+
 # Configuration installtion
 # -------------------------------------------------------------------------- #
 
 # More the printing of the restart ssh message than for the preservation of the
 # distribution's ssh_config.
 if [ ! -e /etc/ssh/sshd_config.org ]; then
-    /bin/mv /etc/ssh/sshd_config /etc/ssh/sshd_config.org
+    sudo mv /etc/ssh/sshd_config /etc/ssh/sshd_config.org
     echo "You must restart sshd."
 fi
 
-install_files root 600 etc/ssh/sshd_config
+install_files root 600 etc

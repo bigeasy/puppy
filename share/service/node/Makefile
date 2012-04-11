@@ -1,5 +1,5 @@
 node-$(V).tar.gz:
-	/bin/rm download.tar.gz
+	/bin/rm -f download.tar.gz
 	/usr/bin/curl http://nodejs.org/dist/$(V)/node-$(V).tar.gz > download.tar.gz
 	/bin/mv download.tar.gz $@
 	/bin/touch $@

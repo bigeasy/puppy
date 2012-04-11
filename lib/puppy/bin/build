@@ -14,7 +14,6 @@ help
 
 [ $# -eq 0 ] && usage 0
 
-for package in $@
-do
-  puppy_exec "build-$package"
-done
+package=$1
+shift
+puppy_exec "build-$package" $@

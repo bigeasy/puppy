@@ -1,4 +1,14 @@
+#!/bin/bash -e
+
+puppify module <<-usage
+  usage: puppify install backup
+usage
+
+puppy_import installer
+
+install_files root 700 root
+install_files root 755 etc
+
+sudo systemctl --system daemon-reload
 
 on_boot configuration
-install_files root 700 root/configure.sh
-install_files root 755 etc/rc.d/init.d/*
