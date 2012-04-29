@@ -39,7 +39,7 @@ function usage() {
 function abend() {
   local message=$1
   echo "error: $message"
-  exit 1
+  usage 1
 }
 
 # At the top of every module. This will gather a usage message to share with the

@@ -1,6 +1,9 @@
 node-$(V).tar.gz:
 	/bin/rm -f download.tar.gz
 	/usr/bin/curl http://nodejs.org/dist/$(V)/node-$(V).tar.gz > download.tar.gz
+	@if [ "$(SHA1)" != "$$(sha1sum download.tar.gz | cut -f1 -d' ')" ]; then \
+		echo "### SHA1 does match! ###"; exit 1; \
+	fi
 	/bin/mv download.tar.gz $@
 	/bin/touch $@
 
