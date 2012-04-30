@@ -1,9 +1,19 @@
+#!/bin/bash -e
 
-make_user   haproxy       225
-install_files root 644 etc/haproxy/*  \
-                       etc/systemd/system/*
-install_files root 755 etc/rc.d/init.d/*
+puppify module <<-usage
+  usage: puppify install haproxy
+usage
+
+puppy_import installer
+
+puppy_exec build-haproxy --version 1.5-dev8 --md5 3b0cd9421a2637c3f5cd4c955a9cc6a8
+
+make_user haproxy 225
+
+install_files root 644 etc/haproxy
+install_files root 755 etc/rc.d
+
 # Create a chroot directory for HAProxy.
-/bin/mkdir -p /var/lib/haproxy
-/bin/chown haproxy:haproxy /var/lib/haproxy
+sudo mkdir -p /var/lib/haproxy
+sudo chown haproxy:haproxy /var/lib/haproxy
 
