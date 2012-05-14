@@ -7,6 +7,8 @@ usage
 puppy_import installer
 puppy_import sudoer
 
+make_user unbound 229
+
 install_service unbound
 install_service bind-utils
 

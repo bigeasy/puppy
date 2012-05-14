@@ -7,7 +7,7 @@ usage
 echo 'VPATH=lib/puppy/bin:share/service' > Makefile
 
 previous=""
-for service in ntp sudoers rsyslog backup initializer postfix sshd shorewall stunnel unbound haproxy
+for service in ntp sudoers rsyslog backup unbound initializer postfix sshd shorewall stunnel haproxy
 do
   echo "" >> Makefile
   target="made/$service:$previous install-$service"
