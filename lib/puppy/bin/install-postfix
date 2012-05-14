@@ -1,0 +1,30 @@
+#!/bin/bash -e
+
+puppify module <<-usage
+  usage: puppify install postfix
+usage
+
+puppy_import installer
+
+install_service postfix
+
+install_files root 640 etc/postfix/sasl_passwd
+install_files root 644 etc/postfix/authorized_submit_users \
+                       etc/postfix/main.cf \
+                       etc/postfix/master.cf \
+                       etc/postfix/sasl_passwd \
+                       etc/postfix/transport \
+                       etc/postfix/virtual_maps
+
+function postmap_files() {
+  for file in $@; do
+    sudo /usr/sbin/postmap $file
+  done
+}
+# Create postfix configuration databases.
+postmap_files /etc/postfix/transport \
+              /etc/postfix/sasl_passwd \
+              /etc/postfix/authorized_submit_users \
+              /etc/postfix/virtual_maps
+
+on_boot postfix

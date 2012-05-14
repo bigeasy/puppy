@@ -1,0 +1,9 @@
+#!/bin/bash -e
+
+puppify module <<-usage
+  usage: puppify install backup
+usage
+
+puppy_import installer
+
+install_files root 440 etc

@@ -1,0 +1,36 @@
+#!/bin/bash -e
+
+puppify module <<-usage
+  usage: puppify install node --version [version]
+usage
+
+puppy_import installer
+
+install_service gcc-c++
+install_service openssl-devel
+
+echo $@
+
+while [ $# -ne 0 ]
+do
+  case $1 in
+    --version|-v)
+      VERSION=$2
+      shift
+      ;;
+    --src|-s)
+      SRC=$2
+      shift
+      ;;
+    --sha1|-S) SHA1=$2; shift;;
+    --prefix|-p)
+      PREFIX=$2
+      shift
+      ;;
+  esac
+  shift
+done
+
+sudo mkdir -p $SRC
+sudo chown -R $UID $SRC
+SHA1=$SHA1 V=$VERSION PREFIX=$PREFIX make -f "$(service_dir)/Makefile" -C $SRC all

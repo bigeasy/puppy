@@ -1,7 +1,7 @@
 #!/bin/bash
 
 hostname=$(curl -s http://169.254.169.254/latest/user-data)
-[ -z $hostname ] && exit 1
+[ -z $hostname ] && exit 0
 
 /usr/bin/s3cmd -c /root/.s3cfg --skip-existing get s3://puppy.io/system/config.img /root/
 

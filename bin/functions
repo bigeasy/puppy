@@ -1,22 +1,27 @@
-function step() {
-    local message=$1
-    shift
-    echo -n "$message"
-    outcome=$($@ 2>&1)
-    if [ $? -eq 0 ]
-    then
-        logger -t "$(/bin/basename $0)[$$]" "$message"
-        echo " [OK]"
-    else
-        logger -t $(/bin/basename $0) "Action failed: $message"
-        echo " [FAILED]"
-        echo "$outcome" 1>&2
-        exit 1
-    fi
-}
+#!/bin/bash
+
+trap "exit" SIGTERM SIGINT
 
 function abend() {
-    local message=$1
-    echo "$message" 1>&2
-    exit 1
+  local message=$1
+  echo "error: $message"
+  exit 1
+}
+
+function install_service() {
+  local package="$1"
+  /bin/rpm -q "$package" > /dev/null
+  if [ $? -ne 0 ]
+  then
+      /usr/bin/yum install -y nsd || abend "Cannot install NSD."
+      /bin/systemctl stop nsd.service
+  fi
+}
+
+# With this, I can move to a different form of layout in the future, one that
+# will work correctly with,  
+function puppy_exec() {
+  local executable=$1
+  shift 
+  $executable $@
 }

@@ -1,0 +1,31 @@
+#!/bin/bash -e
+
+puppify module <<-usage
+  usage: puppify install unbound
+usage
+
+puppy_import installer
+puppy_import sudoer
+
+install_service unbound
+install_service bind-utils
+
+# Make sure there is a place for unbound pid file.
+/bin/mkdir -p /var/run/unbound
+
+# resolv.conf is created each time we start the interface, so we'll remove it if
+# it is incorrect so we know it will be replaced.
+if ! diff /etc/resolv.conf $PUPPIFY_PATH/share/service/unbound/etc/resolv.conf > /dev/null; then
+  sudo rm /etc/resolv.conf
+fi
+
+install_files root 644 etc
+
+# Setup networking to use unbound DNS cache.
+# -------------------------------------------------------------------------- #
+while read iface; do
+  sudo sed -i '/^PEERDNS=/d' /etc/sysconfig/network-scripts/ifcfg-$iface 
+  echo "PEERDNS=no" | sudo_append /etc/sysconfig/network-scripts/ifcfg-$iface
+done < <(ifconfig | grep ^[pe] | cut -f1 -d' ')
+
+on_boot unbound

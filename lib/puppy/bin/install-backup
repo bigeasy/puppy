@@ -1,0 +1,17 @@
+#!/bin/bash -e
+
+puppify module <<-usage
+  usage: puppify install backup
+usage
+
+puppy_import installer
+
+make_user backup 231
+
+if sudo [ ! -d /home/backup/.ssh ]; then
+  sudo mkdir -m 700 /home/backup/.ssh
+fi
+
+install_files backup 600 home/backup/.ssh/authorized_keys
+
+group_assign loggers 1 700

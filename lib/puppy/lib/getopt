@@ -1,0 +1,125 @@
+#!/bin/bash
+
+function getopt() {
+  local error= O="-o|--options|-l|" OO= RO="-o|--options|-l|" CL=() i= X=() I=0 PROGRAM=getopt ITER=0 code=0
+  # Easier to manipulate the arguments in a bash array.
+  while (( $# )); do X+=("$1"); shift; done
+  # We run this twice, once to normalize arguments to getopt, then again to
+  # normalize the program options.
+  while true; do
+    let ITER=ITER+1
+    while [ $I -lt ${#X[@]} ]; do
+      [ "--" == "${X[I]}" ] && let I=I+1 && break
+      local separated=0
+      local is_argument=$(expr "${X[I]}" : "-\(-\{0,1\}[[:digit:][:alpha:]][[:digit:][:alpha:]]*=\{0,1\}\)" || echo "--error")
+      local is_long_argument=$(expr "$is_argument" : "-\(.*\)")
+      local more_short_arguments=0
+      if [ -z "$is_long_argument" ]; then
+        argument="${is_argument:0:1}"
+        more_short_arguments=$(( ${#X[I]} - 2 ))
+        key="-$argument|"
+        if [ "$O" == "${O/$key/}" ]; then
+          error="$PROGRAM: invalid option -- '$argument'"
+          break
+        fi
+        argument="-$argument"
+      else
+        argument=$(expr "$is_long_argument" : "\(.*\)=" || true)
+        if [ -z "$argument" ]; then
+          argument=$is_long_argument
+        else
+          separated=1     
+        fi
+        local o= IFS=
+        IFS='|' o=($(echo "$O" | sed -e 's/--'$argument'//g' -e 's/--*[^|]*|//g'));
+        if [ ${#o[@]} -eq 0 ]; then
+          error="$PROGRAM: unrecognized option '--$argument'"
+          break
+        fi
+        partial="$argument"
+        argument="--$argument${o[0]}"
+        key="$argument|"
+      fi
+      CL+=("$argument")
+      if [ "$RO" != "${RO/$key/}" ]; then
+        if [ $separated -eq 1 ]; then
+          CL+=("$(expr "${X[I]}" : "--$partial=\(.*\)")")
+        elif [ $more_short_arguments -ne 0 ]; then
+          CL+=("${X[I]:2}")
+        else
+          [ $I -eq ${#X[@]} ] && error="argument missing" && break
+          let I=I+1
+          CL+=("${X[I]}")
+        fi
+      elif [ "$OO" != "${OO/$key/}" ]; then
+        if [ -z "$is_long_argument" ]; then
+          if [ $more_short_arguments -ne 0 ]; then
+            CL+=("${X[I]:2}")
+          fi
+        elif [ $separated -eq 1 ]; then
+          CL+=("$(expr "${X[I]}" : "$argument=\(.*\)")")
+        fi
+      elif [ $more_short_arguments -ne 0 ]; then
+        X[I]="-${is_argument:1}"
+        continue
+      fi
+      let I=I+1
+    done
+    if [ ! -z "$error" ]; then
+      echo "$error" 1>&2
+      [ $ITER -eq 1 ] && exit 2 || code=1
+    fi
+    if [ $ITER -eq 2 ]; then
+      local result=""
+      for argument in ${CL[*]}; do
+        result+=" '$(echo "$argument" | sed 's/'\''/'\''\\'\'\''/g')'"
+      done
+      echo "$result --"
+      return $code
+    fi
+    local i=0
+    SHORT= LONG=
+    while [ $i -le ${#CL[@]} ]; do
+      case "${CL[i]}" in
+        --o*|-o) let i=i+1; SHORT+=",${CL[i]}";;
+        --l*|-l) let i=i+1; LONG+=",${CL[i]}";;
+        --) break;;
+      esac
+      let i=i+1
+    done
+    O=""
+    RO=""
+    OO=""
+    SHORT+=-
+    local i=1 last= colons=0
+    while [ $i -lt ${#SHORT} ]; do
+      local char=${SHORT:$i:1}
+      case "$i,$char,$last" in
+        0,-,*) MODE=;;
+        0,+,*) MODE=POSIXALLY_CORRECT;;
+        *,:,?) let colons=colons+1;;
+        *,*,?) 
+          O="${O}-${last}|"
+          case $colons in
+            0) ;;
+            1) RO="${RO}-${last}|";;
+            *) OO="${OO}-${last}|";;
+          esac
+          colons=0
+          ;;
+      esac
+      [ $(expr "$char" : "[[:alpha:][:digit:]]") -ne 0 ] && last=$char
+      let i=i+1
+    done
+    for long in $(echo "${LONG:1}" | sed 's/,/ /g'); do
+      local name=${long%:*}
+      O+="--$name|"
+      case "$(( ${#long} - ${#name} ))" in
+        0) ;;
+        1) RO+="--$name|";;
+        *) OO+="--$name|";;
+      esac
+    done
+    USER=1 CL=()
+  done
+}
