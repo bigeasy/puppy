@@ -1,0 +1,10 @@
+#!/bin/bash -e
+
+puppify module <<-usage
+  usage: puppify configure logging
+usage
+
+puppy_import users
+
+make_group loggers 227
+group_assign loggers 1  700

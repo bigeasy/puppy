@@ -96,7 +96,7 @@ function group_assign()
 
 group_assign exclusive 202 210
 group_assign loggers 1  700
-group_assign wheel 701 701
+group_assign wheel 702 702
 group_assign wheel 202 202
 
 # Configuration installtion
@@ -214,7 +214,7 @@ function copy_public_key()
 # TODO Check the public key into source, but the keys do not live in source,
 # they live on a server and propagate.
 copy_public_key public home/public/ssh/authorized_keys /puppy/public/bin/public_receptionist
-janitor=$(/bin/awk -F : '$3 ~ /^701$/ { print $1 }' /etc/passwd)
+janitor=$(/bin/awk -F : '$3 ~ /^702$/ { print $1 }' /etc/passwd)
 copy_public_key puppy /home/$janitor/.ssh/authorized_keys
 
 

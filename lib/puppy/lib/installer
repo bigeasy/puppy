@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# When we install a new service, we run through the user ids between 1 and 700,
+# the user ids used by Fedora, and add them to the loggers group.
 function install_service() {
   local package="$1"
   if ! /bin/rpm -q "$package" > /dev/null

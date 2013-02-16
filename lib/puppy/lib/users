@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# User and group generation.                                                            
+# -------------------------------------------------------------------------- #
+# User and group generation functions that check to see if the group already
+# exists, followed by the invocation of the functions.
+function make_group() {
+    local group=$1; local gid=$2
+    current=$(grep "^${group}:" /etc/group | cut -d: -f3)
+    if [ -z "$current" ]
+    then
+        echo "Creating group $group."
+        sudo /usr/sbin/groupadd --gid $gid $group
+    elif [ "$current" != "$gid" ]
+    then
+        abend "Group $group exists with gid $current instead of $gid."
+    fi
+}
+
+function make_user() {
+    local user=$1; local uid=$2;
+    make_group $user $uid
+    current=$(grep "^${user}:" /etc/passwd | cut -d: -f3)
+    if [ -z "$current" ]
+    then
+        echo "Creating user $user."
+        sudo /usr/sbin/useradd --uid $uid --gid $uid $user
+    elif [ "$current" != "$uid" ]
+    then
+        abend "User $user exists with uid $current instead of $uid."
+    fi
+}
+
+# Make all of the workers member of the common group.
+function group_assign() {
+    local group=$1; min=$2; local max=$3;
+    while read line
+    do
+        user=($(echo $line | awk -F: '{ print $1, $3 }'))
+        if [ "${user[1]}" -ge $min  -a "${user[1]}" -le $max ]; then
+            members=$(grep "^${group}:" /etc/group | cut -d: -f4)
+            if echo $members | grep -wv ${user[0]} > /dev/null; then
+                echo "Adding ${user[0]} to group $group."
+                sudo /usr/sbin/usermod -a -G $group ${user[0]} || abend "Cannot add ${user[0]} to $group."
+            fi
+        fi
+    done < /etc/passwd
+}
