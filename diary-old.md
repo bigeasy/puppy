@@ -1,8 +1,3 @@
----
-layout: default
-title: Puppy Outgoing
----
-
 Stuff from the Puppy file that I'm organizing.
 
 ## Theory
