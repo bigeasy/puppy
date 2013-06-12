@@ -1,9 +1,8 @@
-.DS_Store
-.AppleDouble
-made/*
-bin/job
-bin/user_generate
-selinux/*.pp
-selinux/tmp/*
-make/*/target
-Makefile
+/made/*
+/bin/job
+/bin/user_generate
+/selinux/*.pp
+/selinux/tmp/*
+/make/*/target
+/Makefile
+/node_modules
