@@ -60,6 +60,22 @@ Take advantage of the Puppy architecture to succeed through organic growth.
  * Learn by doing. You learn more through experiementation than by, say, reading
    every post in your many listservs.
 
+## Concerns and Decisions
+
+Here are questions that I'm pondering at the moment.
+
+ * Storage of private key material; where to put it? For pedestrian users I want
+   to have a simple message; don't lose your login, but I'd have to add, don't
+   lose your private key. Key management is handled by GitHub's Mac client, for
+   example, and I expect that Puppy users will want similar ease of use.
+
+## Going All EC2
+
+After all the energy I put into PostgreSQL, it is saddening to think that I'd
+give up on it and use DynamoDB and SQS, but that is probably the shortest path.
+
+ * https://forums.aws.amazon.com/thread.jspa?threadID=16558
+
 ## EC2 Architecture
 
 There are three types of machines, `user`, `balance` and `data`. Each of the
