@@ -2,7 +2,8 @@
 
 /* 
  
-  usage: bootstrap [options]
+  ___ usage: en_US ___
+  bootstrap [options]
 
   options:
 
@@ -11,47 +12,23 @@
   -s, --size              [name]  instance size, default t1.micro
   -h, --help                      display this help message
 
-  :usage
+  ___ usage ___
  
  */
 
-var cadence = require('cadence')()
-  , ec2 = require('ec2')
-  , fs = require('fs')
-  , $q = require('inquiry')
-  , configuration = JSON.parse(fs.readFileSync(process.env.HOME + '/.aws', 'utf8'))
-  , options
-  ;
+var cadence = require('cadence'),
+    aws = require('aws-sdk'),
+    fs = require('fs'),
+    $q = require('inquiry'),
+    arguable = require('arguable'),
+    configuration = JSON.parse(fs.readFileSync(process.env.HOME + '/.aws', 'utf8')),
+    options;
 
-run(main);
+arguable.parse(__filename, process.argv.slice(2), main);
 
-function run (main) {
-  try {
-    main();
-  } catch (error) {
-    if (error.usage) {
-      if (error.message) console.error('error: ' + error.message);
-      console.error(error.usage);
-      process.on('exit', function () { process.exit(error.code) });
-    } else {
-      throw error;
-    }
-  }
-}
+function main (options) {
 
-function raise (options, message, code) {
-  var error  = new Error(message);
-  error.usage = options.$usage;
-  error.code  = code == null ? 1 : code;
-  throw error;
-}
-
-function main () {
-  options = require('arguable').parse(__filename, process.argv.slice(2));
-
-  var imageId = 'ami-08d97e61', keyFile = './' + imageId + '.pem'
-    , instanceId
-    ;
+  var imageId = 'ami-08d97e61', keyFile = './' + imageId + '.pem', instanceId;
 
   if (options.help) {
     raise(options, '', 0);
