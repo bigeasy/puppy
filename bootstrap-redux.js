@@ -35,7 +35,8 @@ cadence(function (step, ec2) {
       ec2.createTags({
         Resources: [ instance.InstanceId ],
         Tags: [
-          { Key: "Name", Value: "Puppy Bootstrap Image" }
+          { Key: "Name", Value: "Puppy Bootstrap Image" },
+          { Key: "Puppified", Value: "True" }
         ]
       }, step());
     }
@@ -47,9 +48,9 @@ cadence(function (step, ec2) {
       ]
     }, step());
   }, function (result) {
-    var keyMaterial = key.keyMaterial, Attributes = [], count = 0;
+    var keyMaterial = key.keyMaterial, Tags = [], count = 0;
     while (keyMaterial.length) {
-      Attributes.push({
+      Tags.push({
         Key: "Private Key " + (count++),
         Value: keyMaterial.substring(0, 255)
       });
@@ -57,7 +58,7 @@ cadence(function (step, ec2) {
     }
     ec2.createTags({
       Resources: [ instance.InstanceId ],
-      Tags: Attributes
+      Tags: Tags
     }, step());
   }, function (result) {
     console.log(result);
