@@ -48,3 +48,21 @@ echo "$unique_keys" > "$SUDO_HOME/.ssh/authorized_keys"
 chmod -R go-rwx "$SUDO_HOME/.ssh"
 
 restorecon -R "$SUDO_HOME"
+
+if ! grep '^janitor:' /etc/group > /dev/null; then
+    /usr/sbin/groupadd --gid 701 janitor
+fi
+
+if ! grep '^janitor:' /etc/passwd > /dev/null; then
+    /usr/sbin/useradd --gid 701 --uid 701 janitor
+fi
+
+if [ ! -d /home/janitor ]; then
+    mkdir /home/janitor
+fi
+
+sed -i -e '/UseDNS  *yes/d' /etc/ssh/sshd_config
+if ! grep '^UseDNS no' /etc/ssh/sshd_config > /dev/null; then
+    echo "UseDNS no" >> /etc/ssh/sshd_config
+    service sshd restart
+fi
