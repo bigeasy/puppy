@@ -1,0 +1,60 @@
+abend() {
+    local message=$1
+    echo "$message" 1>&2
+    exit 1
+}
+
+[ -z "$(ssh-add -L)" ] && abend "Must connect using forwarded ssh-agent." 
+
+if ! which ssh-add > /dev/null; then
+    yum install -y /usr/bin/ssh-add
+fi
+
+umask 077
+mkdir -p ~/.ssh
+if [ ! -e ~/.ssh/authorized_keys ] || \
+   ! grep -Fx <(ssh-add -L | awk '{ print $1  " " $2 }' | sort)  ~/.ssh/authorized_keys; then
+    ssh-add -L >> ~/.ssh/authorized_keys
+    unique_keys=$(sort ~/.ssh/authorized_keys | uniq)
+    echo "$unique_keys" > ~/.ssh/authorized_keys
+fi
+
+chmod -R go-rwx ~/.ssh
+restorecon -R ~
+
+if ! grep '^janitor:' /etc/group > /dev/null; then
+    /usr/sbin/groupadd --gid 701 janitor
+fi
+
+if ! grep '^janitor:' /etc/passwd > /dev/null; then
+    /usr/sbin/useradd --gid 701 --uid 701 janitor
+fi
+
+if [ ! -d /home/janitor ]; then
+    mkdir /home/janitor
+fi
+
+sed -i -e '/UseDNS  *yes/d' /etc/ssh/sshd_config
+if ! grep '^UseDNS no' /etc/ssh/sshd_config > /dev/null; then
+    echo "UseDNS no" >> /etc/ssh/sshd_config
+    service sshd restart
+fi
+
+if ! { id -Gn janitor | grep wheel > /dev/null; } then
+    usermod -G wheel janitor
+fi
+
+cp -R ~/.ssh /home/janitor/
+chown -R janitor:janitor /home/janitor/.ssh
+chmod -R go-rwx /home/janitor/.ssh
+restorecon -R /home/janitor
+
+cat <<EOF > /etc/sudoers.d/wheel
+%wheel        ALL=(ALL)       NOPASSWD: ALL
+EOF
+
+if [ ! -e /usr/bin/git ]; then
+    yum install -y /usr/bin/git
+fi
+
+(cd / && sudo -u janitor git clone https://github.com/bigeasy/puppy.git /home/janitor/puppy)
