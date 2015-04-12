@@ -1,3 +1,0 @@
-#!/bin/bash
-
-/usr/bin/sudo /usr/sbin/unbound-control -c /etc/unbound/unbound.conf flush_zone . > /dev/null

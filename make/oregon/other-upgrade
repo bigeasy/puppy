@@ -1,5 +1,0 @@
-#!/bin/bash
-
-host=$1.oregon.runpup.net
-
-/usr/bin/ssh -A $host janitor/bin/puppy/upgrade

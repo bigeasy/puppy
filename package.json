@@ -1,8 +1,0 @@
-{ "name": "project"
-, "dependencies": { "cadence": ">=0"
-                  , "aws-sdk": ">=0"
-                  , "arguable": ">=0"
-                  , "ssh2": ">=0"
-                  , "inquiry": ">=0"
-                  }
-, "version": "0.0.1" }

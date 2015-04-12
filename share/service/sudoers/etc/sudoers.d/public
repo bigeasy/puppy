@@ -1,3 +1,0 @@
-public ALL = (private) NOPASSWD: \
-    /puppy/private/bin/account_home, \
-    /puppy/private/bin/account_register

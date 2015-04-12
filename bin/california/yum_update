@@ -1,6 +1,0 @@
-#!/bin/bash
-
-dir=$(/bin/readlink -f "$(/usr/bin/dirname $0)/../..")
-. $dir/bin/functions
-
-step "yum update:"  /usr/bin/sudo /usr/bin/yum update -y

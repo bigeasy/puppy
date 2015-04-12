@@ -1,4 +1,0 @@
-#!/bin/bash
-
-cd /home/alan/git/ecma/puppy/janitor
-/usr/bin/git pull > /dev/null
