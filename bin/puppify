@@ -1,5 +1,9 @@
 #!/bin/bash -e
 
+echo here we go again
+
+exit 0
+
 if [ "$1" == "module" ]; then
   echo "Please do not execute these programs directly. Use puppify."
   exit 1
