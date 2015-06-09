@@ -1,6 +1,0 @@
-#!/bin/bash
-
-# Remember that you don't want to put the sudo command in here, because you need
-# to use this executable as the transition trigger from sudo.
-
-exec /usr/bin/psql $@
