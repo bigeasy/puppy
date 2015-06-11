@@ -81,20 +81,27 @@ function puppy_configuration() {
     fi
 }
 
+function puppy_perpetuate () {
+    local command="${0%.*}/$1.bash"
+    shift
+    $command "$@"
+}
+
 function puppy_exec() {
     local command=$1
 
     [ -z "$command" ] && abend "TODO: write usage"
 
-    local action="$HOMEPORT_PATH/lib/$command"
+    local action="$HOMEPORT_PATH/lib/$command.bash"
 
     [ ! -e "$action"  ] && abend "invalid action: puppy $command"
 
     shift
 
     export puppy_namespace="$puppy_docker_hub_account"
-    export HOMEPORT_PATH puppy_docker_hub_account puppy_unix_user puppy_tag puppy_image_name puppy_unix_user puppy_home_volume
-    export -f usage abend getopt puppy puppy_configuration
+    export HOMEPORT_PATH puppy_docker_hub_account puppy_unix_user puppy_tag \
+        puppy_image_name puppy_unix_user puppy_home_volume
+    export -f usage abend getopt puppy puppy_configuration puppy_perpetuate
 
     "$action" "$@"
 }
