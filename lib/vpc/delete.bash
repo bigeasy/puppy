@@ -46,4 +46,8 @@ done < <(aws ec2 describe-route-tables | jq -r --arg vpc $vpc_id '
             .RouteTables[] | select(.VpcId == $vpc) | select(.Associations | length == 0) | .RouteTableId
         ')
 
+while read -r group; do
+    aws ec2 delete-security-group --group-id $group
+done < <(aws ec2 describe-security-groups | jq -r --arg vpc $vpc_id '.SecurityGroups[] | select(.VpcId == $vpc) | select(.GroupName != "default") .GroupId')
+
 aws ec2 delete-vpc --region=us-west-2 --vpc-id "$vpc_id"
