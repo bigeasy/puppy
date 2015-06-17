@@ -63,10 +63,6 @@ ssh_key=$(ssh-add -L | awk -v sought="$puppy_ssh_key" '
 
 mkdir -p "$dir/ssh"
 
-ssh-keygen -q -f "$dir/ssh/ssh_host_rsa_key" -N '' -t rsa
-
-ls "$dir/ssh"
-
 umask 0077
 
 cat <<EOF > "$dir/cloud-config"
@@ -74,12 +70,6 @@ cat <<EOF > "$dir/cloud-config"
 
 ssh_authorized_keys:
     - $ssh_key
-
-ssh_keys:
-    rsa_private: |
-        $(cat "$dir/ssh/ssh_host_rsa_key" | sed '2,$s/^./        /')
-
-    rsa_public: $(cat "$dir/ssh/ssh_host_rsa_key.pub" | awk '{ print $1 " " $2 }')
 EOF
 
 cat "$dir/cloud-config"
@@ -111,7 +101,6 @@ function tag_instance() {
 mkdir -p "$puppy_configuration/keys"
 
 while read -r instance; do
-    cp "$dir/ssh/ssh_host_rsa_key.pub" "$puppy_configuration/keys/$instance"
     tag_instance $instance 0
 done < <(aws ec2 run-instances \
             --count $instance_count \

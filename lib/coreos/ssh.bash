@@ -1,7 +1,5 @@
 #!/bin/bash
 
-echo calleld
-
 puppy module <<-usage
     usage: puppy coreos down
 
@@ -31,7 +29,7 @@ done < <(echo "$listing")
 knownfile="$puppy_configuration/known_hosts/$instance"
 if [ ! -e "$knownfile" ]; then
     mkdir -p $(dirname "$knownfile")
-    console=$(aws ec2 get-console-output --instance-id i-b7e5af40 | \
+    console=$(aws ec2 get-console-output --instance-id $instance | \
         jq -r '.Output' | \
         awk '/^SSH host key/ && /RSA/ { print $4 }')
     ssh-keyscan "$ip" 2> /dev/null > "$knownfile.tmp"
