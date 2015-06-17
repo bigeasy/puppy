@@ -1,6 +1,0 @@
-#!/bin/bash
-
-function sudo_append() {
-  local file=$1
-  sudo tee -a "$file" > /dev/null
-}
