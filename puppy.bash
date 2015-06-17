@@ -99,8 +99,7 @@ function puppy_exec() {
     shift
 
     export puppy_namespace="$puppy_docker_hub_account"
-    export PUPPY_PATH puppy_docker_hub_account puppy_unix_user puppy_tag \
-        puppy_image_name puppy_unix_user puppy_home_volume
+    export PUPPY_PATH puppy_configuration puppy_home_volume
     export -f usage abend getopt puppy puppy_configuration puppy_perpetuate puppy_exec
 
     "$action" "$@"
@@ -133,6 +132,7 @@ eval "set -- $argv"
 
 puppy_tag=default
 puppy_unix_user=$USER
+puppy_configuration=$HOME/.puppy
 
 while true; do
     case "$1" in

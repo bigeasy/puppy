@@ -19,13 +19,9 @@ while [ $# -ne 0 ]; do
     while read -r name public private id state; do
         for field in $number $name $public $private $id; do
             if [ "$field" = "$identifier" ]; then
-                instances+=($id)
+                echo $public
                 break
             fi
         done
     done < <(echo "$listing")
 done
-
-aws ec2 terminate-instances --instance-ids "${instances[@]}" | jq -r '
-    .TerminatingInstances[] | .InstanceId
-'
