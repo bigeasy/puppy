@@ -1,8 +1,0 @@
-#!/bin/bash
-
-/bin/mount | grep '^/dev/xvdb' > /dev/null
-if [ $? -ne 0 ]
-then
-    /bin/mkdir -p /mnt/wal
-    /bin/mount /dev/xvdb /mnt/wal 
-fi

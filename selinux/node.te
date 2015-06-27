@@ -1,2 +1,0 @@
-# SELinux policy module for node versions.
-policy_module(node, 1.0.0)

@@ -1,3 +1,0 @@
-$FW net ACCEPT
-net all DROP info
-all all REJECT info # Must come last.

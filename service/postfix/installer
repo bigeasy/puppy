@@ -1,8 +1,0 @@
-#!/bin/bash
-
-. ./service/functions
-
-install_service postfix
-
-install_files root 640 etc/postfix/sasl_passwd
-install_files root 644 etc/postfix/* 

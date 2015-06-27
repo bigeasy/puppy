@@ -1,2 +1,0 @@
-vhosts ALL = (database) NOPASSWD: \
-    /puppy/database/bin/database

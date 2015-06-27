@@ -92,16 +92,15 @@ function puppy_exec() {
 
     [ -z "$command" ] && abend "TODO: write usage"
 
-    local action="$HOMEPORT_PATH/lib/$command.bash"
+    local action="$PUPPY_PATH/lib/$command.bash"
 
     [ ! -e "$action"  ] && abend "invalid action: puppy $command"
 
     shift
 
     export puppy_namespace="$puppy_docker_hub_account"
-    export HOMEPORT_PATH puppy_docker_hub_account puppy_unix_user puppy_tag \
-        puppy_image_name puppy_unix_user puppy_home_volume
-    export -f usage abend getopt puppy puppy_configuration puppy_perpetuate
+    export PUPPY_PATH puppy_configuration puppy_home_volume
+    export -f usage abend getopt puppy puppy_configuration puppy_perpetuate puppy_exec
 
     "$action" "$@"
 }
@@ -119,10 +118,10 @@ while [ -L "$puppy_file" ]; do
 done
 
 pushd "${puppy_file%/*}" > /dev/null
-HOMEPORT_PATH=$(pwd)
+PUPPY_PATH=$(pwd)
 popd > /dev/null
 
-source "$HOMEPORT_PATH/getopt.bash"
+source "$PUPPY_PATH/getopt.bash"
 
 # Node that the `+` in the options sets scanning mode to stop at the first
 # non-option parameter, otherwise we'd have to explicilty use `--` before the
@@ -133,6 +132,7 @@ eval "set -- $argv"
 
 puppy_tag=default
 puppy_unix_user=$USER
+puppy_configuration=$HOME/.puppy
 
 while true; do
     case "$1" in
@@ -157,6 +157,8 @@ while true; do
             ;;
     esac
 done
+
+mkdir -p ~/.puppy
 
 if [ ! -z "$puppy_docker_hub_account" ]; then
     puppy_image_name="${puppy_docker_hub_account}/"

@@ -1,5 +1,0 @@
-#!/bin/bash
-
-host=$1
-
-cat /mnt/dns/var/$host/incoming/ksk/*.key

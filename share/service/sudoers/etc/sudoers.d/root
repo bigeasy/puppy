@@ -1,2 +1,0 @@
-# Necessary in order to use sudo in Upstart init scripts.
-Defaults:root   !requiretty

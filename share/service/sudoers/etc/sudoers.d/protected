@@ -1,8 +1,0 @@
-%protected ALL = (private) NOPASSWD: \
-    /puppy/private/bin/account_apps_try, \
-    /puppy/private/bin/app_deploy_try, \
-    /puppy/private/bin/app_fetch_try, \
-    /puppy/private/bin/app_list_try, \
-    /puppy/private/bin/db_alias_try, \
-    /puppy/private/bin/db_fetch_try, \
-    /puppy/private/bin/db_list_try

@@ -1,5 +1,0 @@
-#!/bin/bash
-
-semanage -i "$(dirname $0)/selinux_undo_commands)"
-semodule -r database delegate haproxy liminal node private protected public puppy system worker
-

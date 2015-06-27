@@ -1,5 +1,0 @@
-gcc-c++
-gmp-devel
-openssl-devel
-pcre-devel
-postgresql-devel

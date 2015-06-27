@@ -1,1 +1,0 @@
-backup ALL = (root) NOPASSWD: /usr/bin/rsync

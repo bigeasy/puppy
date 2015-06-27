@@ -1,6 +1,0 @@
-cyrus-sasl-plain
-git
-make
-policycoreutils-python
-postfix
-vim
