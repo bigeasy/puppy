@@ -21,7 +21,7 @@ if [ ! -z "$exists" ]; then
     abend "VPC \"$vpc_name\" already exists." 2>&1
 fi
 
-vpc_id=$(aws ec2 create-vpc --region=us-west-2 --cidr-block 10.0.0.0/28 | jq -r '.Vpc.VpcId')
+vpc_id=$(aws ec2 create-vpc --region=us-west-2 --cidr-block 10.0.0.0/24 | jq -r '.Vpc.VpcId')
 
 aws ec2 create-tags --region=us-west-2 --resources "$vpc_id" --tags 'Key=Name,Value='$vpc_name
 aws ec2 modify-vpc-attribute --vpc-id $vpc_id --enable-dns-support "{\"Value\":true}"
@@ -33,7 +33,7 @@ aws ec2 create-tags \
     --region=us-west-2 --resources "$internet_gateway_id" \
     --tags 'Key=Name,Value='"$vpc_name gateway" > /dev/null
 
-subnet_id=$(aws ec2 create-subnet --vpc-id $vpc_id --cidr-block 10.0.0.0/28 | \
+subnet_id=$(aws ec2 create-subnet --vpc-id $vpc_id --cidr-block 10.0.0.0/24 | \
             jq -r '.Subnet.SubnetId')
 aws ec2 create-tags \
     --region=us-west-2 --resources "$subnet_id" \
