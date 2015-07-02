@@ -75,7 +75,7 @@ EOF
 cat "$dir/cloud-config"
 
 alphabet=(able baker charlie dog easy fox george how item jig king love mike \
-nan oboe peter queen roger sugar tare Uncle victor william x-ray yoke zebra)
+nan oboe peter queen roger sugar tare uncle victor william x-ray yoke zebra)
 
 while read -r id name; do
     delete=($name)
