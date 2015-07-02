@@ -36,6 +36,8 @@ if [ ! -e "$knownfile" ]; then
     file=$(ssh-keygen -lf "$knownfile.tmp" | cut -d' ' -f2)
     if [ "$console" = "$file" ]; then
         mv "$knownfile.tmp" "$knownfile"
+    else
+        abend "cannot find keys (yet)"
     fi
 fi
 
