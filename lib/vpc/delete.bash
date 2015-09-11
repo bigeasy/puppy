@@ -9,7 +9,7 @@ puppy module vpc <<-usage
         Create an AWS VPC.
 usage
 
-vpc_name=puppy
+vpc_name="$puppy_tag"
 
 vpc_id=$(aws ec2 describe-vpcs --region=us-west-2 | \
     jq --arg vpc "$vpc_name" -r '

@@ -9,7 +9,7 @@ puppy module vpc <<-usage
         Create an AWS VPC.
 usage
 
-vpc_name=puppy
+vpc_name="$puppy_tag"
 
 exists=$(aws ec2 describe-vpcs --region=us-west-2 | \
     jq --arg vpc "$vpc_name" -r '
@@ -21,9 +21,16 @@ if [ ! -z "$exists" ]; then
     abend "VPC \"$vpc_name\" already exists." 2>&1
 fi
 
+aws_create_tag() {
+    resource_id=$1 key=$2 value=$3
+    aws ec2 create-tags --region us-west-2 --resources "$resource_id" \
+        --tags "Key=$key,Value=\"$value\"" > /dev/null
+}
+
 vpc_id=$(aws ec2 create-vpc --region=us-west-2 --cidr-block 10.0.0.0/24 | jq -r '.Vpc.VpcId')
 
-aws ec2 create-tags --region=us-west-2 --resources "$vpc_id" --tags 'Key=Name,Value='$vpc_name
+aws_create_tag "$vpc_id" "Name" "$vpc_name"
+aws_create_tag "$vpc_id" "Puppfied" "true"
 aws ec2 modify-vpc-attribute --vpc-id $vpc_id --enable-dns-support "{\"Value\":true}"
 aws ec2 modify-vpc-attribute --vpc-id $vpc_id --enable-dns-hostnames "{\"Value\":true}"
 
