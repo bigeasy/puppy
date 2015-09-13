@@ -3,7 +3,27 @@
 set -e
 
 puppy module <<-usage
-    usage: puppy ubuntu up
+    usage: puppy instance create
+
+    options:
+        --image, -i <string>
+            AMI of AWS image, defaults to most recent Ubuntu LTS.
+
+        --type, -t <string>
+            Intance type, defaults to "t2.micro".
+
+        --count, -c <count>
+            Number of instances to start, defaults to 1.
+
+        --user, -u <string>
+            The user name of the default user or $USER by default.
+
+        --key, -k <string>
+            Path to the public SSH key for the default user, or else a name of a
+            key listed in \`ssh-add -L\`.
+
+        --help, -h
+            Display this message.
 
     description:
         Create an Ubuntu instance.
@@ -18,17 +38,26 @@ function cleanup() {
 }
 
 declare argv
-argv=$(getopt --options +c:i:t: --long count:,image:,type: -- "$@") || return
+argv=$(getopt --options +c:i:t:u:k:h --long count:,image:,type:,user:,key:,help -- "$@") || return
 eval "set -- $argv"
 
 instance_count=1
-instance_image=ami-1b471c2b
-instance_image=ami-17471c27
 instance_image=ami-5189a661
 instance_type=t2.micro
+instance_user="$USER"
 
 while true; do
     case "$1" in
+        --user | -u)
+            shift
+            instance_user=$1
+            shift
+            ;;
+        --key | -k)
+            shift
+            instance_key=$1
+            shift
+            ;;
         --count | -c)
             shift
             instance_count=$1
@@ -55,21 +84,33 @@ if [ -e "$puppy_configuration/puppy.conf" ]; then
     source "$puppy_configuration/puppy.conf"
 fi
 
-if [ -z "$puppy_ssh_key" ]; then
-    puppy_ssh_key=$(ssh-add -L | head -n 1 | awk 'NR = 1 { print $3 }')
+key_missing() {
+    echo 'error: specify a key file or choose a key from your ssh-agent' 1>&2
+    local keys=$(ssh-add -L | awk 'NR = 1 { print $3 }')
+    if [ -z "$keys" ]; then
+        echo '  your ssh-agent has no keys'
+    else
+        echo '  ssh-agent keys:' 1>&2
+        { ssh-add -l | sed 's/^/    /g'; } 1>&2
+    fi
+    exit 1
+}
+
+if [ -z "$instance_key" ]; then
+    key_missing
 fi
 
-if [ -z "$puppy_ssh_key" ]; then
-    abend "cannot find an ssh key to use."
-fi
-
-ssh_key=$(ssh-add -L | awk -v sought="$puppy_ssh_key" '
+instance_key_number=$(ssh-add -l | awk -v sought="$instance_key" '
     function basename(file) {
         sub(".*/", "", file)
         return file
     }
-    sought ~ /\// ? $3 == sought : $3 == basename(sought)  { print }
-' | head -n 1)
+    sought ~ /\// ? $3 == sought : sought ~ /:/ ? $2 == sought : basename($3) == sought  { print NR }
+')
+
+instance_public_key=$(ssh-add -L | awk -v sought="$instance_key_number" '
+    FNR == sought { print $1 " " $2 }
+')
 
 mkdir -p "$dir/ssh"
 
@@ -78,8 +119,12 @@ umask 0077
 cat <<EOF > "$dir/cloud-config"
 #cloud-config
 
+system_info:
+  default_user:
+    name: $USER
+
 ssh_authorized_keys:
-    - $ssh_key
+    - $instance_public_key
 EOF
 
 cat "$dir/cloud-config"
@@ -104,6 +149,7 @@ function tag_instance() {
         sleep 15
         tag_instance $instance $(( count + 1 ))
     else
+        aws ec2 create-tags --resources $instance --tags Key=Puppified,Value=true 2>&1
         alphabet=("${alphabet[@]:1}")
     fi
 }

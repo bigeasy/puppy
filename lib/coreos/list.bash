@@ -14,7 +14,8 @@ usage
     aws ec2 describe-instances | \
         jq -r '
             .Reservations[].Instances[]
-            | select(.ImageId == "ami-c5162ef5")
+            | select(.Tags | length > 0)
+            | select(.Tags[] | select(.Key == "Puppified" and .Value == "true"))
             | select(.State.Name == "running" or .State.Name == "pending")
             | [
                 if .Tags then .Tags[]? | select(.Key == "Name") | .Value else "-" end,
@@ -27,4 +28,3 @@ usage
         ' | \
         sort -k 1
 } | column -t
-           # .Tags[] | select(.Key == "Name") | .Value]
