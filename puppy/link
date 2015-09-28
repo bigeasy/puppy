@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -e
+
+path=$(readlink -f $0)
+path=${path%/puppy/*}
+
+cd "$prefix" && ln -s "$path/puppy.bash" puppy
