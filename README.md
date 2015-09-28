@@ -2,9 +2,9 @@
 
 Create a Homeport container:
 
-```
-homeport --tag aws create
-homeport --tag aws append \
+```console
+$ homeport --tag aws create
+$ homeport --tag aws append \
     zsh vim git rsync \
     formula/pip:awscli \
     formula/chsh:alan,/usr/bin/zsh \
@@ -14,7 +14,7 @@ homeport --tag aws append \
 
 Run the Homeport container and connect via SSH.
 
-```
-homeport --tag aws run
-homeport --tag aws ssh
+```console
+$ homeport --tag aws run
+$ homeport --tag aws ssh
 ```
