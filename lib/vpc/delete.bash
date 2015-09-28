@@ -11,7 +11,7 @@ usage
 
 vpc_name="$puppy_tag"
 
-vpc_id=$(aws ec2 describe-vpcs --region=us-west-2 | \
+vpc_id=$(aws ec2 describe-vpcs --region="$puppy_region" | \
     jq --arg vpc "$vpc_name" -r '
         .Vpcs[]
         | select(.Tags) | select(.Tags[] | .Key == "Name" and .Value == $vpc)
@@ -22,32 +22,42 @@ if [ -z "$vpc_id" ]; then
 fi
 
 while read -r gateway; do
-    aws ec2 detach-internet-gateway --internet-gateway-id $gateway --vpc-id $vpc_id
-    aws ec2 delete-internet-gateway --internet-gateway-id $gateway
-done < <(aws ec2 describe-internet-gateways | jq -r --arg vpc $vpc_id '
-            .InternetGateways[] | select(.Attachments[] | .VpcId == $vpc) | .InternetGatewayId
-        ')
+    echo internet_gateway $gateway
+    aws ec2 detach-internet-gateway --region="$puppy_region" --internet-gateway-id $gateway --vpc-id $vpc_id
+    aws ec2 delete-internet-gateway --region="$puppy_region" --internet-gateway-id $gateway
+done < <(aws ec2 describe-internet-gateways --region="$puppy_region" \
+    | jq -r --arg vpc $vpc_id '
+        .InternetGateways[] | select(.Attachments[] | .VpcId == $vpc) | .InternetGatewayId
+    ')
 
 while read -r subnet; do
-    aws ec2 delete-subnet --subnet-id $subnet
-done < <(aws ec2 describe-subnets | jq -r --arg vpc $vpc_id '
-            .Subnets[] | select(.VpcId == $vpc) | .SubnetId
-        ')
+    echo subnet $subnet
+    aws ec2 delete-subnet --region="$puppy_region" --subnet-id $subnet
+done < <(aws ec2 describe-subnets --region="$puppy_region" \
+    | jq -r --arg vpc $vpc_id '
+        .Subnets[] | select(.VpcId == $vpc) | .SubnetId
+    ')
 
 while read -r association; do
-    aws ec2 disassociate-route-table --association-id $association
-done < <(aws ec2 describe-route-tables | jq -r --arg vpc $vpc_id '
-            .RouteTables[] | select(.VpcId == $vpc) | .Associations[] | select(.Main != true) | .RouteTableAssociationId
-        ')
+    aws ec2 disassociate-route-table --region="$puppy_region" --association-id $association
+done < <(aws ec2 describe-route-tables --region="$puppy_region" \
+    | jq -r --arg vpc $vpc_id '
+        .RouteTables[] | select(.VpcId == $vpc) | .Associations[] | select(.Main != true) | .RouteTableAssociationId
+    ')
 
 while read -r table; do
-    aws ec2 delete-route-table --route-table-id $table
-done < <(aws ec2 describe-route-tables | jq -r --arg vpc $vpc_id '
-            .RouteTables[] | select(.VpcId == $vpc) | select(.Associations | length == 0) | .RouteTableId
-        ')
+    echo route_table $table
+    aws ec2 delete-route-table --region="$puppy_region" --route-table-id $table
+done < <(aws ec2 describe-route-tables --region="$puppy_region" \
+    | jq -r --arg vpc $vpc_id '
+        .RouteTables[] | select(.VpcId == $vpc) | select(.Associations | length == 0) | .RouteTableId
+    ')
 
 while read -r group; do
-    aws ec2 delete-security-group --group-id $group
-done < <(aws ec2 describe-security-groups | jq -r --arg vpc $vpc_id '.SecurityGroups[] | select(.VpcId == $vpc) | select(.GroupName != "default") .GroupId')
+    echo security_group $group
+    aws ec2 delete-security-group --region="$puppy_region" --group-id $group
+done < <(aws ec2 describe-security-groups --region="$puppy_region" \
+    | jq -r --arg vpc $vpc_id '.SecurityGroups[] | select(.VpcId == $vpc) | select(.GroupName != "default") .GroupId')
 
-aws ec2 delete-vpc --region=us-west-2 --vpc-id "$vpc_id"
+echo vpc $vpc_id
+aws ec2 delete-vpc --region="$puppy_region" --vpc-id "$vpc_id"

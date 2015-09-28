@@ -99,7 +99,7 @@ function puppy_exec() {
     shift
 
     export puppy_namespace="$puppy_docker_hub_account"
-    export PUPPY_PATH puppy_configuration puppy_home_volume puppy_tag
+    export PUPPY_PATH puppy_configuration puppy_home_volume puppy_tag puppy_region
     export -f usage abend getopt puppy puppy_configuration puppy_perpetuate puppy_exec
 
     "$action" "$@"
@@ -121,13 +121,16 @@ pushd "${puppy_file%/*}" > /dev/null
 PUPPY_PATH=$(pwd)
 popd > /dev/null
 
+puppy_path="$PUPPY_PATH"
+
 source "$PUPPY_PATH/getopt.bash"
 
 # Node that the `+` in the options sets scanning mode to stop at the first
 # non-option parameter, otherwise we'd have to explicilty use `--` before the
 # sub-command.
 declare argv
-argv=$(getopt --options +t:u:h: --long tag:,user:,hub: -- "$@") || return
+# TODO: Fix because return is wrong.
+argv=$(getopt --options +t:r: --long tag:,region: -- "$@") || return
 eval "set -- $argv"
 
 puppy_tag=puppy
@@ -141,9 +144,9 @@ while true; do
             puppy_unix_user=$1
             shift
             ;;
-        --hub | -h)
+        --region | -r)
             shift
-            puppy_docker_hub_account=$1
+            puppy_region=$1
             shift
             ;;
         --tag | -t)
@@ -166,5 +169,11 @@ fi
 puppy_image_name+=puppy_${USER}_${puppy_unix_user}_${puppy_tag}
 
 puppy_home_volume="puppy_home_${USER}_${puppy_unix_user}"
+
+while read -r alias actual; do
+    if [ "$puppy_region" = "$alias" ]; then
+        puppy_region="$actual"
+    fi
+done < "$puppy_path/data/regions"
 
 puppy_exec "$@"
