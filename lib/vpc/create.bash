@@ -42,7 +42,7 @@ internet_gateway_id=$(aws ec2 create-internet-gateway --region="$puppy_region" \
 aws ec2 create-tags \
     --region="$puppy_region" --resources "$internet_gateway_id" \
     --tags 'Key=Name,Value='"$vpc_name gateway" > /dev/null
-echo internet_gateway $internet_gateway
+echo internet_gateway $internet_gateway_id
 
 subnet_id=$(aws ec2 create-subnet --region="$puppy_region" \
     --vpc-id $vpc_id --cidr-block 10.0.0.0/24 | jq -r '.Subnet.SubnetId')

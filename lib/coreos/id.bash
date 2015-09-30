@@ -3,7 +3,7 @@
 set -e
 
 puppy module <<-usage
-    usage: puppy coreos down
+    usage: puppy coreos id
 
     description:
         Create an AWS VPC.
@@ -19,13 +19,9 @@ while [ $# -ne 0 ]; do
     while read -r name public private id state; do
         for field in $number $name $public $private $id; do
             if [ "$field" = "$identifier" ]; then
-                instances+=($id)
+                echo $id
                 break
             fi
         done
     done < <(echo "$listing")
 done
-
-aws ec2 terminate-instances --region="$puppy_region" --instance-ids "${instances[@]}" | jq -r '
-    .TerminatingInstances[] | .InstanceId
-'

@@ -11,5 +11,5 @@ usage
 
 vpc_name="$puppy_tag"
 
-aws ec2 describe-vpcs --region=us-west-2 | \
+aws ec2 describe-vpcs --region="$puppy_region" | \
     jq --arg vpc "$vpc_name" -r '.Vpcs[] | select(.Tags) | select(.Tags[] | .Key == "Name" and .Value == $vpc) | .VpcId'

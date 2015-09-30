@@ -11,7 +11,7 @@ usage
 
 {
     echo -e "Name\tPublicIP\tPrivateIP\tInstanceId\tState"
-    aws ec2 describe-instances | \
+    aws ec2 describe-instances --region="$puppy_region" | \
         jq -r '
             .Reservations[].Instances[]
             | select(.Tags | length > 0)

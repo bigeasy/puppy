@@ -9,7 +9,7 @@ puppy module <<-usage
         Create an AWS VPC.
 usage
 
-dir=$(mktemp -d -t homeport_append.XXXXXXX)
+dir=$(mktemp -d -t puppy_coreos.XXXXXXX)
 
 trap cleanup EXIT SIGTERM SIGINT
 
@@ -21,7 +21,7 @@ declare argv
 argv=$(getopt --options +c: --long count: -- "$@") || return
 eval "set -- $argv"
 
-instance_count=1
+instance_count=3
 
 while true; do
     case "$1" in
@@ -70,6 +70,24 @@ cat <<EOF > "$dir/cloud-config"
 
 ssh_authorized_keys:
     - $ssh_key
+coreos:
+  etcd2:
+    # generate a new token for each unique cluster from
+    # https://discovery.etcd.io/new?size=3
+    # specify the initial size of your cluster with ?size=X
+    discovery: https://discovery.etcd.io/22c27e35591bac6032c7acae0e979e73
+    # multi-region and multi-cloud deployments need to use \$public_ipv4
+    advertise-client-urls: http://\$private_ipv4:2379,http://\$private_ipv4:4001
+    initial-advertise-peer-urls: http://\$private_ipv4:2380
+    # listen on both the official ports and the legacy ports
+    # legacy ports can be omitted if your application doesn't depend on them
+    listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
+    listen-peer-urls: http://\$private_ipv4:2380,http://\$private_ipv4:7001
+  units:
+    - name: etcd2.service
+      command: start
+    - name: fleet.service
+      command: start
 EOF
 
 cat "$dir/cloud-config"
@@ -86,7 +104,7 @@ subnet_id=$(puppy_exec vpc subnet-id)
 
 function tag_instance() {
     local instance=$1 count=$2
-    errors=$(aws ec2 create-tags --resources $instance --tags Key=Name,Value=${alphabet[0]} 2>&1)
+    errors=$(aws ec2 create-tags --region="$puppy_region" --resources $instance --tags Key=Name,Value=${alphabet[0]} 2>&1)
     if [[ "$errors" = *"The instance ID "*" does not exist" ]]; then
         if [ $count -eq 12 ]; then
             abend "cannot tag instance $instance"
@@ -94,6 +112,8 @@ function tag_instance() {
         sleep 15
         tag_instance $instance $(( count + 1 ))
     else
+        aws ec2 create-tags --region="$puppy_region" \
+            --resources $instance --tags Key=Puppified,Value=true 2>&1
         alphabet=("${alphabet[@]:1}")
     fi
 }
@@ -102,10 +122,10 @@ mkdir -p "$puppy_configuration/keys"
 
 while read -r instance; do
     tag_instance $instance 0
-done < <(aws ec2 run-instances \
+done < <(aws ec2 run-instances --region="$puppy_region" \
             --count $instance_count \
             --key-name puppy \
-            --image-id ami-c5162ef5 \
+            --image-id ami-99bfada9 \
             --subnet-id $subnet_id \
             --user-data file://"$dir/cloud-config" \
             --instance-type t2.micro | \

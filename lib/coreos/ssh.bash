@@ -1,7 +1,7 @@
 #!/bin/bash
 
 puppy module <<-usage
-    usage: puppy coreos down
+    usage: puppy coreos ssh
 
     description:
         Create an AWS VPC.
@@ -29,7 +29,7 @@ done < <(echo "$listing")
 knownfile="$puppy_configuration/known_hosts/$instance"
 if [ ! -e "$knownfile" ]; then
     mkdir -p $(dirname "$knownfile")
-    console=$(aws ec2 get-console-output --instance-id $instance | \
+    console=$(aws ec2 get-console-output --region="$puppy_region" --instance-id $instance | \
         jq -r '.Output' | \
         awk '/^SSH host key/ && /RSA/ { print $4 }')
     ssh-keyscan "$ip" 2> /dev/null > "$knownfile.tmp"

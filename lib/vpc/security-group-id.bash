@@ -11,4 +11,4 @@ vpc_id=$(puppy_exec vpc id)
 
 [ -z "$vpc_id" ] && exit 1
 
-aws ec2 describe-security-groups | jq -r --arg vpc $vpc_id '.SecurityGroups[] | select(.VpcId == $vpc) | select(.GroupName == "default") .GroupId'
+aws ec2 describe-security-groups --region="$puppy_region" | jq -r --arg vpc $vpc_id '.SecurityGroups[] | select(.VpcId == $vpc) | select(.GroupName == "default") .GroupId'
