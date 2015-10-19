@@ -10,5 +10,5 @@ puppy module <<-usage
         Get the DNS name of the ELB.
 usage
 
-aws elb describe-load-balancers | \
+aws elb describe-load-balancers --region="$puppy_region" | \
     jq -r '.LoadBalancerDescriptions[] | select(.LoadBalancerName == "puppy-balancer") | .DNSName '

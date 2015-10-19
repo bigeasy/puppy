@@ -17,5 +17,10 @@ function cleanup() {
     [ ! -z "$dir" ] && rm -rf "$dir"
 }
 
+aws elb delete-security-group \
+    --region="$puppy_region" \
+    --group-id="$(puppy_exec elb group)"
+
 aws elb delete-load-balancer \
-    --load-balancer-name 'puppy-balancer'
+    --region="$puppy_region" \
+    --load-balancer-name="$puppy_tag-balancer"
