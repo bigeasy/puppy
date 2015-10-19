@@ -69,5 +69,8 @@ The VPC acts a little database for a particular application. Your VPC is where
 you deploy CoreOS containers and whatever other images that need to participate
 in your application. The VPC tags are used to store global information.
 
-TODO: The subnet should be the place where the CoreOS material is kept. It seems
-that you'd create a VPC with an elastic IP and subnets in each AZ in a region.
+-    discovery: https://discovery.etcd.io/dfecd45b5cc972bf03190dd845b79af0
++    discovery: https://discovery.etcd.io/8dad394898a26f7ade14f00ec3b02901
+homeport --tag aws append bsdmainutils
+
+TODO: The subnet should be the place where the CoreOS material is kept.
