@@ -37,12 +37,28 @@ while true; do
     esac
 done
 
-if [ ! -e "$puppy_configuration/discovery" ]; then
-    curl -s -w "\n" 'https://discovery.etcd.io/new?size=3' > "$puppy_configuration/discovery"
-fi
+echo $puppy_configuration
 
-if [ -e "$puppy_configuration/puppy.conf" ]; then
-    source "$puppy_configuration/puppy.conf"
+alphabet=(able baker charlie dog easy fox george how item jig king love mike \
+nan oboe peter queen roger sugar tare uncle victor william x-ray yoke zebra)
+
+while read -r name rest; do
+    delete=($name)
+    alphabet=(${alphabet[@]/$delete})
+done < <(puppy_exec coreos list | tail -n +2)
+
+puppy_instances="$puppy_configuration/$puppy_region/instances.json"
+
+etcd_discovery=$(jq -r --arg tag "$puppy_tag" '
+    select(.Reservations[].Instances) |
+    .Reservations[].Instances[] |
+    select(.Tags) |
+        select(.Tags[] | select(.Key == "Puppy.Tag" and .Value == $tag)) |
+        select(.State.Name == "running" or .State.Name == "pending") |
+        .Tags[] | select(.Key == "Puppy.Discovery") | .Value' "$puppy_instances" | tail -n 1)
+
+if [ -z "$etcd_discovery" ]; then
+    etcd_discovery=$(curl -s -w "\n" 'https://discovery.etcd.io/new?size=3')
 fi
 
 if [ -z "$puppy_ssh_key" ]; then
@@ -75,7 +91,7 @@ coreos:
     # generate a new token for each unique cluster from
     # https://discovery.etcd.io/new?size=3
     # specify the initial size of your cluster with ?size=X
-    discovery: https://discovery.etcd.io/dfecd45b5cc972bf03190dd845b79af0
+    discovery: $etcd_discovery
     # multi-region and multi-cloud deployments need to use \$public_ipv4
     advertise-client-urls: http://\$private_ipv4:2379,http://\$private_ipv4:4001
     initial-advertise-peer-urls: http://\$private_ipv4:2380
@@ -92,14 +108,6 @@ EOF
 
 cat "$dir/cloud-config"
 
-alphabet=(able baker charlie dog easy fox george how item jig king love mike \
-nan oboe peter queen roger sugar tare uncle victor william x-ray yoke zebra)
-
-while read -r id name; do
-    delete=($name)
-    alphabet=(${alphabet[@]/$delete})
-done < <(puppy_exec coreos list)
-
 subnet_id=$(puppy_exec vpc subnet-id)
 
 function tag_instance() {
@@ -113,7 +121,9 @@ function tag_instance() {
         tag_instance $instance $(( count + 1 ))
     else
         aws ec2 create-tags --region="$puppy_region" \
-            --resources $instance --tags Key=Puppified,Value=true 2>&1
+            --resources $instance --tags "Key=Puppified,Value=true" \
+                "Key=Puppy.Tag,Value=$puppy_tag" \
+                "Key=Puppy.Discovery,Value=$etcd_discovery" 2>&1
         alphabet=("${alphabet[@]:1}")
     fi
 }
@@ -130,3 +140,5 @@ done < <(aws ec2 run-instances --region="$puppy_region" \
             --user-data file://"$dir/cloud-config" \
             --instance-type t2.micro | \
                 jq -r '.Instances[] | .InstanceId')
+
+puppy_exec coreos refresh

@@ -26,6 +26,10 @@ while [ $# -ne 0 ]; do
     done < <(echo "$listing")
 done
 
+[ ${#instances[@]} -eq 0 ] && exit
+
 aws ec2 terminate-instances --region="$puppy_region" --instance-ids "${instances[@]}" | jq -r '
     .TerminatingInstances[] | .InstanceId
 '
+
+puppy_exec coreos refresh
